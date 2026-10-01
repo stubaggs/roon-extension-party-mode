@@ -11,14 +11,14 @@ const server = createServer(roon, guests);
 const port = Number(process.env.PARTY_PORT) || roon.settings.port || 8080;
 
 server.listen(port).then(() => {
-  roon.setStatusLine(`Guests join at ${server.guestUrl()}`);
+  roon.setStatusLine(`RoonParty at ${server.roonpartyUrl()}`);
   console.log(`Party Mode listening on port ${port}`);
   console.log(`Guest link: ${server.guestUrl()}`);
-  console.log(`RoonParty:  http://localhost:${port}/roonparty`);
+  console.log(`RoonParty:  ${server.roonpartyUrl()}`);
 });
 
 roon.on('core_paired', () => {
-  roon.setStatusLine(`Guests join at ${server.guestUrl()}`);
+  roon.setStatusLine(`RoonParty at ${server.roonpartyUrl()}`);
 });
 
 roon.start();
