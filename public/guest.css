@@ -131,6 +131,10 @@ main {
   font-size: 0.85rem;
 }
 
+.token-line {
+  display: block;
+}
+
 .whoami {
   margin: 0 0 0.6rem;
   font-size: 0.85rem;
