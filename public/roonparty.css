@@ -162,13 +162,17 @@
 }
 
 .list .who {
-  margin-left: 0.6rem;
+  display: inline-block;
+  max-width: 100%;
+  margin-top: 0.3rem;
   padding: 0.1rem 0.6rem;
   border-radius: 999px;
   font-size: 0.6em;
   background: rgba(255, 194, 75, 0.16);
   color: var(--amber);
-  vertical-align: middle;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .current-who.radio,

@@ -318,7 +318,11 @@ main {
 
 .badge {
   display: inline-block;
-  margin-left: 0.4rem;
+  max-width: 100%;
+  margin-top: 0.25rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   padding: 0.05rem 0.45rem;
   border-radius: 999px;
   font-size: 0.72rem;
