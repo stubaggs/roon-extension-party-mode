@@ -50,7 +50,7 @@
   }
 
   async function refresh() {
-    const res = await fetch('/api/dashboard');
+    const res = await fetch('/api/roonparty');
     if (res.ok) render(await res.json());
   }
 
