@@ -165,11 +165,31 @@
     }
   }
 
+  const searchClear = el('search-clear');
+
+  function clearSearch() {
+    clearTimeout(searchTimer);
+    searchInput.value = '';
+    searchClear.hidden = true;
+    runSearch('');
+    searchInput.focus();
+  }
+
   searchInput.addEventListener('input', () => {
     clearTimeout(searchTimer);
     const query = searchInput.value;
+    searchClear.hidden = !query;
     searchTimer = setTimeout(() => runSearch(query), 350);
   });
+
+  searchInput.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && searchInput.value) {
+      event.preventDefault();
+      clearSearch();
+    }
+  });
+
+  searchClear.addEventListener('click', clearSearch);
 
   // ----------------------------------------------------------------- actions
 
