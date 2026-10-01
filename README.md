@@ -32,10 +32,38 @@ Roon Core  ──(node-roon-api over the local network)──  app.js
 | --- | --- |
 | `app.js` | Wires the Roon service to the web server |
 | `lib/roon-service.js` | Pairing, settings layout, search, queue actions, queue subscription |
+| `lib/track-id.js` | Track identity: title and artist normalisation, length, hash |
 | `lib/guests.js` | Guest sessions, token-bucket limits, request attribution |
 | `lib/history.js` | Played-songs list for the guest page |
 | `lib/server.js` | REST API, server-sent events, QR code, image proxy |
 | `public/` | Guest page and the RoonParty screen, no build step |
+| `test/` | Identity and attribution tests, `npm test` |
+
+## How a track is identified
+
+Roon gives extensions no stable track ID to hold on to. A browse `item_key` is a
+cursor into a browse session and expires; a `queue_item_id` exists only while the
+track is queued and has no counterpart on a browse item. So identity is rebuilt from
+what both sides carry — and the two sides carry different things:
+
+| | title | artist | length |
+| --- | --- | --- | --- |
+| Search result (browse item) | yes | yes | **no** |
+| Queue item | yes | yes | yes |
+| Now playing | yes | yes | yes |
+
+Because a search result has no length, the length and hash cannot be known when a
+guest taps Request. They are learned a moment later: Roon reports a queue `insert`
+for the track it just added, carrying the real `queue_item_id` and length, and that
+item is matched back to the pending request. Attribution then works from the queue
+item id rather than from a title guess, and the hash — `sha1(version-sensitive title,
+sorted artists, length)`, truncated — keeps identifying the track after it leaves the
+queue and appears in Played.
+
+Crediting a track falls through five steps, exact first: queue item id, hash, same
+recording by version-sensitive title, same song ignoring version tags, then a title
+only one recent request has. Duplicate checking stops at the version-sensitive step,
+because the last two deliberately treat a remaster as the original.
 
 ## Running it during development
 
@@ -125,12 +153,23 @@ as "a guest".
 is switched on for the party zone, any track no guest added is labelled "Roon Radio",
 which includes tracks the host queues from the Roon app.
 
-**Attribution is best-effort.** Roon queue items carry no "who added this" field, so
-requests are matched back to guests by title and artist afterwards. Search results and
-the queue don't always spell a track the same way, so the match ignores remaster tags,
-artist separators and extra artists. Two guests adding the same track will confuse the
-badge. The console logs each request and each track start with the strings Roon
-reported, which is the place to look when a badge is wrong.
+**Duplicates are per recording, not per song.** A remaster, a live take or a single
+edit is a fair request even when the original is queued, so duplicate checking is
+version-sensitive. The limit is that a search result has no length: where two
+recordings share a title and artist and differ only in length — an album version and
+a single edit both titled "Hey Jude" — they cannot be told apart at search time and
+the second is refused as a duplicate. Once both are queued they are distinct, and get
+their own badges.
+
+**Attribution is exact once a track is queued, best-effort before that.** Roon queue
+items carry no "who added this" field. A request is bound to its real queue item when
+Roon reports the insert, which is exact; the fallbacks below that match on title and
+artist, and ignore remaster tags, artist separators and extra artists. Two guests
+asking for the same recording are credited in the order they asked, so if those two
+inserts arrive out of order the badges swap. A request whose insert never arrives
+within a minute — the host clears the queue, say — falls back to title matching. The
+console logs each request, each queue insert with its length and hash, and each track
+start, which is the place to look when a badge is wrong.
 
 **Browse sessions are stateful.** Item keys are only valid until that guest's browse
 session moves on. The server replays the search and retries once when a key has gone
