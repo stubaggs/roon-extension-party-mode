@@ -103,8 +103,78 @@ main {
 }
 
 .tokens {
+  margin: 0 0 0.25rem;
+  font-size: 0.85rem;
+}
+
+.whoami {
   margin: 0 0 0.6rem;
   font-size: 0.85rem;
+}
+
+.link-button {
+  padding: 0;
+  color: var(--lavender);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+#whoami:not(:empty) + .link-button::before {
+  content: "· ";
+  color: var(--muted);
+  display: inline-block;
+  margin-right: 0.25rem;
+  text-decoration: none;
+}
+
+.nickname-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 1.25rem;
+  background: rgba(10, 6, 20, 0.78);
+}
+
+.nickname-backdrop[hidden] {
+  display: none;
+}
+
+.nickname {
+  width: min(24rem, 100%);
+  padding: 1.5rem;
+  background: var(--raised);
+  border: 1px solid var(--edge);
+  border-radius: 18px;
+}
+
+.nickname h2 {
+  margin: 0 0 0.4rem;
+  font-size: 1.3rem;
+  letter-spacing: -0.02em;
+}
+
+.nickname p {
+  margin: 0 0 1rem;
+  font-size: 0.92rem;
+}
+
+.nickname input {
+  width: 100%;
+  font: inherit;
+  padding: 0.85rem 1rem;
+  font-size: 1.05rem;
+  color: var(--text);
+  background: var(--ink);
+  border: 1px solid var(--edge);
+  border-radius: 12px;
+}
+
+.nickname-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
 }
 
 .rows {

@@ -116,6 +116,11 @@ queue. So a guest can ask for a track to play next when they add it, but nobody 
 promote a track that is already waiting. If you have seen Music Assistant's "boost an
 upcoming song", that part does not have a Roon equivalent.
 
+**Nicknames are optional.** Guests are asked for a name on their first visit; it shows as
+a badge on the songs they add, in Up next, Played and on the RoonParty screen. The phone
+remembers it (or that they skipped), so a rescan doesn't ask again. Unnamed requests show
+as "a guest".
+
 **Attribution is best-effort.** Roon queue items carry no "who added this" field, so
 requests are matched back to guests by title and artist afterwards. Two guests adding the
 same track will confuse the badge.
@@ -138,7 +143,6 @@ the old one is ignored rather than torn down, since the API has no convenient un
 
 ## Ideas worth adding
 
-- A short "who are you" prompt so the RoonParty badges show real names
 - Blocking explicit tracks, or a genre allowlist, using the browse hierarchy
 - Persisting token buckets against a device fingerprint so a page refresh does not matter
   (they are already server-side, but a new scan gets a fresh session)
