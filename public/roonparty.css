@@ -97,6 +97,20 @@
   font-size: clamp(1rem, 1.8vw, 1.6rem);
 }
 
+.current-who {
+  display: inline-block;
+  margin: 0.8rem 0 0;
+  padding: 0.2rem 0.8rem;
+  border-radius: 999px;
+  font-size: clamp(0.85rem, 1.3vw, 1.15rem);
+  background: rgba(255, 194, 75, 0.16);
+  color: var(--amber);
+}
+
+.current-who[hidden] {
+  display: none;
+}
+
 .list {
   list-style: none;
   margin: 0;
