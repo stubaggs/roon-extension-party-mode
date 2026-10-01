@@ -19,7 +19,9 @@
     el('current-artist').textContent = playing ? playing.artist : '';
     const who = el('current-who');
     who.hidden = !(playing && playing.requested_by);
-    who.textContent = who.hidden ? '' : `Requested by ${playing.requested_by}`;
+    const radio = !who.hidden && playing.kind === 'radio';
+    who.textContent = who.hidden ? '' : radio ? 'Roon Radio' : `Requested by ${playing.requested_by}`;
+    who.classList.toggle('radio', radio);
     el('current-label').textContent =
       playing && playing.state === 'playing' ? 'Playing now' : 'Paused';
     const image = el('current-art');
@@ -40,7 +42,7 @@
       t.textContent = item.title;
       if (item.requested_by) {
         const who = document.createElement('span');
-        who.className = item.kind === 'next' ? 'who next' : 'who';
+        who.className = item.kind === 'next' || item.kind === 'radio' ? `who ${item.kind}` : 'who';
         who.textContent = item.requested_by;
         t.appendChild(who);
       }

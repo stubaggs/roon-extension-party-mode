@@ -157,6 +157,12 @@
   vertical-align: middle;
 }
 
+.current-who.radio,
+.list .who.radio {
+  background: rgba(123, 224, 192, 0.16);
+  color: var(--mint);
+}
+
 .list .who.next {
   background: rgba(201, 182, 255, 0.18);
   color: var(--lavender);
