@@ -44,22 +44,52 @@
     return m <= 1 ? 'a minute' : `${m} minutes`;
   }
 
+  // How each allowance is described: [unlimited, n left, waiting, used up].
+  const TOKEN_TEXT = {
+    add: [
+      () => 'Add as many songs as you like.',
+      (n) => `${n} song${n === 1 ? '' : 's'} left to add.`,
+      (wait) => `Another song in ${wait}.`,
+      () => 'You have used all your songs.'
+    ],
+    next: [
+      () => 'Play songs next as often as you like.',
+      (n) => `${n} play-next${n === 1 ? '' : 's'} left.`,
+      (wait) => `Another play-next in ${wait}.`,
+      () => 'You have used all your play-nexts.'
+    ],
+    skip: [
+      () => 'Skip as often as you like.',
+      (n) => `${n} skip${n === 1 ? '' : 's'} left.`,
+      (wait) => `Another skip in ${wait}.`,
+      () => 'You have used all your skips.'
+    ]
+  };
+
+  function describeTokens(bucket) {
+    const [unlimited, left, waiting, usedUp] = TOKEN_TEXT[bucket];
+    const status = party.allowances[bucket];
+    if (status.remaining === null) return unlimited();
+    if (status.remaining > 0) return left(status.remaining);
+    if (status.nextIn) return waiting(minutes(status.nextIn));
+    return usedUp();
+  }
+
   function renderTokens() {
     if (!party) return;
-    const add = party.allowances.add;
-    const bits = [];
-    if (!party.capabilities.add) {
-      bits.push('Requests are closed right now.');
-    } else if (add.remaining === null) {
-      bits.push('Add as many songs as you like.');
-    } else if (add.remaining > 0) {
-      bits.push(`${add.remaining} song${add.remaining === 1 ? '' : 's'} left to add.`);
-    } else if (add.nextIn) {
-      bits.push(`You get another go in ${minutes(add.nextIn)}.`);
-    } else {
-      bits.push('You have used all your songs.');
+    const lines = [];
+    if (!party.capabilities.add) lines.push('Requests are closed right now.');
+    for (const bucket of ['add', 'next', 'skip']) {
+      if (party.capabilities[bucket]) lines.push(describeTokens(bucket));
     }
-    el('tokens').textContent = bits.join(' ');
+    const tokens = el('tokens');
+    tokens.innerHTML = '';
+    for (const line of lines) {
+      const span = document.createElement('span');
+      span.className = 'token-line';
+      span.textContent = line;
+      tokens.appendChild(span);
+    }
   }
 
   function artUrl(key, size) {
@@ -228,6 +258,7 @@
     try {
       const body = await api('/api/skip', { method: 'POST' });
       party.allowances = body.allowances;
+      renderTokens();
       toast('Skipped');
     } catch (err) {
       const detail = err.body || {};
