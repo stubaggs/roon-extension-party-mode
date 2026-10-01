@@ -17,6 +17,9 @@
     const playing = data.now_playing;
     el('current-title').textContent = playing ? playing.title : 'Nothing playing';
     el('current-artist').textContent = playing ? playing.artist : '';
+    const who = el('current-who');
+    who.hidden = !(playing && playing.requested_by);
+    who.textContent = who.hidden ? '' : `Requested by ${playing.requested_by}`;
     el('current-label').textContent =
       playing && playing.state === 'playing' ? 'Playing now' : 'Paused';
     const image = el('current-art');
