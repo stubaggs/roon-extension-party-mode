@@ -243,6 +243,9 @@
     const playing = snapshot.now_playing;
     el('playing-title').textContent = playing ? playing.title : 'Nothing playing';
     el('playing-artist').textContent = playing ? playing.artist : '';
+    const who = el('playing-who');
+    who.hidden = !(playing && playing.requested_by);
+    who.textContent = who.hidden ? '' : `Requested by ${playing.requested_by}`;
     el('playing-label').textContent =
       playing && playing.state === 'playing' ? 'Playing now' : 'Paused';
     setArt(el('playing-art'), playing && playing.image_key, 144);
