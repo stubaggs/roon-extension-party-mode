@@ -1,0 +1,25 @@
+{
+  "name": "roon-extension-party-mode",
+  "version": "0.1.0",
+  "description": "Roon Extension that lets party guests search your library and add tracks to a zone's queue from their phone",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "author": "",
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "cookie-parser": "^1.4.7",
+    "express": "^4.21.2",
+    "node-roon-api": "github:roonlabs/node-roon-api",
+    "node-roon-api-browse": "github:roonlabs/node-roon-api-browse",
+    "node-roon-api-image": "github:roonlabs/node-roon-api-image",
+    "node-roon-api-settings": "github:roonlabs/node-roon-api-settings",
+    "node-roon-api-status": "github:roonlabs/node-roon-api-status",
+    "node-roon-api-transport": "github:roonlabs/node-roon-api-transport",
+    "qrcode": "^1.5.4"
+  }
+}

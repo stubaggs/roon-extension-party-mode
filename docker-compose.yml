@@ -1,0 +1,11 @@
+# Host networking is required: Roon discovery uses UDP broadcast on port 9003.
+services:
+  party-mode:
+    image: yourname/roon-extension-party-mode:latest
+    container_name: roon-extension-party-mode
+    network_mode: host
+    restart: unless-stopped
+    environment:
+      - PARTY_PORT=8080
+    volumes:
+      - ./config.json:/usr/src/app/config.json
