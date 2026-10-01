@@ -49,8 +49,13 @@ party zone, and the console prints the guest link and RoonParty URL. The extensi
 
 ## Host settings (in Roon)
 
-Party zone, party name, guest access on/off, web port, and a guest address override for
-when the machine has several network interfaces. Per-action allowances follow the token
+Party zone, party name, guest access on/off, and web port. Saving a new port moves the
+guest and RoonParty pages there straight away, then the extension reconnects to the Core
+(it drops out of Roon's list for up to ten seconds) so the link Roon shows is updated.
+Open pages and phones on the old port need the new link or a fresh scan. `PARTY_PORT`
+sets the port to start on before one has been saved in Roon.
+
+Links use the machine's first non-internal IPv4 address. Per-action allowances follow the token
 bucket model: each guest starts with N goes and earns one back every M minutes, with
 separate budgets for adding, playing next, and skipping. Adding and playing next are on
 by default, skipping is off.
