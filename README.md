@@ -25,7 +25,7 @@ Roon Core  ──(node-roon-api over the local network)──  app.js
                                               Express on port 8080
                                                         │
                                      /            guest page (phones)
-                                     /dashboard    QR code + queue (TV)
+                                     /roonparty    QR code + queue (TV)
 ```
 
 | File | What it does |
@@ -34,7 +34,7 @@ Roon Core  ──(node-roon-api over the local network)──  app.js
 | `lib/roon-service.js` | Pairing, settings layout, search, queue actions, queue subscription |
 | `lib/guests.js` | Guest sessions, token-bucket limits, request attribution |
 | `lib/server.js` | REST API, server-sent events, QR code, image proxy |
-| `public/` | Guest page and host dashboard, no build step |
+| `public/` | Guest page and the RoonParty screen, no build step |
 
 ## Running it during development
 
@@ -44,7 +44,7 @@ node app.js
 ```
 
 Then open Roon → Settings → Extensions and enable Party Mode. Open its settings, pick a
-party zone, and the console prints the guest link and dashboard URL. The extension writes
+party zone, and the console prints the guest link and RoonParty URL. The extension writes
 `config.json` next to `app.js`.
 
 ## Host settings (in Roon)
@@ -117,7 +117,7 @@ session moves on. The server replays the search and retries once when a key has 
 stale, which covers the usual case of a guest searching again before tapping.
 
 **Access control is a shared join code, not a login.** Anyone who can reach the port and
-has scanned the code can add tracks. The dashboard endpoints need no session at all.
+has scanned the code can add tracks. The RoonParty screen and its endpoints need no session at all.
 Do not expose this to the internet.
 
 **The queue subscription is per zone.** Changing the party zone starts a new subscription;
@@ -125,7 +125,7 @@ the old one is ignored rather than torn down, since the API has no convenient un
 
 ## Ideas worth adding
 
-- A short "who are you" prompt so the dashboard badges show real names
+- A short "who are you" prompt so the RoonParty badges show real names
 - Blocking explicit tracks, or a genre allowlist, using the browse hierarchy
 - Persisting token buckets against a device fingerprint so a page refresh does not matter
   (they are already server-side, but a new scan gets a fresh session)

@@ -14,7 +14,7 @@ server.listen(port).then(() => {
   roon.setStatusLine(`Guests join at ${server.guestUrl()}`);
   console.log(`Party Mode listening on port ${port}`);
   console.log(`Guest link: ${server.guestUrl()}`);
-  console.log(`Dashboard:  http://localhost:${port}/dashboard`);
+  console.log(`RoonParty:  http://localhost:${port}/roonparty`);
 });
 
 roon.on('core_paired', () => {
