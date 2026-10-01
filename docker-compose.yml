@@ -1,7 +1,7 @@
 # Host networking is required: Roon discovery uses UDP broadcast on port 9003.
 services:
   party-mode:
-    image: yourname/roon-extension-party-mode:latest
+    image: stubaggs/roon-extension-party-mode:latest
     container_name: roon-extension-party-mode
     network_mode: host
     restart: unless-stopped

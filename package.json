@@ -3,10 +3,14 @@
   "version": "0.1.0",
   "description": "Roon Extension that lets party guests search your library and add tracks to a zone's queue from their phone",
   "main": "app.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/stubaggs/roon-extension-party-mode.git"
+  },
   "scripts": {
     "start": "node app.js"
   },
-  "author": "",
+  "author": "stubaggs",
   "license": "Apache-2.0",
   "engines": {
     "node": ">=18"
