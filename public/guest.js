@@ -6,10 +6,12 @@
   const locked = el('locked');
   const results = el('results');
   const queueList = el('queue');
+  const playedList = el('played');
   const searchInput = el('search');
   const toastEl = el('toast');
 
   let party = null;
+  let started = false;
   let expandedKey = null;
   let searchTimer = null;
   let lastResults = [];
@@ -245,50 +247,148 @@
       playing && playing.state === 'playing' ? 'Playing now' : 'Paused';
     setArt(el('playing-art'), playing && playing.image_key, 144);
 
-    queueList.innerHTML = '';
     const upcoming = snapshot.upcoming.slice(1, 16);
-    if (!upcoming.length) {
-      const p = document.createElement('li');
-      p.className = 'empty';
-      p.textContent = 'Nothing lined up. Add the first song.';
-      queueList.appendChild(p);
-      return;
-    }
-
-    upcoming.forEach((item, index) => {
-      const li = document.createElement('li');
-      li.className = 'row';
-
+    renderList(queueList, upcoming, 'Nothing lined up. Add the first song.', (item, index) => {
       const position = document.createElement('span');
       position.className = 'queue-position';
       position.textContent = String(index + 1);
-
-      const img = document.createElement('img');
-      img.className = 'art';
-      img.alt = '';
-      img.width = 40;
-      img.height = 40;
-      setArt(img, item.image_key, 80);
-
-      const text = document.createElement('div');
-      text.className = 'row-text';
-      const title = document.createElement('p');
-      title.className = 'row-title';
-      title.textContent = item.title;
-      if (item.requested_by) {
-        const badge = document.createElement('span');
-        badge.className = 'badge';
-        badge.textContent = item.requested_by;
-        title.appendChild(badge);
-      }
-      const sub = document.createElement('p');
-      sub.className = 'row-sub';
-      sub.textContent = item.artist;
-      text.append(title, sub);
-
-      li.append(position, img, text);
-      queueList.appendChild(li);
+      return [position, ...trackCells(item)];
     });
+
+    renderList(playedList, snapshot.played || [], 'Nothing played yet.', (item) => {
+      const time = document.createElement('span');
+      time.className = 'played-at';
+      time.textContent = new Date(item.played_at).toLocaleTimeString([], {
+        hour: 'numeric',
+        minute: '2-digit'
+      });
+      return [...trackCells(item), time];
+    });
+  }
+
+  function renderList(list, items, emptyText, cells) {
+    list.innerHTML = '';
+    if (!items.length) {
+      const p = document.createElement('li');
+      p.className = 'empty';
+      p.textContent = emptyText;
+      list.appendChild(p);
+      return;
+    }
+    items.forEach((item, index) => {
+      const li = document.createElement('li');
+      li.className = 'row';
+      li.append(...cells(item, index));
+      list.appendChild(li);
+    });
+  }
+
+  /** Album art plus title, requester badge and artist. */
+  function trackCells(item) {
+    const img = document.createElement('img');
+    img.className = 'art';
+    img.alt = '';
+    img.width = 40;
+    img.height = 40;
+    setArt(img, item.image_key, 80);
+
+    const text = document.createElement('div');
+    text.className = 'row-text';
+    const title = document.createElement('p');
+    title.className = 'row-title';
+    title.textContent = item.title;
+    if (item.requested_by) {
+      const badge = document.createElement('span');
+      badge.className = 'badge';
+      badge.textContent = item.requested_by;
+      title.appendChild(badge);
+    }
+    const sub = document.createElement('p');
+    sub.className = 'row-sub';
+    sub.textContent = item.artist;
+    text.append(title, sub);
+
+    return [img, text];
+  }
+
+  // --------------------------------------------------------------- nickname
+
+  // Remembered on the phone, so a new scan (which starts a new session) or a
+  // later visit doesn't ask again. Storage can be unavailable in private mode.
+  const NAME_KEY = 'party_name';
+  const remembered = {
+    get() {
+      try {
+        return localStorage.getItem(NAME_KEY);
+      } catch (err) {
+        return null;
+      }
+    },
+    set(name) {
+      try {
+        localStorage.setItem(NAME_KEY, name);
+      } catch (err) {
+        /* private mode */
+      }
+    }
+  };
+
+  const nickname = el('nickname');
+  const nicknameInput = el('nickname-input');
+
+  function renderWhoami() {
+    const name = party && party.guest_name;
+    el('whoami').textContent = name ? `Adding as ${name}` : '';
+    el('whoami-change').textContent = name ? 'Change' : 'Add your name';
+  }
+
+  async function saveName(name) {
+    const body = await api('/api/name', { method: 'POST', body: JSON.stringify({ name }) });
+    party.guest_name = body.guest_name;
+    renderWhoami();
+  }
+
+  let changingName = false;
+
+  /** First visit offers Skip; changing a name later offers Cancel instead. */
+  function askName(changing) {
+    changingName = changing === true;
+    el('nickname-skip').textContent = changingName ? 'Cancel' : 'Skip';
+    nicknameInput.value = (party && party.guest_name) || remembered.get() || '';
+    nickname.hidden = false;
+    nicknameInput.focus();
+  }
+
+  el('nickname-form').addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const name = nicknameInput.value.trim();
+    // Skipping stores an empty name, so "Skip" isn't asked again on this phone.
+    remembered.set(name);
+    nickname.hidden = true;
+    try {
+      await saveName(name);
+    } catch (err) {
+      if (err.message !== 'no_session') toast('Could not save your name.');
+    }
+  });
+
+  el('nickname-skip').addEventListener('click', () => {
+    if (changingName) {
+      nickname.hidden = true;
+      return;
+    }
+    nicknameInput.value = '';
+    el('nickname-form').requestSubmit();
+  });
+
+  el('whoami-change').addEventListener('click', () => askName(true));
+
+  /** First visit asks; a remembered name (or a remembered skip) is applied quietly. */
+  async function settleName() {
+    if (party.guest_name) return;
+    const name = remembered.get();
+    if (name === null) return askName();
+    if (name) await saveName(name).catch(() => {});
   }
 
   // -------------------------------------------------------------- lifecycle
@@ -304,6 +404,12 @@
     document.title = party.party_name || 'Add a song';
     el('skip').hidden = !party.capabilities.skip;
     renderTokens();
+    renderWhoami();
+
+    // boot() runs again when the party settings change; set up the rest once.
+    if (started) return;
+    started = true;
+    await settleName();
 
     const snapshot = await api('/api/queue').catch(() => null);
     if (snapshot) renderQueue(snapshot);
@@ -317,6 +423,7 @@
         .then((body) => {
           party = body;
           renderTokens();
+          renderWhoami();
         })
         .catch(() => {});
     }, 30000);

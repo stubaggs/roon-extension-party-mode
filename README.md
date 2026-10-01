@@ -33,6 +33,7 @@ Roon Core  ──(node-roon-api over the local network)──  app.js
 | `app.js` | Wires the Roon service to the web server |
 | `lib/roon-service.js` | Pairing, settings layout, search, queue actions, queue subscription |
 | `lib/guests.js` | Guest sessions, token-bucket limits, request attribution |
+| `lib/history.js` | Played-songs list for the guest page |
 | `lib/server.js` | REST API, server-sent events, QR code, image proxy |
 | `public/` | Guest page and the RoonParty screen, no build step |
 
@@ -115,6 +116,11 @@ queue. So a guest can ask for a track to play next when they add it, but nobody 
 promote a track that is already waiting. If you have seen Music Assistant's "boost an
 upcoming song", that part does not have a Roon equivalent.
 
+**Nicknames are optional.** Guests are asked for a name on their first visit; it shows as
+a badge on the songs they add, in Up next, Played and on the RoonParty screen. The phone
+remembers it (or that they skipped), so a rescan doesn't ask again. Unnamed requests show
+as "a guest".
+
 **Attribution is best-effort.** Roon queue items carry no "who added this" field, so
 requests are matched back to guests by title and artist afterwards. Two guests adding the
 same track will confuse the badge.
@@ -127,12 +133,16 @@ stale, which covers the usual case of a guest searching again before tapping.
 has scanned the code can add tracks. The RoonParty screen and its endpoints need no session at all.
 Do not expose this to the internet.
 
+**Played history is the extension's own.** Roon's API has no play history, so the
+"Played" list on the guest page is recorded by the extension as tracks start. It is kept
+in memory (last 200 songs) and starts over when the extension restarts or the party zone
+changes.
+
 **The queue subscription is per zone.** Changing the party zone starts a new subscription;
 the old one is ignored rather than torn down, since the API has no convenient unsubscribe.
 
 ## Ideas worth adding
 
-- A short "who are you" prompt so the RoonParty badges show real names
 - Blocking explicit tracks, or a genre allowlist, using the browse hierarchy
 - Persisting token buckets against a device fingerprint so a page refresh does not matter
   (they are already server-side, but a new scan gets a fresh session)

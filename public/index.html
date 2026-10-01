@@ -35,12 +35,21 @@
       </div>
 
       <p class="tokens muted" id="tokens"></p>
+      <p class="whoami muted">
+        <span id="whoami"></span>
+        <button class="link-button" id="whoami-change" type="button"></button>
+      </p>
 
       <section id="results" class="rows" aria-live="polite"></section>
 
       <section class="upnext">
         <h2>Up next</h2>
         <ol id="queue" class="rows queue"></ol>
+      </section>
+
+      <section class="upnext">
+        <h2>Played</h2>
+        <ol id="played" class="rows queue played"></ol>
       </section>
     </main>
 
@@ -49,6 +58,27 @@
       <p class="muted">
         This link only works after scanning the code on the party screen. Ask the host to show it.
       </p>
+    </div>
+
+    <div class="nickname-backdrop" id="nickname" hidden>
+      <form class="nickname" id="nickname-form" role="dialog" aria-modal="true" aria-labelledby="nickname-title">
+        <h2 id="nickname-title">What should we call you?</h2>
+        <p class="muted">Your name shows next to the songs you add, so everyone knows who to thank.</p>
+        <input
+          id="nickname-input"
+          type="text"
+          maxlength="24"
+          autocomplete="nickname"
+          autocapitalize="words"
+          enterkeyhint="go"
+          placeholder="Your name"
+          aria-label="Your name"
+        />
+        <div class="nickname-actions">
+          <button class="pill pill-primary" type="submit">Let's go</button>
+          <button class="pill pill-ghost" id="nickname-skip" type="button">Skip</button>
+        </div>
+      </form>
     </div>
 
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
