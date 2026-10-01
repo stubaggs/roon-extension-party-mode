@@ -126,8 +126,11 @@ is switched on for the party zone, any track no guest added is labelled "Roon Ra
 which includes tracks the host queues from the Roon app.
 
 **Attribution is best-effort.** Roon queue items carry no "who added this" field, so
-requests are matched back to guests by title and artist afterwards. Two guests adding the
-same track will confuse the badge.
+requests are matched back to guests by title and artist afterwards. Search results and
+the queue don't always spell a track the same way, so the match ignores remaster tags,
+artist separators and extra artists. Two guests adding the same track will confuse the
+badge. The console logs each request and each track start with the strings Roon
+reported, which is the place to look when a badge is wrong.
 
 **Browse sessions are stateful.** Item keys are only valid until that guest's browse
 session moves on. The server replays the search and retries once when a key has gone
