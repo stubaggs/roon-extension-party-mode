@@ -290,7 +290,7 @@
     });
   }
 
-  /** Album art plus title, requester badge and artist. */
+  /** Album art plus title, artist and, under it, who requested it. */
   function trackCells(item) {
     const img = document.createElement('img');
     img.className = 'art';
@@ -304,16 +304,16 @@
     const title = document.createElement('p');
     title.className = 'row-title';
     title.textContent = item.title;
-    if (item.requested_by) {
-      const badge = document.createElement('span');
-      badge.className = item.kind === 'radio' ? 'badge radio' : 'badge';
-      badge.textContent = item.requested_by;
-      title.appendChild(badge);
-    }
     const sub = document.createElement('p');
     sub.className = 'row-sub';
     sub.textContent = item.artist;
     text.append(title, sub);
+    if (item.requested_by) {
+      const badge = document.createElement('span');
+      badge.className = item.kind === 'radio' ? 'badge radio' : 'badge';
+      badge.textContent = item.requested_by;
+      text.appendChild(badge);
+    }
 
     return [img, text];
   }

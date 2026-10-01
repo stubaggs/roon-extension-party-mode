@@ -40,16 +40,16 @@
       const t = document.createElement('div');
       t.className = 't';
       t.textContent = item.title;
-      if (item.requested_by) {
-        const who = document.createElement('span');
-        who.className = item.kind === 'next' || item.kind === 'radio' ? `who ${item.kind}` : 'who';
-        who.textContent = item.requested_by;
-        t.appendChild(who);
-      }
       const a = document.createElement('div');
       a.className = 'a';
       a.textContent = item.artist;
       wrap.append(t, a);
+      if (item.requested_by) {
+        const who = document.createElement('span');
+        who.className = item.kind === 'next' || item.kind === 'radio' ? `who ${item.kind}` : 'who';
+        who.textContent = item.requested_by;
+        wrap.appendChild(who);
+      }
 
       li.append(n, wrap);
       list.appendChild(li);
