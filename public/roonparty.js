@@ -29,7 +29,7 @@
     else image.removeAttribute('src');
 
     list.innerHTML = '';
-    data.upcoming.slice(1, 9).forEach((item, index) => {
+    data.upcoming.slice(0, 8).forEach((item, index) => {
       const li = document.createElement('li');
 
       const n = document.createElement('span');
