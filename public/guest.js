@@ -251,8 +251,7 @@
       playing && playing.state === 'playing' ? 'Playing now' : 'Paused';
     setArt(el('playing-art'), playing && playing.image_key, 144);
 
-    const upcoming = snapshot.upcoming.slice(0, 15);
-    renderList(queueList, upcoming, 'Nothing lined up. Add the first song.', (item, index) => {
+    renderList(queueList, snapshot.upcoming, 'Nothing lined up. Add the first song.', (item, index) => {
       const position = document.createElement('span');
       position.className = 'queue-position';
       position.textContent = String(index + 1);
