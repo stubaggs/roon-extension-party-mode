@@ -82,6 +82,27 @@ a:focus-visible {
   cursor: default;
 }
 
+/* Long names that scroll, see marquee.js. */
+.marquee-on {
+  text-overflow: clip;
+}
+
+.marquee-inner {
+  display: inline-block;
+  animation: marquee var(--marquee-time, 8s) ease-in-out infinite alternate;
+}
+
+@keyframes marquee {
+  0%,
+  15% {
+    transform: translateX(0);
+  }
+  85%,
+  100% {
+    transform: translateX(var(--marquee-shift, 0));
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     animation: none !important;

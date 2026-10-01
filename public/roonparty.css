@@ -92,9 +92,16 @@
   white-space: nowrap;
 }
 
+.current-text {
+  min-width: 0;
+}
+
 .current-artist {
   margin: 0.35rem 0 0;
   font-size: clamp(1rem, 1.8vw, 1.6rem);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .current-who {
@@ -142,7 +149,14 @@
   white-space: nowrap;
 }
 
+.list > li > div {
+  min-width: 0;
+}
+
 .list .a {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   color: var(--muted);
   font-size: 0.78em;
 }
