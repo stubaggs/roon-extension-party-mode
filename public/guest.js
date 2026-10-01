@@ -6,6 +6,7 @@
   const locked = el('locked');
   const results = el('results');
   const queueList = el('queue');
+  const playedList = el('played');
   const searchInput = el('search');
   const toastEl = el('toast');
 
@@ -245,50 +246,68 @@
       playing && playing.state === 'playing' ? 'Playing now' : 'Paused';
     setArt(el('playing-art'), playing && playing.image_key, 144);
 
-    queueList.innerHTML = '';
     const upcoming = snapshot.upcoming.slice(1, 16);
-    if (!upcoming.length) {
-      const p = document.createElement('li');
-      p.className = 'empty';
-      p.textContent = 'Nothing lined up. Add the first song.';
-      queueList.appendChild(p);
-      return;
-    }
-
-    upcoming.forEach((item, index) => {
-      const li = document.createElement('li');
-      li.className = 'row';
-
+    renderList(queueList, upcoming, 'Nothing lined up. Add the first song.', (item, index) => {
       const position = document.createElement('span');
       position.className = 'queue-position';
       position.textContent = String(index + 1);
-
-      const img = document.createElement('img');
-      img.className = 'art';
-      img.alt = '';
-      img.width = 40;
-      img.height = 40;
-      setArt(img, item.image_key, 80);
-
-      const text = document.createElement('div');
-      text.className = 'row-text';
-      const title = document.createElement('p');
-      title.className = 'row-title';
-      title.textContent = item.title;
-      if (item.requested_by) {
-        const badge = document.createElement('span');
-        badge.className = 'badge';
-        badge.textContent = item.requested_by;
-        title.appendChild(badge);
-      }
-      const sub = document.createElement('p');
-      sub.className = 'row-sub';
-      sub.textContent = item.artist;
-      text.append(title, sub);
-
-      li.append(position, img, text);
-      queueList.appendChild(li);
+      return [position, ...trackCells(item)];
     });
+
+    renderList(playedList, snapshot.played || [], 'Nothing played yet.', (item) => {
+      const time = document.createElement('span');
+      time.className = 'played-at';
+      time.textContent = new Date(item.played_at).toLocaleTimeString([], {
+        hour: 'numeric',
+        minute: '2-digit'
+      });
+      return [...trackCells(item), time];
+    });
+  }
+
+  function renderList(list, items, emptyText, cells) {
+    list.innerHTML = '';
+    if (!items.length) {
+      const p = document.createElement('li');
+      p.className = 'empty';
+      p.textContent = emptyText;
+      list.appendChild(p);
+      return;
+    }
+    items.forEach((item, index) => {
+      const li = document.createElement('li');
+      li.className = 'row';
+      li.append(...cells(item, index));
+      list.appendChild(li);
+    });
+  }
+
+  /** Album art plus title, requester badge and artist. */
+  function trackCells(item) {
+    const img = document.createElement('img');
+    img.className = 'art';
+    img.alt = '';
+    img.width = 40;
+    img.height = 40;
+    setArt(img, item.image_key, 80);
+
+    const text = document.createElement('div');
+    text.className = 'row-text';
+    const title = document.createElement('p');
+    title.className = 'row-title';
+    title.textContent = item.title;
+    if (item.requested_by) {
+      const badge = document.createElement('span');
+      badge.className = 'badge';
+      badge.textContent = item.requested_by;
+      title.appendChild(badge);
+    }
+    const sub = document.createElement('p');
+    sub.className = 'row-sub';
+    sub.textContent = item.artist;
+    text.append(title, sub);
+
+    return [img, text];
   }
 
   // -------------------------------------------------------------- lifecycle

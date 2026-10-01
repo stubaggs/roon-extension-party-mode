@@ -33,6 +33,7 @@ Roon Core  ──(node-roon-api over the local network)──  app.js
 | `app.js` | Wires the Roon service to the web server |
 | `lib/roon-service.js` | Pairing, settings layout, search, queue actions, queue subscription |
 | `lib/guests.js` | Guest sessions, token-bucket limits, request attribution |
+| `lib/history.js` | Played-songs list for the guest page |
 | `lib/server.js` | REST API, server-sent events, QR code, image proxy |
 | `public/` | Guest page and the RoonParty screen, no build step |
 
@@ -126,6 +127,11 @@ stale, which covers the usual case of a guest searching again before tapping.
 **Access control is a shared join code, not a login.** Anyone who can reach the port and
 has scanned the code can add tracks. The RoonParty screen and its endpoints need no session at all.
 Do not expose this to the internet.
+
+**Played history is the extension's own.** Roon's API has no play history, so the
+"Played" list on the guest page is recorded by the extension as tracks start. It is kept
+in memory (last 200 songs) and starts over when the extension restarts or the party zone
+changes.
 
 **The queue subscription is per zone.** Changing the party zone starts a new subscription;
 the old one is ignored rather than torn down, since the API has no convenient unsubscribe.
