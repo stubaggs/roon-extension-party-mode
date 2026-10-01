@@ -2,10 +2,12 @@
 # Needs two repository secrets: DOCKERHUB_USERNAME and DOCKERHUB_TOKEN.
 name: Publish Docker image
 
+# Manual only for now, while the extension is still being tested: run it from the
+# Actions tab when you want to publish. Restore the push trigger to publish on merge:
+#   push:
+#     branches: [main]
+#     tags: ['v*']
 on:
-  push:
-    branches: [main]
-    tags: ['v*']
   workflow_dispatch:
 
 jobs:

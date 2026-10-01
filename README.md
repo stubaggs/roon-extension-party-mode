@@ -70,17 +70,19 @@ UDP broadcast on port 9003) and bind-mounts `config.json` so settings survive up
 ## Publishing the image
 
 `.github/workflows/docker-publish.yml` builds `linux/amd64`, `linux/arm/v7` and
-`linux/arm64` and pushes `stubaggs/roon-extension-party-mode` to Docker Hub on every push
-to `main` (as `latest`) and on `v*` tags (as the version). It needs two repository
-secrets, under Settings → Secrets and variables → Actions:
+`linux/arm64` and pushes `stubaggs/roon-extension-party-mode:latest` to Docker Hub. For
+now it only runs when started by hand (Actions → Publish Docker image → Run workflow);
+the commented-out `push` trigger in the workflow publishes on every merge to `main` once
+restored. It needs two repository secrets, under Settings → Secrets and variables →
+Actions:
 
 | Secret | Value |
 | --- | --- |
 | `DOCKERHUB_USERNAME` | `stubaggs` |
 | `DOCKERHUB_TOKEN` | A Docker Hub access token with Read & Write scope |
 
-The Extension Manager checks Docker Hub for a newer `latest`, so pushing to `main` is
-how an update reaches people who have it installed.
+The Extension Manager checks Docker Hub for a newer `latest`, so publishing a new
+`latest` is how an update reaches people who have it installed.
 
 To run the image by hand instead:
 
