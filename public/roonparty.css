@@ -43,6 +43,18 @@
   word-break: break-all;
 }
 
+.join-link {
+  display: inline-block;
+  color: inherit;
+  text-decoration: none;
+  border-radius: 6px;
+}
+
+.join-link[href]:hover .join-copy,
+.join-link[href]:hover .join-url {
+  text-decoration: underline;
+}
+
 .stack {
   min-width: 0;
   height: 100%;
