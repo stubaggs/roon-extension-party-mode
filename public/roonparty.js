@@ -11,6 +11,7 @@
   function render(data) {
     el('party-name').textContent = data.party_name || data.zone || 'Party';
     el('join-url').textContent = (data.join_url || '').replace(/^https?:\/\//, '');
+    if (data.join_url) el('join-link').href = data.join_url;
 
     const playing = data.now_playing;
     el('current-title').textContent = playing ? playing.title : 'Nothing playing';

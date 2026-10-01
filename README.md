@@ -17,7 +17,7 @@ it installable from inside Roon.
 Roon Core  ──(node-roon-api over the local network)──  app.js
                                                         │
                         RoonApiSettings   host config in Roon's Extension Settings
-                        RoonApiStatus     "Guests join at http://…"
+                        RoonApiStatus     "RoonParty at http://…"
                         RoonApiTransport  zone state, queue subscription, skip
                         RoonApiBrowse     search + "Queue" / "Add Next" actions
                         RoonApiImage      album art proxy
