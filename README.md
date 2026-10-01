@@ -36,18 +36,6 @@ Roon Core  ──(node-roon-api over the local network)──  app.js
 | `lib/server.js` | REST API, server-sent events, QR code, image proxy |
 | `public/` | Guest page and host dashboard, no build step |
 
-## Before you publish it
-
-Change these in `lib/roon-service.js`, they identify the extension to Roon:
-
-```js
-extension_id:    'com.example.party-mode',   // reverse-DNS, must be unique
-display_name:    'Party Mode',
-publisher:       'Your Name',
-email:           'you@example.com',
-website:         'https://github.com/you/roon-extension-party-mode'
-```
-
 ## Running it during development
 
 ```bash
@@ -71,30 +59,46 @@ The last group of settings is the one to check if your Core is not in English. R
 localises browse titles, so the extension matches on the strings `Tracks`, `Queue` and
 `Add Next`. Put your Core's equivalents there.
 
-## Building and publishing the image
+## Installing it from Roon
 
-```bash
-docker buildx build --platform linux/amd64,linux/arm/v7,linux/arm64 \
-  -t yourname/roon-extension-party-mode:latest --push .
-```
+Once the image is on Docker Hub and the entry is in the Extension Repository, install it
+with the [Extension Manager](https://github.com/TheAppgineer/roon-extension-manager):
+Roon → Settings → Extensions → Extension Manager → Settings, pick the category, pick
+Party Mode, choose Install. The Manager runs it with host networking (Roon discovery uses
+UDP broadcast on port 9003) and bind-mounts `config.json` so settings survive updates.
 
-Run it with host networking. Roon discovery uses UDP broadcast on port 9003 and will not
-find the Core from a bridge network:
+## Publishing the image
+
+`.github/workflows/docker-publish.yml` builds `linux/amd64`, `linux/arm/v7` and
+`linux/arm64` and pushes `stubaggs/roon-extension-party-mode` to Docker Hub on every push
+to `main` (as `latest`) and on `v*` tags (as the version). It needs two repository
+secrets, under Settings → Secrets and variables → Actions:
+
+| Secret | Value |
+| --- | --- |
+| `DOCKERHUB_USERNAME` | `stubaggs` |
+| `DOCKERHUB_TOKEN` | A Docker Hub access token with Read & Write scope |
+
+The Extension Manager checks Docker Hub for a newer `latest`, so pushing to `main` is
+how an update reaches people who have it installed.
+
+To run the image by hand instead:
 
 ```bash
 docker run -d --name party-mode --network host \
   -v "$PWD/config.json:/usr/src/app/config.json" \
-  yourname/roon-extension-party-mode:latest
+  stubaggs/roon-extension-party-mode:latest
 ```
 
-`docker-compose.yml` does the same thing.
+`docker-compose.yml` does the same thing. Create `config.json` first (`touch config.json`)
+or Docker makes a directory in its place.
 
-## Getting it into the Extension Manager
+## Getting it into the Extension Repository
 
 Fork `TheAppgineer/roon-extension-repository`, add the object from `repository-entry.json`
-to a category in `repository.json`, and open a pull request. The `binds` entry is what
-keeps settings across image updates, and the `HostConfig.NetworkMode: host` in `config`
-is what makes discovery work.
+to the "Playback" category in `repository.json`, bump the `version` at the top of that
+file, and open a pull request. Only do this after the image is on Docker Hub: the Manager
+installs straight from it.
 
 ## Known limitations
 

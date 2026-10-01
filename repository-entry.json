@@ -1,9 +1,9 @@
 {
-  "author": "Your Name",
+  "author": "stubaggs",
   "display_name": "Party Mode",
   "description": "Lets guests search your library and add tracks to a zone's queue from their phone",
   "image": {
-    "repo": "yourname/roon-extension-party-mode",
+    "repo": "stubaggs/roon-extension-party-mode",
     "tags": {
       "amd64": "latest",
       "arm": "latest",
@@ -11,19 +11,6 @@
     },
     "binds": [
       "/usr/src/app/config.json"
-    ],
-    "options": {
-      "env": {
-        "PARTY_PORT": "Web port for guests"
-      }
-    },
-    "config": {
-      "HostConfig": {
-        "NetworkMode": "host",
-        "RestartPolicy": {
-          "Name": "unless-stopped"
-        }
-      }
-    }
+    ]
   }
 }
