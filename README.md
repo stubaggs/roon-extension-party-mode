@@ -121,6 +121,10 @@ a badge on the songs they add, in Up next, Played and on the RoonParty screen. T
 remembers it (or that they skipped), so a rescan doesn't ask again. Unnamed requests show
 as "a guest".
 
+**"Roon Radio" is a guess.** Roon doesn't say where a track came from. When Roon Radio
+is switched on for the party zone, any track no guest added is labelled "Roon Radio",
+which includes tracks the host queues from the Roon app.
+
 **Attribution is best-effort.** Roon queue items carry no "who added this" field, so
 requests are matched back to guests by title and artist afterwards. Two guests adding the
 same track will confuse the badge.

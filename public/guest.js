@@ -245,7 +245,8 @@
     el('playing-artist').textContent = playing ? playing.artist : '';
     const who = el('playing-who');
     who.hidden = !(playing && playing.requested_by);
-    who.textContent = who.hidden ? '' : `Requested by ${playing.requested_by}`;
+    who.textContent = who.hidden ? '' : creditText(playing);
+    who.classList.toggle('radio', !who.hidden && playing.kind === 'radio');
     el('playing-label').textContent =
       playing && playing.state === 'playing' ? 'Playing now' : 'Paused';
     setArt(el('playing-art'), playing && playing.image_key, 144);
@@ -267,6 +268,10 @@
       });
       return [...trackCells(item), time];
     });
+  }
+
+  function creditText(track) {
+    return track.kind === 'radio' ? 'Roon Radio' : `Requested by ${track.requested_by}`;
   }
 
   function renderList(list, items, emptyText, cells) {
@@ -302,7 +307,7 @@
     title.textContent = item.title;
     if (item.requested_by) {
       const badge = document.createElement('span');
-      badge.className = 'badge';
+      badge.className = item.kind === 'radio' ? 'badge radio' : 'badge';
       badge.textContent = item.requested_by;
       title.appendChild(badge);
     }

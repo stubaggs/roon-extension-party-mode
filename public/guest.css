@@ -63,6 +63,12 @@ main {
   white-space: nowrap;
 }
 
+.playing-who.radio,
+.badge.radio {
+  background: rgba(123, 224, 192, 0.16);
+  color: var(--mint);
+}
+
 .playing-who[hidden] {
   display: none;
 }
