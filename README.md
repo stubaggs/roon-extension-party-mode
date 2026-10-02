@@ -22,7 +22,7 @@ Roon Core  ──(node-roon-api over the local network)──  app.js
                         RoonApiBrowse     search + "Queue" / "Add Next" actions
                         RoonApiImage      album art proxy
                                                         │
-                                              Express on port 8080
+                                              Express on port 8338
                                                         │
                                      /            guest page (phones)
                                      /roonparty    QR code + queue (TV)
@@ -83,6 +83,18 @@ guest and RoonParty pages there straight away, then the extension reconnects to 
 (it drops out of Roon's list for up to ten seconds) so the link Roon shows is updated.
 Open pages and phones on the old port need the new link or a fresh scan. `PARTY_PORT`
 sets the port to start on before one has been saved in Roon.
+
+The default port is 8338. The container shares the host's network, so the port has to be
+free on the machine itself; 8338 was picked to stay clear of common defaults (8080, 3000,
+5000, 8000, 8443, 9000), Roon's own ports (UDP 9003, TCP 9100-9200 and 9330-9339) and the
+other Extension Manager extensions (8088, 9010, 3000). If you change it, stay between 1024
+and 49151: higher ports are handed out by the OS for outgoing connections.
+
+If the saved port is taken when the extension starts, it uses the next free one of the
+following nine, and Roon's status line says so ("port 8338 was busy"); the QR code and
+links follow. If all ten are taken, it still connects to Roon and asks for another port
+in the settings. A port chosen in the settings while running is not swapped for another:
+if it is busy, the extension stays where it is and says so.
 
 ### Picking the party zone
 
