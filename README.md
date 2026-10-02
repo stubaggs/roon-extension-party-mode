@@ -60,7 +60,7 @@ new QR code, so old links stop working.
 
 | Setting | What it does |
 | --- | --- |
-| Party zone | Where the music plays. If you pick a speaker that's grouped with others, the whole group plays, and the setting says so. |
+| Party zone | Where the music plays. If you pick a speaker that's grouped with others, the whole group plays. |
 | Party name | Shown on the party screen. Leave blank to use the zone's name. |
 | Roon profile for guest requests | The Roon profile the songs are played under. Choose a "Guests" profile to keep party songs out of your own history and recommendations. |
 | Guest access | On or off for everyone. |
