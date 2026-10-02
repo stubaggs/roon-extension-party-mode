@@ -104,7 +104,9 @@ actually pointing at.
 
 Links use the machine's first non-internal IPv4 address. Per-action allowances follow the token
 bucket model: each guest starts with N goes and earns one back every M minutes, with
-separate budgets for adding, playing next, and skipping. Adding and playing next are on
+separate budgets for adding, playing next, and skipping. 0 goes per guest means no limit,
+and 0 minutes means a used go never comes back; to stop guests doing something at all,
+set its "Let guests …" to No. Adding and playing next are on
 by default, skipping is off.
 
 The last group of settings is the one to check if your Core is not in English. Roon
