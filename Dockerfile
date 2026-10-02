@@ -47,7 +47,7 @@ RUN touch config.json
 
 # Documentation only: the container runs with host networking, and the port
 # can be changed in the extension's settings in Roon.
-EXPOSE 8080
+EXPOSE 8338
 
 # Checks the web server on whatever port the settings say.
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \

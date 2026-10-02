@@ -1,11 +1,12 @@
 'use strict';
 
-// Docker HEALTHCHECK: is the web server answering on the port it was set to?
-// The port lives in config.json once saved in Roon; until then PARTY_PORT or
-// 8080, the same order the extension uses at startup.
+// Docker HEALTHCHECK: is the web server answering? It listens on the port saved
+// in config.json (else PARTY_PORT, else 8338, the order the extension uses), or
+// on one of the next few ports if that one was busy at startup.
 
 const fs = require('fs');
 const http = require('http');
+const { FALLBACK_PORTS } = require('./lib/ports');
 
 function configuredPort() {
   try {
@@ -15,15 +16,24 @@ function configuredPort() {
   } catch (err) {
     /* no settings saved yet */
   }
-  return Number(process.env.PARTY_PORT) || 8080;
+  return Number(process.env.PARTY_PORT) || 8338;
 }
 
-const req = http.get(
-  { host: '127.0.0.1', port: configuredPort(), path: '/api/roonparty', timeout: 4000 },
-  (res) => {
-    res.resume();
-    process.exit(res.statusCode === 200 ? 0 : 1);
+function answers(port) {
+  return new Promise((resolve) => {
+    const req = http.get({ host: '127.0.0.1', port, path: '/api/roonparty', timeout: 1500 }, (res) => {
+      res.resume();
+      resolve(res.statusCode === 200);
+    });
+    req.on('timeout', () => req.destroy());
+    req.on('error', () => resolve(false));
+  });
+}
+
+(async () => {
+  const first = configuredPort();
+  for (let port = first; port <= Math.min(first + FALLBACK_PORTS, 65535); port += 1) {
+    if (await answers(port)) process.exit(0);
   }
-);
-req.on('timeout', () => req.destroy(new Error('timeout')));
-req.on('error', () => process.exit(1));
+  process.exit(1);
+})();
