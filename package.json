@@ -9,7 +9,7 @@
   },
   "scripts": {
     "start": "node app.js",
-    "test": "node test/track-id.test.js"
+    "test": "node test/track-id.test.js && node test/settings.test.js"
   },
   "author": "stubaggs",
   "license": "Apache-2.0",

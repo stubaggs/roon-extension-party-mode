@@ -37,7 +37,7 @@ Roon Core  ──(node-roon-api over the local network)──  app.js
 | `lib/history.js` | Played-songs list for the guest page |
 | `lib/server.js` | REST API, server-sent events, QR code, image proxy |
 | `public/` | Guest page and the RoonParty screen, no build step |
-| `test/` | Identity and attribution tests, `npm test` |
+| `test/` | Identity, attribution and settings tests, `npm test` |
 
 ## How a track is identified
 
@@ -83,6 +83,24 @@ guest and RoonParty pages there straight away, then the extension reconnects to 
 (it drops out of Roon's list for up to ten seconds) so the link Roon shows is updated.
 Open pages and phones on the old port need the new link or a fresh scan. `PARTY_PORT`
 sets the port to start on before one has been saved in Roon.
+
+### Picking the party zone
+
+Roon's zone picker lists **endpoints**, not zones, so a zone made by grouping three
+speakers appears as its three separate endpoints. Picking any one of them plays to the
+whole group, because Roon resolves an endpoint to the zone that currently contains it.
+That is why the picker's label names the zone it resolves to:
+
+```
+Party zone — plays to Kitchen + Living Room + Study (3 endpoints)
+```
+
+The setting stores one endpoint, not the group, and grouping is dynamic. So the zone
+means "whichever zone holds this endpoint right now": ungroup the speakers while a party
+is running and the extension quietly follows that one endpoint — guests keep adding
+tracks, but only that speaker plays. Nothing errors, since the endpoint still exists.
+Regroup and it follows the group again. The label is the place to check what it is
+actually pointing at.
 
 Links use the machine's first non-internal IPv4 address. Per-action allowances follow the token
 bucket model: each guest starts with N goes and earns one back every M minutes, with
