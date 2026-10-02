@@ -276,7 +276,9 @@ The normal log is short: the port and links at startup, one line per guest reque
 per track start (`Playing: … -> Sam`), one line when each guest's session gets the
 profile, and warnings. That is enough to diagnose a wrong name on a song.
 
-`PARTY_DEBUG=1` (`lib/log.js`) adds detail: the profile before and after each switch,
+`ROON_EXTENSION_PARTY_MODE_DEBUG=1` (`lib/log.js`; the hyphenated
+`ROON-EXTENSION-PARTY-MODE_DEBUG` also works where Docker passes it, though shells can't
+set it) adds detail: the profile before and after each switch,
 the profiles on offer, the first search's result categories, and node-roon-api's own log
 of every message to and from the Core (its `log_level`, otherwise `"none"`). That last
 part is large and includes guests' searches and Roon's full replies, so it is for
