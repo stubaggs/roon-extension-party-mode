@@ -111,19 +111,41 @@ yours. A "Guests" profile keeps party plays out of your own history. "Leave as i
 doesn't touch the profile.
 
 Roon's API has no profile call, so the extension opens the Profile entry in Roon's
-Settings menu (the browse "settings" hierarchy) and selects the profile there.
+Settings menu and selects the profile there.
 
-Roon keeps the profile **per browse session** (`multi_session_key`), not per extension: a
-queue action is credited to the profile selected in the session that made it, and a
-session nobody has selected one in uses Roon's default (which showed up as "guest"). Each
-guest browses in a session of their own, so the extension selects the profile in that
-guest's session before their first search or request (`RoonService._profileFor`), once
-per guest. It is selected again after the setting changes or the Core reconnects. The
-extension's own session (`party-profile`) is only used to read the list for the settings
-dropdown. The console logs `Profile "Party" selected for guest session …` each time. The entry is matched by
-its title, "Profile" in English: on a Core in another language, put its title in "Profile
-entry in Settings". If something doesn't match, the setting shows what Roon offered and
-the console logs it.
+Roon keeps the profile **per browse session and per hierarchy**: each
+`multi_session_key` has its own profile in each hierarchy, a session nobody has selected
+one in uses Roon's default ("Guest"), and a queue action counts toward the profile of the
+session and hierarchy it was made in. Found on a real Core: selecting in a guest's
+"settings" hierarchy switched it there ("Guest" → "Pat") while songs the same guest
+queued from the "search" hierarchy still counted as Guest.
+
+So guests search and queue in Roon's main **"browse"** hierarchy, the only one holding
+both pieces:
+
+```
+Library  → Search (takes input) → Tracks → a track → Queue / Add Next
+Settings → Profile → the profiles
+```
+
+Before a guest's first search or request, `RoonService._profileFor` selects the chosen
+profile in that guest's browse session through Settings → Profile
+(`selectProfileInBrowse`), once per guest, and again after the setting changes or the
+Core reconnects. Their search then runs through Library → Search in the same session
+(`_openSearch`), and everything after it (track category, action list) is unchanged.
+Library and Settings are found by what they hold, not their names (`openTopEntry` in
+`lib/titles.js`): Library is the top-level entry with a search box (an item with
+`input_prompt`), Settings the one with the Profile entry. The extension's own session in
+the "settings" hierarchy (`party-profile`) only reads the list for the settings dropdown.
+
+The console logs `Profile "Party" selected for guest session …` with Roon's answer and
+the profile before and after, and the first search's result categories
+(`Search (Library → Search) result categories: …`), to check what the search covers. The
+Profile entry is matched by its title, "Profile" in English, or its translations; on a
+Core in another language that doesn't match, put its title in "Profile entry in
+Settings". If something doesn't match, the setting shows what Roon offered and the
+console logs it. Tests use a fake Core shaped like a real browse menu
+(`test/fake-roon.js`).
 
 ### Picking the party zone
 
