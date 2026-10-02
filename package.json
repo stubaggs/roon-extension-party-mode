@@ -11,7 +11,7 @@
     "start": "node app.js",
     "test": "node test/track-id.test.js && node test/settings.test.js"
   },
-  "author": "stubaggs",
+  "author": "Stubaggs",
   "license": "Apache-2.0",
   "engines": {
     "node": ">=18"
