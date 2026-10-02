@@ -7,6 +7,14 @@ name: Publish Docker image
 #   push:
 #     branches: [main]
 #     tags: ['v*']
+#
+# Restore the schedule to rebuild and republish every Monday, so installed copies
+# pick up Alpine and Node security fixes without anyone publishing by hand. A
+# rebuild only gets newer base layers if the Dockerfile's FROM lines allow it:
+# either drop the @sha256 digest so each build uses the current node:22-alpine,
+# or keep the digest and merge Dependabot's update pull requests.
+#   schedule:
+#     - cron: '17 4 * * 1'
 on:
   workflow_dispatch:
 
