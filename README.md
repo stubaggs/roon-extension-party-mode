@@ -140,8 +140,8 @@ set its "Let guests …" to No. Adding and playing next are on
 by default, skipping is off.
 
 **Browse titles.** Roon localises its menus and the API doesn't say which language the
-Core uses. The extension tries the titles in the last group of settings first (English by
-default: `Tracks`, `Queue`, `Add Next`, `Profile`), so an English Core behaves exactly as
+Core uses. The extension tries the titles in the collapsed **Advanced** group at the bottom of the
+settings first (English by default: `Tracks`, `Queue`, `Add Next`, `Profile`), so an English Core behaves exactly as
 written. When one isn't found, it works the menu out instead (`lib/titles.js`):
 
 - **Track category:** the search category whose items open straight into play actions
