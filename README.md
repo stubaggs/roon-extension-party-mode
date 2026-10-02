@@ -304,4 +304,5 @@ the old one is ignored rather than torn down, since the API has no convenient un
 
 ## Licence
 
-Apache-2.0, matching the other extensions in the Appgineer repository.
+Copyright 2026 Stubaggs. Licensed under the Apache License, Version 2.0 (see `LICENSE`),
+matching the other extensions in the Appgineer repository.
