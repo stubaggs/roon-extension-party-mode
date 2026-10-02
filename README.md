@@ -138,6 +138,18 @@ Actions:
 The Extension Manager checks Docker Hub for a newer `latest`, so publishing a new
 `latest` is how an update reaches people who have it installed.
 
+The Dockerfile builds in two stages. The first installs dependencies exactly as
+`package-lock.json` pins them (`npm ci`, which needs `git` for the Roon packages on
+GitHub) and runs `npm test`, so a failing test stops the build. The second copies only
+the app and its dependencies onto a clean base, with a health check that requests the
+RoonParty data on the configured port.
+
+The base is `node:22-alpine`, pinned by digest. Node 22 is the newest line with 32-bit
+ARM images (Node 24 dropped `linux/arm/v7`) and is supported until April 2027; before
+then, move to Node 24 and drop `arm/v7` from the workflow and the repository entry. To
+update the base, change the tag and digest in the Dockerfile's `NODE_IMAGE` together
+(`docker buildx imagetools inspect node:22-alpine` prints the current digest).
+
 To run the image by hand instead:
 
 ```bash
