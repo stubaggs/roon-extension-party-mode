@@ -96,6 +96,21 @@ links follow. If all ten are taken, it still connects to Roon and asks for anoth
 in the settings. A port chosen in the settings while running is not swapped for another:
 if it is busy, the extension stays where it is and says so.
 
+### Guest profile
+
+"Roon profile for guest requests" picks the Roon profile the extension uses, so the
+tracks guests add count toward that profile's play history and Roon Radio instead of
+yours. A "Guests" profile keeps party plays out of your own history. "Leave as it is"
+doesn't touch the profile.
+
+Roon's API has no profile call, so the extension opens the Profile entry in Roon's
+Settings menu (the browse "settings" hierarchy) and selects the profile there. It is
+applied when the extension connects and when the setting changes, and applies to every
+guest, since they all go through the extension's one connection. The entry is matched by
+its title, "Profile" in English: on a Core in another language, put its title in "Profile
+entry in Settings". If something doesn't match, the setting shows what Roon offered and
+the console logs it.
+
 ### Picking the party zone
 
 Roon's zone picker lists **endpoints**, not zones, so a zone made by grouping three
