@@ -54,6 +54,16 @@
     return item.requested_by || t('credit.guest');
   }
 
+  /**
+   * The line under the playing track: "Requested by Sam", "Requested by a
+   * guest" or "Roon Radio". "By a guest" is its own phrase because some
+   * languages change "a guest" after "by" (German: von einem Gast).
+   */
+  function requestedBy(item) {
+    if (item.kind === 'radio') return t('credit.radio');
+    return item.requested_by ? t('credit.requested_by', { name: item.requested_by }) : t('credit.requested_by_guest');
+  }
+
   /** "a minute" / "12 minutes" for a wait in milliseconds. */
   function minutes(ms) {
     const count = Math.max(1, Math.ceil(ms / 60000));
@@ -68,5 +78,5 @@
   document.documentElement.lang = data.lang;
   apply();
 
-  window.I18N = { lang: data.lang, t, apply, credit, minutes, time };
+  window.I18N = { lang: data.lang, t, apply, credit, requestedBy, minutes, time };
 })();

@@ -159,7 +159,8 @@ the detection.
 
 ## Translating the pages
 
-Available: English (`en`), French (`fr`).
+Available: English (`en`), French (`fr`), German (`de`), Spanish (`es`), Dutch (`nl`). The
+non-English files are drafts and worth a read by a native speaker.
 
 The guest page and the RoonParty screen take their text from `public/i18n/<code>.json`,
 one file per language. Each browser gets the language it asks for (its

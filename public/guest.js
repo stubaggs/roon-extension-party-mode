@@ -275,7 +275,7 @@
   }
 
   function creditText(track) {
-    return track.kind === 'radio' ? t('credit.radio') : t('credit.requested_by', { name: window.I18N.credit(track) });
+    return window.I18N.requestedBy(track);
   }
 
   function renderList(list, items, emptyText, cells) {
