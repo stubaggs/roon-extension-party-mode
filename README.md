@@ -112,8 +112,9 @@ rare. If it keeps happening, open an issue with the extension's log (`docker log
 party-mode`, or the log in the Extension Manager), which records each request and each
 song that starts.
 
-**Something else isn't working.** Start the extension with `PARTY_DEBUG=1` (with Docker,
-add `-e PARTY_DEBUG=1`) for a detailed log, including every message to and from Roon, and
+**Something else isn't working.** Start the extension with
+`ROON_EXTENSION_PARTY_MODE_DEBUG=1` (with Docker, add `-e ROON_EXTENSION_PARTY_MODE_DEBUG=1`)
+for a detailed log, including every message to and from Roon, and
 include it in an issue. Turn it off again afterwards: it's large and records what guests
 search for.
 
