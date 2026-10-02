@@ -21,7 +21,7 @@ Roon Core  ──(node-roon-api over the local network)──  app.js
                                                         │
                         RoonApiSettings   host config in Roon's Extension Settings
                         RoonApiStatus     "RoonParty at http://…"
-                        RoonApiTransport  zone state, queue subscription, skip
+                        RoonApiTransport  zone state, queue subscription, skip, play
                         RoonApiBrowse     search + "Queue" / "Add Next" actions
                         RoonApiImage      album art proxy
                                                         │
@@ -304,6 +304,13 @@ after the current one, and it can skip. It cannot move an item that is already i
 queue. So a guest can ask for a track to play next when they add it, but nobody can
 promote a track that is already waiting. If you have seen Music Assistant's "boost an
 upcoming song", that part does not have a Roon equivalent.
+
+**A request presses play.** Roon's Queue and Add Next actions leave a paused or stopped
+zone as it is, so a song requested after the queue ran out would sit there unplayed.
+After either action succeeds, `performAction` sends the transport `play` control unless
+the zone is already playing or loading. That also resumes a zone the host paused on
+purpose; there is no setting to turn it off. A failed `play` is logged and the request
+still counts, since the track was queued.
 
 **Nicknames are optional.** Guests are asked for a name on their first visit; it shows as
 a badge on the songs they add, in Up next, Played and on the RoonParty screen. The phone
