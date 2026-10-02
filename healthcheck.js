@@ -15,12 +15,13 @@
 'use strict';
 
 // Docker HEALTHCHECK: is the web server answering? It listens on the port saved
-// in config.json (else PARTY_PORT, else 8338, the order the extension uses), or
+// in config.json (else ROON_EXTENSION_PARTY_MODE_PORT, else 8338, the order the extension uses), or
 // on one of the next few ports if that one was busy at startup.
 
 const fs = require('fs');
 const http = require('http');
 const { FALLBACK_PORTS } = require('./lib/ports');
+const { startPort } = require('./lib/env');
 
 function configuredPort() {
   try {
@@ -30,7 +31,7 @@ function configuredPort() {
   } catch (err) {
     /* no settings saved yet */
   }
-  return Number(process.env.PARTY_PORT) || 8338;
+  return startPort();
 }
 
 function answers(port) {
