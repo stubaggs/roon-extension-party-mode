@@ -39,46 +39,23 @@
     locked.hidden = false;
   }
 
-  function minutes(ms) {
-    const m = Math.ceil(ms / 60000);
-    return m <= 1 ? 'a minute' : `${m} minutes`;
-  }
+  const { t } = window.I18N;
+  const minutes = window.I18N.minutes;
 
-  // How each allowance is described: [unlimited, n left, waiting, used up].
-  const TOKEN_TEXT = {
-    add: [
-      () => 'Add as many songs as you like.',
-      (n) => `${n} song${n === 1 ? '' : 's'} left to add.`,
-      (wait) => `Another song in ${wait}.`,
-      () => 'You have used all your songs.'
-    ],
-    next: [
-      () => 'Play songs next as often as you like.',
-      (n) => `${n} play-next${n === 1 ? '' : 's'} left.`,
-      (wait) => `Another play-next in ${wait}.`,
-      () => 'You have used all your play-nexts.'
-    ],
-    skip: [
-      () => 'Skip as often as you like.',
-      (n) => `${n} skip${n === 1 ? '' : 's'} left.`,
-      (wait) => `Another skip in ${wait}.`,
-      () => 'You have used all your skips.'
-    ]
-  };
-
+  // Text keys: allowance.<add|next|skip>.<unlimited|left|waiting|used>
   function describeTokens(bucket) {
-    const [unlimited, left, waiting, usedUp] = TOKEN_TEXT[bucket];
     const status = party.allowances[bucket];
-    if (status.remaining === null) return unlimited();
-    if (status.remaining > 0) return left(status.remaining);
-    if (status.nextIn) return waiting(minutes(status.nextIn));
-    return usedUp();
+    const key = (state) => `allowance.${bucket}.${state}`;
+    if (status.remaining === null) return t(key('unlimited'));
+    if (status.remaining > 0) return t(key('left'), { count: status.remaining });
+    if (status.nextIn) return t(key('waiting'), { wait: minutes(status.nextIn) });
+    return t(key('used'));
   }
 
   function renderTokens() {
     if (!party) return;
     const lines = [];
-    if (!party.capabilities.add) lines.push('Requests are closed right now.');
+    if (!party.capabilities.add) lines.push(t('allowance.closed'));
     for (const bucket of ['add', 'next', 'skip']) {
       if (party.capabilities[bucket]) lines.push(describeTokens(bucket));
     }
@@ -114,7 +91,7 @@
       if (searchInput.value.trim().length >= 2) {
         const p = document.createElement('p');
         p.className = 'empty';
-        p.textContent = 'No tracks matched. Try the artist name.';
+        p.textContent = t('search.no_results');
         results.appendChild(p);
       }
       return;
@@ -145,8 +122,8 @@
 
       const state = document.createElement('span');
       state.className = 'row-state';
-      if (track.added) state.textContent = 'Added';
-      else if (track.in_queue) state.textContent = 'In the queue';
+      if (track.added) state.textContent = t('track.added');
+      else if (track.in_queue) state.textContent = t('track.in_queue');
 
       row.append(img, text, state);
       results.appendChild(row);
@@ -165,14 +142,14 @@
         if (party.capabilities.add) {
           const add = document.createElement('button');
           add.className = 'pill pill-primary';
-          add.textContent = 'Add to queue';
+          add.textContent = t('track.add');
           add.addEventListener('click', () => request(track, 'add', add));
           actions.appendChild(add);
         }
         if (party.capabilities.next) {
           const next = document.createElement('button');
           next.className = 'pill pill-ghost';
-          next.textContent = 'Play it next';
+          next.textContent = t('track.next');
           next.addEventListener('click', () => request(track, 'next', next));
           actions.appendChild(next);
         }
@@ -193,7 +170,7 @@
       expandedKey = null;
       renderResults();
     } catch (err) {
-      if (err.message !== 'no_session') toast('Search is unavailable right now.');
+      if (err.message !== 'no_session') toast(t('search.unavailable'));
     }
   }
 
@@ -242,15 +219,15 @@
       expandedKey = null;
       renderTokens();
       renderResults();
-      toast(mode === 'next' ? 'Queued to play next' : 'Added to the queue');
+      toast(mode === 'next' ? t('toast.queued_next') : t('toast.queued'));
     } catch (err) {
       button.disabled = false;
       const detail = err.body || {};
-      if (err.message === 'already_queued') toast('That one is already in the queue.');
+      if (err.message === 'already_queued') toast(t('toast.already_queued'));
       else if (err.message === 'rate_limited') {
-        toast(detail.next_in ? `Nothing left for now. Try again in ${minutes(detail.next_in)}.` : 'Nothing left for now.');
-      } else if (err.message === 'disabled') toast('The host has turned that off.');
-      else if (err.message !== 'no_session') toast('Roon would not take that one.');
+        toast(detail.next_in ? t('toast.nothing_left_wait', { wait: minutes(detail.next_in) }) : t('toast.nothing_left'));
+      } else if (err.message === 'disabled') toast(t('toast.disabled'));
+      else if (err.message !== 'no_session') toast(t('toast.roon_refused'));
     }
   }
 
@@ -259,12 +236,12 @@
       const body = await api('/api/skip', { method: 'POST' });
       party.allowances = body.allowances;
       renderTokens();
-      toast('Skipped');
+      toast(t('toast.skipped'));
     } catch (err) {
       const detail = err.body || {};
       if (err.message === 'rate_limited') {
-        toast(detail.next_in ? `No skips left. Try again in ${minutes(detail.next_in)}.` : 'No skips left.');
-      } else if (err.message !== 'no_session') toast('That did not work.');
+        toast(detail.next_in ? t('toast.no_skips_wait', { wait: minutes(detail.next_in) }) : t('toast.no_skips'));
+      } else if (err.message !== 'no_session') toast(t('toast.failed'));
     }
   });
 
@@ -272,36 +249,33 @@
 
   function renderQueue(snapshot) {
     const playing = snapshot.now_playing;
-    el('playing-title').textContent = playing ? playing.title : 'Nothing playing';
+    el('playing-title').textContent = playing ? playing.title : t('playing.nothing');
     el('playing-artist').textContent = playing ? playing.artist : '';
     const who = el('playing-who');
-    who.hidden = !(playing && playing.requested_by);
+    who.hidden = !(playing && playing.kind);
     who.textContent = who.hidden ? '' : creditText(playing);
     who.classList.toggle('radio', !who.hidden && playing.kind === 'radio');
     el('playing-label').textContent =
-      playing && playing.state === 'playing' ? 'Playing now' : 'Paused';
+      playing && playing.state === 'playing' ? t('playing.now') : t('playing.paused');
     setArt(el('playing-art'), playing && playing.image_key, 144);
 
-    renderList(queueList, snapshot.upcoming, 'Nothing lined up. Add the first song.', (item, index) => {
+    renderList(queueList, snapshot.upcoming, t('queue.empty'), (item, index) => {
       const position = document.createElement('span');
       position.className = 'queue-position';
       position.textContent = String(index + 1);
       return [position, ...trackCells(item)];
     });
 
-    renderList(playedList, snapshot.played || [], 'Nothing played yet.', (item) => {
+    renderList(playedList, snapshot.played || [], t('played.empty'), (item) => {
       const time = document.createElement('span');
       time.className = 'played-at';
-      time.textContent = new Date(item.played_at).toLocaleTimeString([], {
-        hour: 'numeric',
-        minute: '2-digit'
-      });
+      time.textContent = window.I18N.time(item.played_at);
       return [...trackCells(item), time];
     });
   }
 
   function creditText(track) {
-    return track.kind === 'radio' ? 'Roon Radio' : `Requested by ${track.requested_by}`;
+    return track.kind === 'radio' ? t('credit.radio') : t('credit.requested_by', { name: window.I18N.credit(track) });
   }
 
   function renderList(list, items, emptyText, cells) {
@@ -339,10 +313,10 @@
     sub.className = 'row-sub';
     sub.textContent = item.artist;
     text.append(title, sub);
-    if (item.requested_by) {
+    if (item.kind) {
       const badge = document.createElement('span');
       badge.className = item.kind === 'radio' ? 'badge radio' : 'badge';
-      badge.textContent = item.requested_by;
+      badge.textContent = window.I18N.credit(item);
       text.appendChild(badge);
     }
 
@@ -376,8 +350,8 @@
 
   function renderWhoami() {
     const name = party && party.guest_name;
-    el('whoami').textContent = name ? `Adding as ${name}` : '';
-    el('whoami-change').textContent = name ? 'Change' : 'Add your name';
+    el('whoami').textContent = name ? t('name.adding_as', { name }) : '';
+    el('whoami-change').textContent = name ? t('name.change') : t('name.add');
   }
 
   async function saveName(name) {
@@ -391,7 +365,7 @@
   /** First visit offers Skip; changing a name later offers Cancel instead. */
   function askName(changing) {
     changingName = changing === true;
-    el('nickname-skip').textContent = changingName ? 'Cancel' : 'Skip';
+    el('nickname-skip').textContent = changingName ? t('name.cancel') : t('name.skip');
     nicknameInput.value = (party && party.guest_name) || remembered.get() || '';
     nickname.hidden = false;
     nicknameInput.focus();
@@ -406,7 +380,7 @@
     try {
       await saveName(name);
     } catch (err) {
-      if (err.message !== 'no_session') toast('Could not save your name.');
+      if (err.message !== 'no_session') toast(t('toast.name_not_saved'));
     }
   });
 
@@ -439,7 +413,7 @@
     }
     app.hidden = false;
     locked.hidden = true;
-    document.title = party.party_name || 'Add a song';
+    document.title = party.party_name || t('page.title');
     el('skip').hidden = !party.capabilities.skip;
     renderTokens();
     renderWhoami();

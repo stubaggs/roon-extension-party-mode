@@ -3,16 +3,16 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>RoonParty</title>
+    <title data-i18n="page.screen_title">RoonParty</title>
     <link rel="stylesheet" href="/party.css" />
     <link rel="stylesheet" href="/roonparty.css" />
   </head>
   <body class="roonparty">
     <div class="stage">
       <section class="join">
-        <h1 id="party-name">Party</h1>
-        <img id="qr" class="qr" src="/api/qr.svg" alt="Scan to add a song" />
-        <p class="join-copy">Scan to put a song on</p>
+        <h1 id="party-name" data-i18n="party.default_name">Party</h1>
+        <img id="qr" class="qr" src="/api/qr.svg" alt="Scan to add a song" data-i18n-alt="screen.qr_alt" />
+        <p class="join-copy" data-i18n="screen.scan">Scan to put a song on</p>
         <p class="join-url"><a class="join-link muted" id="join-link" target="_blank" rel="noopener"></a></p>
       </section>
 
@@ -20,8 +20,8 @@
         <div class="current">
           <img class="art current-art" id="current-art" alt="" />
           <div class="current-text">
-            <p class="current-label" id="current-label">Playing now</p>
-            <h2 class="current-title" id="current-title">Nothing playing</h2>
+            <p class="current-label" id="current-label" data-i18n="playing.now">Playing now</p>
+            <h2 class="current-title" id="current-title" data-i18n="playing.nothing">Nothing playing</h2>
             <p class="current-artist muted" id="current-artist"></p>
             <p class="current-who" id="current-who" hidden></p>
           </div>
@@ -29,6 +29,7 @@
         <ol class="list" id="list"></ol>
       </section>
     </div>
+    <script src="/i18n.js"></script>
     <script src="/roonparty.js"></script>
     <script src="/marquee.js" data-marquee=".current-title, .current-artist, .list .t, .list .a"></script>
   </body>

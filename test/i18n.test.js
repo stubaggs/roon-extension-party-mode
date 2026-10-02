@@ -1,0 +1,148 @@
+'use strict';
+
+const assert = require('assert');
+const fs = require('fs');
+const path = require('path');
+const vm = require('vm');
+const i18n = require('../lib/i18n');
+
+let failures = 0;
+function check(name, fn) {
+  try {
+    fn();
+    console.log(`  ok   ${name}`);
+  } catch (err) {
+    failures += 1;
+    console.log(`  FAIL ${name}\n       ${err.message}`);
+  }
+}
+
+const PUBLIC = path.join(__dirname, '..', 'public');
+const read = (file) => fs.readFileSync(path.join(PUBLIC, file), 'utf8');
+const en = JSON.parse(read('i18n/en.json'));
+
+/** Keys the pages use: t('key') and the plural/credit keys used by name. */
+function usedKeys() {
+  const keys = new Set();
+  for (const file of ['guest.js', 'roonparty.js', 'i18n-runtime.js']) {
+    for (const m of read(file).matchAll(/\bt\('([a-z_.]+)'/g)) keys.add(m[1]);
+  }
+  for (const file of ['index.html', 'roonparty.html']) {
+    for (const m of read(file).matchAll(/data-i18n(?:-[a-z-]+)?="([a-z_.]+)"/g)) keys.add(m[1]);
+  }
+  // Built from parts in guest.js: allowance.<bucket>.<state>
+  for (const bucket of ['add', 'next', 'skip']) {
+    for (const state of ['unlimited', 'left', 'waiting', 'used']) keys.add(`allowance.${bucket}.${state}`);
+  }
+  keys.add('join.closed');
+  keys.add('join.expired');
+  return keys;
+}
+
+const placeholders = (entry) =>
+  [...new Set((typeof entry === 'object' ? Object.values(entry).join(' ') : entry).match(/\{\w+\}/g) || [])].sort();
+
+/** Runs the page runtime as a browser would, with the given served data. */
+function runtimeFor(lang, strings) {
+  const html = { lang: '' };
+  const window = { I18N_DATA: { lang, strings, fallback: en } };
+  vm.runInNewContext(fs.readFileSync(path.join(PUBLIC, 'i18n-runtime.js'), 'utf8'), {
+    window,
+    document: { documentElement: html, querySelectorAll: () => [] },
+    Intl,
+    Date
+  });
+  return Object.assign(window.I18N, { html });
+}
+
+console.log('page text');
+
+check('every key the pages use is in en.json', () => {
+  const missing = [...usedKeys()].filter((key) => !(key in en));
+  assert.deepStrictEqual(missing, []);
+});
+
+check('en.json has no unused keys', () => {
+  const used = usedKeys();
+  const unused = Object.keys(en).filter((key) => !key.startsWith('_') && !used.has(key));
+  assert.deepStrictEqual(unused, []);
+});
+
+check('no hard-coded English left in the page scripts', () => {
+  for (const file of ['guest.js', 'roonparty.js']) {
+    const quoted = read(file).match(/(['`])(?:[A-Z][a-z]+ )+[a-z]+[^'`]*\1/g) || [];
+    assert.deepStrictEqual(quoted, [], file);
+  }
+});
+
+for (const lang of i18n.languages()) {
+  if (lang === 'en') continue;
+  const strings = JSON.parse(read(`i18n/${lang}.json`));
+  check(`${lang}.json uses the same keys and placeholders as English`, () => {
+    for (const [key, entry] of Object.entries(strings)) {
+      if (key.startsWith('_')) continue;
+      assert.ok(key in en, `unknown key ${key}`);
+      assert.deepStrictEqual(placeholders(entry), placeholders(en[key]), key);
+      if (typeof en[key] === 'object') assert.ok(entry.other, `${key} needs an "other" form`);
+    }
+  });
+}
+
+console.log('\nruntime');
+
+check('fills in names and counts, with plurals', () => {
+  const I18N = runtimeFor('en', en);
+  assert.strictEqual(I18N.t('credit.requested_by', { name: 'Sam' }), 'Requested by Sam');
+  assert.strictEqual(I18N.t('allowance.skip.left', { count: 1 }), '1 skip left.');
+  assert.strictEqual(I18N.t('allowance.skip.left', { count: 3 }), '3 skips left.');
+  assert.strictEqual(I18N.minutes(30 * 1000), 'a minute');
+  assert.strictEqual(I18N.minutes(12 * 60 * 1000), '12 minutes');
+});
+
+check('credits: a name, "a guest", or Roon Radio', () => {
+  const I18N = runtimeFor('en', en);
+  assert.strictEqual(I18N.credit({ kind: 'add', requested_by: 'Sam' }), 'Sam');
+  assert.strictEqual(I18N.credit({ kind: 'next', requested_by: null }), 'a guest');
+  assert.strictEqual(I18N.credit({ kind: 'radio', requested_by: null }), 'Roon Radio');
+});
+
+check('a key missing from a language falls back to English', () => {
+  const I18N = runtimeFor('de', { 'queue.up_next': 'Als Nächstes' });
+  assert.strictEqual(I18N.t('queue.up_next'), 'Als Nächstes');
+  assert.strictEqual(I18N.t('played.title'), 'Played');
+  assert.strictEqual(I18N.html.lang, 'de');
+});
+
+check('times follow the language', () => {
+  const at = new Date(2026, 9, 2, 21, 42).getTime();
+  assert.match(runtimeFor('en', en).time(at), /9:42\sPM/);
+  assert.strictEqual(runtimeFor('de', {}).time(at), '21:42');
+});
+
+console.log('\nserver');
+
+const request = (header) => ({
+  acceptsLanguages: (...langs) => {
+    const wanted = String(header || '').split(',').map((part) => part.split(';')[0].trim().split('-')[0]);
+    return wanted.find((code) => langs.includes(code)) || false;
+  }
+});
+
+check('a browser asking for a language without a file gets English', () => {
+  assert.strictEqual(i18n.pick(request('de-DE,de;q=0.9')), 'en');
+  assert.strictEqual(i18n.pick(request('')), 'en');
+});
+
+check('server messages come from the same file', () => {
+  assert.strictEqual(i18n.t('en', 'join.closed'), 'The party is closed.');
+  assert.strictEqual(i18n.t('xx', 'join.closed'), 'The party is closed.');
+});
+
+check('/i18n.js carries the language and its text before the runtime', () => {
+  const js = i18n.script('en');
+  assert.match(js, /^window\.I18N_DATA = \{"lang":"en"/);
+  assert.ok(js.includes('window.I18N = '));
+});
+
+console.log(failures ? `\n${failures} failing` : '\nall passing');
+process.exit(failures ? 1 : 0);

@@ -1,0 +1,79 @@
+{
+  "_language": "English",
+
+  "page.title": "Add a song",
+  "page.screen_title": "RoonParty",
+  "party.default_name": "Party",
+
+  "playing.now": "Playing now",
+  "playing.paused": "Paused",
+  "playing.nothing": "Nothing playing",
+  "playing.nothing_yet": "Nothing yet",
+  "credit.requested_by": "Requested by {name}",
+  "credit.guest": "a guest",
+  "credit.radio": "Roon Radio",
+
+  "search.placeholder": "Search for a song or artist",
+  "search.clear": "Clear search",
+  "search.no_results": "No tracks matched. Try the artist name.",
+  "search.unavailable": "Search is unavailable right now.",
+
+  "track.added": "Added",
+  "track.in_queue": "In the queue",
+  "track.add": "Add to queue",
+  "track.next": "Play it next",
+
+  "queue.up_next": "Up next",
+  "queue.empty": "Nothing lined up. Add the first song.",
+  "played.title": "Played",
+  "played.empty": "Nothing played yet.",
+
+  "allowance.closed": "Requests are closed right now.",
+  "allowance.add.unlimited": "Add as many songs as you like.",
+  "allowance.add.left": { "one": "{count} song left to add.", "other": "{count} songs left to add." },
+  "allowance.add.waiting": "Another song in {wait}.",
+  "allowance.add.used": "You have used all your songs.",
+  "allowance.next.unlimited": "Play songs next as often as you like.",
+  "allowance.next.left": { "one": "{count} play-next left.", "other": "{count} play-nexts left." },
+  "allowance.next.waiting": "Another play-next in {wait}.",
+  "allowance.next.used": "You have used all your play-nexts.",
+  "allowance.skip.unlimited": "Skip as often as you like.",
+  "allowance.skip.left": { "one": "{count} skip left.", "other": "{count} skips left." },
+  "allowance.skip.waiting": "Another skip in {wait}.",
+  "allowance.skip.used": "You have used all your skips.",
+  "time.minutes": { "one": "a minute", "other": "{count} minutes" },
+
+  "toast.queued_next": "Queued to play next",
+  "toast.queued": "Added to the queue",
+  "toast.already_queued": "That one is already in the queue.",
+  "toast.nothing_left": "Nothing left for now.",
+  "toast.nothing_left_wait": "Nothing left for now. Try again in {wait}.",
+  "toast.disabled": "The host has turned that off.",
+  "toast.roon_refused": "Roon would not take that one.",
+  "toast.skipped": "Skipped",
+  "toast.no_skips": "No skips left.",
+  "toast.no_skips_wait": "No skips left. Try again in {wait}.",
+  "toast.failed": "That did not work.",
+  "toast.name_not_saved": "Could not save your name.",
+
+  "skip.button": "Skip",
+
+  "name.adding_as": "Adding as {name}",
+  "name.change": "Change",
+  "name.add": "Add your name",
+  "name.prompt": "What should we call you?",
+  "name.explain": "Your name shows next to the songs you add, so everyone knows who to thank.",
+  "name.placeholder": "Your name",
+  "name.go": "Let's go",
+  "name.skip": "Skip",
+  "name.cancel": "Cancel",
+
+  "locked.title": "Scan the code again",
+  "locked.text": "This link only works after scanning the code on the party screen. Ask the host to show it.",
+
+  "screen.scan": "Scan to put a song on",
+  "screen.qr_alt": "Scan to add a song",
+
+  "join.closed": "The party is closed.",
+  "join.expired": "That code has expired. Scan the code on the screen again."
+}
