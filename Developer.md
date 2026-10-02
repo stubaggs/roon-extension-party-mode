@@ -111,9 +111,16 @@ yours. A "Guests" profile keeps party plays out of your own history. "Leave as i
 doesn't touch the profile.
 
 Roon's API has no profile call, so the extension opens the Profile entry in Roon's
-Settings menu (the browse "settings" hierarchy) and selects the profile there. It is
-applied when the extension connects and when the setting changes, and applies to every
-guest, since they all go through the extension's one connection. The entry is matched by
+Settings menu (the browse "settings" hierarchy) and selects the profile there.
+
+Roon keeps the profile **per browse session** (`multi_session_key`), not per extension: a
+queue action is credited to the profile selected in the session that made it, and a
+session nobody has selected one in uses Roon's default (which showed up as "guest"). Each
+guest browses in a session of their own, so the extension selects the profile in that
+guest's session before their first search or request (`RoonService._profileFor`), once
+per guest. It is selected again after the setting changes or the Core reconnects. The
+extension's own session (`party-profile`) is only used to read the list for the settings
+dropdown. The console logs `Profile "Party" selected for guest session …` each time. The entry is matched by
 its title, "Profile" in English: on a Core in another language, put its title in "Profile
 entry in Settings". If something doesn't match, the setting shows what Roon offered and
 the console logs it.

@@ -129,6 +129,91 @@ function fakeRoon(profiles, menuTitle = 'Profile') {
     assert.strictEqual(item.subtitle, 'No "Profile" entry');
   });
 
+  console.log('\nprofile per guest session');
+
+  /**
+   * A Core with a settings menu and a one-category search. Records every call as
+   * "hierarchy:session:what", so the order of profile selection and search shows.
+   */
+  function fakeCore(profiles) {
+    const calls = [];
+    const level = {};
+    const browse = async (opts) => {
+      const at = `${opts.hierarchy}:${opts.multi_session_key}`;
+      if (opts.hierarchy === 'settings') {
+        if (opts.pop_all) level[at] = 'root';
+        else if (opts.item_key === 'profile-menu') level[at] = 'profiles';
+        else calls.push(`${at}:select ${opts.item_key}`);
+        return { action: 'list' };
+      }
+      calls.push(`${at}:${opts.input ? 'search' : 'browse'}`);
+      return { action: 'list' };
+    };
+    const load = async (opts) => {
+      const at = `${opts.hierarchy}:${opts.multi_session_key}`;
+      if (opts.hierarchy === 'settings') {
+        return level[at] === 'profiles'
+          ? { items: profiles.map((title, i) => ({ title, item_key: `p${i}` })) }
+          : { items: [{ title: 'Profile', item_key: 'profile-menu' }] };
+      }
+      return { items: [] };
+    };
+    return { browse, load, calls };
+  }
+
+  function guestService(core, settings) {
+    const roon = Object.create(RoonService.prototype);
+    roon.settings = Object.assign({ zone: { output_id: 'o1' }, title_profile: 'Profile', guest_profile: '' }, settings);
+    roon.detected = {};
+    roon.profileSessions = new Map();
+    roon.core = { services: { RoonApiBrowse: {} } };
+    roon._browse = core.browse;
+    roon._load = core.load;
+    return roon;
+  }
+
+  await check("a guest's first search selects the profile in that guest's own session, first", async () => {
+    const core = fakeCore(['Stu', 'Party']);
+    const roon = guestService(core, { guest_profile: 'Party' });
+    await roon.search('guest-1', 'abba');
+    assert.deepStrictEqual(core.calls.slice(0, 2), ['settings:guest-1:select p1', 'search:guest-1:search']);
+  });
+
+  await check('only once per guest; each new guest gets it too', async () => {
+    const core = fakeCore(['Stu', 'Party']);
+    const roon = guestService(core, { guest_profile: 'Party' });
+    await roon.search('guest-1', 'abba');
+    await roon.search('guest-1', 'queen');
+    await roon.search('guest-2', 'abba');
+    const selections = core.calls.filter((c) => c.includes(':select '));
+    assert.deepStrictEqual(selections, ['settings:guest-1:select p1', 'settings:guest-2:select p1']);
+  });
+
+  await check('changing the setting reselects in sessions already set up', async () => {
+    const core = fakeCore(['Stu', 'Party', 'Kids']);
+    const roon = guestService(core, { guest_profile: 'Party' });
+    await roon.search('guest-1', 'abba');
+    roon.settings.guest_profile = 'Kids';
+    roon.profileSessions.clear(); // what _applyProfile does on a change
+    await roon.search('guest-1', 'abba');
+    const selections = core.calls.filter((c) => c.includes(':select '));
+    assert.deepStrictEqual(selections, ['settings:guest-1:select p1', 'settings:guest-1:select p2']);
+  });
+
+  await check('"Leave as it is" selects nothing', async () => {
+    const core = fakeCore(['Stu', 'Party']);
+    const roon = guestService(core, { guest_profile: '' });
+    await roon.search('guest-1', 'abba');
+    assert.deepStrictEqual(core.calls.filter((c) => c.startsWith('settings')), []);
+  });
+
+  await check('a profile that has gone still lets the guest search', async () => {
+    const core = fakeCore(['Stu']);
+    const roon = guestService(core, { guest_profile: 'Party' });
+    await roon.search('guest-1', 'abba');
+    assert.ok(core.calls.includes('search:guest-1:search'));
+  });
+
   console.log(failures ? `\n${failures} failing` : '\nall passing');
   process.exit(failures ? 1 : 0);
 })();
