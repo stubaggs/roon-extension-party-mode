@@ -8,6 +8,7 @@
   "playing.nothing": "Rien en lecture",
   "playing.nothing_yet": "Rien pour l'instant",
   "credit.requested_by": "Demandé par {name}",
+  "credit.requested_by_guest": "Demandé par un invité",
   "credit.guest": "un invité",
   "credit.radio": "Roon Radio",
   "search.placeholder": "Rechercher un morceau ou un artiste",

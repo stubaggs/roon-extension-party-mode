@@ -21,11 +21,7 @@
     const who = el('current-who');
     who.hidden = !(playing && playing.kind);
     const radio = !who.hidden && playing.kind === 'radio';
-    who.textContent = who.hidden
-      ? ''
-      : radio
-        ? t('credit.radio')
-        : t('credit.requested_by', { name: window.I18N.credit(playing) });
+    who.textContent = who.hidden ? '' : window.I18N.requestedBy(playing);
     who.classList.toggle('radio', radio);
     el('current-label').textContent =
       playing && playing.state === 'playing' ? t('playing.now') : t('playing.paused');

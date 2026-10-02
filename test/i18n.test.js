@@ -101,6 +101,9 @@ check('fills in names and counts, with plurals', () => {
 
 check('credits: a name, "a guest", or Roon Radio', () => {
   const I18N = runtimeFor('en', en);
+  assert.strictEqual(I18N.requestedBy({ kind: 'add', requested_by: 'Sam' }), 'Requested by Sam');
+  assert.strictEqual(I18N.requestedBy({ kind: 'next', requested_by: null }), 'Requested by a guest');
+  assert.strictEqual(I18N.requestedBy({ kind: 'radio', requested_by: null }), 'Roon Radio');
   assert.strictEqual(I18N.credit({ kind: 'add', requested_by: 'Sam' }), 'Sam');
   assert.strictEqual(I18N.credit({ kind: 'next', requested_by: null }), 'a guest');
   assert.strictEqual(I18N.credit({ kind: 'radio', requested_by: null }), 'Roon Radio');
@@ -129,7 +132,7 @@ const request = (header) => ({
 });
 
 check('a browser asking for a language without a file gets English', () => {
-  assert.strictEqual(i18n.pick(request('de-DE,de;q=0.9')), 'en');
+  assert.strictEqual(i18n.pick(request('it-IT,it;q=0.9')), 'en');
   assert.strictEqual(i18n.pick(request('ja')), 'en');
   assert.strictEqual(i18n.pick(request('')), 'en');
 });
@@ -150,7 +153,7 @@ console.log('\nFrench');
 check('French browsers get French, including regional ones', () => {
   assert.strictEqual(i18n.pick(request('fr-FR,fr;q=0.9,en;q=0.8')), 'fr');
   assert.strictEqual(i18n.pick(request('fr-CA')), 'fr');
-  assert.strictEqual(i18n.pick(request('de-DE,fr;q=0.5')), 'fr');
+  assert.strictEqual(i18n.pick(request('it-IT,fr;q=0.5')), 'fr');
   assert.strictEqual(i18n.pick(request('en-GB,fr;q=0.5')), 'en');
 });
 
@@ -165,6 +168,36 @@ check('French text, plurals and clock', () => {
   assert.strictEqual(I18N.credit({ kind: 'add', requested_by: null }), 'un invité');
   assert.strictEqual(I18N.time(new Date(2026, 9, 2, 21, 42).getTime()), '21:42');
   assert.strictEqual(i18n.t('fr', 'join.expired'), 'Ce code a expiré. Scannez à nouveau le code affiché à l\'écran.');
+});
+
+console.log('\nSpanish, German, Dutch');
+
+for (const [header, lang] of [['es-ES,es;q=0.9', 'es'], ['es-419', 'es'], ['de-DE,de;q=0.9', 'de'], ['de-CH', 'de'], ['nl-NL', 'nl'], ['nl-BE,fr;q=0.8', 'nl']]) {
+  check(`${header} gets ${lang}`, () => assert.strictEqual(i18n.pick(request(header)), lang));
+}
+
+const samples = {
+  es: { up: 'A continuación', one: 'Te queda 1 canción por añadir.', many: 'Te quedan 3 canciones por añadir.', guest: 'Pedida por un invitado', wait: 'un minuto' },
+  de: { up: 'Als Nächstes', one: 'Du kannst noch 1 Song hinzufügen.', many: 'Du kannst noch 3 Songs hinzufügen.', guest: 'Gewünscht von einem Gast', wait: 'einer Minute' },
+  nl: { up: 'Hierna', one: 'Je kunt nog 1 nummer toevoegen.', many: 'Je kunt nog 3 nummers toevoegen.', guest: 'Aangevraagd door een gast', wait: 'een minuut' }
+};
+for (const [lang, want] of Object.entries(samples)) {
+  check(`${lang}: text, plurals, "by a guest" and the clock`, () => {
+    const I18N = runtimeFor(lang, JSON.parse(read(`i18n/${lang}.json`)));
+    assert.strictEqual(I18N.t('queue.up_next'), want.up);
+    assert.strictEqual(I18N.t('allowance.add.left', { count: 1 }), want.one);
+    assert.strictEqual(I18N.t('allowance.add.left', { count: 3 }), want.many);
+    assert.strictEqual(I18N.requestedBy({ kind: 'add', requested_by: null }), want.guest);
+    assert.strictEqual(I18N.minutes(30 * 1000), want.wait);
+    assert.strictEqual(I18N.time(new Date(2026, 9, 2, 21, 42).getTime()), '21:42');
+  });
+}
+
+check('German "a guest" changes after "by", but not on its own', () => {
+  const I18N = runtimeFor('de', JSON.parse(read('i18n/de.json')));
+  assert.strictEqual(I18N.credit({ kind: 'add', requested_by: null }), 'ein Gast');
+  assert.strictEqual(I18N.requestedBy({ kind: 'add', requested_by: 'Lena' }), 'Gewünscht von Lena');
+  assert.strictEqual(I18N.t('toast.nothing_left_wait', { wait: I18N.minutes(5 * 60 * 1000) }), 'Gerade nichts mehr übrig. Versuch es in 5 Minuten wieder.');
 });
 
 console.log(failures ? `\n${failures} failing` : '\nall passing');
