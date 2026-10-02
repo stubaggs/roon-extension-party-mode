@@ -134,6 +134,30 @@ const artists = [{ title: 'ABBA', item_key: 'x2', hint: 'list' }];
     assert.deepStrictEqual(pressed(fake), []);
   });
 
+  const withTransport = (roon, state) => {
+    const controls = [];
+    roon.zone = { state, display_name: 'Kitchen' };
+    roon.core = { services: { RoonApiTransport: { control: (zone, control, cb) => { controls.push(control); cb(false); } } } };
+    return controls;
+  };
+
+  for (const state of ['paused', 'stopped']) {
+    await check(`a request to a ${state} zone starts playback`, async () => {
+      const roon = service(fakeSearch({ Tracks: tracks, actions: english }));
+      const controls = withTransport(roon, state);
+      await roon.performAction('s1', 't1', 'add');
+      await roon.performAction('s1', 't1', 'next');
+      assert.deepStrictEqual(controls, ['play', 'play']);
+    });
+  }
+
+  await check('a request to a playing zone leaves playback alone', async () => {
+    const roon = service(fakeSearch({ Tracks: tracks, actions: english }));
+    const controls = withTransport(roon, 'playing');
+    await roon.performAction('s1', 't1', 'add');
+    assert.deepStrictEqual(controls, []);
+  });
+
   console.log(failures ? `\n${failures} failing` : '\nall passing');
   process.exit(failures ? 1 : 0);
 })();

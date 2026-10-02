@@ -80,6 +80,9 @@ never**.
 
 - **Guests can't rearrange the queue.** They can add a song to the end, or play one next
   when they add it, but Roon doesn't let anyone move a song that's already queued.
+- **A guest's song gets the music going again.** If the party zone is paused, or the
+  queue has run out, adding a song presses play. If you paused for a speech, it resumes
+  as soon as someone adds a song, so set **Guest access** to **Off** first.
 - **Played starts fresh** when the extension restarts or you change the party zone.
 - **"Roon Radio" is a best guess.** With Roon Radio on, any song no guest added is
   labelled Roon Radio, including songs you queue from the Roon app yourself.
