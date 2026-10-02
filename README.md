@@ -78,7 +78,10 @@ party zone, and the console prints the guest link and RoonParty URL. The extensi
 
 ## Host settings (in Roon)
 
-Party zone, party name, guest access on/off, and web port. Saving a new port moves the
+Party zone, party name, guest access on/off, and web port. Left blank, the party name is
+the party zone's name (for a grouped zone, Roon's name for the group, such as "Kitchen +
+Living Room"), and follows the zone if you change it; the setting shows which name that
+is. Saving a new port moves the
 guest and RoonParty pages there straight away, then the extension reconnects to the Core
 (it drops out of Roon's list for up to ten seconds) so the link Roon shows is updated.
 Open pages and phones on the old port need the new link or a fresh scan. `PARTY_PORT`

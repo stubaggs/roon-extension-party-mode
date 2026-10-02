@@ -1,7 +1,7 @@
 'use strict';
 
 const assert = require('assert');
-const { RoonService, describeZone, normaliseInteger } = require('../lib/roon-service');
+const { RoonService, describeZone, normaliseInteger, partyName } = require('../lib/roon-service');
 const { GuestStore } = require('../lib/guests');
 
 let failures = 0;
@@ -59,6 +59,40 @@ check('a very long group name is clipped', () => {
 
 check('an unnamed zone does not produce a stray dash', () => {
   assert.strictEqual(describeZone(picked('Kitchen'), zone('', 1)), 'Party zone');
+});
+
+console.log('\nparty name');
+
+check('a typed name wins', () => {
+  assert.strictEqual(partyName({ party_name: "Sam's 40th", zone: picked('Kitchen') }, zone('Kitchen', 1)), "Sam's 40th");
+});
+
+check('blank uses the zone name', () => {
+  assert.strictEqual(partyName({ party_name: '', zone: picked('Kitchen') }, zone('Kitchen', 1)), 'Kitchen');
+});
+
+check('blank with a grouped zone uses the group name, not the endpoint picked', () => {
+  const group = zone('Kitchen + Living Room + Study', 3);
+  assert.strictEqual(partyName({ party_name: '', zone: picked('Kitchen') }, group), 'Kitchen + Living Room + Study');
+});
+
+check('spaces only count as blank', () => {
+  assert.strictEqual(partyName({ party_name: '   ', zone: picked('Kitchen') }, zone('Kitchen', 1)), 'Kitchen');
+});
+
+check('zone not available yet: the endpoint picked', () => {
+  assert.strictEqual(partyName({ party_name: '', zone: picked('Kitchen') }, null), 'Kitchen');
+});
+
+check('nothing chosen at all: "Party"', () => {
+  assert.strictEqual(partyName({ party_name: '', zone: null }, null), 'Party');
+});
+
+check('the settings say what a blank name will use', () => {
+  const self = { _resolveZone: () => zone('Kitchen + Living Room', 2) };
+  const result = RoonService.prototype._layout.call(self, { zone: picked('Kitchen') });
+  const field = result.layout.find((item) => item.setting === 'party_name');
+  assert.strictEqual(field.subtitle, 'Leave blank to use the zone name: Kitchen + Living Room');
 });
 
 console.log('\nnumber settings');
