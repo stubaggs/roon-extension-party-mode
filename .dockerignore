@@ -3,7 +3,9 @@ npm-debug.log
 config.json
 .git
 .github
-README.md
 docker-compose.yml
 repository-entry.json
-test
+.claude
+Dockerfile
+.dockerignore
+*.md

@@ -127,8 +127,9 @@ UDP broadcast on port 9003) and bind-mounts `config.json` so settings survive up
 `linux/arm64` and pushes `stubaggs/roon-extension-party-mode:latest` to Docker Hub. For
 now it only runs when started by hand (Actions → Publish Docker image → Run workflow);
 the commented-out `push` trigger in the workflow publishes on every merge to `main` once
-restored. It needs two repository secrets, under Settings → Secrets and variables →
-Actions:
+restored, and a commented-out weekly `schedule` rebuilds and republishes every Monday so
+installs pick up base-image security fixes without a manual publish. It needs two
+repository secrets, under Settings → Secrets and variables → Actions:
 
 | Secret | Value |
 | --- | --- |
@@ -137,6 +138,24 @@ Actions:
 
 The Extension Manager checks Docker Hub for a newer `latest`, so publishing a new
 `latest` is how an update reaches people who have it installed.
+
+The Dockerfile builds in two stages. The first installs dependencies exactly as
+`package-lock.json` pins them (`npm ci`, which needs `git` for the Roon packages on
+GitHub) and runs `npm test`, so a failing test stops the build. The second copies only
+the app and its dependencies onto a clean base, with a health check that requests the
+RoonParty data on the configured port.
+
+The base is `node:22-alpine`, pinned by digest. Node 22 is the newest line with 32-bit
+ARM images (Node 24 dropped `linux/arm/v7`) and is supported until April 2027; before
+then, move to Node 24 and drop `arm/v7` from the workflow and the repository entry.
+
+Dependabot (`.github/dependabot.yml`) checks the base weekly. When the official image is
+rebuilt with Alpine or Node security fixes, its digest changes and Dependabot opens a pull
+request updating both `FROM` lines. It skips major Node versions, so it never moves the
+image to Node 24 on its own. Merging that pull request changes the Dockerfile only: the
+fixes reach installed copies once a new image is published. To update by hand, change
+both `FROM` lines together (`docker buildx imagetools inspect node:22-alpine` prints the
+current digest).
 
 To run the image by hand instead:
 
