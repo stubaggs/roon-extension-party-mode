@@ -139,9 +139,22 @@ and 0 minutes means a used go never comes back; to stop guests doing something a
 set its "Let guests …" to No. Adding and playing next are on
 by default, skipping is off.
 
-The last group of settings is the one to check if your Core is not in English. Roon
-localises browse titles, so the extension matches on the strings `Tracks`, `Queue` and
-`Add Next`. Put your Core's equivalents there.
+**Browse titles.** Roon localises its menus and the API doesn't say which language the
+Core uses. The extension tries the titles in the last group of settings first (English by
+default: `Tracks`, `Queue`, `Add Next`, `Profile`), so an English Core behaves exactly as
+written. When one isn't found, it works the menu out instead (`lib/titles.js`):
+
+- **Track category:** the search category whose items open straight into play actions
+  (albums and artists open into further lists).
+- **Profile entry:** the word for "Profile" in the languages Roon is translated into.
+- **Queue and Add Next:** by position in a track's action list (Play Now, Add Next,
+  Queue, Start Radio), and only when the list has exactly those four actions. Any other
+  shape is refused rather than guessed, since pressing the wrong one could play a
+  guest's track straight away.
+
+What it found shows in each setting's hint and in the console (`Browse titles: using
+"Titel" as the Track category`). Typing the Core's own title into a setting overrides
+the detection.
 
 ## Installing it from Roon
 
