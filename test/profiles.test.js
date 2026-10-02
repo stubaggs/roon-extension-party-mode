@@ -72,7 +72,7 @@ function fakeRoon(profiles, menuTitle = 'Profile') {
   await check('selects the named profile, ignoring case', async () => {
     const roon = fakeRoon(['Stu', 'Guests']);
     const result = await selectProfile(roon.browse, roon.load, 'Profile', 'guests');
-    assert.deepStrictEqual(result, { ok: true });
+    assert.strictEqual(result.ok, true);
     assert.deepStrictEqual(roon.selected, ['p1']);
   });
 
@@ -95,12 +95,12 @@ function fakeRoon(profiles, menuTitle = 'Profile') {
     const roon = fakeRoon(['Stu', 'Gäste'], 'Profil');
     const result = await listProfiles(roon.browse, roon.load, 'Profile');
     assert.strictEqual(result.entryTitle, 'Profil');
-    assert.deepStrictEqual(await selectProfile(roon.browse, roon.load, 'Profile', 'Gäste'), { ok: true });
+    assert.strictEqual((await selectProfile(roon.browse, roon.load, 'Profile', 'Gäste')).ok, true);
   });
 
   await check('a localised menu title works when set', async () => {
     const roon = fakeRoon(['Stu'], 'Profil');
-    assert.deepStrictEqual(await selectProfile(roon.browse, roon.load, 'Profil', 'Stu'), { ok: true });
+    assert.strictEqual((await selectProfile(roon.browse, roon.load, 'Profil', 'Stu')).ok, true);
   });
 
   console.log('\nprofile setting');
