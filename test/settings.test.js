@@ -145,10 +145,22 @@ check('a refill over a day is refused', () => {
   assert.match(item(result, 'next_refill').error, /0 to 1440/);
 });
 
-check('the titles say what 0 means', () => {
+check('the hints under the settings say what 0 means', () => {
   const result = layout({});
-  assert.match(item(result, 'add_limit').title, /0 = no limit/);
-  assert.match(item(result, 'skip_refill').title, /0 = never/);
+  for (const setting of ['add_limit', 'next_limit', 'skip_limit']) {
+    assert.strictEqual(item(result, setting).subtitle, '0 = no limit', setting);
+    assert.doesNotMatch(item(result, setting).title, /0 =/, setting);
+  }
+  for (const setting of ['add_refill', 'next_refill', 'skip_refill']) {
+    assert.strictEqual(item(result, setting).subtitle, '0 = a used one never comes back', setting);
+    assert.strictEqual(item(result, setting).title, 'Minutes to earn one back', setting);
+  }
+});
+
+check('an out-of-range value keeps its hint alongside the error', () => {
+  const field = item(layout({ skip_limit: -1 }), 'skip_limit');
+  assert.strictEqual(field.subtitle, '0 = no limit');
+  assert.match(field.error, /0 to 999/);
 });
 
 console.log('\nallowances');
