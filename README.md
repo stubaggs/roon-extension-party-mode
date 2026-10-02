@@ -160,7 +160,7 @@ the detection.
 ## Translating the pages
 
 Available: English (`en`), French (`fr`), German (`de`), Spanish (`es`), Dutch (`nl`). The
-non-English files are drafts and worth a read by a native speaker.
+non-English files are drafts (Thanks Claude), apologies for poor translations.
 
 The guest page and the RoonParty screen take their text from `public/i18n/<code>.json`,
 one file per language. Each browser gets the language it asks for (its
@@ -237,13 +237,6 @@ place, and the extension, which runs as the image's unprivileged `node` user (ui
 can't save its settings. If it can't, Roon's status line and the console say so. The
 Extension Manager creates the file writable itself.
 
-## Getting it into the Extension Repository
-
-Fork `TheAppgineer/roon-extension-repository`, add the object from `repository-entry.json`
-to the "Playback" category in `repository.json`, bump the `version` at the top of that
-file, and open a pull request. Only do this after the image is on Docker Hub: the Manager
-installs straight from it.
-
 ## Known limitations
 
 **No queue reordering.** Roon's API can add a track to the end of the queue or directly
@@ -294,13 +287,6 @@ changes.
 
 **The queue subscription is per zone.** Changing the party zone starts a new subscription;
 the old one is ignored rather than torn down, since the API has no convenient unsubscribe.
-
-## Ideas worth adding
-
-- Blocking explicit tracks, or a genre allowlist, using the browse hierarchy
-- Persisting token buckets against a device fingerprint so a page refresh does not matter
-  (they are already server-side, but a new scan gets a fresh session)
-- A veto: three guests tap skip on the same track before it goes
 
 ## Licence
 
