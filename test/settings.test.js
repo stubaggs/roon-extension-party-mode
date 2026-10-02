@@ -191,6 +191,14 @@ check('an out-of-range value keeps its hint alongside the error', () => {
   assert.match(field.error, /0 to 999/);
 });
 
+check('browse titles explain themselves in a hint', () => {
+  const result = layout({});
+  const group = result.layout.find((entry) => entry.type === 'group' && entry.title === 'Browse titles');
+  assert.ok(group, 'group titled plainly "Browse titles"');
+  assert.strictEqual(item(result, 'title_add').subtitle, '"Queue" in English. Change it if your Core uses another language.');
+  assert.match(item(result, 'title_tracks').subtitle, /^"Tracks" in English/);
+});
+
 console.log('\nallowances');
 
 function tries(limit, refill, attempts = 3) {
