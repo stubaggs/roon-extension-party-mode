@@ -70,11 +70,18 @@ function fakeRoon(profiles, menuTitle = 'Profile') {
     assert.deepStrictEqual(roon.selected, []);
   });
 
-  await check('reports a missing menu entry with what was there (e.g. another language)', async () => {
-    const roon = fakeRoon(['Stu'], 'Profil');
+  await check('reports a missing menu entry with what was there', async () => {
+    const roon = fakeRoon(['Stu'], 'Benutzer');
     const result = await selectProfile(roon.browse, roon.load, 'Profile', 'Stu');
     assert.strictEqual(result.reason, 'no_menu');
-    assert.deepStrictEqual(result.menu, ['General', 'Profil', 'Library']);
+    assert.deepStrictEqual(result.menu, ['General', 'Benutzer', 'Library']);
+  });
+
+  await check('a Profile entry in another language is found without setting it', async () => {
+    const roon = fakeRoon(['Stu', 'Gäste'], 'Profil');
+    const result = await listProfiles(roon.browse, roon.load, 'Profile');
+    assert.strictEqual(result.entryTitle, 'Profil');
+    assert.deepStrictEqual(await selectProfile(roon.browse, roon.load, 'Profile', 'Gäste'), { ok: true });
   });
 
   await check('a localised menu title works when set', async () => {
