@@ -72,7 +72,7 @@ function fakeRoon(profiles, menuTitle = 'Profile') {
   await check('selects the named profile, ignoring case', async () => {
     const roon = fakeRoon(['Stu', 'Guests']);
     const result = await selectProfile(roon.browse, roon.load, 'Profile', 'guests');
-    assert.deepStrictEqual(result, { ok: true });
+    assert.strictEqual(result.ok, true);
     assert.deepStrictEqual(roon.selected, ['p1']);
   });
 
@@ -95,12 +95,12 @@ function fakeRoon(profiles, menuTitle = 'Profile') {
     const roon = fakeRoon(['Stu', 'Gäste'], 'Profil');
     const result = await listProfiles(roon.browse, roon.load, 'Profile');
     assert.strictEqual(result.entryTitle, 'Profil');
-    assert.deepStrictEqual(await selectProfile(roon.browse, roon.load, 'Profile', 'Gäste'), { ok: true });
+    assert.strictEqual((await selectProfile(roon.browse, roon.load, 'Profile', 'Gäste')).ok, true);
   });
 
   await check('a localised menu title works when set', async () => {
     const roon = fakeRoon(['Stu'], 'Profil');
-    assert.deepStrictEqual(await selectProfile(roon.browse, roon.load, 'Profil', 'Stu'), { ok: true });
+    assert.strictEqual((await selectProfile(roon.browse, roon.load, 'Profil', 'Stu')).ok, true);
   });
 
   console.log('\nprofile setting');
@@ -127,6 +127,68 @@ function fakeRoon(profiles, menuTitle = 'Profile') {
   await check('shows a problem reading profiles under the setting', async () => {
     const item = dropdown(layout({ profiles: [], profileProblem: 'No "Profile" entry' }, {}));
     assert.strictEqual(item.subtitle, 'No "Profile" entry');
+  });
+
+  console.log('\nprofile per guest session');
+
+  const { fakeBrowseCore, serviceFor } = require('./fake-roon');
+  const tracks = [{ title: 'Dancing Queen', subtitle: 'ABBA', item_key: 't1', hint: 'action_list' }];
+
+  await check("a guest's first search selects the profile in that guest's browse session, first", async () => {
+    const core = fakeBrowseCore({ categories: { Tracks: tracks } });
+    const roon = serviceFor(core, { guest_profile: 'Party' });
+    await roon.search('guest-1', 'abba');
+    assert.deepStrictEqual(core.events, ['guest-1:profile Party', 'guest-1:search abba']);
+    assert.strictEqual(core.profileOf('guest-1'), 'Party');
+  });
+
+  await check('the songs a guest queues come from the session holding the profile', async () => {
+    const core = fakeBrowseCore({ categories: { Tracks: tracks } });
+    const roon = serviceFor(core, { guest_profile: 'Party' });
+    const found = await roon.search('guest-1', 'abba');
+    await roon.performAction('guest-1', found[0].item_key, 'add');
+    assert.deepStrictEqual(core.events, ['guest-1:profile Party', 'guest-1:search abba', 'guest-1:press Queue']);
+  });
+
+  await check('only once per guest; each new guest gets it too', async () => {
+    const core = fakeBrowseCore({ categories: { Tracks: tracks } });
+    const roon = serviceFor(core, { guest_profile: 'Party' });
+    await roon.search('guest-1', 'abba');
+    await roon.search('guest-1', 'queen');
+    await roon.search('guest-2', 'abba');
+    assert.deepStrictEqual(core.events.filter((e) => e.includes(':profile ')), ['guest-1:profile Party', 'guest-2:profile Party']);
+  });
+
+  await check('changing the setting reselects in sessions already set up', async () => {
+    const core = fakeBrowseCore({ categories: { Tracks: tracks }, profiles: ['Stu', 'Party', 'Kids'] });
+    const roon = serviceFor(core, { guest_profile: 'Party' });
+    await roon.search('guest-1', 'abba');
+    roon.settings.guest_profile = 'Kids';
+    roon.profileSessions.clear(); // what _applyProfile does on a change
+    await roon.search('guest-1', 'abba');
+    assert.strictEqual(core.profileOf('guest-1'), 'Kids');
+  });
+
+  await check('works when Settings and Profile have other names (another language)', async () => {
+    const core = fakeBrowseCore({ categories: { Titel: tracks }, settings: 'Einstellungen', profileEntry: 'Profil', library: 'Bibliothek', search: 'Suche' });
+    const roon = serviceFor(core, { guest_profile: 'Party' });
+    await roon.search('guest-1', 'abba');
+    assert.strictEqual(core.profileOf('guest-1'), 'Party');
+    assert.ok(core.events.includes('guest-1:search abba'));
+  });
+
+  await check('"Leave as it is" selects nothing', async () => {
+    const core = fakeBrowseCore({ categories: { Tracks: tracks } });
+    const roon = serviceFor(core, { guest_profile: '' });
+    await roon.search('guest-1', 'abba');
+    assert.deepStrictEqual(core.events, ['guest-1:search abba']);
+  });
+
+  await check('a profile that has gone still lets the guest search', async () => {
+    const core = fakeBrowseCore({ categories: { Tracks: tracks }, profiles: ['Stu'] });
+    const roon = serviceFor(core, { guest_profile: 'Party' });
+    const found = await roon.search('guest-1', 'abba');
+    assert.strictEqual(found.length, 1);
   });
 
   console.log(failures ? `\n${failures} failing` : '\nall passing');

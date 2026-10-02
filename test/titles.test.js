@@ -33,44 +33,16 @@ const actions = (...titles) => titles.map((title, i) => ({ title, item_key: `a${
 const english = actions('Play Now', 'Add Next', 'Queue', 'Start Radio');
 const german = actions('Jetzt abspielen', 'Als Nächstes', 'Zur Warteschlange', 'Radio starten');
 
-/**
- * A fake Roon "search" hierarchy: categories at the top, each opening into a
- * list; tracks open into the four actions. Records the actions pressed.
- */
-function fakeSearch(categories) {
-  const pressed = [];
-  let path = [];
-  const top = Object.keys(categories).map((title, i) => ({ title, item_key: `c${i}`, hint: 'list' }));
-  const keyOf = {};
-  top.forEach((item) => (keyOf[item.item_key] = item.title));
-  const browse = async (opts) => {
-    if (opts.pop_all) { path = []; return { action: 'list' }; }
-    if (opts.pop_levels) { path = path.slice(0, -opts.pop_levels); return { action: 'list' }; }
-    const key = opts.item_key;
-    if (keyOf[key]) { path = [keyOf[key]]; return { action: 'list' }; }
-    if (key.startsWith('t')) { path = [path[0] || 'search', key]; return { action: 'list' }; }
-    pressed.push(key);
-    return { action: 'none' };
-  };
-  const load = async () => {
-    if (!path.length) return { items: top };
-    if (path.length === 1) return { list: { hint: null }, items: categories[path[0]] };
-    return { list: { hint: 'action_list' }, items: categories.actions };
-  };
-  return { browse, load, pressed };
-}
+const { fakeBrowseCore, serviceFor } = require('./fake-roon');
 
-function service(fake, settings = {}) {
-  const roon = Object.create(RoonService.prototype);
-  roon.settings = Object.assign(
-    { zone: { output_id: 'o1' }, title_tracks: 'Tracks', title_add: 'Queue', title_next: 'Add Next' },
-    settings
-  );
-  roon.detected = {};
-  roon._browse = fake.browse;
-  roon._load = fake.load;
-  return roon;
-}
+const fakeSearch = (categories) => {
+  const actionsList = categories.actions;
+  const cats = Object.assign({}, categories);
+  delete cats.actions;
+  return fakeBrowseCore({ categories: cats, actions: actionsList.map((a) => a.title) });
+};
+const service = (fake, settings) => serviceFor(fake, settings);
+const pressed = (fake) => fake.events.filter((e) => e.includes(':press ')).map((e) => e.split(':press ')[1]);
 
 const tracks = [
   { title: 'Dancing Queen', subtitle: 'ABBA', item_key: 't1', hint: 'action_list' },
@@ -140,7 +112,7 @@ const artists = [{ title: 'ABBA', item_key: 'x2', hint: 'list' }];
     const roon = service(fake);
     await roon.performAction('s1', 't1', 'add');
     await roon.performAction('s1', 't1', 'next');
-    assert.deepStrictEqual(fake.pressed, ['a2', 'a1']);
+    assert.deepStrictEqual(pressed(fake), ['Zur Warteschlange', 'Als Nächstes']);
     assert.strictEqual(roon.detected.add, 'Zur Warteschlange');
     assert.strictEqual(roon.detected.next, 'Als Nächstes');
   });
@@ -151,7 +123,7 @@ const artists = [{ title: 'ABBA', item_key: 'x2', hint: 'list' }];
     const found = await roon.search('s1', 'abba');
     assert.strictEqual(found.length, 2);
     await roon.performAction('s1', 't1', 'add');
-    assert.deepStrictEqual(fake.pressed, ['a2']);
+    assert.deepStrictEqual(pressed(fake), ['Queue']);
     assert.deepStrictEqual(roon.detected, {});
   });
 
@@ -159,7 +131,7 @@ const artists = [{ title: 'ABBA', item_key: 'x2', hint: 'list' }];
     const fake = fakeSearch({ Titel: tracks, actions: actions('Eins', 'Zwei', 'Drei') });
     const roon = service(fake);
     await assert.rejects(roon.performAction('s1', 't1', 'add'), /action_unavailable/);
-    assert.deepStrictEqual(fake.pressed, []);
+    assert.deepStrictEqual(pressed(fake), []);
   });
 
   console.log(failures ? `\n${failures} failing` : '\nall passing');
