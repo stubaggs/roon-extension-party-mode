@@ -153,8 +153,8 @@ UDP broadcast on port 9003) and bind-mounts `config.json` so settings survive up
 
 ## Publishing the image
 
-`.github/workflows/docker-publish.yml` builds `linux/amd64`, `linux/arm/v7` and
-`linux/arm64` and pushes `stubaggs/roon-extension-party-mode:latest` to Docker Hub. For
+`.github/workflows/docker-publish.yml` builds `linux/amd64`, `linux/arm/v6`,
+`linux/arm/v7` and `linux/arm64` and pushes `stubaggs/roon-extension-party-mode:latest` to Docker Hub. For
 now it only runs when started by hand (Actions → Publish Docker image → Run workflow);
 the commented-out `push` trigger in the workflow publishes on every merge to `main` once
 restored, and a commented-out weekly `schedule` rebuilds and republishes every Monday so
@@ -174,6 +174,10 @@ The Dockerfile builds in two stages. The first installs dependencies exactly as
 GitHub) and runs `npm test`, so a failing test stops the build. The second copies only
 the app and its dependencies onto a clean base, with a health check that requests the
 RoonParty data on the configured port.
+
+The image is built for `linux/amd64`, `linux/arm64` and both 32-bit ARM variants:
+Docker reports every 32-bit ARM host as `arm`, the key the repository entry uses, and
+Pi Zero and Pi 1 need `arm/v6` while later Pis use `arm/v7`.
 
 The base is `node:22-alpine`, pinned by digest. Node 22 is the newest line with 32-bit
 ARM images (Node 24 dropped `linux/arm/v7`) and is supported until April 2027; before
@@ -195,8 +199,11 @@ docker run -d --name party-mode --network host \
   stubaggs/roon-extension-party-mode:latest
 ```
 
-`docker-compose.yml` does the same thing. Create `config.json` first (`touch config.json`)
-or Docker makes a directory in its place.
+`docker-compose.yml` does the same thing. Create `config.json` first and make it writable
+(`touch config.json && chmod 666 config.json`): otherwise Docker makes a directory in its
+place, and the extension, which runs as the image's unprivileged `node` user (uid 1000),
+can't save its settings. If it can't, Roon's status line and the console say so. The
+Extension Manager creates the file writable itself.
 
 ## Getting it into the Extension Repository
 

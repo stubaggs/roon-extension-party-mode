@@ -1,4 +1,6 @@
 # Host networking is required: Roon discovery uses UDP broadcast on port 9003.
+# The extension runs as uid 1000 and saves its settings to ./config.json, so
+# create it writable first: touch config.json && chmod 666 config.json
 services:
   party-mode:
     image: stubaggs/roon-extension-party-mode:latest
