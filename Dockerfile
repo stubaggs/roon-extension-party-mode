@@ -42,8 +42,14 @@ COPY package.json app.js healthcheck.js ./
 COPY lib ./lib
 COPY public ./public
 
-# The Extension Manager bind-mounts this file so settings survive image updates.
-RUN touch config.json
+# The Extension Manager bind-mounts this file so settings survive image updates
+# (it creates it world-writable). The copy in the image is for runs without a
+# bind, owned by the user the extension runs as.
+RUN touch config.json && chown node:node config.json
+
+# Run as the image's unprivileged node user (uid 1000), like the Extension
+# Manager and TheAppgineer's other extensions.
+USER node
 
 # Documentation only: the container runs with host networking, and the port
 # can be changed in the extension's settings in Roon.

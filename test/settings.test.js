@@ -1,7 +1,10 @@
 'use strict';
 
 const assert = require('assert');
-const { RoonService, describeZone, normaliseInteger, partyName } = require('../lib/roon-service');
+const { RoonService, describeZone, normaliseInteger, partyName, configWritable } = require('../lib/roon-service');
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
 const { GuestStore } = require('../lib/guests');
 
 let failures = 0;
@@ -93,6 +96,31 @@ check('the settings say what a blank name will use', () => {
   const result = RoonService.prototype._layout.call(self, { zone: picked('Kitchen') });
   const field = result.layout.find((item) => item.setting === 'party_name');
   assert.strictEqual(field.subtitle, 'Leave blank to use the zone name: Kitchen + Living Room');
+});
+
+console.log('\nconfig.json');
+
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'party-config-'));
+
+check('a writable config.json is fine', () => {
+  const file = path.join(tmp, 'config.json');
+  fs.writeFileSync(file, '');
+  fs.chmodSync(file, 0o666);
+  assert.strictEqual(configWritable(file), true);
+});
+
+check('a missing config.json in a writable folder is fine (it gets created)', () => {
+  assert.strictEqual(configWritable(path.join(tmp, 'missing.json')), true);
+});
+
+// root can write anything, so the read-only cases only mean something as another user.
+const isRoot = process.getuid && process.getuid() === 0;
+check(`a read-only config.json is reported${isRoot ? ' (skipped as root)' : ''}`, () => {
+  if (isRoot) return;
+  const file = path.join(tmp, 'readonly.json');
+  fs.writeFileSync(file, '');
+  fs.chmodSync(file, 0o444);
+  assert.strictEqual(configWritable(file), false);
 });
 
 console.log('\nnumber settings');
