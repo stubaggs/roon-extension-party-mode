@@ -9,7 +9,7 @@
   }
 
   function render(data) {
-    el('party-name').textContent = data.party_name || data.zone || 'Party';
+    el('party-name').textContent = data.party_name || 'Party';
     const link = el('join-link');
     link.textContent = (data.join_url || '').replace(/^https?:\/\//, '');
     if (data.join_url) link.href = data.join_url;

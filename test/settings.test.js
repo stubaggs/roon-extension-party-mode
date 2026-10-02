@@ -1,7 +1,7 @@
 'use strict';
 
 const assert = require('assert');
-const { RoonService, describeZone, normaliseInteger } = require('../lib/roon-service');
+const { RoonService, describeZone, normaliseInteger, partyName } = require('../lib/roon-service');
 const { GuestStore } = require('../lib/guests');
 
 let failures = 0;
@@ -61,6 +61,40 @@ check('an unnamed zone does not produce a stray dash', () => {
   assert.strictEqual(describeZone(picked('Kitchen'), zone('', 1)), 'Party zone');
 });
 
+console.log('\nparty name');
+
+check('a typed name wins', () => {
+  assert.strictEqual(partyName({ party_name: "Sam's 40th", zone: picked('Kitchen') }, zone('Kitchen', 1)), "Sam's 40th");
+});
+
+check('blank uses the zone name', () => {
+  assert.strictEqual(partyName({ party_name: '', zone: picked('Kitchen') }, zone('Kitchen', 1)), 'Kitchen');
+});
+
+check('blank with a grouped zone uses the group name, not the endpoint picked', () => {
+  const group = zone('Kitchen + Living Room + Study', 3);
+  assert.strictEqual(partyName({ party_name: '', zone: picked('Kitchen') }, group), 'Kitchen + Living Room + Study');
+});
+
+check('spaces only count as blank', () => {
+  assert.strictEqual(partyName({ party_name: '   ', zone: picked('Kitchen') }, zone('Kitchen', 1)), 'Kitchen');
+});
+
+check('zone not available yet: the endpoint picked', () => {
+  assert.strictEqual(partyName({ party_name: '', zone: picked('Kitchen') }, null), 'Kitchen');
+});
+
+check('nothing chosen at all: "Party"', () => {
+  assert.strictEqual(partyName({ party_name: '', zone: null }, null), 'Party');
+});
+
+check('the settings say what a blank name will use', () => {
+  const self = { _resolveZone: () => zone('Kitchen + Living Room', 2) };
+  const result = RoonService.prototype._layout.call(self, { zone: picked('Kitchen') });
+  const field = result.layout.find((item) => item.setting === 'party_name');
+  assert.strictEqual(field.subtitle, 'Leave blank to use the zone name: Kitchen + Living Room');
+});
+
 console.log('\nnumber settings');
 
 // _layout only needs a zone resolver from the instance.
@@ -111,10 +145,22 @@ check('a refill over a day is refused', () => {
   assert.match(item(result, 'next_refill').error, /0 to 1440/);
 });
 
-check('the titles say what 0 means', () => {
+check('the hints under the settings say what 0 means', () => {
   const result = layout({});
-  assert.match(item(result, 'add_limit').title, /0 = no limit/);
-  assert.match(item(result, 'skip_refill').title, /0 = never/);
+  for (const setting of ['add_limit', 'next_limit', 'skip_limit']) {
+    assert.strictEqual(item(result, setting).subtitle, '0 = no limit', setting);
+    assert.doesNotMatch(item(result, setting).title, /0 =/, setting);
+  }
+  for (const setting of ['add_refill', 'next_refill', 'skip_refill']) {
+    assert.strictEqual(item(result, setting).subtitle, '0 = a used one never comes back', setting);
+    assert.strictEqual(item(result, setting).title, 'Minutes to earn one back', setting);
+  }
+});
+
+check('an out-of-range value keeps its hint alongside the error', () => {
+  const field = item(layout({ skip_limit: -1 }), 'skip_limit');
+  assert.strictEqual(field.subtitle, '0 = no limit');
+  assert.match(field.error, /0 to 999/);
 });
 
 console.log('\nallowances');
