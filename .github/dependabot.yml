@@ -1,0 +1,16 @@
+# Keeps the Docker base image current. The Dockerfile pins node:22-alpine by
+# digest; when the official image is rebuilt (Alpine or Node security fixes),
+# Dependabot opens a pull request moving the pin to the new digest.
+version: 2
+updates:
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: "Docker base image"
+    ignore:
+      # Node 24 has no 32-bit ARM images, which the build still targets.
+      # Moving to it is a deliberate change (see README), not an automatic bump.
+      - dependency-name: node
+        update-types: ["version-update:semver-major"]

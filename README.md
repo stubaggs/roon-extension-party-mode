@@ -146,9 +146,15 @@ RoonParty data on the configured port.
 
 The base is `node:22-alpine`, pinned by digest. Node 22 is the newest line with 32-bit
 ARM images (Node 24 dropped `linux/arm/v7`) and is supported until April 2027; before
-then, move to Node 24 and drop `arm/v7` from the workflow and the repository entry. To
-update the base, change the tag and digest in the Dockerfile's `NODE_IMAGE` together
-(`docker buildx imagetools inspect node:22-alpine` prints the current digest).
+then, move to Node 24 and drop `arm/v7` from the workflow and the repository entry.
+
+Dependabot (`.github/dependabot.yml`) checks the base weekly. When the official image is
+rebuilt with Alpine or Node security fixes, its digest changes and Dependabot opens a pull
+request updating both `FROM` lines. It skips major Node versions, so it never moves the
+image to Node 24 on its own. Merging that pull request changes the Dockerfile only: the
+fixes reach installed copies once a new image is published. To update by hand, change
+both `FROM` lines together (`docker buildx imagetools inspect node:22-alpine` prints the
+current digest).
 
 To run the image by hand instead:
 
