@@ -193,8 +193,10 @@ check('an out-of-range value keeps its hint alongside the error', () => {
 
 check('browse titles explain themselves in a hint', () => {
   const result = layout({});
-  const group = result.layout.find((entry) => entry.type === 'group' && entry.title === 'Browse titles');
-  assert.ok(group, 'group titled plainly "Browse titles"');
+  const group = result.layout.find((entry) => entry.type === 'group' && entry.title === 'Advanced');
+  assert.ok(group, 'an "Advanced" group');
+  assert.strictEqual(group.collapsable, true, 'starts closed');
+  assert.deepStrictEqual(group.items.map((i) => i.setting), ['title_tracks', 'title_add', 'title_next', 'title_profile']);
   assert.strictEqual(
     item(result, 'title_add').subtitle,
     '"Queue" in English. Usually found automatically on a Core in another language.'
