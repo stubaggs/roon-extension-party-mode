@@ -159,6 +159,8 @@ the detection.
 
 ## Translating the pages
 
+Available: English (`en`), French (`fr`).
+
 The guest page and the RoonParty screen take their text from `public/i18n/<code>.json`,
 one file per language. Each browser gets the language it asks for (its
 `Accept-Language`), so guests at the same party can each see their own; anything not
