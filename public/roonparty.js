@@ -2,6 +2,7 @@
   'use strict';
 
   const el = (id) => document.getElementById(id);
+  const { t } = window.I18N;
   const list = el('list');
 
   function art(key, size) {
@@ -9,21 +10,25 @@
   }
 
   function render(data) {
-    el('party-name').textContent = data.party_name || 'Party';
+    el('party-name').textContent = data.party_name || t('party.default_name');
     const link = el('join-link');
     link.textContent = (data.join_url || '').replace(/^https?:\/\//, '');
     if (data.join_url) link.href = data.join_url;
 
     const playing = data.now_playing;
-    el('current-title').textContent = playing ? playing.title : 'Nothing playing';
+    el('current-title').textContent = playing ? playing.title : t('playing.nothing');
     el('current-artist').textContent = playing ? playing.artist : '';
     const who = el('current-who');
-    who.hidden = !(playing && playing.requested_by);
+    who.hidden = !(playing && playing.kind);
     const radio = !who.hidden && playing.kind === 'radio';
-    who.textContent = who.hidden ? '' : radio ? 'Roon Radio' : `Requested by ${playing.requested_by}`;
+    who.textContent = who.hidden
+      ? ''
+      : radio
+        ? t('credit.radio')
+        : t('credit.requested_by', { name: window.I18N.credit(playing) });
     who.classList.toggle('radio', radio);
     el('current-label').textContent =
-      playing && playing.state === 'playing' ? 'Playing now' : 'Paused';
+      playing && playing.state === 'playing' ? t('playing.now') : t('playing.paused');
     const image = el('current-art');
     if (playing && playing.image_key) image.src = art(playing.image_key, 400);
     else image.removeAttribute('src');
@@ -37,17 +42,17 @@
       n.textContent = String(index + 1);
 
       const wrap = document.createElement('div');
-      const t = document.createElement('div');
-      t.className = 't';
-      t.textContent = item.title;
+      const title = document.createElement('div');
+      title.className = 't';
+      title.textContent = item.title;
       const a = document.createElement('div');
       a.className = 'a';
       a.textContent = item.artist;
-      wrap.append(t, a);
-      if (item.requested_by) {
+      wrap.append(title, a);
+      if (item.kind) {
         const who = document.createElement('span');
         who.className = item.kind === 'next' || item.kind === 'radio' ? `who ${item.kind}` : 'who';
-        who.textContent = item.requested_by;
+        who.textContent = window.I18N.credit(item);
         wrap.appendChild(who);
       }
 

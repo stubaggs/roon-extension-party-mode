@@ -37,6 +37,7 @@ Roon Core  ──(node-roon-api over the local network)──  app.js
 | `lib/history.js` | Played-songs list for the guest page |
 | `lib/server.js` | REST API, server-sent events, QR code, image proxy |
 | `public/` | Guest page and the RoonParty screen, no build step |
+| `public/i18n/`, `lib/i18n.js` | Page text per language, and picking the language per browser |
 | `test/` | Identity, attribution and settings tests, `npm test` |
 
 ## How a track is identified
@@ -155,6 +156,21 @@ written. When one isn't found, it works the menu out instead (`lib/titles.js`):
 What it found shows in each setting's hint and in the console (`Browse titles: using
 "Titel" as the Track category`). Typing the Core's own title into a setting overrides
 the detection.
+
+## Translating the pages
+
+The guest page and the RoonParty screen take their text from `public/i18n/<code>.json`,
+one file per language. Each browser gets the language it asks for (its
+`Accept-Language`), so guests at the same party can each see their own; anything not
+translated, or a missing key, falls back to `en.json`. Track, artist and album names come
+from Roon as they are.
+
+To add a language, copy `en.json` to e.g. `de.json` and translate the values, keeping the
+`{name}`, `{count}` and `{wait}` placeholders. Entries like `{ "one": …, "other": … }` are
+plurals, picked by the language's own rules; add `few`, `many` and so on where the
+language has them. Times follow the language's clock format automatically. `npm test`
+checks that a translation uses the same keys and placeholders as English. Restart the
+extension to pick up a new file.
 
 ## Installing it from Roon
 
