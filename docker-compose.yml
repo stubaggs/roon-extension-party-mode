@@ -9,5 +9,12 @@ services:
     restart: unless-stopped
     environment:
       - PARTY_PORT=8338
+      # - PARTY_DEBUG=1   # detailed log, including every message to and from Roon
     volumes:
       - ./config.json:/usr/src/app/config.json
+    # Keep the log from growing without limit.
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

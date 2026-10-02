@@ -37,9 +37,12 @@ The Extension Manager handles updates from then on.
 ```bash
 touch config.json && chmod 666 config.json
 docker run -d --name party-mode --network host --restart unless-stopped \
+  --log-opt max-size=10m --log-opt max-file=3 \
   -v "$PWD/config.json:/usr/src/app/config.json" \
   stubaggs/roon-extension-party-mode:latest
 ```
+
+The `--log-opt` settings keep the log from growing without limit.
 
 `config.json` keeps your settings when the image is updated. Then enable **Party Mode**
 under **Settings → Extensions** in Roon.
@@ -108,6 +111,11 @@ Mode picks the next free one and the QR code follows it. To choose one yourself,
 rare. If it keeps happening, open an issue with the extension's log (`docker logs
 party-mode`, or the log in the Extension Manager), which records each request and each
 song that starts.
+
+**Something else isn't working.** Start the extension with `PARTY_DEBUG=1` (with Docker,
+add `-e PARTY_DEBUG=1`) for a detailed log, including every message to and from Roon, and
+include it in an issue. Turn it off again afterwards: it's large and records what guests
+search for.
 
 ## For developers
 

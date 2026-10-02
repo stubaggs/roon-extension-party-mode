@@ -269,6 +269,20 @@ place, and the extension, which runs as the image's unprivileged `node` user (ui
 can't save its settings. If it can't, Roon's status line and the console say so. The
 Extension Manager creates the file writable itself.
 
+## Logging
+
+The normal log is short: the port and links at startup, one line per guest request
+(`Request (add) from Sam: …`), per queue insert (`Queued: …` with length and hash) and
+per track start (`Playing: … -> Sam`), one line when each guest's session gets the
+profile, and warnings. That is enough to diagnose a wrong name on a song.
+
+`PARTY_DEBUG=1` (`lib/log.js`) adds detail: the profile before and after each switch,
+the profiles on offer, the first search's result categories, and node-roon-api's own log
+of every message to and from the Core (its `log_level`, otherwise `"none"`). That last
+part is large and includes guests' searches and Roon's full replies, so it is for
+troubleshooting only. `docker-compose.yml` and the README's `docker run` cap the
+container log at 3 × 10 MB.
+
 ## Known limitations
 
 **No queue reordering.** Roon's API can add a track to the end of the queue or directly
