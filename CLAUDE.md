@@ -22,5 +22,8 @@ Every change that affects them updates the docs in the same commit:
 - Extension settings and the Roon status line stay in English, as in other Roon
   extensions. Guest-facing pages are translated: every page string lives in
   `public/i18n/<code>.json` (en, fr, de, es, nl), and new page text needs all of them.
+- Environment variables are named `ROON_EXTENSION_PARTY_MODE_<SETTING>` and read through
+  `lib/env.js`, which also accepts the hyphenated `ROON-EXTENSION-PARTY-MODE_` spelling.
+  When renaming one, keep the old name working.
 - Source files carry the `Copyright 2026 Stubaggs` Apache-2.0 header.
 - Run `npm test` before pushing.

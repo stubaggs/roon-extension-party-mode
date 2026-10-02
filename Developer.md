@@ -41,6 +41,7 @@ Roon Core  ──(node-roon-api over the local network)──  app.js
 | `lib/server.js` | REST API, server-sent events, QR code, image proxy |
 | `public/` | Guest page and the RoonParty screen, no build step |
 | `public/i18n/`, `lib/i18n.js` | Page text per language, and picking the language per browser |
+| `lib/env.js`, `lib/log.js` | Environment variables, and the debug log switch |
 | `test/` | Identity, attribution and settings tests, `npm test` |
 
 ## How a track is identified
@@ -88,8 +89,9 @@ Living Room"), and follows the zone if you change it; the setting shows which na
 is. Saving a new port moves the
 guest and RoonParty pages there straight away, then the extension reconnects to the Core
 (it drops out of Roon's list for up to ten seconds) so the link Roon shows is updated.
-Open pages and phones on the old port need the new link or a fresh scan. `PARTY_PORT`
-sets the port to start on before one has been saved in Roon.
+Open pages and phones on the old port need the new link or a fresh scan.
+`ROON_EXTENSION_PARTY_MODE_PORT` sets the port to start on before one has been saved in
+Roon (the older `PARTY_PORT` still works).
 
 The default port is 8338. The container shares the host's network, so the port has to be
 free on the machine itself; 8338 was picked to stay clear of common defaults (8080, 3000,
@@ -269,6 +271,18 @@ place, and the extension, which runs as the image's unprivileged `node` user (ui
 can't save its settings. If it can't, Roon's status line and the console say so. The
 Extension Manager creates the file writable itself.
 
+## Environment variables
+
+Every environment variable is named `ROON_EXTENSION_PARTY_MODE_<SETTING>`, read through
+`lib/env.js` (`envValue`). The hyphenated spelling, `ROON-EXTENSION-PARTY-MODE_<SETTING>`,
+is accepted too: Docker can pass it, though shells can't set it. A renamed variable keeps
+its old name working, checked after the new ones.
+
+| Variable | Meaning |
+| --- | --- |
+| `ROON_EXTENSION_PARTY_MODE_PORT` | Port to start on until one is saved in Roon (default 8338; was `PARTY_PORT`). |
+| `ROON_EXTENSION_PARTY_MODE_DEBUG` | `1`, `true`, `yes` or `on` turns on the detailed log (see Logging). |
+
 ## Logging
 
 The normal log is short: the port and links at startup, one line per guest request
@@ -276,9 +290,7 @@ The normal log is short: the port and links at startup, one line per guest reque
 per track start (`Playing: … -> Sam`), one line when each guest's session gets the
 profile, and warnings. That is enough to diagnose a wrong name on a song.
 
-`ROON_EXTENSION_PARTY_MODE_DEBUG=1` (`lib/log.js`; the hyphenated
-`ROON-EXTENSION-PARTY-MODE_DEBUG` also works where Docker passes it, though shells can't
-set it) adds detail: the profile before and after each switch,
+`ROON_EXTENSION_PARTY_MODE_DEBUG=1` (`lib/log.js`) adds detail: the profile before and after each switch,
 the profiles on offer, the first search's result categories, and node-roon-api's own log
 of every message to and from the Core (its `log_level`, otherwise `"none"`). That last
 part is large and includes guests' searches and Roon's full replies, so it is for
