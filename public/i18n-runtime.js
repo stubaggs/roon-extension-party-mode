@@ -78,6 +78,11 @@
     return item.requested_by ? t('credit.requested_by', { name: item.requested_by }) : t('credit.requested_by_guest');
   }
 
+  /** "Skipped by Sam" or "Skipped by a guest", for a played track a guest skipped. */
+  function skippedBy(item) {
+    return item.skipped_by ? t('played.skipped_by', { name: item.skipped_by }) : t('played.skipped_by_guest');
+  }
+
   /** "a minute" / "12 minutes" for a wait in milliseconds. */
   function minutes(ms) {
     const count = Math.max(1, Math.ceil(ms / 60000));
@@ -87,5 +92,5 @@
   document.documentElement.lang = data.lang;
   apply();
 
-  window.I18N = { lang: data.lang, t, apply, credit, requestedBy, minutes };
+  window.I18N = { lang: data.lang, t, apply, credit, requestedBy, skippedBy, minutes };
 })();

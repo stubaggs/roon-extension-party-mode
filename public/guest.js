@@ -363,7 +363,16 @@
       return [position, ...trackCells(item)];
     });
 
-    renderList(playedList, snapshot.played || [], t('played.empty'), (item) => trackCells(item));
+    renderList(playedList, snapshot.played || [], t('played.empty'), (item) => {
+      const cells = trackCells(item);
+      if (item.skipped) {
+        const tag = document.createElement('span');
+        tag.className = 'badge skipped';
+        tag.textContent = window.I18N.skippedBy(item);
+        cells[1].appendChild(tag);
+      }
+      return cells;
+    });
   }
 
   function creditText(track) {

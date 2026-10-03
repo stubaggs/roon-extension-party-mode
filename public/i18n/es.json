@@ -27,6 +27,8 @@
   "queue.empty": "No hay nada en cola.",
   "played.title": "Ya sonaron",
   "played.empty": "Todavía no ha sonado nada.",
+  "played.skipped_by": "Saltada por {name}",
+  "played.skipped_by_guest": "Saltada por un invitado",
   "allowance.closed": "Las peticiones están cerradas ahora mismo.",
   "allowance.paused": "Las peticiones están en pausa por un momento.",
   "button.left": {

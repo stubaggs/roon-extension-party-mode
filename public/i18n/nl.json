@@ -27,6 +27,8 @@
   "queue.empty": "Er staat nog niets klaar.",
   "played.title": "Al gespeeld",
   "played.empty": "Er is nog niets gespeeld.",
+  "played.skipped_by": "Overgeslagen door {name}",
+  "played.skipped_by_guest": "Overgeslagen door een gast",
   "allowance.closed": "Verzoekjes zijn nu gesloten.",
   "allowance.paused": "Verzoeken staan even op pauze.",
   "button.left": {

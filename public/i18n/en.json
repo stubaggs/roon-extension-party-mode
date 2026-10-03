@@ -27,6 +27,8 @@
   "queue.empty": "Nothing lined up.",
   "played.title": "Played",
   "played.empty": "Nothing played yet.",
+  "played.skipped_by": "Skipped by {name}",
+  "played.skipped_by_guest": "Skipped by a guest",
   "allowance.closed": "Requests are closed right now.",
   "allowance.paused": "Requests are paused for a moment.",
   "button.left": {

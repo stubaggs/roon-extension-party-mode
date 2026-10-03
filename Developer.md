@@ -404,7 +404,10 @@ access is turned back on (a new party; what is still queued is recorded again).
 **Played history is the extension's own.** Roon's API has no play history, so the
 "Played" list on the guest page is recorded by the extension as tracks start. It is kept
 in memory (last 200 tracks) and starts over when the extension restarts or the party zone
-changes.
+changes. A guest's skip marks the playing track (`markSkipped`, before the skip reaches
+Roon, since the next track can start before Roon answers; undone if the skip fails), and
+Played shows "Skipped by Sam". Skips made in the Roon app aren't seen by the extension,
+so those tracks show no skip.
 
 **The queue subscription is per zone.** Changing the party zone starts a new subscription;
 the old one is ignored rather than torn down, since the API has no convenient unsubscribe.

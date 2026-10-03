@@ -354,6 +354,13 @@ main {
   font-size: 0.85rem;
 }
 
+.badge.skipped {
+  margin-left: 0.3rem;
+  background: none;
+  border: 1px solid var(--edge);
+  color: var(--muted);
+}
+
 .badge {
   display: inline-block;
   max-width: 100%;
