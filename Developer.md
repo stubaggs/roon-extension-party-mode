@@ -84,7 +84,8 @@ party zone, and the console prints the guest link and RoonParty URL. The extensi
 
 ## Host settings (in Roon)
 
-Party zone, party name, guest access on/off, and web port. Left blank, the party name is
+Party mode on/off (first, as the switch used most; stored as `enabled`), party zone,
+party name, and web port. Left blank, the party name is
 the party zone's name (for a grouped zone, Roon's name for the group, such as "Kitchen +
 Living Room"), and follows the zone if you change it; the setting shows which name that
 is. Saving a new port moves the
@@ -373,7 +374,7 @@ extensions Play Now, Add Next, Queue and Start Radio on a track, and Play Now, S
 Add Next, Queue and Start Radio on a playlist; nothing creates or edits one (checked
 against a Core in October 2026). So `lib/party-playlist.js` records every queue entry
 the party zone gets, once per `queue_item_id`, and `GET /api/playlist.csv` (linked from
-the party screen only while guest access is off, which is how a host ends a party; the
+the party screen only while party mode is off, which is how a host ends a party; the
 URL itself needs no session, like the rest of the screen) serves it as CSV in
 the form Soundiiz imports: lower-case `title`, `artist`, `album` headers (the other
 columns are ignored by importers), commas, UTF-8 without a byte order mark (a BOM hides

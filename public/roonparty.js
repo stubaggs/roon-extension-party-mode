@@ -26,7 +26,7 @@
   function render(data) {
     el('party-name').textContent = data.party_name || t('party.default_name');
     if (data.join_url) el('join-link').href = data.join_url;
-    // Guest access off ends the party: no QR code that no longer works, and
+    // Party mode off ends the party: no QR code that no longer works, and
     // the playlist to download instead.
     el('join-open').hidden = !data.enabled;
     el('join-closed').hidden = data.enabled;

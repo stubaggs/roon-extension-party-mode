@@ -58,7 +58,7 @@ under **Settings → Extensions** in Roon.
    on a TV, a tablet or a laptop where guests can see it.
 3. Guests scan the QR code on the party screen with their phone camera. That's it.
 
-When the party ends, set **Guest access** to **Off**. The party screen swaps the QR code
+When the party ends, set **Party mode** to **Off**. The party screen swaps the QR code
 for "The party's over" and a **Download the playlist** button; click it on a computer
 rather than the TV. You get a CSV file of every song that was
 queued in the party zone: title, artist, album, length, who asked for it and when. Roon
@@ -67,7 +67,7 @@ can't import it directly, but it's in the format Soundiiz imports: in Soundiiz, 
 with your playlists. Excel on Windows can garble accented names when you double-click the
 file; Google Sheets, Numbers and Excel's **Data → From Text/CSV** read it correctly.
 
-To stop guests adding songs, set **Guest access** to **Off**. Turning it back on makes a
+To stop guests adding songs, set **Party mode** to **Off**, at the top of the settings. Turning it back on makes a
 new QR code, so old links stop working, and starts a new playlist: download the old one
 first.
 
@@ -75,10 +75,10 @@ first.
 
 | Setting | What it does |
 | --- | --- |
+| Party mode | On while the party is running. Off stops guests adding songs, and the party screen shows "The party's over" with the playlist to download. Turning it back on starts a new party: a new QR code and a new playlist. |
 | Party zone | Where the music plays. If you pick a speaker that's grouped with others, the whole group plays. |
 | Party name | Shown on the party screen. Leave blank to use the zone's name. |
 | Roon profile for guest requests | The Roon profile the songs are played under. Choose a "Guests" profile to keep party songs out of your own history and recommendations. |
-| Guest access | On or off for everyone. |
 | Web port | The port the guest pages use (8338). Only change it if something else on the computer uses 8338. |
 | Adding tracks | Whether guests can add songs, whether a song already in the queue can be added again, how many each guest gets, and how many minutes until they get another. |
 | Playing next | The same, for putting a song straight after the current one. |
@@ -94,11 +94,12 @@ never**.
   when they add it, but Roon doesn't let anyone move a song that's already queued.
 - **A guest's song gets the music going again.** If the party zone is paused, or the
   queue has run out, adding a song presses play. If you paused for a speech, it resumes
-  as soon as someone adds a song, so set **Guest access** to **Off** first. Turning it
+  as soon as someone adds a song, so set **Party mode** to **Off** first (the party screen
+  then says the party's over until you turn it back on). Turning it
   back on starts a new playlist, so download the playlist before you do.
 - **Played starts fresh** when the extension restarts or you change the party zone.
 - **The downloadable playlist starts fresh** when the extension restarts, you change the
-  party zone, or you turn **Guest access** back on, which counts as a new party.
+  party zone, or you turn **Party mode** back on, which counts as a new party.
   Download it before any of those. Songs still in the queue carry over to the new list.
 - **"Roon Radio" is a best guess.** With Roon Radio on, any song no guest added is
   labelled Roon Radio, including songs you queue from the Roon app yourself.
@@ -113,7 +114,7 @@ the same network as the Roon Core. With Docker, use `--network host`, as above.
 **Phones can't open the page after scanning.** Check that the phones are on the same Wi-Fi as
 the computer running Party Mode, and that the computer's firewall allows port 8338.
 
-**"That code has expired".** Guest access was switched off and on, which makes a new code.
+**"That code has expired".** Party mode was switched off and on, which makes a new code.
 Scan the code on the party screen again.
 
 **Roon says settings can't be saved.** The extension can't write `config.json`. With Docker,
