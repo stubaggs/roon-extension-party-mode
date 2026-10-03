@@ -312,6 +312,18 @@ const set = (values) => Object.assign(roon.settings, values);
     assert.ok(server.hubUrl().endsWith('/PartyHub'));
   });
 
+  await check("the Hub's title is the party's name, before any script runs", async () => {
+    roon.partyName = 'Kate & Sam <3 $& Co';
+    const en = await (await get('/PartyHub')).text();
+    assert.match(en, /<title>Kate &#38; Sam &#60;3 \$&#38; Co Hub<\/title>/);
+    const fr = await (await get('/partyhub', { 'Accept-Language': 'fr' })).text();
+    assert.match(fr, /<html lang="fr">/);
+    roon.partyName = '';
+    const unnamed = await (await get('/PartyHub', { 'Accept-Language': 'nl' })).text();
+    assert.match(unnamed, /<title>Feest Hub<\/title>/);
+    roon.partyName = 'Test Party';
+  });
+
   await check('the old RoonParty address and its data still work', async () => {
     for (const path of ['/roonparty', '/roonparty.html']) {
       const res = await get(path);

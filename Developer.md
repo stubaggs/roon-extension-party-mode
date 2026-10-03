@@ -227,8 +227,11 @@ extension to pick up a new file.
 
 The TV page is the **Party Hub**, at `/PartyHub` (Express routes ignore case, so
 `/partyhub` works too); Roon's Extensions link and status line point there. Its tab title
-is the party's name plus "Hub" (`page.hub_title`, `{name} Hub`), set by `hub.js`, so a
-renamed party shows straight away. It was the RoonParty screen before 1.2.0: `/roonparty`
+is the party's name plus "Hub" (`page.hub_title`, `{name} Hub`). The server writes it
+into the page, with the page's `lang`, before sending it, so bookmarks and home-screen
+icons get it as the page arrives; `hub.js` sets it again on each update, so a renamed
+party shows straight away. Safari on macOS drops what open tabs' titles have in common,
+so with the guest page ("EX5 Test-o-rama") open beside it, the Hub's tab reads just "Hub". It was the RoonParty screen before 1.2.0: `/roonparty`
 redirects (301) to `/PartyHub`, and `/api/roonparty` still answers alongside `/api/hub`,
 so a screen left open across the upgrade keeps working until it reloads.
 
