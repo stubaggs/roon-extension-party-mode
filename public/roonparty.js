@@ -27,10 +27,18 @@
     el('party-name').textContent = data.party_name || t('party.default_name');
     if (data.join_url) el('join-link').href = data.join_url;
     // Party mode off ends the party: no QR code that no longer works, and
-    // the playlist to download instead. Paused keeps the code but says so.
+    // the playlist's own QR code instead, when the host offers it. Paused
+    // keeps the code but says so.
     const over = data.party_mode === 'off';
     el('join-open').hidden = over;
     el('join-closed').hidden = !over;
+    const offer = over && Boolean(data.playlist_url);
+    el('playlist-offer').hidden = !offer;
+    // Loaded when shown, so the code follows a change of address or port.
+    if (offer && el('playlist-qr').dataset.url !== data.playlist_url) {
+      el('playlist-qr').dataset.url = data.playlist_url;
+      el('playlist-qr').src = `/api/playlist-qr.svg?t=${Date.now()}`;
+    }
     el('join-link').textContent = data.party_mode === 'paused' ? t('allowance.paused') : t('screen.scan');
 
     const playing = data.now_playing;

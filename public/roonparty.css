@@ -52,7 +52,7 @@
 }
 
 .join-closed {
-  padding: clamp(1rem, 6vh, 4rem) 0;
+  padding: clamp(0.5rem, 2vh, 1.5rem) 0;
 }
 
 .closed-title {
@@ -64,15 +64,8 @@
 }
 
 .closed-text {
-  margin: 0.4rem 0 1.6rem;
+  margin: 0.4rem 0 1.2rem;
   font-size: clamp(1rem, 1.6vw, 1.4rem);
-}
-
-.download {
-  display: inline-block;
-  text-decoration: none;
-  font-size: clamp(1rem, 1.4vw, 1.25rem);
-  padding: 0.8rem 1.6rem;
 }
 
 /* The scan line is the guest link, in the line's own colour. */

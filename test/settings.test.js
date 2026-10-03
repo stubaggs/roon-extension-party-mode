@@ -159,6 +159,12 @@ check('a saved on/off from "Guest access" carries over, and junk reads as on', (
   assert.strictEqual(layout({ enabled: 'maybe' }).values.enabled, true);
 });
 
+check('playlist download is on unless turned off', () => {
+  assert.ok(item(layout({}), 'playlist_download'));
+  assert.strictEqual(layout({}).values.playlist_download, true);
+  assert.strictEqual(layout({ playlist_download: false }).values.playlist_download, false);
+});
+
 check('numbers in range pass through', () => {
   assert.strictEqual(normaliseInteger(10, 0, 999, 0), 10);
   assert.strictEqual(normaliseInteger(0, 0, 999, 0), 0);
