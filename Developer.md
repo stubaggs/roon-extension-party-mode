@@ -447,6 +447,20 @@ uses the name's letters and digits, accents dropped ("Kitchen & Bar" becomes
 `kitchen-bar`); a name with none ("厨房") gets a short hash instead. The console's first
 line says which name a copy registered as.
 
+Names may have spaces. In `docker-compose.yml`, write them as they are:
+
+```yaml
+    environment:
+      - ROON_EXTENSION_PARTY_MODE_INSTANCE=Living Room
+```
+
+or `ROON_EXTENSION_PARTY_MODE_INSTANCE: Living Room` in the `key: value` style. Don't
+quote the value after the `=` in the list style: YAML keeps the quotes, and they would
+show in Roon's name for it (the id ignores them). A ` #` starts a YAML comment, so quote
+the whole line for such a name, or one starting with a symbol such as `&`, `*` or `!`:
+`- "ROON_EXTENSION_PARTY_MODE_INSTANCE=Bar #2"`. With `docker run`, the shell needs the
+quotes: `-e "ROON_EXTENSION_PARTY_MODE_INSTANCE=Living Room"`.
+
 Unset, which is everyone else, nothing changes: same id, same name, same pairing. A
 named copy is new to Roon the first time: enable it and set it up, with its own
 `config.json` and party zone. Renaming it later makes it a new extension again.
