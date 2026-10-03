@@ -20,7 +20,7 @@
   "track.add": "Add to queue",
   "track.next": "Play it next",
   "queue.up_next": "Up next",
-  "queue.empty": "Nothing lined up. Add a song.",
+  "queue.empty": "Nothing lined up.",
   "played.title": "Played",
   "played.empty": "Nothing played yet.",
   "allowance.closed": "Requests are closed right now.",
