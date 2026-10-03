@@ -68,6 +68,7 @@
   "locked.text": "Dieser Link funktioniert erst, nachdem du den Code auf dem Party-Bildschirm gescannt hast. Bitte den Gastgeber, ihn zu zeigen.",
   "screen.scan": "Scannen, um einen Titel hinzuzufügen",
   "screen.qr_alt": "Scannen, um einen Titel hinzuzufügen",
+  "screen.download_playlist": "Die Playlist herunterladen",
   "screen.scan_playlist": "Scannen, um die Playlist herunterzuladen",
   "screen.playlist_qr_alt": "Scannen, um die Playlist herunterzuladen",
   "screen.closed_title": "Keine Wünsche mehr",

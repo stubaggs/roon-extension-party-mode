@@ -62,9 +62,13 @@ under **Settings → Extensions** in Roon.
 3. Guests scan the QR code on the party screen with their phone camera. That's it.
 
 When you're done taking requests, set **Party mode** to **Off**. The party screen swaps the QR code
-for "Requests are closed" and a second QR code, **Scan to download the playlist**. Anyone
-in the room can scan it to save the playlist on their phone, or click the line under it
-on a computer. You get a CSV file of every track that was
+for "Requests are closed" and the playlist. By default that's a second QR code, **Scan to
+download the playlist**, which anyone in the room can scan to save it on their phone; the
+line under it is a link to click on a computer. **Display playlist download** in the
+settings can show just a link instead, or nothing. Whatever you choose there, the playlist
+is always at the address the setting's hint gives, such as
+`http://192.168.1.73:8338/api/playlist.csv`, so you can open it in any browser on your
+network. You get a CSV file of every track that was
 queued in the party zone: title, artist, album, length, who asked for it and when. Roon
 can't import it directly, but it's in the format Soundiiz imports: in Soundiiz, choose
 **Import playlist**, then the file, and pick TIDAL, Qobuz or Spotify. Roon then shows it
@@ -77,7 +81,7 @@ file; Google Sheets, Numbers and Excel's **Data → From Text/CSV** read it corr
 - **Paused**, for a speech or the cake: the music pauses and guests' requests wait, with
   the QR code still up. Back to **On**, the music carries on where it was.
 - **Off**, when you're done taking requests: the music pauses, guests can't add tracks, and the party screen
-  says requests are closed, with a QR code for the playlist. Turning it back on starts
+  says requests are closed, with the playlist to download. Turning it back on starts
   a new party, with a new QR code (old links stop working) and a new playlist, so
   download the old one first.
 
@@ -88,7 +92,7 @@ file; Google Sheets, Numbers and Excel's **Data → From Text/CSV** read it corr
 | Party mode | On, Paused (music and requests on hold) or Off (requests closed, playlist ready). See above. |
 | Party zone | Where the music plays. If you pick a speaker that's grouped with others, the whole group plays. |
 | Party name | Shown on the party screen. Leave blank to use the zone's name. |
-| Playlist download | Yes (the default) shows a QR code for the playlist on the party screen once **Party mode** is **Off**. No keeps the playlist to yourself: no code, and the download doesn't work. |
+| Display playlist download | What the party screen shows once **Party mode** is **Off**: a **QR code** guests can scan (the default), a **Link only** to click on the screen itself, or **Off** for nothing. The hint gives the download address, which works whichever you pick. |
 | Roon profile for guest requests | The Roon profile the tracks are played under. Choose a "Guests" profile to keep party tracks out of your own history and recommendations. |
 | Web port | The port the guest pages use (8338). Only change it if something else on the computer uses 8338. |
 | Adding tracks | Whether guests can add tracks, whether a track already in the queue can be added again (covers, live takes and remasters count as different tracks), how many each guest gets, and how many minutes until they get another. |

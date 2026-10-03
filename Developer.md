@@ -413,9 +413,8 @@ extensions Play Now, Add Next, Queue and Start Radio on a track, and Play Now, S
 Add Next, Queue and Start Radio on a playlist; nothing creates or edits one (checked
 against a Core in October 2026). So `lib/party-playlist.js` records every queue entry
 the party zone gets, once per `queue_item_id`, and `GET /api/playlist.csv` (offered on
-the party screen only while party mode is off, which is how a host ends a party, as a
-QR code from `GET /api/playlist-qr.svg` with the link under it; the URL itself needs no
-session, like the rest of the screen, so anyone in the room can scan it) serves it as CSV in
+the party screen only while party mode is off, which is how a host ends a party; the
+URL itself needs no session, like the rest of the screen, and always works) serves it as CSV in
 the form Soundiiz imports: lower-case `title`, `artist`, `album` headers (the other
 columns are ignored by importers), commas, UTF-8 without a byte order mark (a BOM hides
 the first header from an importer, at the cost of Excel's double-click guessing the
@@ -423,9 +422,13 @@ encoding wrong), and Roon's ` / ` between artists written as `, `. It includes w
 queued before the extension started, Roon Radio picks and the host's own additions. Credits are frozen when the entry is first seen, since closing guest
 access clears attributions. Column names and credits are English, which import services
 expect. A guest name a spreadsheet would read as a formula gets a leading apostrophe;
-track details are left as Roon gives them, so they still match. With the Playlist
-download setting (`playlist_download`) off, both URLs answer 404 and `/api/roonparty`
-sends `playlist_url: null`, so the screen shows no code. Times are local to the extension, which in Docker is UTC unless
+track details are left as Roon gives them, so they still match. The Display playlist
+download setting (`playlist_download`: `'qr'`, `'link'` or `'off'`, read through
+`playlistDisplay()`, which turns the brief yes/no form into `'qr'`/`'off'`) only decides
+what the screen shows: `/api/roonparty` passes it as `playlist`, and the screen shows a QR
+code from `GET /api/playlist-qr.svg` with the link under it, a button, or nothing. Its hint
+in Roon's settings gives the download address, which `app.js` hands over with
+`setPlaylistUrl()` alongside the website link. Times are local to the extension, which in Docker is UTC unless
 `TZ` is set. Kept in memory, at most 2000 tracks, and reset with the party zone and when guest
 access is turned back on (a new party; what is still queued is recorded again).
 

@@ -63,6 +63,17 @@
   color: var(--amber);
 }
 
+.download {
+  display: inline-block;
+  text-decoration: none;
+  font-size: clamp(1rem, 1.4vw, 1.25rem);
+  padding: 0.8rem 1.6rem;
+}
+
+.download[hidden] {
+  display: none;
+}
+
 .closed-text {
   margin: 0.4rem 0 1.2rem;
   font-size: clamp(1rem, 1.6vw, 1.4rem);
