@@ -8,7 +8,7 @@ Roon account, and no access to anything else in your Roon setup.
 - **Skipping** the current song is an option you can turn on.
 - **Fair shares:** each guest gets a number of songs, earning more back over time.
 - **Names on songs:** guests can give a nickname, shown next to the songs they add.
-- **A party screen** for a TV or tablet: QR code, what's playing and what's next.
+- **A party screen** for a TV or tablet: QR code, what's playing and the whole queue.
 - **Up next and Played** lists, so everyone can see what's coming and what's been on.
 - **Keep the party's playlist:** download everything that was queued as a spreadsheet
   file, ready to import into a music service.
