@@ -19,6 +19,14 @@
   box-sizing: border-box;
 }
 
+/* Phone browsers enlarge text in boxes they think are wide; a scrolling name
+   (marquee.js) is one, so it grew while it scrolled. The pages size their own
+   text, and this doesn't stop guests zooming. */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
 html,
 body {
   margin: 0;
