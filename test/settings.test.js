@@ -15,7 +15,7 @@
 'use strict';
 
 const assert = require('assert');
-const { RoonService, describeZone, normaliseInteger, partyName, configWritable, extensionIdentity } = require('../lib/roon-service');
+const { RoonService, describeZone, normaliseInteger, partyName, configWritable, extensionIdentity, statusText } = require('../lib/roon-service');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
@@ -151,6 +151,37 @@ check('party mode is first, with on, paused and off', () => {
   assert.strictEqual(result.layout[0].setting, 'enabled');
   assert.strictEqual(result.layout[0].title, 'Party mode');
   assert.deepStrictEqual(result.layout[0].values.map((v) => v.value), [true, 'paused', false]);
+});
+
+check("Roon's status line: the party's name, the mode and the Hub's address, in every mode", () => {
+  const hub = 'Party Hub at http://192.168.1.73:8338/PartyHub';
+  assert.strictEqual(statusText('EX5 Test-o-rama', 'on', hub), `EX5 Test-o-rama: Party mode is on. ${hub}`);
+  assert.strictEqual(statusText('EX5 Test-o-rama', 'paused', hub), `EX5 Test-o-rama: Party mode is paused. ${hub}`);
+  assert.strictEqual(statusText('EX5 Test-o-rama', 'off', hub), `EX5 Test-o-rama: Party mode is off. ${hub}`);
+  assert.strictEqual(statusText('Kitchen', 'on', ''), 'Kitchen: Party mode is on.');
+});
+
+check('the status line uses the party name, falling back to the zone, with the address', () => {
+  const said = [];
+  const self = {
+    svcStatus: { set_status: (message) => said.push(message) },
+    configWritable: true,
+    core: {},
+    zone: { display_name: 'Kitchen', outputs: [{ output_id: 'o1' }] },
+    statusLine: 'Party Hub at http://h:8338/PartyHub',
+    settings: { zone: { output_id: 'o1', name: 'Kitchen' }, enabled: 'paused', party_name: 'Sam\'s 40th' },
+    get partyName() {
+      return partyName(this.settings, this.zone);
+    }
+  };
+  RoonService.prototype._updateStatus.call(self);
+  self.settings.party_name = '';
+  self.settings.enabled = false;
+  RoonService.prototype._updateStatus.call(self);
+  assert.deepStrictEqual(said, [
+    "Sam's 40th: Party mode is paused. Party Hub at http://h:8338/PartyHub",
+    'Kitchen: Party mode is off. Party Hub at http://h:8338/PartyHub'
+  ]);
 });
 
 check('an experimental version is a separate extension to Roon; a release keeps its id', () => {

@@ -95,6 +95,10 @@ file; Google Sheets, Numbers and Excel's **Data → From Text/CSV** read it corr
   a new party, with a new QR code (old links stop working) and a new playlist, so
   download the old one first.
 
+Under **Settings → Extensions**, Roon shows Party Mode's status: the party's name, its
+Party mode and the Party Hub's address, for example *EX5 Test-o-rama: Party mode is
+paused. Party Hub at http://192.168.1.73:8338/PartyHub*.
+
 ## Settings
 
 | Setting | What it does |
