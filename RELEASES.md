@@ -77,14 +77,14 @@ running in its Extensions list.
   run out, adding a track presses play.
 - The party zone is found as soon as you choose it, instead of when Roon next reports a
   change.
-- Settings from the environment (for Docker) are named `ROON_EXTENSION_PARTY_MODE_<SETTING>`.
-  The old names still work.
 
 ## 1.0.2
 
 - Guest requests count toward the chosen **Roon profile for guest requests**, so party
   tracks stay out of your own history and recommendations.
 - Quieter logs. Set `ROON_EXTENSION_PARTY_MODE_DEBUG` for the detail.
+- Settings from the environment (for Docker) are named `ROON_EXTENSION_PARTY_MODE_<SETTING>`.
+  The old names still work.
 - The README is now a guide for running a party, with developer notes in their own file.
 
 ## 1.0.1
