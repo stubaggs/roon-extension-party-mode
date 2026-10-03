@@ -11,9 +11,6 @@ Not released yet. You can try it on the `experimental` branch, or with Docker as
 - The party screen is now the **Party Hub**, at `/PartyHub`. Its browser tab shows the
   party's name, such as "EX5 Test-o-rama Hub". Roon's link and status line point there,
   and old `/roonparty` bookmarks still open it.
-- With Docker, `ROON_EXTENSION_PARTY_MODE_PORT` (as in `docker-compose.yml`) now always
-  decides the port, and Roon's settings show it. Before, it only counted until settings
-  were first saved. A busy port still falls back to the next free one.
 - The **Party mode** setting reads **Pause** while the party is on and **Unpause** while
   it's paused, and says when turning it on starts a new party.
 

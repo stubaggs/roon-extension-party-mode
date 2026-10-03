@@ -101,13 +101,11 @@ is. Saving a new port moves the
 guest pages and the Party Hub there straight away, then the extension reconnects to the Core
 (it drops out of Roon's list for up to ten seconds) so the link Roon shows is updated.
 Open pages and phones on the old port need the new link or a fresh scan.
-`ROON_EXTENSION_PARTY_MODE_PORT` (the older `PARTY_PORT` still works), when set to a port,
-decides it over the one saved in Roon (`envPort()` in `lib/env.js`): in Docker the
-compose file is where the port is configured, and a saved value would otherwise freeze
-it, since Roon saves every field, the port included, on the first Save. The settings
-then show a label ("Web port: 8400, set by ROON_EXTENSION_PARTY_MODE_PORT …") instead of
-the integer field, and startup errors say to change the variable. An invalid value is
-ignored. Either way, a busy port at startup falls through to the next free one.
+`ROON_EXTENSION_PARTY_MODE_PORT` (the older `PARTY_PORT` still works) only sets the first
+port: Roon saves every field on the first Save, the port included, even when only the
+zone was chosen, so from then on the saved port wins and the variable is ignored. To
+change the port after setup, use Web port in Roon. Either way, a busy port at startup
+falls through to the next free one.
 
 The default port is 8338. The container shares the host's network, so the port has to be
 free on the machine itself; 8338 was picked to stay clear of common defaults (8080, 3000,
@@ -364,7 +362,7 @@ its old name working, checked after the new ones.
 
 | Variable | Meaning |
 | --- | --- |
-| `ROON_EXTENSION_PARTY_MODE_PORT` | The web port; when set, it wins over the one saved in Roon (default 8338; was `PARTY_PORT`). |
+| `ROON_EXTENSION_PARTY_MODE_PORT` | The first port, before settings are first saved in Roon; after that, use Web port in Roon (default 8338; was `PARTY_PORT`). |
 | `ROON_EXTENSION_PARTY_MODE_DEBUG` | `1`, `true`, `yes` or `on` turns on the detailed log (see Logging). |
 
 ## Logging
