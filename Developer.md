@@ -89,7 +89,8 @@ Party mode is stored as `enabled`, its name when it was an on/off "Guest access"
 `true`, `"paused"` or `false`, read through `partyMode()` (`lib/roon-service.js`), which
 treats anything else as on. Paused pauses the zone if it is playing and refuses requests
 and skips (409 `paused`) while guests stay in; back to on presses play if Roon allows.
-Off closes the guest pages and leaves the music alone; leaving off rotates the join code
+Off pauses the zone too and closes the guest pages; back on from off doesn't press play
+(a new party waits for the host or the first request), and leaving off rotates the join code
 and starts a new playlist (`party_mode_changed` in `lib/server.js`). Left blank, the party name is
 the party zone's name (for a grouped zone, Roon's name for the group, such as "Kitchen +
 Living Room"), and follows the zone if you change it; the setting shows which name that

@@ -194,8 +194,15 @@ const artists = [{ title: 'ABBA', item_key: 'x2', hint: 'list' }];
     assert.deepStrictEqual((await modeChange('stopped', 'paused', 'on', { is_play_allowed: false })).controls, []);
   });
 
-  await check('off leaves the music alone, and so does coming back from off', async () => {
-    assert.deepStrictEqual((await modeChange('playing', 'on', 'off')).controls, []);
+  await check('off pauses the music too', async () => {
+    assert.deepStrictEqual((await modeChange('playing', 'on', 'off')).controls, ['pause']);
+  });
+
+  await check('paused to off has nothing more to pause', async () => {
+    assert.deepStrictEqual((await modeChange('paused', 'paused', 'off')).controls, []);
+  });
+
+  await check('back on from off, a new party, waits for someone to press play', async () => {
     assert.deepStrictEqual((await modeChange('paused', 'off', 'on')).controls, []);
   });
 

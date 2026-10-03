@@ -72,8 +72,8 @@ file; Google Sheets, Numbers and Excel's **Data → From Text/CSV** read it corr
 - **On**: guests add songs.
 - **Paused**, for a speech or the cake: the music pauses and guests' requests wait, with
   the QR code still up. Back to **On**, the music carries on where it was.
-- **Off**, when it's over: guests can't add songs, and the party screen says the party's
-  over, with the playlist to download. The music is left alone. Turning it back on starts
+- **Off**, when it's over: the music pauses, guests can't add songs, and the party screen
+  says the party's over, with the playlist to download. Turning it back on starts
   a new party, with a new QR code (old links stop working) and a new playlist, so
   download the old one first.
 
