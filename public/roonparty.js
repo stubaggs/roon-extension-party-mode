@@ -25,9 +25,7 @@
 
   function render(data) {
     el('party-name').textContent = data.party_name || t('party.default_name');
-    const link = el('join-link');
-    link.textContent = (data.join_url || '').replace(/^https?:\/\//, '');
-    if (data.join_url) link.href = data.join_url;
+    if (data.join_url) el('join-link').href = data.join_url;
 
     const playing = data.now_playing;
     el('current-title').textContent = playing ? playing.title : t('playing.nothing');

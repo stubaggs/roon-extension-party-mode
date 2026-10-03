@@ -73,7 +73,7 @@
   "name.cancel": "Cancel",
   "locked.title": "Scan the code again",
   "locked.text": "This link only works after scanning the code on the party screen. Ask the host to show it.",
-  "screen.scan": "Scan to put a song on",
+  "screen.scan": "Scan to add a song",
   "screen.qr_alt": "Scan to add a song",
   "screen.download_playlist": "Download playlist",
   "join.closed": "The party is closed.",

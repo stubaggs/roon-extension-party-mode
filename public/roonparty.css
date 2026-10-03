@@ -48,6 +48,11 @@
   border-radius: 6px;
 }
 
+/* The scan line is the guest link, in the line's own colour. */
+.join-copy .join-link {
+  color: inherit;
+}
+
 .join-link[href]:hover {
   text-decoration: underline;
 }
