@@ -164,7 +164,7 @@ check('the choices read as what they do from the mode the party is in now', () =
 check('the wording follows the saved mode, not the one being picked', () => {
   const self = { _resolveZone: () => null, settings: { enabled: true } };
   const result = RoonService.prototype._layout.call(self, { enabled: 'paused' });
-  assert.strictEqual(result.layout[0].values[1].title, 'Pause — hold the music and requests');
+  assert.strictEqual(result.layout[0].values[1].title, 'Pause — hold playback and requests');
   assert.strictEqual(result.values.enabled, 'paused');
 });
 
