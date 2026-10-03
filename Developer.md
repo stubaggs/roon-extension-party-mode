@@ -352,8 +352,14 @@ still counts, since the track was queued.
 a badge on the tracks they add, in Up next, Played and on the RoonParty screen. The phone
 remembers it (or that they skipped), so a rescan doesn't ask again. A guest without a name
 shows as "Anon" (`credit.guest`, translated: Anonyme, Anonym, Anónimo, Anoniem; "Anon" in
-the playlist file and the log). It is only a display name: the session's name stays empty,
-so naming yourself later updates your tracks.
+the playlist file and the log). It is only a display name: the session's name stays empty.
+Naming yourself later, or changing your name, reaches everything you already added: each
+session has a `ref` (random, separate from its `id`, which is the session cookie) that
+requests, Played entries, skips and playlist rows record, and `POST /api/name` renames by
+it (`GuestStore.rename`, `PlayHistory.rename`, `PartyPlaylist.rename`) and pushes a fresh
+queue to the pages. The ref never leaves the server: the pages' credits come from
+`requester()`, which has none, and `PlayHistory.list()` strips it. A new scan starts a new
+session, so tracks added before a rescan keep the name they had.
 
 **"Roon Radio" is a guess.** Roon doesn't say where a track came from. When Roon Radio
 is switched on for the party zone, any track no guest added is labelled "Roon Radio",

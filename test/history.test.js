@@ -131,5 +131,47 @@ check('a different track\'s position is ignored', () => {
   assert.ok(!history.list()[0].skipped);
 });
 
+console.log('\nnaming yourself later');
+
+check('a name given later reaches the tracks already played and playing', () => {
+  const history = new PlayHistory();
+  history.update('z1', playing('Waterloo'), { requested_by: null, kind: 'add', guest: 'g1' });
+  history.markSkipped(playing('Waterloo'), '', 'g1');
+  history.update('z1', playing('SOS'), { requested_by: null, kind: 'add', guest: 'g1' });
+  history.update('z1', playing('Mamma Mia'), { requested_by: 'Sam', kind: 'add', guest: 'g2' });
+  history.rename('g1', 'Stu');
+  history.update('z1', playing('Fernando'), null);
+  const [mamma, sos, waterloo] = history.list();
+  assert.strictEqual(waterloo.requested_by, 'Stu');
+  assert.strictEqual(waterloo.skipped_by, 'Stu');
+  assert.strictEqual(sos.requested_by, 'Stu', 'the track that was playing when they renamed');
+  assert.strictEqual(mamma.requested_by, 'Sam', "someone else's track is left alone");
+});
+
+check("guest refs never leave the server", () => {
+  const history = new PlayHistory();
+  history.update('z1', playing('Waterloo'), { requested_by: 'Stu', kind: 'add', guest: 'g1' });
+  history.markSkipped(playing('Waterloo'), 'Stu', 'g1');
+  history.update('z1', playing('SOS'), null);
+  assert.ok(!JSON.stringify(history.list()).includes('g1'));
+});
+
+{
+  const { GuestStore } = require('../lib/guests');
+  check('renaming a guest renames their requests, and only theirs', () => {
+    const store = new GuestStore();
+    const stu = store.create();
+    const sam = store.create();
+    sam.name = 'Sam';
+    store.attribute(stu, { title: 'Waterloo', artist: 'ABBA' }, 'add');
+    store.attribute(sam, { title: 'SOS', artist: 'ABBA' }, 'add');
+    stu.name = 'Stu';
+    store.rename(stu);
+    assert.strictEqual(store.lookup({ title: 'Waterloo', artist: 'ABBA' }).name, 'Stu');
+    assert.strictEqual(store.lookup({ title: 'SOS', artist: 'ABBA' }).name, 'Sam');
+    assert.notStrictEqual(stu.ref, stu.id, 'the ref is not the session cookie');
+  });
+}
+
 console.log(failures ? `\n${failures} failing` : '\nall passing');
 process.exit(failures ? 1 : 0);

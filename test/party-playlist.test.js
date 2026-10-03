@@ -143,5 +143,17 @@ check('file name is the party and the date, without unsafe characters', () => {
   assert.strictEqual(playlistFileName('', day), 'Party 2026-10-02.csv');
 });
 
+check('a name given later reaches the playlist', () => {
+  const playlist = new PartyPlaylist();
+  playlist.update('o1', [track(1, 'Waterloo'), track(2, 'SOS')], (t) =>
+    t.id === 1 ? { requested_by: null, kind: 'add', guest: 'g1' } : { requested_by: 'Sam', kind: 'add', guest: 'g2' }
+  );
+  playlist.rename('g1', 'Stu');
+  const csv = rows(playlist);
+  assert.ok(csv[1].includes(',Stu,'), csv[1]);
+  assert.ok(csv[2].includes(',Sam,'), csv[2]);
+  assert.ok(!playlist.toCsv().includes('g1'), 'no guest refs in the file');
+});
+
 console.log(failures ? `\n${failures} failing` : '\nall passing');
 process.exit(failures ? 1 : 0);
