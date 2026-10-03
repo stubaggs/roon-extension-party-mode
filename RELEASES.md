@@ -11,6 +11,11 @@ Not released yet. You can try it on the `experimental` branch (see
 - The party screen is now the **Party Hub**, at `/PartyHub`. Its browser tab shows the
   party's name, such as "EX5 Test-o-rama Hub". Roon's link and status line point there,
   and old `/roonparty` bookmarks still open it.
+- 25 more languages for the guest pages and the Party Hub, 30 in all: Arabic (including
+  Egyptian), Bulgarian, Chinese (Simplified and Traditional), Czech, Danish, Finnish,
+  Greek, Hebrew, Hungarian, Italian, Japanese, Korean, Norwegian, Polish, Portuguese
+  (Portugal and Brazil), Romanian, Russian, Swedish, Thai, Turkish, Ukrainian and
+  Vietnamese. Hebrew and Arabic pages read right to left.
 - Roon's status line for Party Mode shows its Party mode, the party's name and the Party
   Hub's address, whether the party is on, paused or off.
 - The **Party mode** setting reads **Pause** while the party is on and **Unpause** while

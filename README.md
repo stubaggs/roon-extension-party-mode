@@ -16,8 +16,12 @@ Roon account, and no access to anything else in your Roon setup.
 - **Keep the party's playlist:** download everything that was queued as a spreadsheet
   file, ready to import into a music service.
 - **Roon Radio** tracks are labelled, so guests know what the radio picked.
-- **In their language:** the guest pages appear in English, French, German, Spanish or
-  Dutch, following each phone's language.
+- **In their language:** the guest pages and the Party Hub follow each phone's or
+  screen's language, in 30 languages: English, Arabic (including Egyptian), Bulgarian,
+  Chinese (Simplified and Traditional), Czech, Danish, Dutch, Finnish, French, German,
+  Greek, Hebrew, Hungarian, Italian, Japanese, Korean, Norwegian, Polish, Portuguese
+  (Portugal and Brazil), Romanian, Russian, Spanish, Swedish, Thai, Turkish, Ukrainian and
+  Vietnamese.
 
 What's changed in each version is in [RELEASES.md](RELEASES.md).
 

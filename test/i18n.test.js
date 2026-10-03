@@ -58,7 +58,7 @@ const placeholders = (entry) =>
 /** Runs the page runtime as a browser would, with the given served data. */
 function runtimeFor(lang, strings) {
   const html = { lang: '' };
-  const window = { I18N_DATA: { lang, strings, fallback: en } };
+  const window = { I18N_DATA: { lang, dir: i18n.dir(lang), strings, fallback: en } };
   vm.runInNewContext(fs.readFileSync(path.join(PUBLIC, 'i18n-runtime.js'), 'utf8'), {
     window,
     document: { documentElement: html, querySelectorAll: () => [] },
@@ -128,12 +128,12 @@ check('no language preference, or any, gets English', () => {
   const accepts = require('accepts');
   const real = (header) => {
     const req = { headers: header ? { 'accept-language': header } : {} };
-    return { acceptsLanguages: (...langs) => accepts(req).languages(...langs) };
+    return Object.assign(req, { acceptsLanguages: (...langs) => accepts(req).languages(...langs) });
   };
   assert.strictEqual(i18n.pick(real()), 'en');
   assert.strictEqual(i18n.pick(real('*')), 'en');
   assert.strictEqual(i18n.pick(real('fr-FR,fr;q=0.9')), 'fr');
-  assert.strictEqual(i18n.pick(real('ja')), 'en');
+  assert.strictEqual(i18n.pick(real('is')), 'en');
 });
 
 check('a key missing from a language falls back to English', () => {
@@ -145,16 +145,12 @@ check('a key missing from a language falls back to English', () => {
 
 console.log('\nserver');
 
-const request = (header) => ({
-  acceptsLanguages: (...langs) => {
-    const wanted = String(header || '').split(',').map((part) => part.split(';')[0].trim().split('-')[0]);
-    return wanted.find((code) => langs.includes(code)) || false;
-  }
-});
+// A request as Express gives it: the language comes from the header.
+const request = (header) => ({ headers: header ? { 'accept-language': header } : {} });
 
 check('a browser asking for a language without a file gets English', () => {
-  assert.strictEqual(i18n.pick(request('it-IT,it;q=0.9')), 'en');
-  assert.strictEqual(i18n.pick(request('ja')), 'en');
+  assert.strictEqual(i18n.pick(request('is-IS,is;q=0.9')), 'en');
+  assert.strictEqual(i18n.pick(request('sw')), 'en');
   assert.strictEqual(i18n.pick(request('')), 'en');
 });
 
@@ -176,7 +172,7 @@ console.log('\nFrench');
 check('French browsers get French, including regional ones', () => {
   assert.strictEqual(i18n.pick(request('fr-FR,fr;q=0.9,en;q=0.8')), 'fr');
   assert.strictEqual(i18n.pick(request('fr-CA')), 'fr');
-  assert.strictEqual(i18n.pick(request('it-IT,fr;q=0.5')), 'fr');
+  assert.strictEqual(i18n.pick(request('is-IS,fr;q=0.5')), 'fr');
   assert.strictEqual(i18n.pick(request('en-GB,fr;q=0.5')), 'en');
 });
 
@@ -222,4 +218,59 @@ check('German: a name after "von", and the wait', () => {
 });
 
 console.log(failures ? `\n${failures} failing` : '\nall passing');
+
+console.log('\nmore languages');
+
+const languageCases = [
+  ['it-IT,it;q=0.9', 'it'], ['cs-CZ', 'cs'], ['da-DK', 'da'], ['hu', 'hu'], ['pl-PL', 'pl'],
+  ['ro-RO', 'ro'], ['fi-FI', 'fi'], ['sv-SE', 'sv'], ['vi-VN', 'vi'], ['tr-TR', 'tr'],
+  ['el-GR', 'el'], ['bg-BG', 'bg'], ['ru-RU', 'ru'], ['uk-UA', 'uk'], ['th-TH', 'th'],
+  ['ko-KR', 'ko'], ['ja-JP', 'ja'], ['he-IL', 'he'], ['iw', 'he'],
+  // Norwegian: Bokmål for nb, the general "no" and Nynorsk alike.
+  ['nb-NO', 'nb'], ['no', 'nb'], ['nn-NO', 'nb'],
+  // Portuguese: Brazil has its own file; Portugal and the rest use pt.
+  ['pt-BR', 'pt-BR'], ['pt-PT', 'pt'], ['pt', 'pt'], ['pt-AO', 'pt'],
+  // Arabic: Egypt has its own file.
+  ['ar-EG', 'ar-EG'], ['ar-SA', 'ar'], ['ar', 'ar'],
+  // Chinese by script: Traditional for Taiwan, Hong Kong and Macau.
+  ['zh-CN', 'zh-Hans'], ['zh-SG', 'zh-Hans'], ['zh', 'zh-Hans'], ['zh-Hans-CN', 'zh-Hans'],
+  ['zh-TW', 'zh-Hant'], ['zh-HK', 'zh-Hant'], ['zh-MO', 'zh-Hant'], ['zh-Hant', 'zh-Hant'],
+  // Preference order and weights.
+  ['sw,ja;q=0.8,en;q=0.9', 'en'], ['en;q=0.5,ko', 'ko'], ['*', 'en'], ['ja;q=0', 'en']
+];
+for (const [header, lang] of languageCases) {
+  check(`${header} gets ${lang}`, () => assert.strictEqual(i18n.pick(request(header)), lang));
+}
+
+check('every language file has a name, and every page key', () => {
+  for (const lang of i18n.languages()) {
+    const strings = JSON.parse(read(`i18n/${lang}.json`));
+    assert.ok(strings._language, lang);
+    const missing = Object.keys(en).filter((key) => !(key in strings));
+    assert.deepStrictEqual(missing, [], lang);
+  }
+});
+
+check('Hebrew and Arabic read right to left; the page is told so', () => {
+  for (const lang of ['he', 'ar', 'ar-EG']) assert.strictEqual(i18n.dir(lang), 'rtl', lang);
+  for (const lang of ['en', 'ru', 'zh-Hant', 'ja']) assert.strictEqual(i18n.dir(lang), 'ltr', lang);
+  assert.match(i18n.script('he'), /"dir":"rtl"/);
+  assert.strictEqual(runtimeFor('ar', JSON.parse(read('i18n/ar.json'))).html.dir, 'rtl');
+  assert.strictEqual(runtimeFor('fr', JSON.parse(read('i18n/fr.json'))).html.dir, 'ltr');
+});
+
+check('plurals follow each language: Russian, Polish, Czech, Arabic, Japanese', () => {
+  const t = (lang, key, count) => runtimeFor(lang, JSON.parse(read(`i18n/${lang}.json`))).t(key, { count });
+  assert.strictEqual(t('ru', 'time.minutes', 1), '1 минуту');
+  assert.strictEqual(t('ru', 'time.minutes', 3), '3 минуты');
+  assert.strictEqual(t('ru', 'time.minutes', 5), '5 минут');
+  assert.strictEqual(t('ru', 'time.minutes', 21), '21 минуту');
+  assert.strictEqual(t('pl', 'search.results', 2), 'Znaleziono 2 utwory.');
+  assert.strictEqual(t('pl', 'search.results', 12), 'Znaleziono 12 utworów.');
+  assert.strictEqual(t('cs', 'button.left', 3), 'zbývají 3');
+  assert.strictEqual(t('ar', 'time.minutes', 2), 'دقيقتين');
+  assert.strictEqual(t('ar', 'time.minutes', 4), '4 دقائق');
+  assert.strictEqual(t('ja', 'search.results', 1), '1 件のトラックが見つかりました。');
+});
+
 process.exit(failures ? 1 : 0);

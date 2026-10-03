@@ -216,8 +216,26 @@ the detection.
 
 ## Translating the pages
 
-Available: English (`en`), French (`fr`), German (`de`), Spanish (`es`), Dutch (`nl`). The
-non-English files are drafts (Thanks Claude), apologies for poor translations.
+Available (30): English (`en`), Arabic (`ar`), Egyptian Arabic (`ar-EG`), Bulgarian (`bg`),
+Czech (`cs`), Danish (`da`), German (`de`), Greek (`el`), Spanish (`es`), Finnish (`fi`),
+French (`fr`), Hebrew (`he`), Hungarian (`hu`), Italian (`it`), Japanese (`ja`), Korean
+(`ko`), Norwegian Bokmål (`nb`), Dutch (`nl`), Polish (`pl`), Portuguese (`pt`, Portugal),
+Brazilian Portuguese (`pt-BR`), Romanian (`ro`), Russian (`ru`), Swedish (`sv`), Thai
+(`th`), Turkish (`tr`), Ukrainian (`uk`), Vietnamese (`vi`), Simplified Chinese
+(`zh-Hans`) and Traditional Chinese (`zh-Hant`). The non-English files are drafts (Thanks
+Claude), apologies for poor translations; corrections from native speakers are welcome.
+
+**Choosing the file** (`pick()` and `match()` in `lib/i18n.js`): the browser's
+Accept-Language entries, best first, each matched as the tag itself (`pt-BR`), then the
+language with its region or script, then the language alone (`fr-CA` gets `fr`). A few
+codes are mapped: `no` and `nn` to `nb`, the old `iw` to `he`, and Chinese by script, so
+`zh-TW`, `zh-HK`, `zh-MO` and `zh-Hant-…` get `zh-Hant` and every other `zh` gets
+`zh-Hans`. Nothing matching, or `*`, gets English.
+
+**Right to left.** Hebrew and Arabic pages get `dir="rtl"` (`dir()` in `lib/i18n.js`; the
+runtime sets it, and the server writes it into the Party Hub and its message pages). The
+styles use logical properties (`inset-inline-end`, `padding-inline`, `text-align: start`)
+so they mirror, and scrolling names slide the other way.
 
 The guest page and the Party Hub take their text from `public/i18n/<code>.json`,
 one file per language. Each browser gets the language it asks for (its
@@ -227,8 +245,10 @@ from Roon as they are.
 
 To add a language, copy `en.json` to e.g. `de.json` and translate the values, keeping the
 `{name}`, `{count}` and `{wait}` placeholders. Entries like `{ "one": …, "other": … }` are
-plurals, picked by the language's own rules; add `few`, `many` and so on where the
-language has them. `npm test`
+plurals, picked by the language's own rules (`Intl.PluralRules`); add `zero`, `two`,
+`few` and `many` where the language has them (Arabic has all six; Czech, Polish, Russian
+and Ukrainian need `few` and `many`; Japanese, Korean, Chinese, Thai and Vietnamese need
+only `other`). A form left out falls back to `other`. `npm test`
 checks that a translation uses the same keys and placeholders as English, and that every
 key the pages and `messagePage()` use is in `en.json`. Restart the
 extension to pick up a new file.

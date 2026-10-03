@@ -29,7 +29,7 @@
 (function () {
   'use strict';
 
-  const data = window.I18N_DATA || { lang: 'en', strings: {}, fallback: {} };
+  const data = window.I18N_DATA || { lang: 'en', dir: 'ltr', strings: {}, fallback: {} };
   const plurals = {};
   const pluralFor = (lang) => plurals[lang] || (plurals[lang] = new Intl.PluralRules(lang));
 
@@ -90,6 +90,8 @@
   }
 
   document.documentElement.lang = data.lang;
+  // Hebrew and Arabic read right to left; the styles mirror with it.
+  document.documentElement.dir = data.dir || 'ltr';
   apply();
 
   window.I18N = { lang: data.lang, t, apply, credit, requestedBy, skippedBy, minutes };

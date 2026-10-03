@@ -91,7 +91,8 @@ main {
 
 #search {
   width: 100%;
-  padding: 0.95rem 3rem 0.95rem 1.1rem;
+  padding-block: 0.95rem;
+  padding-inline: 1.1rem 3rem;
   font-size: 1.05rem;
   color: var(--text);
   background: var(--raised);
@@ -112,7 +113,7 @@ main {
 .search-clear {
   position: absolute;
   top: 50%;
-  right: 0.55rem;
+  inset-inline-end: 0.55rem;
   width: 2.2rem;
   height: 2.2rem;
   margin-top: -1.1rem;
@@ -265,7 +266,7 @@ main {
   padding: 0.5rem;
   border-radius: 12px;
   width: 100%;
-  text-align: left;
+  text-align: start;
 }
 
 .row[aria-disabled="true"] {
@@ -311,7 +312,8 @@ main {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
-  padding: 0 0.5rem 0.75rem 4.2rem;
+  padding-block: 0 0.75rem;
+  padding-inline: 4.2rem 0.5rem;
   background: var(--raised);
   border-radius: 0 0 12px 12px;
   margin-top: -0.35rem;
@@ -363,7 +365,7 @@ main {
 }
 
 .badge.skipped {
-  margin-left: 0.3rem;
+  margin-inline-start: 0.3rem;
   background: none;
   border: 1px solid var(--edge);
   color: var(--muted);

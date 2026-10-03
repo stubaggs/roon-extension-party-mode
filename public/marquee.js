@@ -66,7 +66,9 @@
     const text = target.textContent;
     if (!started.has(text)) started.set(text, performance.now());
     const elapsed = (performance.now() - started.get(text)) / 1000;
-    inner.style.setProperty('--marquee-shift', `${-shift}px`);
+    // Left to show the end of the name; right on a right-to-left page.
+    const rtl = getComputedStyle(target).direction === 'rtl';
+    inner.style.setProperty('--marquee-shift', `${rtl ? shift : -shift}px`);
     inner.style.setProperty('--marquee-time', `${seconds.toFixed(2)}s`);
     inner.style.animationDelay = `${-elapsed.toFixed(2)}s`;
     inner.addEventListener('animationend', () => {
