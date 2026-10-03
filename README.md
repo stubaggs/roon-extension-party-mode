@@ -72,7 +72,8 @@ settings can show just a link instead, or nothing. Whatever you choose there, th
 is always at the address the setting's hint gives, such as
 `http://192.168.1.73:8338/api/playlist.csv`, so you can open it in any browser on your
 network. You get a CSV file of every track that was
-queued in the party zone: title, artist, album, length, who asked for it and when. Roon
+queued in the party zone: title, artist, album, length, who asked for it and when, with
+the time zone (for example `21:30 +01:00`, an hour ahead of UTC). Roon
 can't import it directly, but it's in the format Soundiiz imports: in Soundiiz, choose
 **Import playlist**, then the file, and pick TIDAL, Qobuz or Spotify. Roon then shows it
 with your playlists. Excel on Windows can garble accented names when you double-click the

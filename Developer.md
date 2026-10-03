@@ -441,8 +441,10 @@ code from `GET /api/playlist-qr.svg` with the link under it, a button, or nothin
 in Roon's settings gives the download address, which `app.js` hands over with
 `setPlaylistUrl()` alongside the website link. `test/server.test.js` runs the real web server against a
 stand-in for Roon and checks these answers, the join-link pages and the guest API's
-`no_session` and `closed` errors. Times are local to the extension, which in Docker is UTC unless
-`TZ` is set. Kept in memory, at most 2000 tracks, and reset with the party zone and when guest
+`no_session` and `closed` errors. Times are local to the extension, to the minute, with the offset
+from UTC (`2026-10-02 21:30 +01:00`), so they read correctly wherever the file is opened.
+In Docker the zone is UTC (`+00:00`) unless `TZ` is set. Spreadsheets treat the column
+as text rather than a date because of the offset; importers ignore it. Kept in memory, at most 2000 tracks, and reset with the party zone and when guest
 access is turned back on (a new party; what is still queued is recorded again).
 
 **Played history is the extension's own.** Roon's API has no play history, so the

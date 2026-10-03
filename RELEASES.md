@@ -21,6 +21,7 @@ Not released yet. You can try it on the `experimental` branch.
   turn it into a TIDAL, Qobuz or Spotify playlist that Roon then shows with your others.
 - With Party mode **Off**, the party screen says "Requests are closed" where the playing
   track was, and guests' phones say so too, instead of asking them to scan the code again.
+- The playlist's times show the time zone, such as `21:30 +01:00`.
 - **Display playlist download** setting: once Party mode is **Off**, the party screen shows
   a QR code guests can scan to get the playlist, just a link, or nothing. The setting's
   hint gives the download address, which works whichever you pick.
