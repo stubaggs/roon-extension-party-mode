@@ -343,12 +343,14 @@ a release's number.
 An experimental build is also a separate extension to Roon (`extensionIdentity()` in
 `lib/roon-service.js`): a version with a suffix registers as
 `com.stubaggs.party-mode.experimental`, named "Party Mode (experimental)", while a release
-keeps `com.stubaggs.party-mode`. Two copies with one id clash on one machine; with
-separate ids, the release and the experimental build run side by side against one Core,
-each enabled, set up and paired on its own (checked October 2026). They still need their
-own `config.json` and party zone; the port sorts itself out (the second takes the next
-free one). For
-now it only runs when started by hand (Actions → Publish Docker image → Run workflow);
+keeps `com.stubaggs.party-mode`. Roon tells extensions apart by id, wherever they run:
+two copies with one id clash even on separate machines, so run at most one release and
+one experimental build per Core. With their separate ids, those two run side by side
+against one Core, on one machine or two, each enabled, set up and paired on its own
+(checked October 2026). They still need their own `config.json` and party zone; the port
+sorts itself out (the second takes the next free one).
+
+The workflow only runs when started by hand (Actions → Publish Docker image → Run workflow);
 the commented-out `push` trigger in the workflow publishes on every merge to `main` once
 restored, and a commented-out weekly `schedule` rebuilds and republishes every Monday so
 installs pick up base-image security fixes without a manual publish. It needs two
@@ -409,9 +411,11 @@ Extension Manager creates the file writable itself.
 
 New features are tried out before each release in an **experimental** version, built
 from the `experimental` branch and published by hand as the `:experimental` Docker tag
-(see Publishing the image). It may change or break between updates. It shows in Roon as a separate extension, **Party Mode
-(experimental)**, so it can run alongside the released Party Mode, even on the same
-computer. Give it its own folder, container name and party zone:
+(see Publishing the image). It may change or break between updates. It shows in Roon as a
+separate extension, **Party Mode (experimental)**, so it can run alongside the released
+Party Mode, even on the same computer. Run only one copy of each per Roon Core, though:
+two copies of the same one clash, even on different computers. Give it its own folder,
+container name and party zone:
 
 ```bash
 mkdir party-mode-experimental && cd party-mode-experimental
