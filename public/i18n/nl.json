@@ -75,7 +75,7 @@
   "locked.text": "Deze link werkt pas nadat je de code op het feestscherm hebt gescand. Vraag de host om hem te laten zien.",
   "screen.scan": "Scan om een nummer toe te voegen",
   "screen.qr_alt": "Scan om een nummer toe te voegen",
-  "screen.download_playlist": "Playlist downloaden",
+  "screen.download_playlist": "De playlist downloaden",
   "join.closed": "Het feest neemt geen verzoekjes meer aan.",
   "join.expired": "Deze code is verlopen. Scan de code op het scherm opnieuw."
 }

@@ -75,7 +75,7 @@
   "locked.text": "Dieser Link funktioniert erst, nachdem du den Code auf dem Party-Bildschirm gescannt hast. Bitte den Gastgeber, ihn zu zeigen.",
   "screen.scan": "Scannen, um einen Song hinzuzufügen",
   "screen.qr_alt": "Scannen, um einen Song hinzuzufügen",
-  "screen.download_playlist": "Playlist herunterladen",
+  "screen.download_playlist": "Die Playlist herunterladen",
   "join.closed": "Die Party nimmt keine Wünsche mehr an.",
   "join.expired": "Dieser Code ist abgelaufen. Scanne den Code auf dem Bildschirm noch einmal."
 }

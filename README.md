@@ -58,7 +58,7 @@ under **Settings → Extensions** in Roon.
    on a TV, a tablet or a laptop where guests can see it.
 3. Guests scan the QR code on the party screen with their phone camera. That's it.
 
-To keep the party's playlist, click **Download playlist** under the QR code on the party
+To keep the party's playlist, click **Download the playlist** under the QR code on the party
 screen, on a computer rather than the TV. You get a CSV file of every song that was
 queued in the party zone: title, artist, album, length, who asked for it and when. Roon
 can't import it directly, but it's in the format Soundiiz imports: in Soundiiz, choose
