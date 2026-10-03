@@ -89,7 +89,7 @@ file; Google Sheets, Numbers and Excel's **Data → From Text/CSV** read it corr
 | Party name | Shown on the party screen. Leave blank to use the zone's name. |
 | Roon profile for guest requests | The Roon profile the tracks are played under. Choose a "Guests" profile to keep party tracks out of your own history and recommendations. |
 | Web port | The port the guest pages use (8338). Only change it if something else on the computer uses 8338. |
-| Adding tracks | Whether guests can add tracks, whether a track already in the queue can be added again, how many each guest gets, and how many minutes until they get another. |
+| Adding tracks | Whether guests can add tracks, whether a track already in the queue can be added again (covers, live takes and remasters count as different tracks), how many each guest gets, and how many minutes until they get another. |
 | Playing next | The same, for putting a track straight after the current one. |
 | Skipping | The same, for skipping the current track. Off unless you turn it on. |
 | Advanced | Only needed if search or queueing doesn't work on a Core that isn't in English. Usually it sorts itself out. |

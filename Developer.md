@@ -367,6 +367,17 @@ a single edit both titled "Hey Jude" — they cannot be told apart at search tim
 the second is refused as a duplicate. Once both are queued they are distinct, and get
 their own badges.
 
+**Covers are not duplicates, which takes some inferring.** A search result's subtitle
+credits writers as well as performers ("FINNEAS, Billie Eilish, 2CELLOS"); a queue entry
+credits performers only ("Billie Eilish"). Compared name by name, every cover of a song
+would share its writer with the queued original. So `sharedCredits` (`lib/track-id.js`)
+takes the names credited on at least half of the guest's results with that title, when
+there are three or more, as the writers, and `sameRecordingAsQueued` compares only what
+is left: the version's performers. A result crediting only writers is the original and
+is compared on all its names. On a real search for "bad guy" (`test/fixtures/`), this
+took the results marked as queued from 24 to the one that was. With fewer than three
+results to compare, any shared name still counts, as before.
+
 **Attribution is exact once a track is queued, best-effort before that.** Roon queue
 items carry no "who added this" field. A request is bound to its real queue item when
 Roon reports the insert, which is exact; the fallbacks below that match on title and
