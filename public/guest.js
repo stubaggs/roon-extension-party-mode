@@ -19,6 +19,7 @@
   const app = el('app');
   const locked = el('locked');
   const results = el('results');
+  const resultsStatus = el('results-status');
   const queueList = el('queue');
   const playedList = el('played');
   const searchInput = el('search');
@@ -39,47 +40,100 @@
 
   async function api(path, options) {
     const res = await fetch(path, Object.assign({ headers: { 'Content-Type': 'application/json' } }, options));
+    const body = await res.json().catch(() => ({}));
     if (res.status === 401 || res.status === 403) {
-      showLocked();
+      // Party mode Off answers "closed": requests are over, not the guest's link.
+      showLocked(body.error === 'closed' ? 'closed' : 'locked');
       throw new Error('no_session');
     }
-    const body = await res.json().catch(() => ({}));
     if (!res.ok) throw Object.assign(new Error(body.error || 'error'), { body });
     return body;
   }
 
-  function showLocked() {
+  /** In place of the page: 'locked' (scan again) or 'closed' (requests are over). */
+  function showLocked(which) {
     app.hidden = true;
-    locked.hidden = false;
+    el('nickname').hidden = true;
+    locked.hidden = which !== 'locked';
+    el('closed').hidden = which !== 'closed';
   }
 
   const { t } = window.I18N;
   const minutes = window.I18N.minutes;
 
-  // Text keys: allowance.<add|next|skip>.<unlimited|left|waiting|used>
-  function describeTokens(bucket) {
+  /**
+   * A guest's allowance lives on the button it limits: "Add to queue · 3 left",
+   * "Skip · in 5 min". Each such button carries data-bucket (add, next, skip)
+   * and data-label (its text key), so it can be relabelled in place when the
+   * counts change, without rebuilding the list around it. A button with
+   * data-quiet (Skip) says nothing while it can be used, only when it can't.
+   */
+  function allowanceNote(bucket) {
     const status = party.allowances[bucket];
-    const key = (state) => `allowance.${bucket}.${state}`;
-    if (status.remaining === null) return t(key('unlimited'));
-    if (status.remaining > 0) return t(key('left'), { count: status.remaining });
-    if (status.nextIn) return t(key('waiting'), { wait: minutes(status.nextIn) });
-    return t(key('used'));
+    if (party.party_mode === 'paused') return { text: t('button.paused'), usable: false };
+    if (status.remaining === null) return { text: '', usable: true };
+    if (status.remaining > 0) return { text: t('button.left', { count: status.remaining }), usable: true };
+    if (status.nextIn) {
+      const wait = t('time.short', { count: Math.max(1, Math.ceil(status.nextIn / 60000)) });
+      return { text: t('button.wait', { wait }), usable: false };
+    }
+    return { text: t('button.used'), usable: false };
   }
 
-  function renderTokens() {
-    if (!party) return;
-    const lines = [];
-    if (!party.capabilities.add) lines.push(t('allowance.closed'));
-    for (const bucket of ['add', 'next', 'skip']) {
-      if (party.capabilities[bucket]) lines.push(describeTokens(bucket));
+  function labelButton(button) {
+    const note = allowanceNote(button.dataset.bucket);
+    button.textContent = t(button.dataset.label);
+    if (note.text && !(note.usable && 'quiet' in button.dataset)) {
+      const dot = document.createElement('span');
+      dot.className = 'note-dot';
+      dot.setAttribute('aria-hidden', 'true');
+      dot.textContent = ' · ';
+      const count = document.createElement('span');
+      count.className = 'note';
+      count.textContent = note.text;
+      button.append(dot, count);
     }
-    const tokens = el('tokens');
-    tokens.innerHTML = '';
-    for (const line of lines) {
-      const span = document.createElement('span');
-      span.className = 'token-line';
-      span.textContent = line;
-      tokens.appendChild(span);
+    // Used up, the button stays focusable so a screen reader still hears
+    // "Skip, in 5 min"; pressing it explains instead (spentMessage).
+    button.setAttribute('aria-disabled', String(!note.usable));
+  }
+
+  const isSpent = (button) => button.getAttribute('aria-disabled') === 'true';
+
+  /** What to say when a used-up button is pressed. */
+  function spentMessage(bucket) {
+    if (party.party_mode === 'paused') return t('allowance.paused');
+    const wait = party.allowances[bucket].nextIn;
+    if (bucket === 'skip') return wait ? t('toast.no_skips_wait', { wait: minutes(wait) }) : t('toast.no_skips');
+    return wait ? t('toast.nothing_left_wait', { wait: minutes(wait) }) : t('toast.nothing_left');
+  }
+
+  let refillTimer = null;
+
+  function renderAllowances() {
+    if (!party) return;
+    // A line under the search box only when there is nothing to press.
+    const notice = el('notice');
+    if (party.party_mode === 'paused') notice.textContent = t('allowance.paused');
+    else if (!party.capabilities.add && !party.capabilities.next) notice.textContent = t('allowance.closed');
+    else notice.textContent = '';
+    notice.hidden = !notice.textContent;
+
+    document.querySelectorAll('[data-bucket]').forEach(labelButton);
+
+    // Fetch again when a used-up button is due back, so it comes back on time.
+    clearTimeout(refillTimer);
+    const waits = ['add', 'next', 'skip'].map((b) => party.allowances[b].nextIn).filter(Boolean);
+    if (waits.length) refillTimer = setTimeout(refreshParty, Math.min(...waits) + 1000);
+  }
+
+  async function refreshParty() {
+    try {
+      party = await api('/api/party');
+      renderAllowances();
+      renderNameChip();
+    } catch (err) {
+      /* the next refresh will try again */
     }
   }
 
@@ -99,7 +153,12 @@
 
   // ------------------------------------------------------------------ search
 
-  function renderResults() {
+  /**
+   * Redraw the results. The list is rebuilt, which would drop keyboard and
+   * screen reader focus, so focus goes back to the row for focusKey: the
+   * result just opened or requested.
+   */
+  function renderResults(focusKey) {
     results.innerHTML = '';
     if (!lastResults.length) {
       if (searchInput.value.trim().length >= 2) {
@@ -115,7 +174,7 @@
       const row = document.createElement('button');
       row.className = 'row';
       row.type = 'button';
-      row.setAttribute('aria-expanded', String(expandedKey === track.key));
+      row.dataset.key = track.key;
 
       const img = document.createElement('img');
       img.className = 'art';
@@ -142,11 +201,16 @@
       row.append(img, text, state);
       results.appendChild(row);
 
-      if (track.in_queue || track.added) continue;
+      // Already queued: still in the list, and reachable, but not a working button.
+      if (track.in_queue || track.added) {
+        row.setAttribute('aria-disabled', 'true');
+        continue;
+      }
 
+      row.setAttribute('aria-expanded', String(expandedKey === track.key));
       row.addEventListener('click', () => {
         expandedKey = expandedKey === track.key ? null : track.key;
-        renderResults();
+        renderResults(track.key);
       });
 
       if (expandedKey === track.key) {
@@ -156,35 +220,55 @@
         if (party.capabilities.add) {
           const add = document.createElement('button');
           add.className = 'pill pill-primary';
-          add.textContent = t('track.add');
+          Object.assign(add.dataset, { bucket: 'add', label: 'track.add' });
+          labelButton(add);
           add.addEventListener('click', () => request(track, 'add', add));
           actions.appendChild(add);
         }
         if (party.capabilities.next) {
           const next = document.createElement('button');
           next.className = 'pill pill-ghost';
-          next.textContent = t('track.next');
+          Object.assign(next.dataset, { bucket: 'next', label: 'track.next' });
+          labelButton(next);
           next.addEventListener('click', () => request(track, 'next', next));
           actions.appendChild(next);
         }
         results.appendChild(actions);
       }
     }
+
+    if (focusKey) {
+      const row = [...results.querySelectorAll('.row')].find((r) => r.dataset.key === focusKey);
+      if (row) row.focus();
+    }
   }
 
+  function announceResults(query) {
+    if (query.trim().length < 2) resultsStatus.textContent = '';
+    else if (!lastResults.length) resultsStatus.textContent = t('search.no_results');
+    else resultsStatus.textContent = t('search.results', { count: lastResults.length });
+  }
+
+  // Only the latest search's answer is shown: an earlier one may come back last.
+  let searchSeq = 0;
+
   async function runSearch(query) {
+    const mine = ++searchSeq;
     if (query.trim().length < 2) {
       lastResults = [];
       renderResults();
+      announceResults(query);
       return;
     }
     try {
       const body = await api(`/api/search?q=${encodeURIComponent(query)}`);
+      if (mine !== searchSeq || body.superseded) return;
       lastResults = body.results;
       expandedKey = null;
       renderResults();
+      announceResults(query);
     } catch (err) {
-      if (err.message !== 'no_session') toast(t('search.unavailable'));
+      if (mine === searchSeq && err.message !== 'no_session') toast(t('search.unavailable'));
     }
   }
 
@@ -217,28 +301,27 @@
   // ----------------------------------------------------------------- actions
 
   async function request(track, mode, button) {
+    if (isSpent(button)) return toast(spentMessage(mode));
     button.disabled = true;
     try {
       const body = await api('/api/request', {
         method: 'POST',
-        body: JSON.stringify({
-          key: track.key,
-          mode,
-          title: track.title,
-          subtitle: track.subtitle
-        })
+        // The server knows the track by its key, from the results it sent.
+        body: JSON.stringify({ key: track.key, mode })
       });
       party.allowances = body.allowances;
       track.added = true;
       expandedKey = null;
-      renderTokens();
-      renderResults();
+      renderAllowances();
+      renderResults(track.key);
       toast(mode === 'next' ? t('toast.queued_next') : t('toast.queued'));
     } catch (err) {
       button.disabled = false;
       const detail = err.body || {};
       if (err.message === 'already_queued') toast(t('toast.already_queued'));
+      else if (err.message === 'paused') toast(t('allowance.paused'));
       else if (err.message === 'rate_limited') {
+        refreshParty(); // the counts were out of date; grey the button out
         toast(detail.next_in ? t('toast.nothing_left_wait', { wait: minutes(detail.next_in) }) : t('toast.nothing_left'));
       } else if (err.message === 'disabled') toast(t('toast.disabled'));
       else if (err.message !== 'no_session') toast(t('toast.roon_refused'));
@@ -246,14 +329,17 @@
   }
 
   el('skip').addEventListener('click', async () => {
+    if (isSpent(el('skip'))) return toast(spentMessage('skip'));
     try {
       const body = await api('/api/skip', { method: 'POST' });
       party.allowances = body.allowances;
-      renderTokens();
+      renderAllowances();
       toast(t('toast.skipped'));
     } catch (err) {
       const detail = err.body || {};
-      if (err.message === 'rate_limited') {
+      if (err.message === 'paused') toast(t('allowance.paused'));
+      else if (err.message === 'rate_limited') {
+        refreshParty();
         toast(detail.next_in ? t('toast.no_skips_wait', { wait: minutes(detail.next_in) }) : t('toast.no_skips'));
       } else if (err.message !== 'no_session') toast(t('toast.failed'));
     }
@@ -269,6 +355,7 @@
     who.hidden = !(playing && playing.kind);
     who.textContent = who.hidden ? '' : creditText(playing);
     who.classList.toggle('radio', !who.hidden && playing.kind === 'radio');
+    who.classList.toggle('next', !who.hidden && playing.kind === 'next');
     el('playing-label').textContent =
       playing && playing.state === 'playing' ? t('playing.now') : t('playing.paused');
     setArt(el('playing-art'), playing && playing.image_key, 144);
@@ -277,14 +364,20 @@
       const position = document.createElement('span');
       position.className = 'queue-position';
       position.textContent = String(index + 1);
+      // The list is numbered already; don't read the number twice.
+      position.setAttribute('aria-hidden', 'true');
       return [position, ...trackCells(item)];
     });
 
     renderList(playedList, snapshot.played || [], t('played.empty'), (item) => {
-      const time = document.createElement('span');
-      time.className = 'played-at';
-      time.textContent = window.I18N.time(item.played_at);
-      return [...trackCells(item), time];
+      const cells = trackCells(item);
+      if (item.skipped) {
+        const tag = document.createElement('span');
+        tag.className = 'badge skipped';
+        tag.textContent = window.I18N.skippedBy(item);
+        cells[1].appendChild(tag);
+      }
+      return cells;
     });
   }
 
@@ -329,7 +422,7 @@
     text.append(title, sub);
     if (item.kind) {
       const badge = document.createElement('span');
-      badge.className = item.kind === 'radio' ? 'badge radio' : 'badge';
+      badge.className = item.kind === 'next' || item.kind === 'radio' ? `badge ${item.kind}` : 'badge';
       badge.textContent = window.I18N.credit(item);
       text.appendChild(badge);
     }
@@ -362,27 +455,48 @@
   const nickname = el('nickname');
   const nicknameInput = el('nickname-input');
 
-  function renderWhoami() {
+  /** The name tag at the top: "✎ Stu", or "Add your name" before there is one. */
+  function renderNameChip() {
     const name = party && party.guest_name;
-    el('whoami').textContent = name ? t('name.adding_as', { name }) : '';
-    el('whoami-change').textContent = name ? t('name.change') : t('name.add');
+    const chip = el('name-chip');
+    chip.textContent = name || t('name.add');
+    chip.classList.toggle('named', Boolean(name));
+    // Said in full to a screen reader: "Adding as Stu. Change".
+    chip.setAttribute('aria-label', name ? `${t('name.adding_as', { name })}. ${t('name.change')}` : t('name.add'));
   }
 
   async function saveName(name) {
     const body = await api('/api/name', { method: 'POST', body: JSON.stringify({ name }) });
     party.guest_name = body.guest_name;
-    renderWhoami();
+    renderNameChip();
   }
 
   let changingName = false;
+  let nicknameOpener = null;
 
-  /** First visit offers Skip; changing a name later offers Cancel instead. */
+  /**
+   * First visit offers Skip; changing a name later offers Cancel instead.
+   * While it is open the page behind is inert, so focus stays in the dialog.
+   */
   function askName(changing) {
     changingName = changing === true;
     el('nickname-skip').textContent = changingName ? t('name.cancel') : t('name.skip');
     nicknameInput.value = (party && party.guest_name) || remembered.get() || '';
+    nicknameOpener = document.activeElement;
+    app.inert = true;
     nickname.hidden = false;
     nicknameInput.focus();
+  }
+
+  /**
+   * Back to the button that opened it. On a first visit nothing did, and
+   * focusing the search box would pop up a phone's keyboard unasked.
+   */
+  function closeName() {
+    nickname.hidden = true;
+    app.inert = false;
+    if (nicknameOpener && nicknameOpener !== document.body) nicknameOpener.focus();
+    nicknameOpener = null;
   }
 
   el('nickname-form').addEventListener('submit', async (event) => {
@@ -390,7 +504,7 @@
     const name = nicknameInput.value.trim();
     // Skipping stores an empty name, so "Skip" isn't asked again on this phone.
     remembered.set(name);
-    nickname.hidden = true;
+    closeName();
     try {
       await saveName(name);
     } catch (err) {
@@ -398,16 +512,26 @@
     }
   });
 
-  el('nickname-skip').addEventListener('click', () => {
+  function skipName() {
     if (changingName) {
-      nickname.hidden = true;
+      closeName();
       return;
     }
     nicknameInput.value = '';
     el('nickname-form').requestSubmit();
+  }
+
+  el('nickname-skip').addEventListener('click', skipName);
+
+  // Escape does what the second button says: Cancel, or Skip on a first visit.
+  nickname.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      skipName();
+    }
   });
 
-  el('whoami-change').addEventListener('click', () => askName(true));
+  el('name-chip').addEventListener('click', () => askName(true));
 
   /** First visit asks; a remembered name (or a remembered skip) is applied quietly. */
   async function settleName() {
@@ -427,10 +551,14 @@
     }
     app.hidden = false;
     locked.hidden = true;
+    el('closed').hidden = true;
     document.title = party.party_name || t('page.title');
-    el('skip').hidden = !party.capabilities.skip;
-    renderTokens();
-    renderWhoami();
+    const skip = el('skip');
+    skip.hidden = !party.capabilities.skip;
+    if (party.capabilities.skip) Object.assign(skip.dataset, { bucket: 'skip', label: 'skip.button', quiet: '' });
+    else delete skip.dataset.bucket;
+    renderAllowances();
+    renderNameChip();
 
     // boot() runs again when the party settings change; set up the rest once.
     if (started) return;
@@ -444,15 +572,7 @@
     events.addEventListener('queue', (event) => renderQueue(JSON.parse(event.data)));
     events.addEventListener('party', () => boot());
 
-    setInterval(() => {
-      api('/api/party')
-        .then((body) => {
-          party = body;
-          renderTokens();
-          renderWhoami();
-        })
-        .catch(() => {});
-    }, 30000);
+    setInterval(refreshParty, 30000);
   }
 
   boot();

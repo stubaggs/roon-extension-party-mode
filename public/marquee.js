@@ -14,7 +14,8 @@
 
 /**
  * Scrolls track and artist names that don't fit their space: pause, slide to
- * show the end, slide back, repeat. Names that fit are left alone. Each page
+ * show the end, slide back, twice, then stop with the "…" back (party.css sets
+ * the count; hovering pauses it). Names that fit are left alone. Each page
  * lists its selectors in data-marquee on the <script> tag that loads this file.
  */
 (function () {
@@ -28,6 +29,8 @@
   // When a page redraws a name that was already scrolling, carry on from where
   // it was instead of starting over (the RoonParty screen redraws every 30s).
   const started = new Map();
+  // Names that have had their turn; they keep their "…" until they leave the page.
+  const finished = new Set();
 
   function unwrap(target) {
     const inner = target.querySelector(':scope > .marquee-inner');
@@ -45,6 +48,7 @@
       inner = null;
     }
     if (inner) return;
+    if (finished.has(target.textContent)) return;
     if (target.scrollWidth <= target.clientWidth + 1) return;
 
     inner = document.createElement('span');
@@ -65,6 +69,10 @@
     inner.style.setProperty('--marquee-shift', `${-shift}px`);
     inner.style.setProperty('--marquee-time', `${seconds.toFixed(2)}s`);
     inner.style.animationDelay = `${-elapsed.toFixed(2)}s`;
+    inner.addEventListener('animationend', () => {
+      finished.add(text);
+      unwrap(target);
+    });
     target.classList.add('marquee-on');
   }
 
@@ -79,6 +87,7 @@
       // Forget names that are no longer on the page.
       const shown = new Set([...targets].map((target) => target.textContent));
       for (const text of started.keys()) if (!shown.has(text)) started.delete(text);
+      for (const text of finished) if (!shown.has(text)) finished.delete(text);
     });
   }
 

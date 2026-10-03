@@ -10,7 +10,12 @@ Every change that affects them updates the docs in the same commit:
 - **Developer.md** is for people working on the code. Update it when how things work
   changes: architecture, files, matching and attribution rules, tests, translations,
   Docker and publishing, known limitations.
-- If a change touches neither, say so in the pull request rather than editing the docs.
+- **RELEASES.md** is the user-friendly list of changes, newest version first. Every
+  change people would notice (features, settings, fixes, the pages) adds a line under the
+  version in progress, in the same commit, in the README's plain language. Internal
+  changes (refactors, tests, workflows) don't go in. A version bump in `package.json`
+  starts a new section; the version in progress says it isn't released yet.
+- If a change touches none of these, say so in the pull request rather than editing the docs.
 
 ## Conventions the owner has asked for
 
@@ -22,6 +27,10 @@ Every change that affects them updates the docs in the same commit:
 - Extension settings and the Roon status line stay in English, as in other Roon
   extensions. Guest-facing pages are translated: every page string lives in
   `public/i18n/<code>.json` (en, fr, de, es, nl), and new page text needs all of them.
+- Say **tracks**, not songs, in everything people see (pages, settings, docs): a track
+  may be a poem or a speech. In translations use the neutral word Roon uses (fr
+  "morceau", de "Titel", es "pista", nl "nummer"). "Song" stays only where it means the
+  song as opposed to one recording of it, as in duplicate matching.
 - Environment variables are named `ROON_EXTENSION_PARTY_MODE_<SETTING>` and read through
   `lib/env.js`, which also accepts the hyphenated `ROON-EXTENSION-PARTY-MODE_` spelling.
   When renaming one, keep the old name working.

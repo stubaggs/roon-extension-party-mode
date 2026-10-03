@@ -37,12 +37,13 @@ Roon Core  ──(node-roon-api over the local network)──  app.js
 | `lib/roon-service.js` | Pairing, settings layout, search, queue actions, queue subscription |
 | `lib/track-id.js` | Track identity: title and artist normalisation, length, hash |
 | `lib/guests.js` | Guest sessions, token-bucket limits, request attribution |
-| `lib/history.js` | Played-songs list for the guest page |
+| `lib/history.js` | Played-tracks list for the guest page |
+| `lib/party-playlist.js` | Everything queued during the party, as the downloadable CSV |
 | `lib/server.js` | REST API, server-sent events, QR code, image proxy |
 | `public/` | Guest page and the RoonParty screen, no build step |
 | `public/i18n/`, `lib/i18n.js` | Page text per language, and picking the language per browser |
 | `lib/env.js`, `lib/log.js` | Environment variables, and the debug log switch |
-| `test/` | Identity, attribution and settings tests, `npm test` |
+| `test/` | Identity, attribution, settings and web server tests, `npm test` |
 
 ## How a track is identified
 
@@ -83,7 +84,14 @@ party zone, and the console prints the guest link and RoonParty URL. The extensi
 
 ## Host settings (in Roon)
 
-Party zone, party name, guest access on/off, and web port. Left blank, the party name is
+Party mode (first, as the switch used most), party zone, party name, and web port.
+Party mode is stored as `enabled`, its name when it was an on/off "Guest access":
+`true`, `"paused"` or `false`, read through `partyMode()` (`lib/roon-service.js`), which
+treats anything else as on. Paused pauses the zone if it is playing and refuses requests
+and skips (409 `paused`) while guests stay in; back to on presses play if Roon allows.
+Off pauses the zone too and closes the guest pages; back on from off doesn't press play
+(a new party waits for the host or the first request), and leaving off rotates the join code
+and starts a new playlist (`party_mode_changed` in `lib/server.js`). Left blank, the party name is
 the party zone's name (for a grouped zone, Roon's name for the group, such as "Kitchen +
 Living Room"), and follows the zone if you change it; the setting shows which name that
 is. Saving a new port moves the
@@ -119,7 +127,7 @@ Roon keeps the profile **per browse session and per hierarchy**: each
 `multi_session_key` has its own profile in each hierarchy, a session nobody has selected
 one in uses Roon's default ("Guest"), and a queue action counts toward the profile of the
 session and hierarchy it was made in. Found on a real Core: selecting in a guest's
-"settings" hierarchy switched it there ("Guest" → "Pat") while songs the same guest
+"settings" hierarchy switched it there ("Guest" → "Pat") while tracks the same guest
 queued from the "search" hierarchy still counted as Guest.
 
 So guests search and queue in Roon's main **"browse"** hierarchy, the only one holding
@@ -172,7 +180,12 @@ bucket model: each guest starts with N goes and earns one back every M minutes, 
 separate budgets for adding, playing next, and skipping. 0 goes per guest means no limit,
 and 0 minutes means a used go never comes back; to stop guests doing something at all,
 set its "Let guests …" to No. Adding and playing next are on
-by default, skipping is off.
+by default, skipping is off. The guest page shows each allowance on the button it limits
+("Add to queue · 3 left", greyed out when used up; Skip shows nothing until it is used up,
+then "in 5 min"), relabelled in place
+from `party.allowances` (`labelButton` in `public/guest.js`) and fetched again when a used
+go is due back. A line under the search box appears only when requests are closed or
+paused. The guest's name is a tag at the top right that opens the name dialog.
 
 **Browse titles.** Roon localises its menus and the API doesn't say which language the
 Core uses. The extension tries the titles in the collapsed **Advanced** group at the bottom of the
@@ -205,9 +218,43 @@ from Roon as they are.
 To add a language, copy `en.json` to e.g. `de.json` and translate the values, keeping the
 `{name}`, `{count}` and `{wait}` placeholders. Entries like `{ "one": …, "other": … }` are
 plurals, picked by the language's own rules; add `few`, `many` and so on where the
-language has them. Times follow the language's clock format automatically. `npm test`
-checks that a translation uses the same keys and placeholders as English. Restart the
+language has them. `npm test`
+checks that a translation uses the same keys and placeholders as English, and that every
+key the pages and `messagePage()` use is in `en.json`. Restart the
 extension to pick up a new file.
+
+## Accessibility
+
+The pages were checked by hand against WCAG 2.2 AA (October 2026); keep these when
+changing them:
+
+- **Contrast.** Text colours in `public/party.css` are all at least 4.5:1 on the
+  background; text fields use `--field-edge`, 3:1 against the page and the field.
+- **Focus survives redraws.** The guest page rebuilds its search results on every
+  change, so `renderResults(focusKey)` puts focus back on the row just opened or
+  requested. Results already queued are `aria-disabled` rows, not dead buttons.
+- **Announce, don't read out.** The results list is not a live region; a hidden
+  `role="status"` line says how many tracks were found (`search.results`, a plural).
+- **Used-up buttons stay reachable.** They are `aria-disabled`, not `disabled`, so a
+  screen reader still hears "Skip, in 5 min"; pressing one shows why in a toast. They
+  are outlined rather than faded, so the wait stays readable.
+- **The name dialog** makes the page behind `inert`, closes on Escape (as Skip or
+  Cancel), and hands focus back to the button that opened it.
+- **Moving text stops.** Long names scroll twice to the end and back, pause on hover,
+  then keep their "…" (`marquee.js`, the count is in `party.css`). With reduced motion
+  they never scroll.
+- **Numbered lists** are `<ol>`; the visible number is `aria-hidden` so it isn't read
+  twice. Album covers have empty `alt` text: the title next to them says it all.
+- **Say why, in the guest's language.** The guest page shows nothing until it knows
+  whether it can open, then "Scan the code again" (no session) or "Requests are closed"
+  (the API answers `closed` while party mode is off), never one in place of the other. An
+  old or closed join link (`/j/<code>`) gets a small HTML page from `messagePage()` in
+  `lib/server.js`, with `lang` and a viewport, rather than plain text a phone shows tiny.
+- **QR codes say what they are.** Their `alt` text names the code ("QR code for the
+  guest page", `screen.qr_alt`) rather than repeating the link under it, which a screen
+  reader would then hear twice.
+- **Headings follow the screen.** On the party screen, "Requests are closed" is an `<h2>`
+  in the place of the playing track's title, which is one too.
 
 ## Installing it from Roon
 
@@ -266,7 +313,9 @@ docker run -d --name party-mode --network host \
 ```
 
 `docker-compose.yml` does the same thing. Create `config.json` first and make it writable
-(`touch config.json && chmod 666 config.json`): otherwise Docker makes a directory in its
+by uid 1000 (`touch config.json && sudo chown 1000 config.json && chmod 600 config.json`;
+`chmod 666` works without `sudo` but leaves Roon's pairing token readable by every
+account on the host): otherwise Docker makes a directory in its
 place, and the extension, which runs as the image's unprivileged `node` user (uid 1000),
 can't save its settings. If it can't, Roon's status line and the console say so. The
 Extension Manager creates the file writable itself.
@@ -288,7 +337,7 @@ its old name working, checked after the new ones.
 The normal log is short: the port and links at startup, one line per guest request
 (`Request (add) from Sam: …`), per queue insert (`Queued: …` with length and hash) and
 per track start (`Playing: … -> Sam`), one line when each guest's session gets the
-profile, and warnings. That is enough to diagnose a wrong name on a song.
+profile, and warnings. That is enough to diagnose a wrong name on a track.
 
 `ROON_EXTENSION_PARTY_MODE_DEBUG=1` (`lib/log.js`) adds detail: the profile before and after each switch,
 the profiles on offer, the first search's result categories, and node-roon-api's own log
@@ -306,16 +355,24 @@ promote a track that is already waiting. If you have seen Music Assistant's "boo
 upcoming song", that part does not have a Roon equivalent.
 
 **A request presses play.** Roon's Queue and Add Next actions leave a paused or stopped
-zone as it is, so a song requested after the queue ran out would sit there unplayed.
+zone as it is, so a track requested after the queue ran out would sit there unplayed.
 After either action succeeds, `performAction` sends the transport `play` control unless
 the zone is already playing or loading. That also resumes a zone the host paused on
 purpose; there is no setting to turn it off. A failed `play` is logged and the request
 still counts, since the track was queued.
 
 **Nicknames are optional.** Guests are asked for a name on their first visit; it shows as
-a badge on the songs they add, in Up next, Played and on the RoonParty screen. The phone
-remembers it (or that they skipped), so a rescan doesn't ask again. Unnamed requests show
-as "a guest".
+a badge on the tracks they add, in Up next, Played and on the RoonParty screen. The phone
+remembers it (or that they skipped), so a rescan doesn't ask again. A guest without a name
+shows as "Anon" (`credit.guest`, translated: Anonyme, Anonym, Anónimo, Anoniem; "Anon" in
+the playlist file and the log). It is only a display name: the session's name stays empty.
+Naming yourself later, or changing your name, reaches everything you already added: each
+session has a `ref` (random, separate from its `id`, which is the session cookie) that
+requests, Played entries, skips and playlist rows record, and `POST /api/name` renames by
+it (`GuestStore.rename`, `PlayHistory.rename`, `PartyPlaylist.rename`) and pushes a fresh
+queue to the pages. The ref never leaves the server: the pages' credits come from
+`requester()`, which has none, and `PlayHistory.list()` strips it. A new scan starts a new
+session, so tracks added before a rescan keep the name they had.
 
 **"Roon Radio" is a guess.** Roon doesn't say where a track came from. When Roon Radio
 is switched on for the party zone, any track no guest added is labelled "Roon Radio",
@@ -328,6 +385,17 @@ recordings share a title and artist and differ only in length — an album versi
 a single edit both titled "Hey Jude" — they cannot be told apart at search time and
 the second is refused as a duplicate. Once both are queued they are distinct, and get
 their own badges.
+
+**Covers are not duplicates, which takes some inferring.** A search result's subtitle
+credits writers as well as performers ("FINNEAS, Billie Eilish, 2CELLOS"); a queue entry
+credits performers only ("Billie Eilish"). Compared name by name, every cover of a song
+would share its writer with the queued original. So `sharedCredits` (`lib/track-id.js`)
+takes the names credited on at least half of the guest's results with that title, when
+there are three or more, as the writers, and `sameRecordingAsQueued` compares only what
+is left: the version's performers. A result crediting only writers is the original and
+is compared on all its names. On a real search for "bad guy" (`test/fixtures/`), this
+took the results marked as queued from 24 to the one that was. With fewer than three
+results to compare, any shared name still counts, as before.
 
 **Attribution is exact once a track is queued, best-effort before that.** Roon queue
 items carry no "who added this" field. A request is bound to its real queue item when
@@ -342,15 +410,80 @@ start, which is the place to look when a badge is wrong.
 **Browse sessions are stateful.** Item keys are only valid until that guest's browse
 session moves on. The server replays the search and retries once when a key has gone
 stale, which covers the usual case of a guest searching again before tapping.
+A session also has one position, and a search or a request is several steps through
+it, so a guest's operations take turns (`RoonService._inSession`): interleaved, one
+search opened Tracks while another took the session back to the result categories, and
+the first then read "Tracks, Artists, TIDAL" as tracks. A search still waiting when the
+same guest searches again is dropped (`search` returns null; the page ignores out-of-date
+answers too), and only `action_list` items are returned as tracks.
 
 **Access control is a shared join code, not a login.** Anyone who can reach the port and
-has scanned the code can add tracks. The RoonParty screen and its endpoints need no session at all.
-Do not expose this to the internet.
+has scanned the code can add tracks. The RoonParty screen and its endpoints need no session at all,
+and they include the join link, so the code proves someone opened the screen, not that they
+are in the room. Allowances are per session: a guest who clears cookies and scans again
+starts afresh. Do not expose this to the internet.
+
+**What a guest can make Roon do is limited to what they were shown.** Browse item keys
+are short and numbered in sequence, so `POST /api/request` only takes a key this guest was
+sent in their search results (`GuestStore.offer`, the last 400 per guest), and uses the
+title and artist the server sent, not the phone's: a guest can't send the key of an
+album, a playlist or a search category, which would queue all of it, or pass one track off
+as another to get past the duplicate check. A key never sent answers `unknown_track`.
+
+**Allowances are taken before Roon is asked**, and handed back (`GuestStore.refund`) if
+Roon refuses, for requests and skips alike, so several sent at once can't all pass the
+check before any is counted.
+
+**Input limits.** Names go through `cleanName()` (`lib/guests.js`): control characters,
+which could fake log lines, and direction overrides, which can show a name back to
+front, are removed, and the 24-character limit counts characters, so an emoji isn't cut
+in half. Searches stop at 200 characters. At most 2000 sessions are held; the longest idle
+goes first.
+
+**Headers.** Every response carries a Content-Security-Policy allowing only the
+extension's own scripts, styles, images and connections (the pages have no inline
+script or style; `marquee.js` sets styles through the DOM, which the policy allows),
+`X-Content-Type-Options: nosniff` and `Referrer-Policy: no-referrer`. Guest pages also
+refuse to be framed (`frame-ancestors 'none'`, `X-Frame-Options: DENY`); the party
+screen may be, for a dashboard on the TV. `test/server.test.js` covers all of this.
+
+**The party playlist is a download, not a Roon playlist.** Roon's browse API offers
+extensions Play Now, Add Next, Queue and Start Radio on a track, and Play Now, Shuffle,
+Add Next, Queue and Start Radio on a playlist; nothing creates or edits one (checked
+against a Core in October 2026). So `lib/party-playlist.js` records every queue entry
+the party zone gets, once per `queue_item_id`, and `GET /api/playlist.csv` (offered on
+the party screen only while party mode is off, which is how a host ends a party; the
+URL itself needs no session, like the rest of the screen, and always works) serves it as CSV in
+the form Soundiiz imports: lower-case `title`, `artist`, `album` headers (the other
+columns are ignored by importers), commas, UTF-8 without a byte order mark (a BOM hides
+the first header from an importer, at the cost of Excel's double-click guessing the
+encoding wrong), and Roon's ` / ` between artists written as `, `. It includes what was
+queued before the extension started, Roon Radio picks and the host's own additions. Credits are frozen when the entry is first seen, since closing guest
+access clears attributions. Column names and credits are English, which import services
+expect. A guest name a spreadsheet would read as a formula gets a leading apostrophe;
+track details are left as Roon gives them, so they still match. The Display playlist
+download setting (`playlist_download`: `'qr'`, `'link'` or `'off'`, read through
+`playlistDisplay()`, which turns the brief yes/no form into `'qr'`/`'off'`) only decides
+what the screen shows: `/api/roonparty` passes it as `playlist`, and the screen shows a QR
+code from `GET /api/playlist-qr.svg` with the link under it, a button, or nothing. Its hint
+in Roon's settings gives the download address, which `app.js` hands over with
+`setPlaylistUrl()` alongside the website link. `test/server.test.js` runs the real web server against a
+stand-in for Roon and checks these answers, the join-link pages and the guest API's
+`no_session` and `closed` errors. Times are local to the extension, which in Docker is UTC unless
+`TZ` is set. Kept in memory, at most 2000 tracks, and reset with the party zone and when guest
+access is turned back on (a new party; what is still queued is recorded again).
 
 **Played history is the extension's own.** Roon's API has no play history, so the
 "Played" list on the guest page is recorded by the extension as tracks start. It is kept
-in memory (last 200 songs) and starts over when the extension restarts or the party zone
-changes.
+in memory (last 200 tracks) and starts over when the extension restarts or the party zone
+changes. A guest's skip marks the playing track (`markSkipped`, before the skip reaches
+Roon, since the next track can start before Roon answers; undone if the skip fails), and
+Played shows "Skipped by Sam". A skip made in Roon is inferred: `RoonService._notePosition`
+keeps the furthest position Roon reported for the playing track (zone updates can carry a
+reset one), and a track left 10 seconds or more before its end (`SKIP_MARGIN` in
+`lib/history.js`) with no guest skip shows "Skipped in Roon". It is not judged without a
+length or a position, so radio streams and zones that report no position never show it.
+Anything that cuts a track short counts, such as Play Now on another track in Roon.
 
 **The queue subscription is per zone.** Changing the party zone starts a new subscription;
 the old one is ignored rather than torn down, since the API has no convenient unsubscribe.

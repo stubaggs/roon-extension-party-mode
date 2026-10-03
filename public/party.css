@@ -2,6 +2,8 @@
   --ink: #170f2b;
   --raised: #241740;
   --edge: #3a2a63;
+  /* Text fields' borders: 3:1 against the page and the field, so the box shows. */
+  --field-edge: #7565ab;
   --text: #f0eaff;
   --muted: #a79bd0;
   --amber: #ffc24b;
@@ -15,6 +17,14 @@
 
 * {
   box-sizing: border-box;
+}
+
+/* Phone browsers enlarge text in boxes they think are wide; a scrolling name
+   (marquee.js) is one, so it grew while it scrolled. The pages size their own
+   text, and this doesn't stop guests zooming. */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 html,
@@ -82,6 +92,19 @@ a:focus-visible {
   cursor: default;
 }
 
+/* For screen readers only. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* Long names that scroll, see marquee.js. */
 .marquee-on {
   text-overflow: clip;
@@ -89,7 +112,13 @@ a:focus-visible {
 
 .marquee-inner {
   display: inline-block;
-  animation: marquee var(--marquee-time, 8s) ease-in-out infinite alternate;
+  /* Twice to the end and back, then it stops (marquee.js restores the "…"):
+     moving text shouldn't go on indefinitely with no way to stop it. */
+  animation: marquee var(--marquee-time, 8s) ease-in-out 4 alternate;
+}
+
+.marquee-on:hover .marquee-inner {
+  animation-play-state: paused;
 }
 
 @keyframes marquee {

@@ -56,8 +56,8 @@ main {
   padding: 0.1rem 0.55rem;
   border-radius: 999px;
   font-size: 0.78rem;
-  background: rgba(255, 194, 75, 0.16);
-  color: var(--amber);
+  background: rgba(201, 182, 255, 0.18);
+  color: var(--lavender);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -67,6 +67,14 @@ main {
 .badge.radio {
   background: rgba(123, 224, 192, 0.16);
   color: var(--mint);
+}
+
+/* As on the party screen: lavender for a track a guest added, amber for one
+   they put straight after the playing track, mint for Roon Radio. */
+.playing-who.next,
+.badge.next {
+  background: rgba(255, 194, 75, 0.16);
+  color: var(--amber);
 }
 
 .playing-who[hidden] {
@@ -87,7 +95,7 @@ main {
   font-size: 1.05rem;
   color: var(--text);
   background: var(--raised);
-  border: 1px solid var(--edge);
+  border: 1px solid var(--field-edge);
   border-radius: 14px;
   appearance: none;
 }
@@ -126,33 +134,68 @@ main {
   color: var(--text);
 }
 
-.tokens {
-  margin: 0 0 0.25rem;
-  font-size: 0.85rem;
-}
-
-.token-line {
-  display: block;
-}
-
-.whoami {
+/* Only when requests are closed or paused. */
+.notice {
   margin: 0 0 0.6rem;
+  font-size: 0.9rem;
+}
+
+.notice[hidden] {
+  display: none;
+}
+
+/* The name tag, top right. */
+.topbar {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 0.75rem;
+  margin-bottom: -0.75rem;
+}
+
+.name-chip {
+  max-width: 60%;
+  min-height: 32px;
+  padding: 0.25rem 0.8rem;
+  border: 1px solid var(--edge);
+  border-radius: 999px;
   font-size: 0.85rem;
-}
-
-.link-button {
-  padding: 0;
   color: var(--lavender);
-  text-decoration: underline;
-  text-underline-offset: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-#whoami:not(:empty) + .link-button::before {
-  content: "· ";
+.name-chip.named::before {
+  content: "✎ ";
+}
+
+/* "· 3 left" on a button: the allowance it uses. */
+.pill .note {
+  font-weight: 500;
+}
+
+/* Used up or paused: outlined rather than faded, so "in 5 min" stays
+   readable (grey label 6.5:1, the note in full text colour). */
+.pill[aria-disabled="true"] {
+  background: none;
+  border: 1px solid var(--edge);
   color: var(--muted);
-  display: inline-block;
-  margin-right: 0.25rem;
-  text-decoration: none;
+  cursor: default;
+}
+
+.pill[aria-disabled="true"] .note {
+  color: var(--text);
+}
+
+/* Skip shares a row with what's playing, so its count goes underneath. */
+.skip .note-dot {
+  display: none;
+}
+
+.skip .note {
+  display: block;
+  font-size: 0.72rem;
+  line-height: 1.1;
 }
 
 .nickname-backdrop {
@@ -195,7 +238,7 @@ main {
   font-size: 1.05rem;
   color: var(--text);
   background: var(--ink);
-  border: 1px solid var(--edge);
+  border: 1px solid var(--field-edge);
   border-radius: 12px;
 }
 
@@ -223,6 +266,10 @@ main {
   border-radius: 12px;
   width: 100%;
   text-align: left;
+}
+
+.row[aria-disabled="true"] {
+  cursor: default;
 }
 
 .row[aria-expanded="true"] {
@@ -262,6 +309,7 @@ main {
 
 .actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.5rem;
   padding: 0 0.5rem 0.75rem 4.2rem;
   background: var(--raised);
@@ -305,19 +353,20 @@ main {
 }
 
 .played .row {
-  grid-template-columns: 40px 1fr auto;
-}
-
-.played-at {
-  font-variant-numeric: tabular-nums;
-  color: var(--muted);
-  font-size: 0.8rem;
+  grid-template-columns: 40px 1fr;
 }
 
 .queue-position {
   font-variant-numeric: tabular-nums;
   color: var(--muted);
   font-size: 0.85rem;
+}
+
+.badge.skipped {
+  margin-left: 0.3rem;
+  background: none;
+  border: 1px solid var(--edge);
+  color: var(--muted);
 }
 
 .badge {
@@ -330,8 +379,8 @@ main {
   padding: 0.05rem 0.45rem;
   border-radius: 999px;
   font-size: 0.72rem;
-  background: rgba(255, 194, 75, 0.16);
-  color: var(--amber);
+  background: rgba(201, 182, 255, 0.18);
+  color: var(--lavender);
 }
 
 .skip {

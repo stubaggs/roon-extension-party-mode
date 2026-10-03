@@ -158,6 +158,135 @@ const artists = [{ title: 'ABBA', item_key: 'x2', hint: 'list' }];
     assert.deepStrictEqual(controls, []);
   });
 
+  console.log('\none guest, two searches at once');
+
+  // The second search starts while the first is inside "Tracks"; without
+  // taking turns, the first then read the result categories as its tracks.
+  const overlapping = async (useSearch) => {
+    const fake = fakeSearch({ Artists: artists, Tracks: tracks, actions: english });
+    const roon = service(fake);
+    const browse = fake.browse;
+    let release;
+    let reached;
+    const gate = new Promise((r) => (release = r));
+    const inside = new Promise((r) => (reached = r));
+    let paused = false;
+    roon._browse = async (opts) => {
+      const result = await browse(opts);
+      if (!paused && opts.item_key === 'c1') {
+        paused = true;
+        reached();
+        await gate;
+      }
+      return result;
+    };
+    const first = roon.search('s1', 'abba');
+    await inside;
+    const second = useSearch ? roon.search('s1', 'waterloo') : roon.performAction('s1', 't1', 'add');
+    release();
+    return { first: await first, second: await second, fake };
+  };
+
+  await check('a search started during another waits its turn', async () => {
+    const { first, second } = await overlapping(true);
+    assert.deepStrictEqual(first.map((t) => t.title), ['Dancing Queen', 'Waterloo']);
+    assert.deepStrictEqual(second.map((t) => t.title), ['Dancing Queen', 'Waterloo']);
+  });
+
+  await check('a request made during a search waits its turn too', async () => {
+    const { first, fake } = await overlapping(false);
+    assert.deepStrictEqual(first.map((t) => t.title), ['Dancing Queen', 'Waterloo']);
+    assert.deepStrictEqual(pressed(fake), ['Queue']);
+  });
+
+  await check('typing on: a search still waiting is dropped for the newer one', async () => {
+    const roon = service(fakeSearch({ Tracks: tracks, actions: english }));
+    const [older, newer] = await Promise.all([roon.search('s1', 'ab'), roon.search('s1', 'abba')]);
+    assert.strictEqual(older, null);
+    assert.strictEqual(newer.length, 2);
+  });
+
+  await check('a category is never returned as a track', async () => {
+    const fake = fakeSearch({ Tracks: [...tracks, { title: 'More', item_key: 'm1', hint: 'list' }], actions: english });
+    const found = await service(fake).search('s1', 'abba');
+    assert.deepStrictEqual(found.map((t) => t.title), ['Dancing Queen', 'Waterloo']);
+  });
+
+  console.log('\nparty mode');
+
+  const { partyMode } = require('../lib/roon-service');
+
+  await check('stored values read as on, paused or off; anything else is on', async () => {
+    assert.strictEqual(partyMode({ enabled: true }), 'on');
+    assert.strictEqual(partyMode({ enabled: 'paused' }), 'paused');
+    assert.strictEqual(partyMode({ enabled: false }), 'off');
+    assert.strictEqual(partyMode({}), 'on');
+    assert.strictEqual(partyMode({ enabled: 'nonsense' }), 'on');
+  });
+
+  const modeChange = async (state, from, to, extra) => {
+    const roon = service(fakeSearch({ Tracks: tracks, actions: english }));
+    const controls = withTransport(roon, state);
+    Object.assign(roon.zone, { is_play_allowed: true }, extra);
+    const events = [];
+    roon.on('party_mode_changed', (...args) => events.push(args));
+    await roon._partyModeChanged(from, to);
+    return { controls, events };
+  };
+
+  await check('on to paused pauses the music', async () => {
+    const { controls, events } = await modeChange('playing', 'on', 'paused');
+    assert.deepStrictEqual(controls, ['pause']);
+    assert.deepStrictEqual(events, [['paused', 'on']]);
+  });
+
+  await check('paused back to on plays the queue', async () => {
+    assert.deepStrictEqual((await modeChange('paused', 'paused', 'on')).controls, ['play']);
+  });
+
+  await check('back to on with nothing to play leaves it', async () => {
+    assert.deepStrictEqual((await modeChange('stopped', 'paused', 'on', { is_play_allowed: false })).controls, []);
+  });
+
+  await check('off pauses the music too', async () => {
+    assert.deepStrictEqual((await modeChange('playing', 'on', 'off')).controls, ['pause']);
+  });
+
+  await check('paused to off has nothing more to pause', async () => {
+    assert.deepStrictEqual((await modeChange('paused', 'paused', 'off')).controls, []);
+  });
+
+  await check('back on from off, a new party, waits for someone to press play', async () => {
+    assert.deepStrictEqual((await modeChange('paused', 'off', 'on')).controls, []);
+  });
+
+  console.log('\nhow far a track got');
+
+  const zoneAt = (title, seek, length = 200) => ({
+    now_playing: { three_line: { line1: title, line2: 'ABBA' }, length, seek_position: seek }
+  });
+
+  await check('the furthest position seen is reported when the track changes', async () => {
+    const roon = service(fakeSearch({ Tracks: tracks, actions: english }));
+    assert.strictEqual(roon._notePosition(zoneAt('Waterloo', 10)), null);
+    roon._notePosition(zoneAt('Waterloo', 42));
+    roon._notePosition(zoneAt('Waterloo', 0)); // a zone update with a reset position
+    assert.deepStrictEqual(roon._notePosition(zoneAt('SOS', 0)), { title: 'Waterloo', artist: 'ABBA', length: 200, seek: 42 });
+  });
+
+  await check('no position ever seen is reported as unknown', async () => {
+    const roon = service(fakeSearch({ Tracks: tracks, actions: english }));
+    roon._notePosition(zoneAt('Waterloo', undefined));
+    assert.strictEqual(roon._notePosition(zoneAt('SOS', 0)).seek, null);
+  });
+
+  await check('nothing playing any more also ends the track', async () => {
+    const roon = service(fakeSearch({ Tracks: tracks, actions: english }));
+    roon._notePosition(zoneAt('Waterloo', 42));
+    assert.strictEqual(roon._notePosition({}).title, 'Waterloo');
+    assert.strictEqual(roon._notePosition(zoneAt('SOS', 1)), null);
+  });
+
   console.log(failures ? `\n${failures} failing` : '\nall passing');
   process.exit(failures ? 1 : 0);
 })();

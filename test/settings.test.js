@@ -146,6 +146,43 @@ const item = (result, setting) => {
   return all.find((entry) => entry.setting === setting);
 };
 
+check('party mode is first, with on, paused and off', () => {
+  const result = layout({});
+  assert.strictEqual(result.layout[0].setting, 'enabled');
+  assert.strictEqual(result.layout[0].title, 'Party mode');
+  assert.deepStrictEqual(result.layout[0].values.map((v) => v.value), [true, 'paused', false]);
+});
+
+check('a saved on/off from "Guest access" carries over, and junk reads as on', () => {
+  assert.strictEqual(layout({ enabled: false }).values.enabled, false);
+  assert.strictEqual(layout({ enabled: 'paused' }).values.enabled, 'paused');
+  assert.strictEqual(layout({ enabled: 'maybe' }).values.enabled, true);
+});
+
+check('display playlist download: QR code, link or off, QR code unless chosen', () => {
+  const entry = item(layout({}), 'playlist_download');
+  assert.strictEqual(entry.title, 'Display playlist download');
+  assert.deepStrictEqual(entry.values.map((v) => v.value), ['qr', 'link', 'off']);
+  assert.strictEqual(layout({}).values.playlist_download, 'qr');
+  assert.strictEqual(layout({ playlist_download: 'link' }).values.playlist_download, 'link');
+  assert.strictEqual(layout({ playlist_download: 'off' }).values.playlist_download, 'off');
+});
+
+check('a saved yes/no for the playlist carries over, and junk reads as QR code', () => {
+  assert.strictEqual(layout({ playlist_download: true }).values.playlist_download, 'qr');
+  assert.strictEqual(layout({ playlist_download: false }).values.playlist_download, 'off');
+  assert.strictEqual(layout({ playlist_download: 'maybe' }).values.playlist_download, 'qr');
+});
+
+check('the hint names the download address once it is known', () => {
+  const hint = (self) => item(RoonService.prototype._layout.call(self, {}), 'playlist_download').subtitle;
+  assert.strictEqual(hint({ _resolveZone: () => null }), 'On the party screen when Party mode is Off');
+  assert.strictEqual(
+    hint({ _resolveZone: () => null, playlistUrl: 'http://192.168.1.73:8338/api/playlist.csv' }),
+    'On the party screen when Party mode is Off. Always downloadable at http://192.168.1.73:8338/api/playlist.csv'
+  );
+});
+
 check('numbers in range pass through', () => {
   assert.strictEqual(normaliseInteger(10, 0, 999, 0), 10);
   assert.strictEqual(normaliseInteger(0, 0, 999, 0), 0);

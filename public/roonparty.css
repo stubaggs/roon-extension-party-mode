@@ -6,7 +6,10 @@
 .stage {
   display: grid;
   grid-template-columns: minmax(280px, 34%) 1fr;
-  gap: clamp(1.5rem, 4vw, 4rem);
+  /* The join code and what's playing on top; the whole queue underneath,
+     taking the rest of the screen and scrolling when it is longer. */
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: clamp(1rem, 3vh, 2.5rem) clamp(1.5rem, 4vw, 4rem);
   height: 100vh;
   padding: clamp(1.5rem, 4vh, 3.5rem);
   align-items: center;
@@ -24,7 +27,7 @@
 }
 
 .qr {
-  width: min(100%, 22rem);
+  width: min(100%, 22rem, 32vh);
   aspect-ratio: 1;
   background: #fff;
   border-radius: 18px;
@@ -48,13 +51,57 @@
   border-radius: 6px;
 }
 
+.join-closed {
+  padding: 0;
+}
+
+/* "Requests are closed", where the playing track was, at the same size. */
+.closed-message[hidden],
+.current[hidden] {
+  display: none;
+}
+
+.closed-title {
+  margin: 0;
+  font-size: clamp(1.6rem, 4vw, 3.4rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  color: var(--amber);
+}
+
+.closed-text {
+  margin: 0.6rem 0 0;
+  font-size: clamp(1rem, 1.8vw, 1.6rem);
+}
+
+.download {
+  display: inline-block;
+  text-decoration: none;
+  font-size: clamp(1rem, 1.4vw, 1.25rem);
+  padding: 0.8rem 1.6rem;
+}
+
+.download[hidden] {
+  display: none;
+}
+
+.closed-text {
+  margin: 0.4rem 0 1.2rem;
+  font-size: clamp(1rem, 1.6vw, 1.4rem);
+}
+
+/* The scan line is the guest link, in the line's own colour. */
+.join-copy .join-link {
+  color: inherit;
+}
+
 .join-link[href]:hover {
   text-decoration: underline;
 }
 
 .stack {
   min-width: 0;
-  height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -110,12 +157,36 @@
   padding: 0.2rem 0.8rem;
   border-radius: 999px;
   font-size: clamp(0.85rem, 1.3vw, 1.15rem);
-  background: rgba(255, 194, 75, 0.16);
-  color: var(--amber);
+  background: rgba(201, 182, 255, 0.18);
+  color: var(--lavender);
 }
 
 .current-who[hidden] {
   display: none;
+}
+
+.upnext {
+  grid-column: 1 / -1;
+  align-self: stretch;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.upnext-title {
+  margin: 0 0 0.6rem;
+  color: var(--amber);
+  font-size: clamp(0.8rem, 1.1vw, 1rem);
+  font-weight: 600;
+}
+
+.upnext .list {
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.list .empty {
+  display: block;
 }
 
 .list {
@@ -128,13 +199,18 @@
 
 .list li {
   display: grid;
-  grid-template-columns: 2.2rem 1fr;
+  grid-template-columns: 2.2rem auto 1fr;
   gap: 1rem;
-  align-items: baseline;
+  align-items: center;
   padding: clamp(0.4rem, 1.1vh, 0.9rem) 0;
   border-bottom: 1px solid rgba(58, 42, 99, 0.5);
   font-size: clamp(1rem, 1.6vw, 1.5rem);
   min-width: 0;
+}
+
+.list .cover {
+  width: 2.4em;
+  height: 2.4em;
 }
 
 .list .n {
@@ -168,8 +244,8 @@
   padding: 0.1rem 0.6rem;
   border-radius: 999px;
   font-size: 0.6em;
-  background: rgba(255, 194, 75, 0.16);
-  color: var(--amber);
+  background: rgba(201, 182, 255, 0.18);
+  color: var(--lavender);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -181,22 +257,82 @@
   color: var(--mint);
 }
 
+/* Lavender for a track a guest added, amber for one they put straight
+   after the playing track, mint for Roon Radio. */
+.current-who.next,
 .list .who.next {
-  background: rgba(201, 182, 255, 0.18);
-  color: var(--lavender);
+  background: rgba(255, 194, 75, 0.16);
+  color: var(--amber);
 }
 
-.closed {
-  grid-column: 1 / -1;
-  text-align: center;
-  font-size: 1.4rem;
-  color: var(--muted);
+
+/* With room to spare, one line per song so more of the queue fits. */
+@media (min-width: 721px) {
+  .upnext .list > li > div {
+    display: flex;
+    align-items: baseline;
+    gap: 0.9em;
+  }
+  .upnext .list .t {
+    flex: 0 1 auto;
+  }
+  .upnext .list .a {
+    flex: 0 1 auto;
+  }
+  .upnext .list .who {
+    flex: none;
+    margin-top: 0;
+  }
 }
 
 @media (max-width: 720px) {
+  /* One column on a phone, and the page scrolls rather than the list. */
+  .roonparty {
+    overflow: auto;
+    height: auto;
+  }
   .stage {
     grid-template-columns: 1fr;
+    grid-template-rows: none;
+    height: auto;
     align-content: start;
+  }
+  .upnext .list {
+    overflow: visible;
+  }
+  /* "Playing now" becomes a heading at the left edge, like "Up next",
+     with the cover and the track beneath it. */
+  .current {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    /* The label, then the cover beside title, artist and credit. No row gap:
+       the inherited flex gap would push those three apart. */
+    gap: 0 1rem;
+    align-items: center;
+  }
+  .current-text {
+    display: contents;
+  }
+  .current-label {
+    grid-column: 1 / -1;
+    margin: 0 0 0.6rem;
+    font-weight: 600;
+  }
+  .current-art {
+    grid-column: 1;
+    grid-row: 2 / span 3;
+  }
+  .current-title {
+    grid-area: 2 / 2;
+  }
+  .current-artist {
+    grid-area: 3 / 2;
+  }
+  .current-who {
+    grid-area: 4 / 2;
+  }
+  .current-who {
+    justify-self: start;
   }
   .qr {
     width: min(60%, 16rem);

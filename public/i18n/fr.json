@@ -8,47 +8,40 @@
   "playing.nothing": "Rien en lecture",
   "playing.nothing_yet": "Rien pour l'instant",
   "credit.requested_by": "Demandé par {name}",
-  "credit.requested_by_guest": "Demandé par un invité",
-  "credit.guest": "un invité",
+  "credit.guest": "Anonyme",
   "credit.radio": "Roon Radio",
   "search.placeholder": "Rechercher un morceau ou un artiste",
   "search.clear": "Effacer la recherche",
   "search.no_results": "Aucun morceau trouvé. Essayez avec le nom de l'artiste.",
+  "search.results": {
+    "one": "{count} morceau trouvé.",
+    "other": "{count} morceaux trouvés."
+  },
   "search.unavailable": "La recherche est indisponible pour le moment.",
   "track.added": "Ajouté",
   "track.in_queue": "Dans la file d'attente",
   "track.add": "Ajouter à la file",
   "track.next": "Lire ensuite",
   "queue.up_next": "À suivre",
-  "queue.empty": "Rien de prévu. Ajoutez le premier morceau.",
+  "queue.empty": "Rien de prévu.",
   "played.title": "Déjà joués",
   "played.empty": "Rien n'a encore été joué.",
+  "played.skipped_by": "Passé par {name}",
+  "played.skipped_in_roon": "Passé dans Roon",
   "allowance.closed": "Les demandes sont fermées pour le moment.",
-  "allowance.add.unlimited": "Ajoutez autant de morceaux que vous voulez.",
-  "allowance.add.left": {
-    "one": "Il vous reste {count} morceau à ajouter.",
-    "other": "Il vous reste {count} morceaux à ajouter."
+  "allowance.paused": "Les demandes sont en pause pour un moment.",
+  "button.left": {
+    "one": "{count} restant",
+    "other": "{count} restants"
   },
-  "allowance.add.waiting": "Un autre morceau dans {wait}.",
-  "allowance.add.used": "Vous avez ajouté tous vos morceaux.",
-  "allowance.next.unlimited": "Utilisez « Lire ensuite » autant que vous voulez.",
-  "allowance.next.left": {
-    "one": "Il vous reste {count} « Lire ensuite ».",
-    "other": "Il vous reste {count} « Lire ensuite »."
-  },
-  "allowance.next.waiting": "Un autre « Lire ensuite » dans {wait}.",
-  "allowance.next.used": "Vous avez utilisé tous vos « Lire ensuite ».",
-  "allowance.skip.unlimited": "Passez des morceaux autant que vous voulez.",
-  "allowance.skip.left": {
-    "one": "Vous pouvez encore passer {count} morceau.",
-    "other": "Vous pouvez encore passer {count} morceaux."
-  },
-  "allowance.skip.waiting": "Vous pourrez passer un autre morceau dans {wait}.",
-  "allowance.skip.used": "Vous avez passé tous les morceaux autorisés.",
+  "button.wait": "dans {wait}",
+  "button.used": "plus aucun",
+  "button.paused": "en pause",
   "time.minutes": {
     "one": "une minute",
     "other": "{count} minutes"
   },
+  "time.short": "{count} min",
   "toast.queued_next": "Sera lu ensuite",
   "toast.queued": "Ajouté à la file d'attente",
   "toast.already_queued": "Ce morceau est déjà dans la file d'attente.",
@@ -74,7 +67,11 @@
   "locked.title": "Scannez à nouveau le code",
   "locked.text": "Ce lien ne fonctionne qu'après avoir scanné le code affiché sur l'écran de la soirée. Demandez à l'hôte de l'afficher.",
   "screen.scan": "Scannez pour ajouter un morceau",
-  "screen.qr_alt": "Scannez pour ajouter un morceau",
-  "join.closed": "La soirée n'accepte plus de demandes.",
+  "screen.qr_alt": "Code QR de la page des invités",
+  "screen.download_playlist": "Télécharger la playlist",
+  "screen.scan_playlist": "Scannez pour télécharger la playlist",
+  "screen.playlist_qr_alt": "Code QR de la playlist",
+  "screen.closed_title": "Les demandes sont fermées",
+  "screen.closed_text": "Merci pour tous les morceaux.",
   "join.expired": "Ce code a expiré. Scannez à nouveau le code affiché à l'écran."
 }

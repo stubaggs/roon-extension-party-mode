@@ -157,5 +157,50 @@ check('unrelated track gets no credit', () => {
   assert.strictEqual(found, null);
 });
 
+console.log('\nduplicates: covers are not the queued original');
+
+{
+  const { sharedCredits, sameRecordingAsQueued } = require('../lib/track-id');
+  const { results } = require('./fixtures/bad-guy-search.json');
+  const asCandidate = (r) => ({ title: r.title, artist: r.subtitle });
+  const blocked = (queued, list) =>
+    list.filter((r) => sameRecordingAsQueued(queued, asCandidate(r), sharedCredits(list, r.title)));
+
+  check('the writers of "bad guy" are inferred from the other results', () => {
+    assert.deepStrictEqual([...sharedCredits(results, 'bad guy')].sort(), ['billie eilish', 'finneas']);
+  });
+
+  check('with the original queued, only the original is a duplicate, not its 20-odd covers', () => {
+    const hits = blocked({ title: 'bad guy', artist: 'Billie Eilish' }, results);
+    assert.deepStrictEqual(hits.map((r) => r.subtitle), ['Billie Eilish, FINNEAS']);
+  });
+
+  check('with a cover queued, only that cover is a duplicate', () => {
+    const hits = blocked({ title: 'bad guy', artist: '2CELLOS' }, results);
+    assert.deepStrictEqual(hits.map((r) => r.subtitle), ['FINNEAS, Billie Eilish, 2CELLOS']);
+  });
+
+  check('a cover credited to one writer: Hallelujah', () => {
+    const list = [
+      { title: 'Hallelujah', subtitle: 'Leonard Cohen' },
+      { title: 'Hallelujah', subtitle: 'Jeff Buckley, Leonard Cohen' },
+      { title: 'Hallelujah', subtitle: 'Rufus Wainwright, Leonard Cohen' },
+      { title: 'Hallelujah', subtitle: 'Pentatonix, Leonard Cohen' }
+    ];
+    assert.deepStrictEqual(blocked({ title: 'Hallelujah', artist: 'Leonard Cohen' }, list).map((r) => r.subtitle), ['Leonard Cohen']);
+    assert.deepStrictEqual(blocked({ title: 'Hallelujah', artist: 'Jeff Buckley' }, list).map((r) => r.subtitle), ['Jeff Buckley, Leonard Cohen']);
+  });
+
+  check('too few results to tell: any shared performer still counts', () => {
+    const list = [{ title: 'Rush, Rush', subtitle: 'Deborah Harry, Giorgio Moroder, Blondie' }];
+    assert.strictEqual(blocked({ title: 'Rush, Rush', artist: 'Deborah Harry / Blondie' }, list).length, 1);
+  });
+
+  check('a different version title is never a duplicate', () => {
+    const hits = blocked({ title: 'bad guy (with Justin Bieber)', artist: 'Billie Eilish / Justin Bieber' }, results);
+    assert.deepStrictEqual(hits.map((r) => r.title), ['bad guy (with Justin Bieber)']);
+  });
+}
+
 console.log(failures ? `\n${failures} failing` : '\nall passing');
 process.exit(failures ? 1 : 0);

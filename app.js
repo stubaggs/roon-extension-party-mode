@@ -34,6 +34,7 @@ function publishLinks() {
     return;
   }
   roon.setWebsite(server.roonpartyUrl());
+  roon.setPlaylistUrl(server.playlistUrl());
   roon.setStatusLine(`RoonParty at ${server.roonpartyUrl()}${portNote}`);
 }
 

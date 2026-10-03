@@ -8,47 +8,40 @@
   "playing.nothing": "Er speelt niets",
   "playing.nothing_yet": "Nog niets",
   "credit.requested_by": "Aangevraagd door {name}",
-  "credit.requested_by_guest": "Aangevraagd door een gast",
-  "credit.guest": "een gast",
+  "credit.guest": "Anoniem",
   "credit.radio": "Roon Radio",
   "search.placeholder": "Zoek een nummer of artiest",
   "search.clear": "Zoekopdracht wissen",
   "search.no_results": "Geen nummers gevonden. Probeer de naam van de artiest.",
+  "search.results": {
+    "one": "{count} nummer gevonden.",
+    "other": "{count} nummers gevonden."
+  },
   "search.unavailable": "Zoeken is nu niet beschikbaar.",
   "track.added": "Toegevoegd",
   "track.in_queue": "In de wachtrij",
   "track.add": "Aan wachtrij toevoegen",
   "track.next": "Hierna afspelen",
   "queue.up_next": "Hierna",
-  "queue.empty": "Er staat nog niets klaar. Voeg het eerste nummer toe.",
+  "queue.empty": "Er staat nog niets klaar.",
   "played.title": "Al gespeeld",
   "played.empty": "Er is nog niets gespeeld.",
+  "played.skipped_by": "Overgeslagen door {name}",
+  "played.skipped_in_roon": "Overgeslagen in Roon",
   "allowance.closed": "Verzoekjes zijn nu gesloten.",
-  "allowance.add.unlimited": "Voeg zoveel nummers toe als je wilt.",
-  "allowance.add.left": {
-    "one": "Je kunt nog {count} nummer toevoegen.",
-    "other": "Je kunt nog {count} nummers toevoegen."
+  "allowance.paused": "Verzoeken staan even op pauze.",
+  "button.left": {
+    "one": "nog {count}",
+    "other": "nog {count}"
   },
-  "allowance.add.waiting": "Nog een nummer over {wait}.",
-  "allowance.add.used": "Je hebt al je nummers toegevoegd.",
-  "allowance.next.unlimited": "Gebruik ‘Hierna afspelen’ zo vaak als je wilt.",
-  "allowance.next.left": {
-    "one": "Je kunt ‘Hierna afspelen’ nog {count} keer gebruiken.",
-    "other": "Je kunt ‘Hierna afspelen’ nog {count} keer gebruiken."
-  },
-  "allowance.next.waiting": "Weer ‘Hierna afspelen’ over {wait}.",
-  "allowance.next.used": "Je hebt ‘Hierna afspelen’ opgebruikt.",
-  "allowance.skip.unlimited": "Sla zo vaak over als je wilt.",
-  "allowance.skip.left": {
-    "one": "Je kunt nog {count} nummer overslaan.",
-    "other": "Je kunt nog {count} nummers overslaan."
-  },
-  "allowance.skip.waiting": "Je kunt over {wait} weer overslaan.",
-  "allowance.skip.used": "Je kunt niet meer overslaan.",
+  "button.wait": "over {wait}",
+  "button.used": "op",
+  "button.paused": "gepauzeerd",
   "time.minutes": {
     "one": "een minuut",
     "other": "{count} minuten"
   },
+  "time.short": "{count} min",
   "toast.queued_next": "Wordt hierna afgespeeld",
   "toast.queued": "Aan de wachtrij toegevoegd",
   "toast.already_queued": "Dat nummer staat al in de wachtrij.",
@@ -73,8 +66,12 @@
   "name.cancel": "Annuleren",
   "locked.title": "Scan de code opnieuw",
   "locked.text": "Deze link werkt pas nadat je de code op het feestscherm hebt gescand. Vraag de host om hem te laten zien.",
-  "screen.scan": "Scan om een nummer op te zetten",
-  "screen.qr_alt": "Scan om een nummer toe te voegen",
-  "join.closed": "Het feest neemt geen verzoekjes meer aan.",
+  "screen.scan": "Scan om een nummer toe te voegen",
+  "screen.qr_alt": "QR-code voor de gastenpagina",
+  "screen.download_playlist": "De playlist downloaden",
+  "screen.scan_playlist": "Scan om de playlist te downloaden",
+  "screen.playlist_qr_alt": "QR-code voor de playlist",
+  "screen.closed_title": "Verzoekjes zijn gesloten",
+  "screen.closed_text": "Bedankt voor alle nummers.",
   "join.expired": "Deze code is verlopen. Scan de code op het scherm opnieuw."
 }
