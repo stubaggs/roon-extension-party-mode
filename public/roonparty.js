@@ -50,6 +50,7 @@
     const radio = !who.hidden && playing.kind === 'radio';
     who.textContent = who.hidden ? '' : window.I18N.requestedBy(playing);
     who.classList.toggle('radio', radio);
+    who.classList.toggle('next', !who.hidden && playing.kind === 'next');
     el('current-label').textContent =
       playing && playing.state === 'playing' ? t('playing.now') : t('playing.paused');
     const image = el('current-art');
