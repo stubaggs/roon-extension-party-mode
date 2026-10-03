@@ -198,6 +198,27 @@ check('the hint names the download address once it is known', () => {
   );
 });
 
+check('a port set in the environment wins over the saved one, and Roon shows it', () => {
+  const before = process.env.ROON_EXTENSION_PARTY_MODE_PORT;
+  try {
+    process.env.ROON_EXTENSION_PARTY_MODE_PORT = '9100';
+    const result = layout({ port: 9200 });
+    assert.strictEqual(result.values.port, 9100);
+    assert.strictEqual(item(result, 'port'), undefined, 'no editable port field');
+    const label = result.layout.find((entry) => entry.type === 'label');
+    assert.match(label.title, /^Web port: 9100, set by ROON_EXTENSION_PARTY_MODE_PORT\./);
+    assert.match(label.title, /next free port/);
+
+    delete process.env.ROON_EXTENSION_PARTY_MODE_PORT;
+    const saved = layout({ port: 9200 });
+    assert.strictEqual(saved.values.port, 9200);
+    assert.strictEqual(item(saved, 'port').title, 'Web port');
+  } finally {
+    if (before === undefined) delete process.env.ROON_EXTENSION_PARTY_MODE_PORT;
+    else process.env.ROON_EXTENSION_PARTY_MODE_PORT = before;
+  }
+});
+
 check('numbers in range pass through', () => {
   assert.strictEqual(normaliseInteger(10, 0, 999, 0), 10);
   assert.strictEqual(normaliseInteger(0, 0, 999, 0), 0);

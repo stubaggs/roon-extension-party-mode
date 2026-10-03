@@ -51,6 +51,11 @@ docker run -d --name party-mode --network host --restart unless-stopped \
 
 The `--log-opt` settings keep the log from growing without limit.
 
+To use another port than 8338, add `-e ROON_EXTENSION_PARTY_MODE_PORT=8400` (or set it in
+`docker-compose.yml`). Set this way, the port is shown in Roon's settings rather than
+changed there. If that port is busy when Party Mode starts, it uses the next free one, and
+Roon's status line says so.
+
 `config.json` keeps your settings when the image is updated. It also holds the key Roon
 gave Party Mode, so the commands above let only the extension (user 1000) read it. Without
 `sudo`, use `chmod 666 config.json` instead, which lets every account on the computer
@@ -118,7 +123,7 @@ file; Google Sheets, Numbers and Excel's **Data → From Text/CSV** read it corr
 | Party name | Shown on the Party Hub. Leave blank to use the zone's name. |
 | Display playlist download | What the Party Hub shows once **Party mode** is **Off**: a **QR code** guests can scan (the default), a **Link only** to click on the Hub itself, or **Off** for nothing. The hint gives the download address, which works whichever you pick. |
 | Roon profile for guest requests | The Roon profile the tracks are played under. Choose a "Guests" profile to keep party tracks out of your own history and recommendations. |
-| Web port | The port the guest pages use (8338). Only change it if something else on the computer uses 8338. |
+| Web port | The port the guest pages and the Party Hub use (8338). Only change it if something else on the computer uses 8338. If `ROON_EXTENSION_PARTY_MODE_PORT` is set (Docker), it decides the port and this shows it instead. If the port is busy at startup, the next free one is used. |
 | Adding tracks | Whether guests can add tracks, whether a track already in the queue can be added again (covers, live takes and remasters count as different tracks), how many each guest gets, and how many minutes until they get another. |
 | Playing next | The same, for putting a track straight after the current one. |
 | Skipping | The same, for skipping the current track. Off unless you turn it on. |
@@ -166,8 +171,9 @@ run `sudo chown 1000 config.json && chmod 600 config.json` on the file you mount
 `chmod 666 config.json` without `sudo`.
 
 **The status says a port was busy.** Something else on the computer uses that port. Party
-Mode picks the next free one and the QR code follows it. To choose one yourself, change
-**Web port** in the settings.
+Mode picks the next free one and the QR code follows it, so this is fine to leave. To
+choose one yourself, change **Web port** in the settings, or
+`ROON_EXTENSION_PARTY_MODE_PORT` if you set the port there.
 
 **Search finds nothing, or adding fails, on a Core in another language.** Open the
 **Advanced** section of the settings and fill in the titles your Core uses.

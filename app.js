@@ -18,6 +18,7 @@ const { RoonService } = require('./lib/roon-service');
 const { GuestStore } = require('./lib/guests');
 const { createServer } = require('./lib/server');
 const { listenWithFallback, FALLBACK_PORTS } = require('./lib/ports');
+const { envPort, PREFIXES } = require('./lib/env');
 
 const roon = new RoonService();
 const guests = new GuestStore();
@@ -93,10 +94,12 @@ listenWithFallback((port) => server.listen(port), configuredPort).then(
   },
   (err) => {
     const range = `${configuredPort}-${configuredPort + FALLBACK_PORTS}`;
+    // Where the host changes the port: the environment, if it set it, else Roon.
+    const fix = envPort() ? `Set ${PREFIXES[0]}PORT to another port.` : 'Pick another web port in the settings.';
     startError =
       err.code === 'EADDRINUSE'
-        ? `Ports ${range} are all in use. Pick another web port in the settings.`
-        : `Could not open port ${configuredPort} (${err.code || err.message}). Pick another web port in the settings.`;
+        ? `Ports ${range} are all in use. ${fix}`
+        : `Could not open port ${configuredPort} (${err.code || err.message}). ${fix}`;
     console.error(startError);
     publishLinks();
     roon.start();
