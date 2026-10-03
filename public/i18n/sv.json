@@ -43,7 +43,19 @@
   },
   "time.short": "{count} min",
   "toast.queued_next": "Spelas härnäst",
+  "toast.queued_next_left": {
+    "one": "Spelas härnäst. Det kan du göra {count} gång till.",
+    "other": "Spelas härnäst. Det kan du göra {count} gånger till."
+  },
+  "toast.queued_next_last_wait": "Spelas härnäst. Det kan du göra igen om {wait}.",
+  "toast.queued_next_last": "Spelas härnäst. Det var ditt sista.",
   "toast.queued": "Tillagd i kön",
+  "toast.queued_left": {
+    "one": "Tillagd i kön. Du kan lägga till {count} till.",
+    "other": "Tillagd i kön. Du kan lägga till {count} till."
+  },
+  "toast.queued_last_wait": "Tillagd i kön. Du kan lägga till ett nytt om {wait}.",
+  "toast.queued_last": "Tillagd i kön. Det var ditt sista.",
   "toast.already_queued": "Det spåret finns redan i kön.",
   "toast.nothing_left": "Inga fler just nu.",
   "toast.nothing_left_wait": "Inga fler just nu. Försök igen om {wait}.",

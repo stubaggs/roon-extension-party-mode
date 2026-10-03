@@ -43,7 +43,19 @@
   },
   "time.short": "{count} min",
   "toast.queued_next": "Sarà riprodotto dopo",
+  "toast.queued_next_left": {
+    "one": "Sarà riprodotto dopo. Puoi farlo ancora {count} volta.",
+    "other": "Sarà riprodotto dopo. Puoi farlo ancora {count} volte."
+  },
+  "toast.queued_next_last_wait": "Sarà riprodotto dopo. Potrai rifarlo tra {wait}.",
+  "toast.queued_next_last": "Sarà riprodotto dopo. Era l'ultimo.",
   "toast.queued": "Aggiunto alla coda",
+  "toast.queued_left": {
+    "one": "Aggiunto alla coda. Puoi aggiungerne ancora {count}.",
+    "other": "Aggiunto alla coda. Puoi aggiungerne ancora {count}."
+  },
+  "toast.queued_last_wait": "Aggiunto alla coda. Potrai aggiungerne un altro tra {wait}.",
+  "toast.queued_last": "Aggiunto alla coda. Era l'ultimo.",
   "toast.already_queued": "Questo brano è già in coda.",
   "toast.nothing_left": "Per ora non ne hai più.",
   "toast.nothing_left_wait": "Per ora non ne hai più. Riprova tra {wait}.",

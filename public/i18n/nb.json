@@ -43,7 +43,19 @@
   },
   "time.short": "{count} min",
   "toast.queued_next": "Spilles som neste",
+  "toast.queued_next_left": {
+    "one": "Spilles som neste. Det kan du gjøre {count} gang til.",
+    "other": "Spilles som neste. Det kan du gjøre {count} ganger til."
+  },
+  "toast.queued_next_last_wait": "Spilles som neste. Det kan du gjøre igjen om {wait}.",
+  "toast.queued_next_last": "Spilles som neste. Det var ditt siste.",
   "toast.queued": "Lagt til i køen",
+  "toast.queued_left": {
+    "one": "Lagt til i køen. Du kan legge til {count} til.",
+    "other": "Lagt til i køen. Du kan legge til {count} til."
+  },
+  "toast.queued_last_wait": "Lagt til i køen. Du kan legge til et nytt om {wait}.",
+  "toast.queued_last": "Lagt til i køen. Det var ditt siste.",
   "toast.already_queued": "Det sporet er allerede i køen.",
   "toast.nothing_left": "Ingen flere akkurat nå.",
   "toast.nothing_left_wait": "Ingen flere akkurat nå. Prøv igjen om {wait}.",

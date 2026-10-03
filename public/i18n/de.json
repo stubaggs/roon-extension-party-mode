@@ -43,7 +43,19 @@
   },
   "time.short": "{count} Min.",
   "toast.queued_next": "Wird als Nächstes gespielt",
+  "toast.queued_next_left": {
+    "one": "Wird als Nächstes gespielt. Das geht noch {count} Mal.",
+    "other": "Wird als Nächstes gespielt. Das geht noch {count} Mal."
+  },
+  "toast.queued_next_last_wait": "Wird als Nächstes gespielt. In {wait} geht das wieder.",
+  "toast.queued_next_last": "Wird als Nächstes gespielt. Das war dein letzter.",
   "toast.queued": "Zur Warteschlange hinzugefügt",
+  "toast.queued_left": {
+    "one": "Zur Warteschlange hinzugefügt. Du kannst noch {count} hinzufügen.",
+    "other": "Zur Warteschlange hinzugefügt. Du kannst noch {count} hinzufügen."
+  },
+  "toast.queued_last_wait": "Zur Warteschlange hinzugefügt. In {wait} kannst du wieder einen hinzufügen.",
+  "toast.queued_last": "Zur Warteschlange hinzugefügt. Das war dein letzter.",
   "toast.already_queued": "Der Titel ist schon in der Warteschlange.",
   "toast.nothing_left": "Gerade nichts mehr übrig.",
   "toast.nothing_left_wait": "Gerade nichts mehr übrig. Versuch es in {wait} wieder.",

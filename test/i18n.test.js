@@ -42,6 +42,12 @@ function usedKeys() {
     for (const m of read(file).matchAll(/\bt\('([a-z_.]+)'/g)) keys.add(m[1]);
     // Button labels relabelled in place: dataset { label: 'track.add' }.
     for (const m of read(file).matchAll(/\blabel: '([a-z_.]+)'/g)) keys.add(m[1]);
+    // doneMessage('toast.queued', …) also uses _left, _last_wait and _last.
+    for (const line of read(file).split('\n').filter((l) => l.includes('doneMessage('))) {
+      for (const m of line.matchAll(/'(toast\.[a-z_]+)'/g)) {
+        for (const suffix of ['', '_left', '_last_wait', '_last']) keys.add(m[1] + suffix);
+      }
+    }
   }
   for (const file of ['index.html', 'hub.html']) {
     for (const m of read(file).matchAll(/data-i18n(?:-[a-z-]+)?="([a-z_.]+)"/g)) keys.add(m[1]);
@@ -318,6 +324,10 @@ check('the skip notice says what is left, in the language\'s plural', () => {
   assert.strictEqual(t('en', 'toast.skipped_left', { count: 2 }), 'Skipped. 2 skips left.');
   assert.strictEqual(t('en', 'toast.skipped_last_wait', { wait: '5 minutes' }), 'Skipped. Your next skip comes in 5 minutes.');
   assert.strictEqual(t('ru', 'toast.skipped_left', { count: 5 }), 'Пропущен. Осталось 5 пропусков.');
+  assert.strictEqual(t('en', 'toast.queued_left', { count: 3 }), 'Added to the queue. You can add 3 more.');
+  assert.strictEqual(t('en', 'toast.queued_next_left', { count: 1 }), 'Queued to play next. You can do that 1 more time.');
+  assert.strictEqual(t('en', 'toast.queued_next_last'), 'Queued to play next. That was your last one.');
+  assert.strictEqual(t('pl', 'toast.queued_next_left', { count: 2 }), 'Zagra jako następny. Możesz to zrobić jeszcze 2 razy.');
 });
 
 process.exit(failures ? 1 : 0);

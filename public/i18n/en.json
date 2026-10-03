@@ -43,7 +43,19 @@
   },
   "time.short": "{count} min",
   "toast.queued_next": "Queued to play next",
+  "toast.queued_next_left": {
+    "one": "Queued to play next. You can do that {count} more time.",
+    "other": "Queued to play next. You can do that {count} more times."
+  },
+  "toast.queued_next_last_wait": "Queued to play next. You can do that again in {wait}.",
+  "toast.queued_next_last": "Queued to play next. That was your last one.",
   "toast.queued": "Added to the queue",
+  "toast.queued_left": {
+    "one": "Added to the queue. You can add {count} more.",
+    "other": "Added to the queue. You can add {count} more."
+  },
+  "toast.queued_last_wait": "Added to the queue. You can add another in {wait}.",
+  "toast.queued_last": "Added to the queue. That was your last one.",
   "toast.already_queued": "That one is already in the queue.",
   "toast.nothing_left": "Nothing left for now.",
   "toast.nothing_left_wait": "Nothing left for now. Try again in {wait}.",

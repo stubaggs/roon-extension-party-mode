@@ -43,7 +43,19 @@
   },
   "time.short": "{count} мин",
   "toast.queued_next": "Ще звучи следващ",
+  "toast.queued_next_left": {
+    "one": "Ще звучи следващ. Можеш да го направиш още {count} път.",
+    "other": "Ще звучи следващ. Можеш да го направиш още {count} пъти."
+  },
+  "toast.queued_next_last_wait": "Ще звучи следващ. Пак можеш след {wait}.",
+  "toast.queued_next_last": "Ще звучи следващ. Това беше последният.",
   "toast.queued": "Добавен в опашката",
+  "toast.queued_left": {
+    "one": "Добавен в опашката. Можеш да добавиш още {count}.",
+    "other": "Добавен в опашката. Можеш да добавиш още {count}."
+  },
+  "toast.queued_last_wait": "Добавен в опашката. Следващия можеш да добавиш след {wait}.",
+  "toast.queued_last": "Добавен в опашката. Това беше последният.",
   "toast.already_queued": "Този запис вече е в опашката.",
   "toast.nothing_left": "Засега нямаш повече.",
   "toast.nothing_left_wait": "Засега нямаш повече. Опитай пак след {wait}.",

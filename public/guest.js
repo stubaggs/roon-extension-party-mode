@@ -314,7 +314,7 @@
       expandedKey = null;
       renderAllowances();
       renderResults(track.key);
-      toast(mode === 'next' ? t('toast.queued_next') : t('toast.queued'));
+      toast(doneMessage(mode === 'next' ? 'toast.queued_next' : 'toast.queued', party.allowances[mode]));
     } catch (err) {
       button.disabled = false;
       const detail = err.body || {};
@@ -329,14 +329,16 @@
   }
 
   /**
-   * "Skipped", and with a limit, what's left: "Skipped. 2 skips left.", or after
-   * the last one, when the next comes back (or that there are no more).
+   * What a done request or skip says, and with a limit, what's left ("Skipped.
+   * 2 skips left."), or after the last one, when the next comes back or that
+   * there are no more. `base` is its text key: toast.queued, toast.queued_next
+   * or toast.skipped, with _left, _last_wait and _last versions.
    */
-  function skippedMessage(status) {
-    if (!status || status.remaining === null) return t('toast.skipped');
-    if (status.remaining > 0) return t('toast.skipped_left', { count: status.remaining });
-    if (status.nextIn) return t('toast.skipped_last_wait', { wait: minutes(status.nextIn) });
-    return t('toast.skipped_last');
+  function doneMessage(base, status) {
+    if (!status || status.remaining === null) return t(base);
+    if (status.remaining > 0) return t(`${base}_left`, { count: status.remaining });
+    if (status.nextIn) return t(`${base}_last_wait`, { wait: minutes(status.nextIn) });
+    return t(`${base}_last`);
   }
 
   el('skip').addEventListener('click', async () => {
@@ -345,7 +347,7 @@
       const body = await api('/api/skip', { method: 'POST' });
       party.allowances = body.allowances;
       renderAllowances();
-      toast(skippedMessage(party.allowances.skip));
+      toast(doneMessage('toast.skipped', party.allowances.skip));
     } catch (err) {
       const detail = err.body || {};
       if (err.message === 'paused') toast(t('allowance.paused'));

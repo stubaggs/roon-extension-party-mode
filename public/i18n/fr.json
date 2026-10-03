@@ -43,7 +43,19 @@
   },
   "time.short": "{count} min",
   "toast.queued_next": "Sera lu ensuite",
+  "toast.queued_next_left": {
+    "one": "Sera lu ensuite. Vous pouvez encore le faire {count} fois.",
+    "other": "Sera lu ensuite. Vous pouvez encore le faire {count} fois."
+  },
+  "toast.queued_next_last_wait": "Sera lu ensuite. Vous pourrez recommencer dans {wait}.",
+  "toast.queued_next_last": "Sera lu ensuite. C'était votre dernier.",
   "toast.queued": "Ajouté à la file d'attente",
+  "toast.queued_left": {
+    "one": "Ajouté à la file. Vous pouvez encore en ajouter {count}.",
+    "other": "Ajouté à la file. Vous pouvez encore en ajouter {count}."
+  },
+  "toast.queued_last_wait": "Ajouté à la file. Vous pourrez en ajouter un autre dans {wait}.",
+  "toast.queued_last": "Ajouté à la file. C'était votre dernier.",
   "toast.already_queued": "Ce morceau est déjà dans la file d'attente.",
   "toast.nothing_left": "Plus rien pour l'instant.",
   "toast.nothing_left_wait": "Plus rien pour l'instant. Réessayez dans {wait}.",

@@ -40,7 +40,17 @@
   },
   "time.short": "{count}분",
   "toast.queued_next": "다음에 재생됩니다",
+  "toast.queued_next_left": {
+    "other": "다음에 재생됩니다. {count}번 더 할 수 있습니다."
+  },
+  "toast.queued_next_last_wait": "다음에 재생됩니다. {wait} 후에 다시 할 수 있습니다.",
+  "toast.queued_next_last": "다음에 재생됩니다. 마지막이었습니다.",
   "toast.queued": "대기열에 추가되었습니다",
+  "toast.queued_left": {
+    "other": "대기열에 추가되었습니다. {count}개 더 추가할 수 있습니다."
+  },
+  "toast.queued_last_wait": "대기열에 추가되었습니다. {wait} 후에 하나 더 추가할 수 있습니다.",
+  "toast.queued_last": "대기열에 추가되었습니다. 마지막 추가였습니다.",
   "toast.already_queued": "이미 대기열에 있는 트랙입니다.",
   "toast.nothing_left": "지금은 남은 횟수가 없습니다.",
   "toast.nothing_left_wait": "지금은 남은 횟수가 없습니다. {wait} 후에 다시 시도하세요.",

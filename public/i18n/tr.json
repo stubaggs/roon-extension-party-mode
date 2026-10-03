@@ -43,7 +43,19 @@
   },
   "time.short": "{count} dk",
   "toast.queued_next": "Sonra çalacak",
+  "toast.queued_next_left": {
+    "one": "Sonra çalacak. Bunu {count} kez daha yapabilirsin.",
+    "other": "Sonra çalacak. Bunu {count} kez daha yapabilirsin."
+  },
+  "toast.queued_next_last_wait": "Sonra çalacak. {wait} sonra bunu yine yapabilirsin.",
+  "toast.queued_next_last": "Sonra çalacak. Bu son hakkındı.",
   "toast.queued": "Sıraya eklendi",
+  "toast.queued_left": {
+    "one": "Sıraya eklendi. {count} parça daha ekleyebilirsin.",
+    "other": "Sıraya eklendi. {count} parça daha ekleyebilirsin."
+  },
+  "toast.queued_last_wait": "Sıraya eklendi. {wait} sonra bir tane daha ekleyebilirsin.",
+  "toast.queued_last": "Sıraya eklendi. Bu son hakkındı.",
   "toast.already_queued": "Bu parça zaten sırada.",
   "toast.nothing_left": "Şimdilik hakkın kalmadı.",
   "toast.nothing_left_wait": "Şimdilik hakkın kalmadı. {wait} sonra tekrar dene.",

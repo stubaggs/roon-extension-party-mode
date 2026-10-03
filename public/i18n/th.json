@@ -40,7 +40,17 @@
   },
   "time.short": "{count} นาที",
   "toast.queued_next": "จะเล่นถัดไป",
+  "toast.queued_next_left": {
+    "other": "จะเล่นถัดไป ทำแบบนี้ได้อีก {count} ครั้ง"
+  },
+  "toast.queued_next_last_wait": "จะเล่นถัดไป ทำแบบนี้ได้อีกครั้งในอีก {wait}",
+  "toast.queued_next_last": "จะเล่นถัดไป นี่เป็นครั้งสุดท้ายของคุณ",
   "toast.queued": "เพิ่มในคิวแล้ว",
+  "toast.queued_left": {
+    "other": "เพิ่มในคิวแล้ว เพิ่มได้อีก {count} แทร็ก"
+  },
+  "toast.queued_last_wait": "เพิ่มในคิวแล้ว เพิ่มแทร็กใหม่ได้ในอีก {wait}",
+  "toast.queued_last": "เพิ่มในคิวแล้ว นี่เป็นครั้งสุดท้ายของคุณ",
   "toast.already_queued": "แทร็กนี้อยู่ในคิวแล้ว",
   "toast.nothing_left": "ตอนนี้สิทธิ์หมดแล้ว",
   "toast.nothing_left_wait": "ตอนนี้สิทธิ์หมดแล้ว ลองใหม่อีก {wait}",
