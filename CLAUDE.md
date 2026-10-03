@@ -13,7 +13,9 @@ Every change that affects them updates the docs in the same commit:
 - **RELEASES.md** is the user-friendly list of changes, newest version first. Every
   change people would notice (features, settings, fixes, the pages) adds a line under the
   version in progress, in the same commit, in the README's plain language. Internal
-  changes (refactors, tests, workflows) don't go in. A version bump in `package.json`
+  changes (refactors, tests, workflows) don't go in. Security fixes are summed up as
+  "Various security enhancements", with details only for what a host or guest would
+  notice in normal use. A version bump in `package.json`
   starts a new section; the version in progress says it isn't released yet.
 - If a change touches none of these, say so in the pull request rather than editing the docs.
 
@@ -24,6 +26,9 @@ Every change that affects them updates the docs in the same commit:
   Publish Docker image). Keep the workflow's push and schedule triggers commented out, and
   put `[skip ci]` in merge commit titles.
 - Bump `version` in `package.json` for a release; Roon shows it as the extension's version.
+- After merging a release into `main`, tag the merge commit with an annotated tag
+  `v<version>` (e.g. `v1.1.0`) and push the tag. The workflow's `tags` trigger stays
+  commented out, so a tag doesn't publish the Docker image either.
 - Extension settings and the Roon status line stay in English, as in other Roon
   extensions. Guest-facing pages are translated: every page string lives in
   `public/i18n/<code>.json` (en, fr, de, es, nl), and new page text needs all of them.

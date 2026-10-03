@@ -3,6 +3,11 @@
 What's new in each version of Party Mode, newest first. Roon shows the version you're
 running in its Extensions list.
 
+## 1.1.1
+
+- No changes to the extension itself. These release notes are corrected: the environment
+  variable names came with 1.0.2, not 1.0.3.
+
 ## 1.1.0
 
 ### End the party, keep the playlist
@@ -44,15 +49,7 @@ running in its Extensions list.
 
 ### Security
 
-- A guest can only add tracks from their own search results, as they were shown. A guest
-  who knew some web code could otherwise have queued a whole album or playlist with one
-  request, or slipped past the duplicate check.
-- Allowances hold even when a guest sends many requests or skips at once.
-- Names can't contain line breaks or hidden characters that show text back to front.
-- The pages tell browsers to run only Party Mode's own code, and other websites can't show
-  the guest page inside theirs. The party screen can still go in a dashboard.
-- Limits on how many guest sessions are kept and how long a search can be.
-- Updated a library the web server uses, for two published security fixes.
+- Various security enhancements.
 - The Docker instructions now keep `config.json`, which holds Roon's key for Party Mode,
   readable only by the extension.
 
@@ -77,14 +74,14 @@ running in its Extensions list.
   run out, adding a track presses play.
 - The party zone is found as soon as you choose it, instead of when Roon next reports a
   change.
-- Settings from the environment (for Docker) are named `ROON_EXTENSION_PARTY_MODE_<SETTING>`.
-  The old names still work.
 
 ## 1.0.2
 
 - Guest requests count toward the chosen **Roon profile for guest requests**, so party
   tracks stay out of your own history and recommendations.
 - Quieter logs. Set `ROON_EXTENSION_PARTY_MODE_DEBUG` for the detail.
+- Settings from the environment (for Docker) are named `ROON_EXTENSION_PARTY_MODE_<SETTING>`.
+  The old names still work.
 - The README is now a guide for running a party, with developer notes in their own file.
 
 ## 1.0.1
