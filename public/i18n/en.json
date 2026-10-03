@@ -28,6 +28,7 @@
   "played.title": "Played",
   "played.empty": "Nothing played yet.",
   "allowance.closed": "Requests are closed right now.",
+  "allowance.paused": "Requests are paused for a moment.",
   "allowance.add.unlimited": "Add as many songs as you like.",
   "allowance.add.left": {
     "one": "{count} song left to add.",

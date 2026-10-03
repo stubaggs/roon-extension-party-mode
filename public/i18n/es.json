@@ -28,6 +28,7 @@
   "played.title": "Ya sonaron",
   "played.empty": "Todavía no ha sonado nada.",
   "allowance.closed": "Las peticiones están cerradas ahora mismo.",
+  "allowance.paused": "Las peticiones están en pausa por un momento.",
   "allowance.add.unlimited": "Añade todas las canciones que quieras.",
   "allowance.add.left": {
     "one": "Te queda {count} canción por añadir.",

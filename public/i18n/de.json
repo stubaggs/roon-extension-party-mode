@@ -28,6 +28,7 @@
   "played.title": "Bereits gespielt",
   "played.empty": "Noch nichts gespielt.",
   "allowance.closed": "Gerade sind keine Wünsche möglich.",
+  "allowance.paused": "Wünsche sind gerade kurz pausiert.",
   "allowance.add.unlimited": "Füge so viele Songs hinzu, wie du möchtest.",
   "allowance.add.left": {
     "one": "Du kannst noch {count} Song hinzufügen.",

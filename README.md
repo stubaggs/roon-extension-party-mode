@@ -67,15 +67,21 @@ can't import it directly, but it's in the format Soundiiz imports: in Soundiiz, 
 with your playlists. Excel on Windows can garble accented names when you double-click the
 file; Google Sheets, Numbers and Excel's **Data → From Text/CSV** read it correctly.
 
-To stop guests adding songs, set **Party mode** to **Off**, at the top of the settings. Turning it back on makes a
-new QR code, so old links stop working, and starts a new playlist: download the old one
-first.
+**Party mode**, at the top of the settings, runs the party:
+
+- **On**: guests add songs.
+- **Paused**, for a speech or the cake: the music pauses and guests' requests wait, with
+  the QR code still up. Back to **On**, the music carries on where it was.
+- **Off**, when it's over: guests can't add songs, and the party screen says the party's
+  over, with the playlist to download. The music is left alone. Turning it back on starts
+  a new party, with a new QR code (old links stop working) and a new playlist, so
+  download the old one first.
 
 ## Settings
 
 | Setting | What it does |
 | --- | --- |
-| Party mode | On while the party is running. Off stops guests adding songs, and the party screen shows "The party's over" with the playlist to download. Turning it back on starts a new party: a new QR code and a new playlist. |
+| Party mode | On, Paused (music and requests on hold) or Off (the party's over, playlist ready). See above. |
 | Party zone | Where the music plays. If you pick a speaker that's grouped with others, the whole group plays. |
 | Party name | Shown on the party screen. Leave blank to use the zone's name. |
 | Roon profile for guest requests | The Roon profile the songs are played under. Choose a "Guests" profile to keep party songs out of your own history and recommendations. |
@@ -93,13 +99,12 @@ never**.
 - **Guests can't rearrange the queue.** They can add a song to the end, or play one next
   when they add it, but Roon doesn't let anyone move a song that's already queued.
 - **A guest's song gets the music going again.** If the party zone is paused, or the
-  queue has run out, adding a song presses play. If you paused for a speech, it resumes
-  as soon as someone adds a song, so set **Party mode** to **Off** first (the party screen
-  then says the party's over until you turn it back on). Turning it
-  back on starts a new playlist, so download the playlist before you do.
+  queue has run out, adding a song presses play. For a speech, set **Party mode** to
+  **Paused** instead of pausing in Roon: that holds the requests too.
 - **Played starts fresh** when the extension restarts or you change the party zone.
 - **The downloadable playlist starts fresh** when the extension restarts, you change the
-  party zone, or you turn **Party mode** back on, which counts as a new party.
+  party zone, or you turn **Party mode** back on from **Off**, which counts as a new party
+  (from **Paused** it doesn't).
   Download it before any of those. Songs still in the queue carry over to the new list.
 - **"Roon Radio" is a best guess.** With Roon Radio on, any song no guest added is
   labelled Roon Radio, including songs you queue from the Roon app yourself.

@@ -28,6 +28,7 @@
   "played.title": "Déjà joués",
   "played.empty": "Rien n'a encore été joué.",
   "allowance.closed": "Les demandes sont fermées pour le moment.",
+  "allowance.paused": "Les demandes sont en pause pour un moment.",
   "allowance.add.unlimited": "Ajoutez autant de morceaux que vous voulez.",
   "allowance.add.left": {
     "one": "Il vous reste {count} morceau à ajouter.",

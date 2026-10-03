@@ -28,6 +28,7 @@
   "played.title": "Al gespeeld",
   "played.empty": "Er is nog niets gespeeld.",
   "allowance.closed": "Verzoekjes zijn nu gesloten.",
+  "allowance.paused": "Verzoeken staan even op pauze.",
   "allowance.add.unlimited": "Voeg zoveel nummers toe als je wilt.",
   "allowance.add.left": {
     "one": "Je kunt nog {count} nummer toevoegen.",

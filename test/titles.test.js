@@ -158,6 +158,47 @@ const artists = [{ title: 'ABBA', item_key: 'x2', hint: 'list' }];
     assert.deepStrictEqual(controls, []);
   });
 
+  console.log('\nparty mode');
+
+  const { partyMode } = require('../lib/roon-service');
+
+  await check('stored values read as on, paused or off; anything else is on', async () => {
+    assert.strictEqual(partyMode({ enabled: true }), 'on');
+    assert.strictEqual(partyMode({ enabled: 'paused' }), 'paused');
+    assert.strictEqual(partyMode({ enabled: false }), 'off');
+    assert.strictEqual(partyMode({}), 'on');
+    assert.strictEqual(partyMode({ enabled: 'nonsense' }), 'on');
+  });
+
+  const modeChange = async (state, from, to, extra) => {
+    const roon = service(fakeSearch({ Tracks: tracks, actions: english }));
+    const controls = withTransport(roon, state);
+    Object.assign(roon.zone, { is_play_allowed: true }, extra);
+    const events = [];
+    roon.on('party_mode_changed', (...args) => events.push(args));
+    await roon._partyModeChanged(from, to);
+    return { controls, events };
+  };
+
+  await check('on to paused pauses the music', async () => {
+    const { controls, events } = await modeChange('playing', 'on', 'paused');
+    assert.deepStrictEqual(controls, ['pause']);
+    assert.deepStrictEqual(events, [['paused', 'on']]);
+  });
+
+  await check('paused back to on plays the queue', async () => {
+    assert.deepStrictEqual((await modeChange('paused', 'paused', 'on')).controls, ['play']);
+  });
+
+  await check('back to on with nothing to play leaves it', async () => {
+    assert.deepStrictEqual((await modeChange('stopped', 'paused', 'on', { is_play_allowed: false })).controls, []);
+  });
+
+  await check('off leaves the music alone, and so does coming back from off', async () => {
+    assert.deepStrictEqual((await modeChange('playing', 'on', 'off')).controls, []);
+    assert.deepStrictEqual((await modeChange('paused', 'off', 'on')).controls, []);
+  });
+
   console.log(failures ? `\n${failures} failing` : '\nall passing');
   process.exit(failures ? 1 : 0);
 })();

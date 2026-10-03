@@ -146,6 +146,19 @@ const item = (result, setting) => {
   return all.find((entry) => entry.setting === setting);
 };
 
+check('party mode is first, with on, paused and off', () => {
+  const result = layout({});
+  assert.strictEqual(result.layout[0].setting, 'enabled');
+  assert.strictEqual(result.layout[0].title, 'Party mode');
+  assert.deepStrictEqual(result.layout[0].values.map((v) => v.value), [true, 'paused', false]);
+});
+
+check('a saved on/off from "Guest access" carries over, and junk reads as on', () => {
+  assert.strictEqual(layout({ enabled: false }).values.enabled, false);
+  assert.strictEqual(layout({ enabled: 'paused' }).values.enabled, 'paused');
+  assert.strictEqual(layout({ enabled: 'maybe' }).values.enabled, true);
+});
+
 check('numbers in range pass through', () => {
   assert.strictEqual(normaliseInteger(10, 0, 999, 0), 10);
   assert.strictEqual(normaliseInteger(0, 0, 999, 0), 0);

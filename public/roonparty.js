@@ -27,9 +27,11 @@
     el('party-name').textContent = data.party_name || t('party.default_name');
     if (data.join_url) el('join-link').href = data.join_url;
     // Party mode off ends the party: no QR code that no longer works, and
-    // the playlist to download instead.
-    el('join-open').hidden = !data.enabled;
-    el('join-closed').hidden = data.enabled;
+    // the playlist to download instead. Paused keeps the code but says so.
+    const over = data.party_mode === 'off';
+    el('join-open').hidden = over;
+    el('join-closed').hidden = !over;
+    el('join-link').textContent = data.party_mode === 'paused' ? t('allowance.paused') : t('screen.scan');
 
     const playing = data.now_playing;
     el('current-title').textContent = playing ? playing.title : t('playing.nothing');

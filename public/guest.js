@@ -70,9 +70,13 @@
   function renderTokens() {
     if (!party) return;
     const lines = [];
-    if (!party.capabilities.add) lines.push(t('allowance.closed'));
-    for (const bucket of ['add', 'next', 'skip']) {
-      if (party.capabilities[bucket]) lines.push(describeTokens(bucket));
+    if (party.party_mode === 'paused') {
+      lines.push(t('allowance.paused'));
+    } else {
+      if (!party.capabilities.add) lines.push(t('allowance.closed'));
+      for (const bucket of ['add', 'next', 'skip']) {
+        if (party.capabilities[bucket]) lines.push(describeTokens(bucket));
+      }
     }
     const tokens = el('tokens');
     tokens.innerHTML = '';
@@ -262,6 +266,7 @@
       button.disabled = false;
       const detail = err.body || {};
       if (err.message === 'already_queued') toast(t('toast.already_queued'));
+      else if (err.message === 'paused') toast(t('allowance.paused'));
       else if (err.message === 'rate_limited') {
         toast(detail.next_in ? t('toast.nothing_left_wait', { wait: minutes(detail.next_in) }) : t('toast.nothing_left'));
       } else if (err.message === 'disabled') toast(t('toast.disabled'));
@@ -277,7 +282,8 @@
       toast(t('toast.skipped'));
     } catch (err) {
       const detail = err.body || {};
-      if (err.message === 'rate_limited') {
+      if (err.message === 'paused') toast(t('allowance.paused'));
+      else if (err.message === 'rate_limited') {
         toast(detail.next_in ? t('toast.no_skips_wait', { wait: minutes(detail.next_in) }) : t('toast.no_skips'));
       } else if (err.message !== 'no_session') toast(t('toast.failed'));
     }
