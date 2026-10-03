@@ -245,7 +245,11 @@
     else resultsStatus.textContent = t('search.results', { count: lastResults.length });
   }
 
+  // Only the latest search's answer is shown: an earlier one may come back last.
+  let searchSeq = 0;
+
   async function runSearch(query) {
+    const mine = ++searchSeq;
     if (query.trim().length < 2) {
       lastResults = [];
       renderResults();
@@ -254,12 +258,13 @@
     }
     try {
       const body = await api(`/api/search?q=${encodeURIComponent(query)}`);
+      if (mine !== searchSeq || body.superseded) return;
       lastResults = body.results;
       expandedKey = null;
       renderResults();
       announceResults(query);
     } catch (err) {
-      if (err.message !== 'no_session') toast(t('search.unavailable'));
+      if (mine === searchSeq && err.message !== 'no_session') toast(t('search.unavailable'));
     }
   }
 

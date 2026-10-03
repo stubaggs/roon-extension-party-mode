@@ -158,6 +158,60 @@ const artists = [{ title: 'ABBA', item_key: 'x2', hint: 'list' }];
     assert.deepStrictEqual(controls, []);
   });
 
+  console.log('\none guest, two searches at once');
+
+  // The second search starts while the first is inside "Tracks"; without
+  // taking turns, the first then read the result categories as its tracks.
+  const overlapping = async (useSearch) => {
+    const fake = fakeSearch({ Artists: artists, Tracks: tracks, actions: english });
+    const roon = service(fake);
+    const browse = fake.browse;
+    let release;
+    let reached;
+    const gate = new Promise((r) => (release = r));
+    const inside = new Promise((r) => (reached = r));
+    let paused = false;
+    roon._browse = async (opts) => {
+      const result = await browse(opts);
+      if (!paused && opts.item_key === 'c1') {
+        paused = true;
+        reached();
+        await gate;
+      }
+      return result;
+    };
+    const first = roon.search('s1', 'abba');
+    await inside;
+    const second = useSearch ? roon.search('s1', 'waterloo') : roon.performAction('s1', 't1', 'add');
+    release();
+    return { first: await first, second: await second, fake };
+  };
+
+  await check('a search started during another waits its turn', async () => {
+    const { first, second } = await overlapping(true);
+    assert.deepStrictEqual(first.map((t) => t.title), ['Dancing Queen', 'Waterloo']);
+    assert.deepStrictEqual(second.map((t) => t.title), ['Dancing Queen', 'Waterloo']);
+  });
+
+  await check('a request made during a search waits its turn too', async () => {
+    const { first, fake } = await overlapping(false);
+    assert.deepStrictEqual(first.map((t) => t.title), ['Dancing Queen', 'Waterloo']);
+    assert.deepStrictEqual(pressed(fake), ['Queue']);
+  });
+
+  await check('typing on: a search still waiting is dropped for the newer one', async () => {
+    const roon = service(fakeSearch({ Tracks: tracks, actions: english }));
+    const [older, newer] = await Promise.all([roon.search('s1', 'ab'), roon.search('s1', 'abba')]);
+    assert.strictEqual(older, null);
+    assert.strictEqual(newer.length, 2);
+  });
+
+  await check('a category is never returned as a track', async () => {
+    const fake = fakeSearch({ Tracks: [...tracks, { title: 'More', item_key: 'm1', hint: 'list' }], actions: english });
+    const found = await service(fake).search('s1', 'abba');
+    assert.deepStrictEqual(found.map((t) => t.title), ['Dancing Queen', 'Waterloo']);
+  });
+
   console.log('\nparty mode');
 
   const { partyMode } = require('../lib/roon-service');

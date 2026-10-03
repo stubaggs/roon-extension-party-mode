@@ -397,6 +397,12 @@ start, which is the place to look when a badge is wrong.
 **Browse sessions are stateful.** Item keys are only valid until that guest's browse
 session moves on. The server replays the search and retries once when a key has gone
 stale, which covers the usual case of a guest searching again before tapping.
+A session also has one position, and a search or a request is several steps through
+it, so a guest's operations take turns (`RoonService._inSession`): interleaved, one
+search opened Tracks while another took the session back to the result categories, and
+the first then read "Tracks, Artists, TIDAL" as tracks. A search still waiting when the
+same guest searches again is dropped (`search` returns null; the page ignores out-of-date
+answers too), and only `action_list` items are returned as tracks.
 
 **Access control is a shared join code, not a login.** Anyone who can reach the port and
 has scanned the code can add tracks. The RoonParty screen and its endpoints need no session at all.
