@@ -15,7 +15,7 @@
 'use strict';
 
 const assert = require('assert');
-const { PartyPlaylist, playlistFileName, csvCell, defuse, utcOffset } = require('../lib/party-playlist');
+const { PartyPlaylist, playlistFileName, csvCell, defuse } = require('../lib/party-playlist');
 
 let failures = 0;
 function check(name, fn) {
@@ -99,21 +99,10 @@ check('a track with no credit yet is looked up again', () => {
   assert.ok(csv[1].includes(',Anon,'), csv[1]);
 });
 
-check('queued at is local time, to the minute, with its offset from UTC', () => {
+check('queued at is local time, to the minute', () => {
   const playlist = new PartyPlaylist();
-  const when = new Date(2026, 9, 2, 21, 5, 59);
-  playlist.update('o1', [track(1, 'Waterloo')], nobody, when.getTime());
-  assert.ok(rows(playlist)[1].endsWith(`,2026-10-02 21:05 ${utcOffset(when)}`), rows(playlist)[1]);
-  assert.match(utcOffset(when), /^[+-]\d{2}:\d{2}$/);
-});
-
-check('UTC offsets: ahead, behind, half hours and UTC itself', () => {
-  const at = (offsetMinutes) => ({ getTimezoneOffset: () => offsetMinutes });
-  assert.strictEqual(utcOffset(at(-60)), '+01:00'); // London in summer
-  assert.strictEqual(utcOffset(at(300)), '-05:00'); // New York in winter
-  assert.strictEqual(utcOffset(at(-330)), '+05:30'); // India
-  assert.strictEqual(utcOffset(at(210)), '-03:30'); // Newfoundland
-  assert.strictEqual(utcOffset(at(0)), '+00:00'); // UTC, as Docker is by default
+  playlist.update('o1', [track(1, 'Waterloo')], nobody, new Date(2026, 9, 2, 21, 5, 59).getTime());
+  assert.ok(rows(playlist)[1].endsWith(',2026-10-02 21:05'), rows(playlist)[1]);
 });
 
 check('Soundiiz finds the title column: no byte order mark before it', () => {
