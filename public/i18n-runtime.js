@@ -94,5 +94,16 @@
   document.documentElement.dir = data.dir || 'ltr';
   apply();
 
-  window.I18N = { lang: data.lang, t, apply, credit, requestedBy, skippedBy, minutes };
+  window.I18N = {
+    lang: data.lang,
+    // Every language by its own name, and whether the guest picked this one.
+    languages: data.languages || [],
+    chosen: Boolean(data.chosen),
+    t,
+    apply,
+    credit,
+    requestedBy,
+    skippedBy,
+    minutes
+  };
 })();

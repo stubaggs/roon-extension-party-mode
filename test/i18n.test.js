@@ -273,4 +273,23 @@ check('plurals follow each language: Russian, Polish, Czech, Arabic, Japanese', 
   assert.strictEqual(t('ja', 'search.results', 1), '1 件のトラックが見つかりました。');
 });
 
+console.log('\nchosen language');
+
+check("a language the guest chose wins over the browser's", () => {
+  const req = (cookie, header) => Object.assign(request(header), { cookies: cookie ? { party_lang: cookie } : {} });
+  assert.strictEqual(i18n.pick(req('ja', 'fr-FR')), 'ja');
+  assert.strictEqual(i18n.pick(req('pt-BR', 'en')), 'pt-BR');
+  assert.strictEqual(i18n.pick(req('xx', 'fr-FR')), 'fr', 'an unknown choice is ignored');
+  assert.strictEqual(i18n.pick(req(null, 'fr-FR')), 'fr');
+});
+
+check('the page gets every language by its own name, and whether one was chosen', () => {
+  const names = i18n.list();
+  assert.strictEqual(names.length, i18n.languages().length);
+  assert.ok(names.some((l) => l.code === 'ja' && l.name === '日本語'));
+  assert.ok(names.some((l) => l.code === 'zh-Hant' && l.name === '繁體中文'));
+  assert.match(i18n.script('ja', true), /"chosen":true/);
+  assert.match(i18n.script('en'), /"chosen":false/);
+});
+
 process.exit(failures ? 1 : 0);

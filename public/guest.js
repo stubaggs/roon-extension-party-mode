@@ -533,6 +533,73 @@
 
   el('name-chip').addEventListener('click', () => askName(true));
 
+  // ---------------------------------------------------------------- language
+
+  // The guest's choice is a cookie the server reads when it sends the page's
+  // text (lib/i18n.js), so the page reloads to switch. A year, like a setting.
+  const LANG_COOKIE = 'party_lang';
+  const languageDialog = el('language');
+  let languageOpener = null;
+
+  function renderLanguageChip() {
+    const chip = el('lang-chip');
+    const name = t('_language');
+    chip.textContent = name;
+    chip.setAttribute('aria-label', t('lang.change', { language: name }));
+  }
+
+  function chooseLanguage(code) {
+    document.cookie = code
+      ? `${LANG_COOKIE}=${encodeURIComponent(code)}; path=/; max-age=31536000; samesite=lax`
+      : `${LANG_COOKIE}=; path=/; max-age=0; samesite=lax`;
+    location.reload();
+  }
+
+  /** "Same as this phone", then every language by its own name. */
+  function openLanguages() {
+    const list = el('language-list');
+    list.innerHTML = '';
+    const option = (label, code, current, lang) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.textContent = label;
+      // Each name is read in its own language, and written in its own direction.
+      if (lang) button.lang = lang;
+      button.dir = 'auto';
+      if (current) button.setAttribute('aria-current', 'true');
+      button.addEventListener('click', () => (current ? closeLanguages() : chooseLanguage(code)));
+      list.appendChild(button);
+      return button;
+    };
+    const automatic = option(t('lang.automatic'), null, !window.I18N.chosen);
+    let current = automatic;
+    for (const language of window.I18N.languages) {
+      const isCurrent = window.I18N.chosen && language.code === window.I18N.lang;
+      const button = option(language.name, language.code, isCurrent, language.code);
+      if (isCurrent) current = button;
+    }
+    languageOpener = document.activeElement;
+    app.inert = true;
+    languageDialog.hidden = false;
+    current.focus();
+  }
+
+  function closeLanguages() {
+    languageDialog.hidden = true;
+    app.inert = false;
+    if (languageOpener && languageOpener !== document.body) languageOpener.focus();
+    languageOpener = null;
+  }
+
+  el('lang-chip').addEventListener('click', openLanguages);
+  el('language-cancel').addEventListener('click', closeLanguages);
+  languageDialog.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      closeLanguages();
+    }
+  });
+
   /** First visit asks; a remembered name (or a remembered skip) is applied quietly. */
   async function settleName() {
     if (party.guest_name) return;
@@ -559,6 +626,7 @@
     else delete skip.dataset.bucket;
     renderAllowances();
     renderNameChip();
+    renderLanguageChip();
 
     // boot() runs again when the party settings change; set up the rest once.
     if (started) return;

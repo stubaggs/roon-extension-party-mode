@@ -10,8 +10,9 @@
   </head>
   <body>
     <main id="app" hidden>
-      <!-- Who the guest's tracks are credited to; tap to change. -->
+      <!-- The page's language, and who the guest's tracks are credited to; tap to change. -->
       <div class="topbar">
+        <button class="name-chip lang-chip" id="lang-chip" type="button"></button>
         <button class="name-chip" id="name-chip" type="button"></button>
       </div>
 
@@ -95,6 +96,16 @@
           <button class="pill pill-ghost" id="nickname-skip" type="button" data-i18n="name.skip">Skip</button>
         </div>
       </form>
+    </div>
+
+    <div class="nickname-backdrop" id="language" hidden>
+      <div class="nickname" role="dialog" aria-modal="true" aria-labelledby="language-title">
+        <h2 id="language-title" data-i18n="lang.title">Language</h2>
+        <div class="language-list" id="language-list"></div>
+        <div class="nickname-actions">
+          <button class="pill pill-ghost" id="language-cancel" type="button" data-i18n="name.cancel">Cancel</button>
+        </div>
+      </div>
     </div>
 
     <div id="toast" class="toast" role="status" aria-live="polite"></div>

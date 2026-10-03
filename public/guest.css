@@ -148,7 +148,8 @@ main {
 /* The name tag, top right. */
 .topbar {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  gap: 0.5rem;
   padding-top: 0.75rem;
   margin-bottom: -0.75rem;
 }
@@ -168,6 +169,32 @@ main {
 
 .name-chip.named::before {
   content: "✎ ";
+}
+
+/* The page's language, at the start of the bar; the name tag sits at the end. */
+.lang-chip::before {
+  content: "🌐 ";
+}
+
+.language-list {
+  display: grid;
+  gap: 0.35rem;
+  max-height: min(60vh, 28rem);
+  overflow-y: auto;
+  margin: 0.6rem 0 0;
+}
+
+.language-list button {
+  min-height: 44px;
+  padding: 0.5rem 0.9rem;
+  border: 1px solid var(--edge);
+  border-radius: 12px;
+  text-align: start;
+}
+
+.language-list button[aria-current="true"] {
+  border-color: var(--amber);
+  color: var(--amber);
 }
 
 /* "· 3 left" on a button: the allowance it uses. */

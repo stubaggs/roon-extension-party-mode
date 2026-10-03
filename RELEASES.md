@@ -16,6 +16,8 @@ Not released yet. You can try it on the `experimental` branch (see
   Greek, Hebrew, Hungarian, Italian, Japanese, Korean, Norwegian, Polish, Portuguese
   (Portugal and Brazil), Romanian, Russian, Swedish, Thai, Turkish, Ukrainian and
   Vietnamese. Hebrew and Arabic pages read right to left.
+- Guests can choose their page's language with a 🌐 button next to their name tag;
+  otherwise it follows the phone's.
 - Roon's status line for Party Mode shows its Party mode, the party's name and the Party
   Hub's address, whether the party is on, paused or off.
 - The **Party mode** setting reads **Pause** while the party is on and **Unpause** while

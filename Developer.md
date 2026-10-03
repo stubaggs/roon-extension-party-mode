@@ -232,6 +232,14 @@ codes are mapped: `no` and `nn` to `nb`, the old `iw` to `he`, and Chinese by sc
 `zh-TW`, `zh-HK`, `zh-MO` and `zh-Hant-…` get `zh-Hant` and every other `zh` gets
 `zh-Hans`. Nothing matching, or `*`, gets English.
 
+**Chosen by the guest.** The 🌐 pill at the top of the guest page opens a list of every
+language by its own name (`list()`), plus "Same as this phone". A choice is a
+`party_lang` cookie (a year, not HttpOnly: the page sets it), which `pick()` honours
+before Accept-Language, so the page reloads to switch; "Same as this phone" deletes it.
+`/i18n.js` tells the page whether the language was chosen (`chosen`), to mark the list,
+and varies on `Cookie`. The same cookie applies to the Party Hub and join pages in that
+browser.
+
 **Right to left.** Hebrew and Arabic pages get `dir="rtl"` (`dir()` in `lib/i18n.js`; the
 runtime sets it, and the server writes it into the Party Hub and its message pages). The
 styles use logical properties (`inset-inline-end`, `padding-inline`, `text-align: start`)

@@ -326,6 +326,15 @@ const set = (values) => Object.assign(roon.settings, values);
     roon.partyName = 'Test Party';
   });
 
+  await check("the page's text follows a language the guest chose", async () => {
+    const chosen = await (await get('/i18n.js', { 'Accept-Language': 'fr', Cookie: 'party_lang=ko' })).text();
+    assert.match(chosen, /"lang":"ko"/);
+    assert.match(chosen, /"chosen":true/);
+    const browser = await (await get('/i18n.js', { 'Accept-Language': 'fr' })).text();
+    assert.match(browser, /"lang":"fr"/);
+    assert.match(browser, /"chosen":false/);
+  });
+
   await check('the old RoonParty address and its data still work', async () => {
     for (const path of ['/roonparty', '/roonparty.html']) {
       const res = await get(path);
