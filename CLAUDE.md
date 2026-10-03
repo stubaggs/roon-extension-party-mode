@@ -22,9 +22,10 @@ Every change that affects them updates the docs in the same commit:
 ## Conventions the owner has asked for
 
 - Work on a branch and merge into `main` through a pull request, only when asked.
-- **Never publish the Docker image automatically.** Publishing is manual (Actions →
-  Publish Docker image). Keep the workflow's push and schedule triggers commented out, and
-  put `[skip ci]` in merge commit titles.
+- **Never publish the Docker image, and never set it to publish automatically.** The
+  owner publishes it by hand (Actions → Publish Docker image). Don't run that workflow,
+  keep its push, tags and schedule triggers commented out, and put `[skip ci]` in merge
+  commit titles. After every release, remind the owner to publish it.
 - Bump `version` in `package.json` for a release; Roon shows it as the extension's version.
 - After merging a release into `main`, tag the merge commit with an annotated tag
   `v<version>` (e.g. `v1.1.0`) and push the tag. The workflow's `tags` trigger stays
