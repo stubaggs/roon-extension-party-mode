@@ -87,7 +87,10 @@ party zone, and the console prints the guest link and the Party Hub's URL. The e
 Party mode (first, as the switch used most), party zone, party name, and web port.
 Party mode is stored as `enabled`, its name when it was an on/off "Guest access":
 `true`, `"paused"` or `false`, read through `partyMode()` (`lib/roon-service.js`), which
-treats anything else as on. Paused pauses the zone if it is playing and refuses requests
+treats anything else as on. Roon's settings have no buttons, so the dropdown's choices
+are worded from the saved mode (`partyModeChoices()`): Pause while on, Unpause while
+paused, "start a new party" while off. The layout sent back after a save is rebuilt from
+the new mode, so the wording swaps over. Paused pauses the zone if it is playing and refuses requests
 and skips (409 `paused`) while guests stay in; back to on presses play if Roon allows.
 Off pauses the zone too and closes the guest pages; back on from off doesn't press play
 (a new party waits for the host or the first request), and leaving off rotates the join code

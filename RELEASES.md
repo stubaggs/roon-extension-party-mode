@@ -10,6 +10,8 @@ Not released yet. You can try it on the `experimental` branch.
 - The party screen is now the **Party Hub**, at `/PartyHub`. Its browser tab shows the
   party's name, such as "EX5 Test-o-rama Hub". Roon's link and status line point there,
   and old `/roonparty` bookmarks still open it.
+- The **Party mode** setting reads **Pause** while the party is on and **Unpause** while
+  it's paused, and says when turning it on starts a new party.
 
 ## 1.1.1
 

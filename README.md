@@ -95,7 +95,7 @@ file; Google Sheets, Numbers and Excel's **Data → From Text/CSV** read it corr
 
 | Setting | What it does |
 | --- | --- |
-| Party mode | On, Paused (music and requests on hold) or Off (requests closed, playlist ready). See above. |
+| Party mode | On, Paused (music and requests on hold) or Off (requests closed, playlist ready). See above. The choices are worded for where the party is now: **Pause** while it's on, **Unpause** while it's paused. |
 | Party zone | Where the music plays. If you pick a speaker that's grouped with others, the whole group plays. |
 | Party name | Shown on the Party Hub. Leave blank to use the zone's name. |
 | Display playlist download | What the Party Hub shows once **Party mode** is **Off**: a **QR code** guests can scan (the default), a **Link only** to click on the Hub itself, or **Off** for nothing. The hint gives the download address, which works whichever you pick. |

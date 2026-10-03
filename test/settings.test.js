@@ -153,6 +153,21 @@ check('party mode is first, with on, paused and off', () => {
   assert.deepStrictEqual(result.layout[0].values.map((v) => v.value), [true, 'paused', false]);
 });
 
+check('the choices read as what they do from the mode the party is in now', () => {
+  const titles = (enabled) =>
+    RoonService.prototype._layout.call({ _resolveZone: () => null, settings: { enabled } }, { enabled }).layout[0].values.map((v) => v.title.split(' — ')[0]);
+  assert.deepStrictEqual(titles(true), ['On', 'Pause', 'Off']);
+  assert.deepStrictEqual(titles('paused'), ['Unpause', 'Paused', 'Off']);
+  assert.deepStrictEqual(titles(false), ['On', 'Paused', 'Off']);
+});
+
+check('the wording follows the saved mode, not the one being picked', () => {
+  const self = { _resolveZone: () => null, settings: { enabled: true } };
+  const result = RoonService.prototype._layout.call(self, { enabled: 'paused' });
+  assert.strictEqual(result.layout[0].values[1].title, 'Pause — hold the music and requests');
+  assert.strictEqual(result.values.enabled, 'paused');
+});
+
 check('a saved on/off from "Guest access" carries over, and junk reads as on', () => {
   assert.strictEqual(layout({ enabled: false }).values.enabled, false);
   assert.strictEqual(layout({ enabled: 'paused' }).values.enabled, 'paused');
