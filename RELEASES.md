@@ -3,6 +3,10 @@
 What's new in each version of Party Mode, newest first. Roon shows the version you're
 running in its Extensions list.
 
+## 1.2.0 (in progress)
+
+Not released yet. You can try it on the `experimental` branch.
+
 ## 1.1.1
 
 - No changes to the extension itself. These release notes are corrected: the environment
