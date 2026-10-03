@@ -80,6 +80,8 @@
   "screen.scan": "Scannen, um einen Song hinzuzufügen",
   "screen.qr_alt": "Scannen, um einen Song hinzuzufügen",
   "screen.download_playlist": "Die Playlist herunterladen",
+  "screen.closed_title": "Die Party ist vorbei",
+  "screen.closed_text": "Danke fürs Kommen.",
   "join.closed": "Die Party nimmt keine Wünsche mehr an.",
   "join.expired": "Dieser Code ist abgelaufen. Scanne den Code auf dem Bildschirm noch einmal."
 }

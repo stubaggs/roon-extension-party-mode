@@ -58,8 +58,9 @@ under **Settings → Extensions** in Roon.
    on a TV, a tablet or a laptop where guests can see it.
 3. Guests scan the QR code on the party screen with their phone camera. That's it.
 
-To keep the party's playlist, click **Download the playlist** under the QR code on the party
-screen, on a computer rather than the TV. You get a CSV file of every song that was
+When the party ends, set **Guest access** to **Off**. The party screen swaps the QR code
+for "The party's over" and a **Download the playlist** button; click it on a computer
+rather than the TV. You get a CSV file of every song that was
 queued in the party zone: title, artist, album, length, who asked for it and when. Roon
 can't import it directly, but it's in the format Soundiiz imports: in Soundiiz, choose
 **Import playlist**, then the file, and pick TIDAL, Qobuz or Spotify. Roon then shows it
@@ -67,7 +68,8 @@ with your playlists. Excel on Windows can garble accented names when you double-
 file; Google Sheets, Numbers and Excel's **Data → From Text/CSV** read it correctly.
 
 To stop guests adding songs, set **Guest access** to **Off**. Turning it back on makes a
-new QR code, so old links stop working.
+new QR code, so old links stop working, and starts a new playlist: download the old one
+first.
 
 ## Settings
 

@@ -373,7 +373,8 @@ extensions Play Now, Add Next, Queue and Start Radio on a track, and Play Now, S
 Add Next, Queue and Start Radio on a playlist; nothing creates or edits one (checked
 against a Core in October 2026). So `lib/party-playlist.js` records every queue entry
 the party zone gets, once per `queue_item_id`, and `GET /api/playlist.csv` (linked from
-the party screen, no session needed, like the rest of the screen) serves it as CSV in
+the party screen only while guest access is off, which is how a host ends a party; the
+URL itself needs no session, like the rest of the screen) serves it as CSV in
 the form Soundiiz imports: lower-case `title`, `artist`, `album` headers (the other
 columns are ignored by importers), commas, UTF-8 without a byte order mark (a BOM hides
 the first header from an importer, at the cost of Excel's double-click guessing the
