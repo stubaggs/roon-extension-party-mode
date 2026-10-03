@@ -29,31 +29,18 @@
   "played.empty": "Todavía no ha sonado nada.",
   "allowance.closed": "Las peticiones están cerradas ahora mismo.",
   "allowance.paused": "Las peticiones están en pausa por un momento.",
-  "allowance.add.unlimited": "Añade todas las pistas que quieras.",
-  "allowance.add.left": {
-    "one": "Te queda {count} pista por añadir.",
-    "other": "Te quedan {count} pistas por añadir."
+  "button.left": {
+    "one": "queda {count}",
+    "other": "quedan {count}"
   },
-  "allowance.add.waiting": "Otra pista en {wait}.",
-  "allowance.add.used": "Has añadido todas tus pistas.",
-  "allowance.next.unlimited": "Usa «Poner a continuación» tantas veces como quieras.",
-  "allowance.next.left": {
-    "one": "Puedes usar «Poner a continuación» {count} vez más.",
-    "other": "Puedes usar «Poner a continuación» {count} veces más."
-  },
-  "allowance.next.waiting": "Otro «Poner a continuación» en {wait}.",
-  "allowance.next.used": "Has usado todos tus «Poner a continuación».",
-  "allowance.skip.unlimited": "Salta pistas tantas veces como quieras.",
-  "allowance.skip.left": {
-    "one": "Puedes saltar {count} pista más.",
-    "other": "Puedes saltar {count} pistas más."
-  },
-  "allowance.skip.waiting": "Podrás saltar otra pista en {wait}.",
-  "allowance.skip.used": "Has saltado todas las pistas permitidas.",
+  "button.wait": "en {wait}",
+  "button.used": "no quedan",
+  "button.paused": "en pausa",
   "time.minutes": {
     "one": "un minuto",
     "other": "{count} minutos"
   },
+  "time.short": "{count} min",
   "toast.queued_next": "Sonará a continuación",
   "toast.queued": "Añadida a la cola",
   "toast.already_queued": "Esa pista ya está en la cola.",

@@ -19,7 +19,7 @@
  *
  *   I18N.t('queue.up_next')                          -> "Up next"
  *   I18N.t('credit.requested_by', { name: 'Sam' })   -> "Requested by Sam"
- *   I18N.t('allowance.skip.left', { count: 2 })      -> "2 skips left."
+ *   I18N.t('button.left', { count: 2 })              -> "2 left"
  *
  * A key missing from the language falls back to English. An entry that is an
  * object is a plural: { one, other, ... } chosen by the language's own rules.

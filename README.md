@@ -6,7 +6,8 @@ Roon account, and no access to anything else in your Roon setup.
 
 - **Guests add tracks** from their phone, or jump one to play next, if you allow it.
 - **Skipping** the current track is an option you can turn on.
-- **Fair shares:** each guest gets a number of tracks, earning more back over time.
+- **Fair shares:** each guest gets a number of tracks, earning more back over time. The
+  buttons show how many are left.
 - **Names on tracks:** guests can give a nickname, shown next to the tracks they add.
 - **A party screen** for a TV or tablet: QR code, what's playing and the whole queue.
 - **Up next and Played** lists, so everyone can see what's coming and what's been on.

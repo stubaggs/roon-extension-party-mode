@@ -57,34 +57,66 @@
   const { t } = window.I18N;
   const minutes = window.I18N.minutes;
 
-  // Text keys: allowance.<add|next|skip>.<unlimited|left|waiting|used>
-  function describeTokens(bucket) {
+  /**
+   * A guest's allowance lives on the button it limits: "Add to queue · 3 left",
+   * "Skip · in 5 min". Each such button carries data-bucket (add, next, skip)
+   * and data-label (its text key), so it can be relabelled in place when the
+   * counts change, without rebuilding the list around it.
+   */
+  function allowanceNote(bucket) {
     const status = party.allowances[bucket];
-    const key = (state) => `allowance.${bucket}.${state}`;
-    if (status.remaining === null) return t(key('unlimited'));
-    if (status.remaining > 0) return t(key('left'), { count: status.remaining });
-    if (status.nextIn) return t(key('waiting'), { wait: minutes(status.nextIn) });
-    return t(key('used'));
+    if (party.party_mode === 'paused') return { text: t('button.paused'), usable: false };
+    if (status.remaining === null) return { text: '', usable: true };
+    if (status.remaining > 0) return { text: t('button.left', { count: status.remaining }), usable: true };
+    if (status.nextIn) {
+      const wait = t('time.short', { count: Math.max(1, Math.ceil(status.nextIn / 60000)) });
+      return { text: t('button.wait', { wait }), usable: false };
+    }
+    return { text: t('button.used'), usable: false };
   }
 
-  function renderTokens() {
-    if (!party) return;
-    const lines = [];
-    if (party.party_mode === 'paused') {
-      lines.push(t('allowance.paused'));
-    } else {
-      if (!party.capabilities.add) lines.push(t('allowance.closed'));
-      for (const bucket of ['add', 'next', 'skip']) {
-        if (party.capabilities[bucket]) lines.push(describeTokens(bucket));
-      }
+  function labelButton(button) {
+    const note = allowanceNote(button.dataset.bucket);
+    button.textContent = t(button.dataset.label);
+    if (note.text) {
+      const dot = document.createElement('span');
+      dot.className = 'note-dot';
+      dot.setAttribute('aria-hidden', 'true');
+      dot.textContent = ' · ';
+      const count = document.createElement('span');
+      count.className = 'note';
+      count.textContent = note.text;
+      button.append(dot, count);
     }
-    const tokens = el('tokens');
-    tokens.innerHTML = '';
-    for (const line of lines) {
-      const span = document.createElement('span');
-      span.className = 'token-line';
-      span.textContent = line;
-      tokens.appendChild(span);
+    button.disabled = !note.usable;
+  }
+
+  let refillTimer = null;
+
+  function renderAllowances() {
+    if (!party) return;
+    // A line under the search box only when there is nothing to press.
+    const notice = el('notice');
+    if (party.party_mode === 'paused') notice.textContent = t('allowance.paused');
+    else if (!party.capabilities.add && !party.capabilities.next) notice.textContent = t('allowance.closed');
+    else notice.textContent = '';
+    notice.hidden = !notice.textContent;
+
+    document.querySelectorAll('[data-bucket]').forEach(labelButton);
+
+    // Fetch again when a used-up button is due back, so it comes back on time.
+    clearTimeout(refillTimer);
+    const waits = ['add', 'next', 'skip'].map((b) => party.allowances[b].nextIn).filter(Boolean);
+    if (waits.length) refillTimer = setTimeout(refreshParty, Math.min(...waits) + 1000);
+  }
+
+  async function refreshParty() {
+    try {
+      party = await api('/api/party');
+      renderAllowances();
+      renderNameChip();
+    } catch (err) {
+      /* the next refresh will try again */
     }
   }
 
@@ -171,14 +203,16 @@
         if (party.capabilities.add) {
           const add = document.createElement('button');
           add.className = 'pill pill-primary';
-          add.textContent = t('track.add');
+          Object.assign(add.dataset, { bucket: 'add', label: 'track.add' });
+          labelButton(add);
           add.addEventListener('click', () => request(track, 'add', add));
           actions.appendChild(add);
         }
         if (party.capabilities.next) {
           const next = document.createElement('button');
           next.className = 'pill pill-ghost';
-          next.textContent = t('track.next');
+          Object.assign(next.dataset, { bucket: 'next', label: 'track.next' });
+          labelButton(next);
           next.addEventListener('click', () => request(track, 'next', next));
           actions.appendChild(next);
         }
@@ -259,7 +293,7 @@
       party.allowances = body.allowances;
       track.added = true;
       expandedKey = null;
-      renderTokens();
+      renderAllowances();
       renderResults(track.key);
       toast(mode === 'next' ? t('toast.queued_next') : t('toast.queued'));
     } catch (err) {
@@ -268,6 +302,7 @@
       if (err.message === 'already_queued') toast(t('toast.already_queued'));
       else if (err.message === 'paused') toast(t('allowance.paused'));
       else if (err.message === 'rate_limited') {
+        refreshParty(); // the counts were out of date; grey the button out
         toast(detail.next_in ? t('toast.nothing_left_wait', { wait: minutes(detail.next_in) }) : t('toast.nothing_left'));
       } else if (err.message === 'disabled') toast(t('toast.disabled'));
       else if (err.message !== 'no_session') toast(t('toast.roon_refused'));
@@ -278,12 +313,13 @@
     try {
       const body = await api('/api/skip', { method: 'POST' });
       party.allowances = body.allowances;
-      renderTokens();
+      renderAllowances();
       toast(t('toast.skipped'));
     } catch (err) {
       const detail = err.body || {};
       if (err.message === 'paused') toast(t('allowance.paused'));
       else if (err.message === 'rate_limited') {
+        refreshParty();
         toast(detail.next_in ? t('toast.no_skips_wait', { wait: minutes(detail.next_in) }) : t('toast.no_skips'));
       } else if (err.message !== 'no_session') toast(t('toast.failed'));
     }
@@ -389,16 +425,20 @@
   const nickname = el('nickname');
   const nicknameInput = el('nickname-input');
 
-  function renderWhoami() {
+  /** The name tag at the top: "✎ Stu", or "Add your name" before there is one. */
+  function renderNameChip() {
     const name = party && party.guest_name;
-    el('whoami').textContent = name ? t('name.adding_as', { name }) : '';
-    el('whoami-change').textContent = name ? t('name.change') : t('name.add');
+    const chip = el('name-chip');
+    chip.textContent = name || t('name.add');
+    chip.classList.toggle('named', Boolean(name));
+    // Said in full to a screen reader: "Adding as Stu. Change".
+    chip.setAttribute('aria-label', name ? `${t('name.adding_as', { name })}. ${t('name.change')}` : t('name.add'));
   }
 
   async function saveName(name) {
     const body = await api('/api/name', { method: 'POST', body: JSON.stringify({ name }) });
     party.guest_name = body.guest_name;
-    renderWhoami();
+    renderNameChip();
   }
 
   let changingName = false;
@@ -461,7 +501,7 @@
     }
   });
 
-  el('whoami-change').addEventListener('click', () => askName(true));
+  el('name-chip').addEventListener('click', () => askName(true));
 
   /** First visit asks; a remembered name (or a remembered skip) is applied quietly. */
   async function settleName() {
@@ -482,9 +522,12 @@
     app.hidden = false;
     locked.hidden = true;
     document.title = party.party_name || t('page.title');
-    el('skip').hidden = !party.capabilities.skip;
-    renderTokens();
-    renderWhoami();
+    const skip = el('skip');
+    skip.hidden = !party.capabilities.skip;
+    if (party.capabilities.skip) Object.assign(skip.dataset, { bucket: 'skip', label: 'skip.button' });
+    else delete skip.dataset.bucket;
+    renderAllowances();
+    renderNameChip();
 
     // boot() runs again when the party settings change; set up the rest once.
     if (started) return;
@@ -498,15 +541,7 @@
     events.addEventListener('queue', (event) => renderQueue(JSON.parse(event.data)));
     events.addEventListener('party', () => boot());
 
-    setInterval(() => {
-      api('/api/party')
-        .then((body) => {
-          party = body;
-          renderTokens();
-          renderWhoami();
-        })
-        .catch(() => {});
-    }, 30000);
+    setInterval(refreshParty, 30000);
   }
 
   boot();

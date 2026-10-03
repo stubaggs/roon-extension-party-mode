@@ -29,31 +29,18 @@
   "played.empty": "Noch nichts gespielt.",
   "allowance.closed": "Gerade sind keine Wünsche möglich.",
   "allowance.paused": "Wünsche sind gerade kurz pausiert.",
-  "allowance.add.unlimited": "Füge so viele Titel hinzu, wie du möchtest.",
-  "allowance.add.left": {
-    "one": "Du kannst noch {count} Titel hinzufügen.",
-    "other": "Du kannst noch {count} Titel hinzufügen."
+  "button.left": {
+    "one": "noch {count}",
+    "other": "noch {count}"
   },
-  "allowance.add.waiting": "Ein weiterer Titel in {wait}.",
-  "allowance.add.used": "Du hast alle deine Titel hinzugefügt.",
-  "allowance.next.unlimited": "Nutze „Als Nächstes spielen“ so oft du willst.",
-  "allowance.next.left": {
-    "one": "Du kannst „Als Nächstes spielen“ noch {count}-mal nutzen.",
-    "other": "Du kannst „Als Nächstes spielen“ noch {count}-mal nutzen."
-  },
-  "allowance.next.waiting": "„Als Nächstes spielen“ wieder in {wait}.",
-  "allowance.next.used": "Du hast „Als Nächstes spielen“ aufgebraucht.",
-  "allowance.skip.unlimited": "Überspringe so oft du willst.",
-  "allowance.skip.left": {
-    "one": "Du kannst noch {count} Titel überspringen.",
-    "other": "Du kannst noch {count} Titel überspringen."
-  },
-  "allowance.skip.waiting": "Überspringen wieder in {wait}.",
-  "allowance.skip.used": "Du hast alle deine Überspringen aufgebraucht.",
+  "button.wait": "in {wait}",
+  "button.used": "keine mehr",
+  "button.paused": "pausiert",
   "time.minutes": {
     "one": "einer Minute",
     "other": "{count} Minuten"
   },
+  "time.short": "{count} Min.",
   "toast.queued_next": "Wird als Nächstes gespielt",
   "toast.queued": "Zur Warteschlange hinzugefügt",
   "toast.already_queued": "Der Titel ist schon in der Warteschlange.",

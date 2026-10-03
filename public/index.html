@@ -10,6 +10,11 @@
   </head>
   <body>
     <main id="app" hidden>
+      <!-- Who the guest's tracks are credited to; tap to change. -->
+      <div class="topbar">
+        <button class="name-chip" id="name-chip" type="button"></button>
+      </div>
+
       <section class="playing" id="playing">
         <img class="art playing-art" id="playing-art" alt="" width="72" height="72" />
         <div class="playing-text">
@@ -37,11 +42,8 @@
         </button>
       </div>
 
-      <p class="tokens muted" id="tokens"></p>
-      <p class="whoami muted">
-        <span id="whoami"></span>
-        <button class="link-button" id="whoami-change" type="button"></button>
-      </p>
+      <!-- Only when requests are closed or paused; counts are on the buttons. -->
+      <p class="notice muted" id="notice" hidden></p>
 
       <!-- Results are announced as a count, not read out in full each time. -->
       <p id="results-status" class="visually-hidden" role="status" aria-live="polite"></p>

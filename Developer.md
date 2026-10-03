@@ -180,7 +180,11 @@ bucket model: each guest starts with N goes and earns one back every M minutes, 
 separate budgets for adding, playing next, and skipping. 0 goes per guest means no limit,
 and 0 minutes means a used go never comes back; to stop guests doing something at all,
 set its "Let guests …" to No. Adding and playing next are on
-by default, skipping is off.
+by default, skipping is off. The guest page shows each allowance on the button it limits
+("Add to queue · 3 left", "Skip · in 5 min", greyed out when used up), relabelled in place
+from `party.allowances` (`labelButton` in `public/guest.js`) and fetched again when a used
+go is due back. A line under the search box appears only when requests are closed or
+paused. The guest's name is a tag at the top right that opens the name dialog.
 
 **Browse titles.** Roon localises its menus and the API doesn't say which language the
 Core uses. The extension tries the titles in the collapsed **Advanced** group at the bottom of the

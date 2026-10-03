@@ -40,13 +40,11 @@ function usedKeys() {
   const keys = new Set();
   for (const file of ['guest.js', 'roonparty.js', 'i18n-runtime.js']) {
     for (const m of read(file).matchAll(/\bt\('([a-z_.]+)'/g)) keys.add(m[1]);
+    // Button labels relabelled in place: dataset { label: 'track.add' }.
+    for (const m of read(file).matchAll(/\blabel: '([a-z_.]+)'/g)) keys.add(m[1]);
   }
   for (const file of ['index.html', 'roonparty.html']) {
     for (const m of read(file).matchAll(/data-i18n(?:-[a-z-]+)?="([a-z_.]+)"/g)) keys.add(m[1]);
-  }
-  // Built from parts in guest.js: allowance.<bucket>.<state>
-  for (const bucket of ['add', 'next', 'skip']) {
-    for (const state of ['unlimited', 'left', 'waiting', 'used']) keys.add(`allowance.${bucket}.${state}`);
   }
   keys.add('join.closed');
   keys.add('join.expired');
@@ -107,8 +105,8 @@ console.log('\nruntime');
 check('fills in names and counts, with plurals', () => {
   const I18N = runtimeFor('en', en);
   assert.strictEqual(I18N.t('credit.requested_by', { name: 'Sam' }), 'Requested by Sam');
-  assert.strictEqual(I18N.t('allowance.skip.left', { count: 1 }), '1 skip left.');
-  assert.strictEqual(I18N.t('allowance.skip.left', { count: 3 }), '3 skips left.');
+  assert.strictEqual(I18N.t('button.left', { count: 1 }), '1 left');
+  assert.strictEqual(I18N.t('button.wait', { wait: I18N.t('time.short', { count: 5 }) }), 'in 5 min');
   assert.strictEqual(I18N.minutes(30 * 1000), 'a minute');
   assert.strictEqual(I18N.minutes(12 * 60 * 1000), '12 minutes');
 });
@@ -183,8 +181,8 @@ check('French text, plurals and clock', () => {
   const I18N = runtimeFor('fr', fr);
   assert.strictEqual(I18N.t('queue.up_next'), 'À suivre');
   assert.strictEqual(I18N.t('credit.requested_by', { name: 'Sam' }), 'Demandé par Sam');
-  assert.strictEqual(I18N.t('allowance.add.left', { count: 1 }), 'Il vous reste 1 morceau à ajouter.');
-  assert.strictEqual(I18N.t('allowance.add.left', { count: 3 }), 'Il vous reste 3 morceaux à ajouter.');
+  assert.strictEqual(I18N.t('button.left', { count: 1 }), '1 restant');
+  assert.strictEqual(I18N.t('button.left', { count: 3 }), '3 restants');
   assert.strictEqual(I18N.minutes(30 * 1000), 'une minute');
   assert.strictEqual(I18N.credit({ kind: 'add', requested_by: null }), 'un invité');
   assert.strictEqual(i18n.t('fr', 'join.expired'), 'Ce code a expiré. Scannez à nouveau le code affiché à l\'écran.');
@@ -197,16 +195,16 @@ for (const [header, lang] of [['es-ES,es;q=0.9', 'es'], ['es-419', 'es'], ['de-D
 }
 
 const samples = {
-  es: { up: 'A continuación', one: 'Te queda 1 pista por añadir.', many: 'Te quedan 3 pistas por añadir.', guest: 'Pedida por un invitado', wait: 'un minuto' },
-  de: { up: 'Als Nächstes', one: 'Du kannst noch 1 Titel hinzufügen.', many: 'Du kannst noch 3 Titel hinzufügen.', guest: 'Gewünscht von einem Gast', wait: 'einer Minute' },
-  nl: { up: 'Hierna', one: 'Je kunt nog 1 nummer toevoegen.', many: 'Je kunt nog 3 nummers toevoegen.', guest: 'Aangevraagd door een gast', wait: 'een minuut' }
+  es: { up: 'A continuación', one: 'queda 1', many: 'quedan 3', guest: 'Pedida por un invitado', wait: 'un minuto' },
+  de: { up: 'Als Nächstes', one: 'noch 1', many: 'noch 3', guest: 'Gewünscht von einem Gast', wait: 'einer Minute' },
+  nl: { up: 'Hierna', one: 'nog 1', many: 'nog 3', guest: 'Aangevraagd door een gast', wait: 'een minuut' }
 };
 for (const [lang, want] of Object.entries(samples)) {
   check(`${lang}: text, plurals and "by a guest"`, () => {
     const I18N = runtimeFor(lang, JSON.parse(read(`i18n/${lang}.json`)));
     assert.strictEqual(I18N.t('queue.up_next'), want.up);
-    assert.strictEqual(I18N.t('allowance.add.left', { count: 1 }), want.one);
-    assert.strictEqual(I18N.t('allowance.add.left', { count: 3 }), want.many);
+    assert.strictEqual(I18N.t('button.left', { count: 1 }), want.one);
+    assert.strictEqual(I18N.t('button.left', { count: 3 }), want.many);
     assert.strictEqual(I18N.requestedBy({ kind: 'add', requested_by: null }), want.guest);
     assert.strictEqual(I18N.minutes(30 * 1000), want.wait);
   });

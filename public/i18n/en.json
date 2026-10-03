@@ -29,31 +29,18 @@
   "played.empty": "Nothing played yet.",
   "allowance.closed": "Requests are closed right now.",
   "allowance.paused": "Requests are paused for a moment.",
-  "allowance.add.unlimited": "Add as many tracks as you like.",
-  "allowance.add.left": {
-    "one": "{count} track left to add.",
-    "other": "{count} tracks left to add."
+  "button.left": {
+    "one": "{count} left",
+    "other": "{count} left"
   },
-  "allowance.add.waiting": "Another track in {wait}.",
-  "allowance.add.used": "You have used all your tracks.",
-  "allowance.next.unlimited": "Play tracks next as often as you like.",
-  "allowance.next.left": {
-    "one": "{count} play-next left.",
-    "other": "{count} play-nexts left."
-  },
-  "allowance.next.waiting": "Another play-next in {wait}.",
-  "allowance.next.used": "You have used all your play-nexts.",
-  "allowance.skip.unlimited": "Skip as often as you like.",
-  "allowance.skip.left": {
-    "one": "{count} skip left.",
-    "other": "{count} skips left."
-  },
-  "allowance.skip.waiting": "Another skip in {wait}.",
-  "allowance.skip.used": "You have used all your skips.",
+  "button.wait": "in {wait}",
+  "button.used": "none left",
+  "button.paused": "paused",
   "time.minutes": {
     "one": "a minute",
     "other": "{count} minutes"
   },
+  "time.short": "{count} min",
   "toast.queued_next": "Queued to play next",
   "toast.queued": "Added to the queue",
   "toast.already_queued": "That one is already in the queue.",

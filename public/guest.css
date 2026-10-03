@@ -126,37 +126,55 @@ main {
   color: var(--text);
 }
 
-.tokens {
-  margin: 0 0 0.25rem;
-  font-size: 0.85rem;
-}
-
-.token-line {
-  display: block;
-}
-
-.whoami {
+/* Only when requests are closed or paused. */
+.notice {
   margin: 0 0 0.6rem;
+  font-size: 0.9rem;
+}
+
+.notice[hidden] {
+  display: none;
+}
+
+/* The name tag, top right. */
+.topbar {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 0.75rem;
+  margin-bottom: -0.75rem;
+}
+
+.name-chip {
+  max-width: 60%;
+  min-height: 32px;
+  padding: 0.25rem 0.8rem;
+  border: 1px solid var(--edge);
+  border-radius: 999px;
   font-size: 0.85rem;
-}
-
-.link-button {
-  /* At least 24px tall to tap, without moving the text around it. */
-  display: inline-block;
-  min-height: 24px;
-  padding: 0.2rem 0.3rem;
-  margin: -0.2rem -0.3rem;
   color: var(--lavender);
-  text-decoration: underline;
-  text-underline-offset: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-#whoami:not(:empty) + .link-button::before {
-  content: "· ";
-  color: var(--muted);
-  display: inline-block;
-  margin-right: 0.25rem;
-  text-decoration: none;
+.name-chip.named::before {
+  content: "✎ ";
+}
+
+/* "· 3 left" on a button: the allowance it uses. */
+.pill .note {
+  font-weight: 500;
+}
+
+/* Skip shares a row with what's playing, so its count goes underneath. */
+.skip .note-dot {
+  display: none;
+}
+
+.skip .note {
+  display: block;
+  font-size: 0.72rem;
+  line-height: 1.1;
 }
 
 .nickname-backdrop {
@@ -270,6 +288,7 @@ main {
 
 .actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.5rem;
   padding: 0 0.5rem 0.75rem 4.2rem;
   background: var(--raised);

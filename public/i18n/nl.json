@@ -29,31 +29,18 @@
   "played.empty": "Er is nog niets gespeeld.",
   "allowance.closed": "Verzoekjes zijn nu gesloten.",
   "allowance.paused": "Verzoeken staan even op pauze.",
-  "allowance.add.unlimited": "Voeg zoveel nummers toe als je wilt.",
-  "allowance.add.left": {
-    "one": "Je kunt nog {count} nummer toevoegen.",
-    "other": "Je kunt nog {count} nummers toevoegen."
+  "button.left": {
+    "one": "nog {count}",
+    "other": "nog {count}"
   },
-  "allowance.add.waiting": "Nog een nummer over {wait}.",
-  "allowance.add.used": "Je hebt al je nummers toegevoegd.",
-  "allowance.next.unlimited": "Gebruik ‘Hierna afspelen’ zo vaak als je wilt.",
-  "allowance.next.left": {
-    "one": "Je kunt ‘Hierna afspelen’ nog {count} keer gebruiken.",
-    "other": "Je kunt ‘Hierna afspelen’ nog {count} keer gebruiken."
-  },
-  "allowance.next.waiting": "Weer ‘Hierna afspelen’ over {wait}.",
-  "allowance.next.used": "Je hebt ‘Hierna afspelen’ opgebruikt.",
-  "allowance.skip.unlimited": "Sla zo vaak over als je wilt.",
-  "allowance.skip.left": {
-    "one": "Je kunt nog {count} nummer overslaan.",
-    "other": "Je kunt nog {count} nummers overslaan."
-  },
-  "allowance.skip.waiting": "Je kunt over {wait} weer overslaan.",
-  "allowance.skip.used": "Je kunt niet meer overslaan.",
+  "button.wait": "over {wait}",
+  "button.used": "op",
+  "button.paused": "gepauzeerd",
   "time.minutes": {
     "one": "een minuut",
     "other": "{count} minuten"
   },
+  "time.short": "{count} min",
   "toast.queued_next": "Wordt hierna afgespeeld",
   "toast.queued": "Aan de wachtrij toegevoegd",
   "toast.already_queued": "Dat nummer staat al in de wachtrij.",

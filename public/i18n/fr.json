@@ -29,31 +29,18 @@
   "played.empty": "Rien n'a encore été joué.",
   "allowance.closed": "Les demandes sont fermées pour le moment.",
   "allowance.paused": "Les demandes sont en pause pour un moment.",
-  "allowance.add.unlimited": "Ajoutez autant de morceaux que vous voulez.",
-  "allowance.add.left": {
-    "one": "Il vous reste {count} morceau à ajouter.",
-    "other": "Il vous reste {count} morceaux à ajouter."
+  "button.left": {
+    "one": "{count} restant",
+    "other": "{count} restants"
   },
-  "allowance.add.waiting": "Un autre morceau dans {wait}.",
-  "allowance.add.used": "Vous avez ajouté tous vos morceaux.",
-  "allowance.next.unlimited": "Utilisez « Lire ensuite » autant que vous voulez.",
-  "allowance.next.left": {
-    "one": "Il vous reste {count} « Lire ensuite ».",
-    "other": "Il vous reste {count} « Lire ensuite »."
-  },
-  "allowance.next.waiting": "Un autre « Lire ensuite » dans {wait}.",
-  "allowance.next.used": "Vous avez utilisé tous vos « Lire ensuite ».",
-  "allowance.skip.unlimited": "Passez des morceaux autant que vous voulez.",
-  "allowance.skip.left": {
-    "one": "Vous pouvez encore passer {count} morceau.",
-    "other": "Vous pouvez encore passer {count} morceaux."
-  },
-  "allowance.skip.waiting": "Vous pourrez passer un autre morceau dans {wait}.",
-  "allowance.skip.used": "Vous avez passé tous les morceaux autorisés.",
+  "button.wait": "dans {wait}",
+  "button.used": "plus aucun",
+  "button.paused": "en pause",
   "time.minutes": {
     "one": "une minute",
     "other": "{count} minutes"
   },
+  "time.short": "{count} min",
   "toast.queued_next": "Sera lu ensuite",
   "toast.queued": "Ajouté à la file d'attente",
   "toast.already_queued": "Ce morceau est déjà dans la file d'attente.",
