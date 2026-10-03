@@ -16,7 +16,9 @@ Every change that affects them updates the docs in the same commit:
   changes (refactors, tests, workflows) don't go in. Security fixes are summed up as
   "Various security enhancements", with details only for what a host or guest would
   notice in normal use. A version bump in `package.json`
-  starts a new section; the version in progress says it isn't released yet.
+  starts a new section; the version in progress says it isn't released yet. On `experimental`, `package.json`'s
+  version keeps a suffix (`1.2.0-experimental`) until the release bump: the publish
+  workflow refuses an experimental build without one.
 - If a change touches none of these, say so in the pull request rather than editing the docs.
 
 ## Conventions the owner has asked for

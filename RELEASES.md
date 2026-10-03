@@ -5,7 +5,8 @@ running in its Extensions list.
 
 ## 1.2.0 (in progress)
 
-Not released yet. You can try it on the `experimental` branch.
+Not released yet. You can try it on the `experimental` branch, or with Docker as
+`stubaggs/roon-extension-party-mode:experimental` once that is published.
 
 - The party screen is now the **Party Hub**, at `/PartyHub`. Its browser tab shows the
   party's name, such as "EX5 Test-o-rama Hub". Roon's link and status line point there,

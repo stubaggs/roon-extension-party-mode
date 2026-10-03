@@ -282,7 +282,17 @@ UDP broadcast on port 9003) and bind-mounts `config.json` so settings survive up
 ## Publishing the image
 
 `.github/workflows/docker-publish.yml` builds `linux/amd64`, `linux/arm/v6`,
-`linux/arm/v7` and `linux/arm64` and pushes `stubaggs/roon-extension-party-mode:latest` to Docker Hub. For
+`linux/arm/v7` and `linux/arm64` and pushes `stubaggs/roon-extension-party-mode` to Docker Hub,
+tagged by the branch chosen under **Use workflow from** when it's run:
+
+| Branch | Tags | Who gets it |
+| --- | --- | --- |
+| `main` | `latest`, and the version (`1.1.1`) | The Extension Manager (`repository-entry.json` asks for `latest`), and Docker users on `latest`; the version tag lets anyone pin or roll back |
+| `experimental` | `experimental`, and the version (`1.2.0-experimental`) | Only those who ask for `:experimental` |
+
+The workflow refuses any other branch, and refuses `experimental` when its
+`package.json` version has no suffix, so an experimental build can never take `latest` or
+a release's number. For
 now it only runs when started by hand (Actions → Publish Docker image → Run workflow);
 the commented-out `push` trigger in the workflow publishes on every merge to `main` once
 restored, and a commented-out weekly `schedule` rebuilds and republishes every Monday so

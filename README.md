@@ -57,6 +57,22 @@ gave Party Mode, so the commands above let only the extension (user 1000) read i
 read and change it. Then enable **Party Mode**
 under **Settings → Extensions** in Roon.
 
+### Trying the experimental version
+
+New features are tried out before each release in an **experimental** version. To run
+it, use the `experimental` Docker tag instead of `latest`:
+
+```bash
+docker run -d --name party-mode --network host --restart unless-stopped \
+  -v "$PWD/config.json:/usr/src/app/config.json" \
+  stubaggs/roon-extension-party-mode:experimental
+```
+
+It may change or break between updates. Roon sees it as the same Party Mode with the same
+settings, so stop the usual one first (`docker stop party-mode && docker rm party-mode`)
+and run only one at a time. To go back, run the usual command with `latest`. The Extension
+Manager always installs the released version.
+
 ## Starting a party
 
 1. In Roon, open **Settings → Extensions → Party Mode → Settings** and pick the **Party
