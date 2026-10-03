@@ -68,10 +68,12 @@ docker run -d --name party-mode --network host --restart unless-stopped \
   stubaggs/roon-extension-party-mode:experimental
 ```
 
-It may change or break between updates. Roon sees it as the same Party Mode with the same
-settings, so stop the usual one first (`docker stop party-mode && docker rm party-mode`)
-and run only one at a time. To go back, run the usual command with `latest`. The Extension
-Manager always installs the released version.
+It may change or break between updates. It can run alongside the released version, for
+example on another computer, as long as each has its own `config.json` and its own party
+zone: two copies on one zone would both pause and resume it, each with its own join code.
+To swap instead, stop the usual one first (`docker stop party-mode && docker rm party-mode`),
+and to go back, run the usual command with `latest`. The Extension Manager always installs
+the released version.
 
 ## Starting a party
 
