@@ -3,6 +3,11 @@
 What's new in each version of Party Mode, newest first. Roon shows the version you're
 running in its Extensions list.
 
+## 1.1.1
+
+- No changes to the extension itself. These release notes are corrected: the environment
+  variable names came with 1.0.2, not 1.0.3.
+
 ## 1.1.0
 
 ### End the party, keep the playlist
