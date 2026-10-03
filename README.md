@@ -61,30 +61,6 @@ gave Party Mode, so the commands above let only the extension (user 1000) read i
 read and change it. Then enable **Party Mode**
 under **Settings → Extensions** in Roon.
 
-### Trying the experimental version
-
-New features are tried out before each release in an **experimental** version. It may
-change or break between updates. It shows in Roon as a separate extension, **Party Mode
-(experimental)**, so it can run alongside the released Party Mode, even on the same
-computer. Give it its own folder, container name and party zone:
-
-```bash
-mkdir party-mode-experimental && cd party-mode-experimental
-touch config.json && sudo chown 1000 config.json && chmod 600 config.json
-docker run -d --name party-mode-experimental --network host --restart unless-stopped \
-  --log-opt max-size=10m --log-opt max-file=3 \
-  -v "$PWD/config.json:/usr/src/app/config.json" \
-  stubaggs/roon-extension-party-mode:experimental
-```
-
-Then enable **Party Mode (experimental)** under **Settings → Extensions** in Roon and
-choose its settings. Pick a different party zone from the released Party Mode's: two on
-one zone would both pause and resume it, each with its own join code. If the released one
-already uses port 8338, the experimental one uses the next free port, and its status line
-in Roon says so. To stop trying it, remove the container
-(`docker rm -f party-mode-experimental`) and disable it in Roon. The Extension Manager
-always installs the released version.
-
 ## Starting a party
 
 1. In Roon, open **Settings → Extensions → Party Mode → Settings** and pick the **Party
