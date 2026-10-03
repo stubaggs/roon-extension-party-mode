@@ -61,7 +61,8 @@
    * A guest's allowance lives on the button it limits: "Add to queue · 3 left",
    * "Skip · in 5 min". Each such button carries data-bucket (add, next, skip)
    * and data-label (its text key), so it can be relabelled in place when the
-   * counts change, without rebuilding the list around it.
+   * counts change, without rebuilding the list around it. A button with
+   * data-quiet (Skip) says nothing while it can be used, only when it can't.
    */
   function allowanceNote(bucket) {
     const status = party.allowances[bucket];
@@ -78,7 +79,7 @@
   function labelButton(button) {
     const note = allowanceNote(button.dataset.bucket);
     button.textContent = t(button.dataset.label);
-    if (note.text) {
+    if (note.text && !(note.usable && 'quiet' in button.dataset)) {
       const dot = document.createElement('span');
       dot.className = 'note-dot';
       dot.setAttribute('aria-hidden', 'true');
@@ -524,7 +525,7 @@
     document.title = party.party_name || t('page.title');
     const skip = el('skip');
     skip.hidden = !party.capabilities.skip;
-    if (party.capabilities.skip) Object.assign(skip.dataset, { bucket: 'skip', label: 'skip.button' });
+    if (party.capabilities.skip) Object.assign(skip.dataset, { bucket: 'skip', label: 'skip.button', quiet: '' });
     else delete skip.dataset.bucket;
     renderAllowances();
     renderNameChip();
