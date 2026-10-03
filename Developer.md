@@ -244,7 +244,17 @@ browser.
 **Right to left.** Hebrew and Arabic pages get `dir="rtl"` (`dir()` in `lib/i18n.js`; the
 runtime sets it, and the server writes it into the Party Hub and its message pages). The
 styles use logical properties (`inset-inline-end`, `padding-inline`, `text-align: start`)
-so they mirror, and scrolling names slide the other way.
+so they mirror, and scrolling names slide the other way. Text guests type (search, name)
+takes its direction from what is typed (`dir="auto"`), and a guest's name or a language
+name dropped into a sentence is wrapped in first-strong isolates (U+2068…U+2069) on a
+right-to-left page, or when the name itself is right to left, so "Requested by יוסי" and
+"דולגה על ידי Sam" keep their order (`isolate()` in `i18n-runtime.js`).
+
+**Length.** Translations run longer than English (Arabic and Hungarian button labels are
+over 35 characters with the allowance), so action buttons wrap rather than overflow, lose
+their indent on phones under 400px, and toasts are as wide as their message up to the
+screen. Track, artist and album names from Roon are shown as Roon gives them; one in a
+different script from the page keeps the page's alignment.
 
 The guest page and the Party Hub take their text from `public/i18n/<code>.json`,
 one file per language. Each browser gets the language it asks for (its

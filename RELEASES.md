@@ -16,6 +16,9 @@ Not released yet. You can try it on the `experimental` branch (see
   Greek, Hebrew, Hungarian, Italian, Japanese, Korean, Norwegian, Polish, Portuguese
   (Portugal and Brazil), Romanian, Russian, Swedish, Thai, Turkish, Ukrainian and
   Vietnamese. Hebrew and Arabic pages read right to left.
+- Long translations fit narrow phones: buttons wrap instead of running off the screen,
+  and messages use the screen's width. Names in another script (a Hebrew name on an
+  English page, say) stay in the right order.
 - Guests can choose their page's language with a 🌐 button beside their name tag;
   otherwise it follows the phone's.
 - Roon's status line for Party Mode shows its Party mode, the party's name and the Party

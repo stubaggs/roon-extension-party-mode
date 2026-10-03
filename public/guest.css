@@ -348,6 +348,23 @@ main {
   margin-top: -0.35rem;
 }
 
+/* Some languages' labels are long ("Lejátszás következőként · 10 maradt"):
+   they wrap rather than run off a narrow phone, which also drops the indent. */
+.actions .pill {
+  max-width: 100%;
+  white-space: normal;
+}
+
+@media (max-width: 400px) {
+  .actions {
+    padding-inline-start: 0.5rem;
+  }
+}
+
+.nickname-actions {
+  flex-wrap: wrap;
+}
+
 .added {
   animation: land 420ms ease-out;
 }
@@ -437,7 +454,12 @@ main {
   transform: translate(-50%, 2rem);
   background: var(--raised);
   border: 1px solid var(--edge);
-  border-radius: 999px;
+  /* As wide as the message, up to the screen: centring with left: 50% would
+     otherwise wrap it at half the width, which long translations make worse. */
+  width: max-content;
+  max-width: calc(100vw - 2rem);
+  text-align: center;
+  border-radius: 1.2rem;
   padding: 0.6rem 1.2rem;
   font-size: 0.92rem;
   opacity: 0;

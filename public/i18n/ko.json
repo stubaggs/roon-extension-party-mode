@@ -21,7 +21,7 @@
   "track.in_queue": "대기열에 있음",
   "track.add": "대기열에 추가",
   "track.next": "다음에 재생",
-  "queue.up_next": "다음 곡",
+  "queue.up_next": "다음 순서",
   "queue.empty": "대기열이 비어 있습니다.",
   "played.title": "재생됨",
   "played.empty": "아직 재생된 항목이 없습니다.",

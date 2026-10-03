@@ -292,4 +292,24 @@ check('the page gets every language by its own name, and whether one was chosen'
   assert.match(i18n.script('en'), /"chosen":false/);
 });
 
+console.log('\nmixed scripts');
+
+check('a name in another script keeps its place; plain text otherwise', () => {
+  const he = runtimeFor('he', JSON.parse(read('i18n/he.json')));
+  assert.strictEqual(he.t('credit.requested_by', { name: 'Sam' }), 'בבקשת \u2068Sam\u2069');
+  const enPage = runtimeFor('en', en);
+  assert.strictEqual(enPage.t('credit.requested_by', { name: 'Sam' }), 'Requested by Sam');
+  assert.strictEqual(enPage.t('credit.requested_by', { name: 'יוסי' }), 'Requested by \u2068יוסי\u2069');
+  assert.strictEqual(enPage.t('lang.change', { language: 'العربية' }), 'Language: \u2068العربية\u2069. Change');
+  assert.strictEqual(enPage.t('search.results', { count: 3 }), '3 tracks found.', 'counts are never wrapped');
+});
+
+check('"Up next" and "Play it next" read differently, and nothing says song', () => {
+  for (const lang of i18n.languages()) {
+    const strings = JSON.parse(read(`i18n/${lang}.json`));
+    assert.notStrictEqual(strings['queue.up_next'], strings['track.next'], lang);
+  }
+  assert.strictEqual(JSON.parse(read('i18n/ko.json'))['queue.up_next'], '다음 순서');
+});
+
 process.exit(failures ? 1 : 0);

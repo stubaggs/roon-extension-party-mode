@@ -21,7 +21,7 @@
   "track.in_queue": "キューにあります",
   "track.add": "キューに追加",
   "track.next": "次に再生",
-  "queue.up_next": "次に再生",
+  "queue.up_next": "このあと",
   "queue.empty": "キューは空です。",
   "played.title": "再生済み",
   "played.empty": "まだ何も再生されていません。",

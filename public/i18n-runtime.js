@@ -33,6 +33,17 @@
   const plurals = {};
   const pluralFor = (lang) => plurals[lang] || (plurals[lang] = new Intl.PluralRules(lang));
 
+  // Names guests type, and language names, can be in another script from the
+  // page ("Requested by יוסי", "דולגה על ידי Sam"). Wrapped in first-strong
+  // isolates, they keep their place in the sentence. Only when it matters: a
+  // right-to-left page, or right-to-left text, so other pages stay plain text.
+  const ISOLATE = ['name', 'language'];
+  const RTL_TEXT = /[\u0590-\u08ff\ufb1d-\ufdff\ufe70-\ufeff]/;
+  function isolate(value) {
+    const text = String(value);
+    return data.dir === 'rtl' || RTL_TEXT.test(text) ? `\u2068${text}\u2069` : text;
+  }
+
   function t(key, vars) {
     vars = vars || {};
     let entry = data.strings[key];
@@ -45,7 +56,9 @@
     if (typeof entry === 'object') {
       entry = entry[pluralFor(lang).select(Number(vars.count))] || entry.other || '';
     }
-    return String(entry).replace(/\{(\w+)\}/g, (match, name) => (vars[name] === undefined ? match : vars[name]));
+    return String(entry).replace(/\{(\w+)\}/g, (match, name) =>
+      vars[name] === undefined ? match : ISOLATE.includes(name) ? isolate(vars[name]) : vars[name]
+    );
   }
 
   const ATTRIBUTES = ['placeholder', 'aria-label', 'alt', 'title'];

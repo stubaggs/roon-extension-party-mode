@@ -27,7 +27,7 @@
     const name = data.party_name || t('party.default_name');
     el('party-name').textContent = name;
     // "EX5 Test-o-rama Hub" in the tab, a bookmark or on a tablet's home screen.
-    document.title = t('page.hub_title', { name });
+    document.title = t('page.hub_title', { name }).replace(/[\u2068\u2069]/g, '');
     if (data.join_url) el('join-link').href = data.join_url;
     // Party mode off ends the party: no QR code that no longer works, but
     // the playlist, as a QR code or a link as the host chose, and "Requests
