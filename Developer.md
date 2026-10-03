@@ -279,6 +279,11 @@ repository secrets, under Settings → Secrets and variables → Actions:
 | `DOCKERHUB_USERNAME` | `stubaggs` |
 | `DOCKERHUB_TOKEN` | A Docker Hub access token with Read & Write scope |
 
+A release bumps `version` in `package.json`, gives RELEASES.md its section, merges into
+`main` through a pull request, and tags the merge commit `v<version>` (an annotated tag,
+from `v1.1.0` on). The workflow's `tags: ['v*']` trigger is commented out with `push`, so
+tagging doesn't publish; run the workflow by hand.
+
 The Extension Manager checks Docker Hub for a newer `latest`, so publishing a new
 `latest` is how an update reaches people who have it installed.
 
