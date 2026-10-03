@@ -234,6 +234,9 @@ changing them:
   requested. Results already queued are `aria-disabled` rows, not dead buttons.
 - **Announce, don't read out.** The results list is not a live region; a hidden
   `role="status"` line says how many tracks were found (`search.results`, a plural).
+- **Used-up buttons stay reachable.** They are `aria-disabled`, not `disabled`, so a
+  screen reader still hears "Skip, in 5 min"; pressing one shows why in a toast. They
+  are outlined rather than faded, so the wait stays readable.
 - **The name dialog** makes the page behind `inert`, closes on Escape (as Skip or
   Cancel), and hands focus back to the button that opened it.
 - **Moving text stops.** Long names scroll twice to the end and back, pause on hover,

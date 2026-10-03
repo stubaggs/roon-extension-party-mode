@@ -89,7 +89,19 @@
       count.textContent = note.text;
       button.append(dot, count);
     }
-    button.disabled = !note.usable;
+    // Used up, the button stays focusable so a screen reader still hears
+    // "Skip, in 5 min"; pressing it explains instead (spentMessage).
+    button.setAttribute('aria-disabled', String(!note.usable));
+  }
+
+  const isSpent = (button) => button.getAttribute('aria-disabled') === 'true';
+
+  /** What to say when a used-up button is pressed. */
+  function spentMessage(bucket) {
+    if (party.party_mode === 'paused') return t('allowance.paused');
+    const wait = party.allowances[bucket].nextIn;
+    if (bucket === 'skip') return wait ? t('toast.no_skips_wait', { wait: minutes(wait) }) : t('toast.no_skips');
+    return wait ? t('toast.nothing_left_wait', { wait: minutes(wait) }) : t('toast.nothing_left');
   }
 
   let refillTimer = null;
@@ -280,6 +292,7 @@
   // ----------------------------------------------------------------- actions
 
   async function request(track, mode, button) {
+    if (isSpent(button)) return toast(spentMessage(mode));
     button.disabled = true;
     try {
       const body = await api('/api/request', {
@@ -311,6 +324,7 @@
   }
 
   el('skip').addEventListener('click', async () => {
+    if (isSpent(el('skip'))) return toast(spentMessage('skip'));
     try {
       const body = await api('/api/skip', { method: 'POST' });
       party.allowances = body.allowances;

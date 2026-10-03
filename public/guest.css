@@ -166,6 +166,19 @@ main {
   font-weight: 500;
 }
 
+/* Used up or paused: outlined rather than faded, so "in 5 min" stays
+   readable (grey label 6.5:1, the note in full text colour). */
+.pill[aria-disabled="true"] {
+  background: none;
+  border: 1px solid var(--edge);
+  color: var(--muted);
+  cursor: default;
+}
+
+.pill[aria-disabled="true"] .note {
+  color: var(--text);
+}
+
 /* Skip shares a row with what's playing, so its count goes underneath. */
 .skip .note-dot {
   display: none;
