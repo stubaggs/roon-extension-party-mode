@@ -44,15 +44,7 @@ running in its Extensions list.
 
 ### Security
 
-- A guest can only add tracks from their own search results, as they were shown. A guest
-  who knew some web code could otherwise have queued a whole album or playlist with one
-  request, or slipped past the duplicate check.
-- Allowances hold even when a guest sends many requests or skips at once.
-- Names can't contain line breaks or hidden characters that show text back to front.
-- The pages tell browsers to run only Party Mode's own code, and other websites can't show
-  the guest page inside theirs. The party screen can still go in a dashboard.
-- Limits on how many guest sessions are kept and how long a search can be.
-- Updated a library the web server uses, for two published security fixes.
+- Various security enhancements.
 - The Docker instructions now keep `config.json`, which holds Roon's key for Party Mode,
   readable only by the extension.
 

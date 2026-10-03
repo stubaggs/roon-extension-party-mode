@@ -13,7 +13,9 @@ Every change that affects them updates the docs in the same commit:
 - **RELEASES.md** is the user-friendly list of changes, newest version first. Every
   change people would notice (features, settings, fixes, the pages) adds a line under the
   version in progress, in the same commit, in the README's plain language. Internal
-  changes (refactors, tests, workflows) don't go in. A version bump in `package.json`
+  changes (refactors, tests, workflows) don't go in. Security fixes are summed up as
+  "Various security enhancements", with details only for what a host or guest would
+  notice in normal use. A version bump in `package.json`
   starts a new section; the version in progress says it isn't released yet.
 - If a change touches none of these, say so in the pull request rather than editing the docs.
 
