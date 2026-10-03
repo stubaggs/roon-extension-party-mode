@@ -123,6 +123,19 @@ check('credits: a name, "a guest", or Roon Radio', () => {
   assert.strictEqual(I18N.credit({ kind: 'radio', requested_by: null }), 'Roon Radio');
 });
 
+check('no language preference, or any, gets English', () => {
+  // The real negotiation Express uses, which offers the first language listed.
+  const accepts = require('accepts');
+  const real = (header) => {
+    const req = { headers: header ? { 'accept-language': header } : {} };
+    return { acceptsLanguages: (...langs) => accepts(req).languages(...langs) };
+  };
+  assert.strictEqual(i18n.pick(real()), 'en');
+  assert.strictEqual(i18n.pick(real('*')), 'en');
+  assert.strictEqual(i18n.pick(real('fr-FR,fr;q=0.9')), 'fr');
+  assert.strictEqual(i18n.pick(real('ja')), 'en');
+});
+
 check('a key missing from a language falls back to English', () => {
   const I18N = runtimeFor('de', { 'queue.up_next': 'Als Nächstes' });
   assert.strictEqual(I18N.t('queue.up_next'), 'Als Nächstes');
