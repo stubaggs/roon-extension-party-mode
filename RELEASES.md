@@ -3,9 +3,7 @@
 What's new in each version of Party Mode, newest first. Roon shows the version you're
 running in its Extensions list.
 
-## 1.1.0 (in progress)
-
-Not released yet. You can try it on the `experimental` branch.
+## 1.1.0
 
 ### End the party, keep the playlist
 
