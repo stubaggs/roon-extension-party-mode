@@ -37,7 +37,7 @@ Roon Core  ──(node-roon-api over the local network)──  app.js
 | `lib/roon-service.js` | Pairing, settings layout, search, queue actions, queue subscription |
 | `lib/track-id.js` | Track identity: title and artist normalisation, length, hash |
 | `lib/guests.js` | Guest sessions, token-bucket limits, request attribution |
-| `lib/history.js` | Played-songs list for the guest page |
+| `lib/history.js` | Played-tracks list for the guest page |
 | `lib/party-playlist.js` | Everything queued during the party, as the downloadable CSV |
 | `lib/server.js` | REST API, server-sent events, QR code, image proxy |
 | `public/` | Guest page and the RoonParty screen, no build step |
@@ -127,7 +127,7 @@ Roon keeps the profile **per browse session and per hierarchy**: each
 `multi_session_key` has its own profile in each hierarchy, a session nobody has selected
 one in uses Roon's default ("Guest"), and a queue action counts toward the profile of the
 session and hierarchy it was made in. Found on a real Core: selecting in a guest's
-"settings" hierarchy switched it there ("Guest" → "Pat") while songs the same guest
+"settings" hierarchy switched it there ("Guest" → "Pat") while tracks the same guest
 queued from the "search" hierarchy still counted as Guest.
 
 So guests search and queue in Roon's main **"browse"** hierarchy, the only one holding
@@ -228,7 +228,7 @@ changing them:
   change, so `renderResults(focusKey)` puts focus back on the row just opened or
   requested. Results already queued are `aria-disabled` rows, not dead buttons.
 - **Announce, don't read out.** The results list is not a live region; a hidden
-  `role="status"` line says how many songs were found (`search.results`, a plural).
+  `role="status"` line says how many tracks were found (`search.results`, a plural).
 - **The name dialog** makes the page behind `inert`, closes on Escape (as Skip or
   Cancel), and hands focus back to the button that opened it.
 - **Moving text stops.** Long names scroll twice to the end and back, pause on hover,
@@ -316,7 +316,7 @@ its old name working, checked after the new ones.
 The normal log is short: the port and links at startup, one line per guest request
 (`Request (add) from Sam: …`), per queue insert (`Queued: …` with length and hash) and
 per track start (`Playing: … -> Sam`), one line when each guest's session gets the
-profile, and warnings. That is enough to diagnose a wrong name on a song.
+profile, and warnings. That is enough to diagnose a wrong name on a track.
 
 `ROON_EXTENSION_PARTY_MODE_DEBUG=1` (`lib/log.js`) adds detail: the profile before and after each switch,
 the profiles on offer, the first search's result categories, and node-roon-api's own log
@@ -334,14 +334,14 @@ promote a track that is already waiting. If you have seen Music Assistant's "boo
 upcoming song", that part does not have a Roon equivalent.
 
 **A request presses play.** Roon's Queue and Add Next actions leave a paused or stopped
-zone as it is, so a song requested after the queue ran out would sit there unplayed.
+zone as it is, so a track requested after the queue ran out would sit there unplayed.
 After either action succeeds, `performAction` sends the transport `play` control unless
 the zone is already playing or loading. That also resumes a zone the host paused on
 purpose; there is no setting to turn it off. A failed `play` is logged and the request
 still counts, since the track was queued.
 
 **Nicknames are optional.** Guests are asked for a name on their first visit; it shows as
-a badge on the songs they add, in Up next, Played and on the RoonParty screen. The phone
+a badge on the tracks they add, in Up next, Played and on the RoonParty screen. The phone
 remembers it (or that they skipped), so a rescan doesn't ask again. Unnamed requests show
 as "a guest".
 
@@ -395,7 +395,7 @@ access is turned back on (a new party; what is still queued is recorded again).
 
 **Played history is the extension's own.** Roon's API has no play history, so the
 "Played" list on the guest page is recorded by the extension as tracks start. It is kept
-in memory (last 200 songs) and starts over when the extension restarts or the party zone
+in memory (last 200 tracks) and starts over when the extension restarts or the party zone
 changes.
 
 **The queue subscription is per zone.** Changing the party zone starts a new subscription;

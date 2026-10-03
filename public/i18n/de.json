@@ -1,6 +1,6 @@
 {
   "_language": "Deutsch",
-  "page.title": "Song hinzufügen",
+  "page.title": "Titel hinzufügen",
   "page.screen_title": "RoonParty",
   "party.default_name": "Party",
   "playing.now": "Läuft gerade",
@@ -11,12 +11,12 @@
   "credit.requested_by_guest": "Gewünscht von einem Gast",
   "credit.guest": "ein Gast",
   "credit.radio": "Roon Radio",
-  "search.placeholder": "Song oder Künstler suchen",
+  "search.placeholder": "Titel oder Künstler suchen",
   "search.clear": "Suche löschen",
-  "search.no_results": "Keine passenden Songs. Versuch es mit dem Namen des Künstlers.",
+  "search.no_results": "Keine passenden Titel. Versuch es mit dem Namen des Künstlers.",
   "search.results": {
-    "one": "{count} Song gefunden.",
-    "other": "{count} Songs gefunden."
+    "one": "{count} Titel gefunden.",
+    "other": "{count} Titel gefunden."
   },
   "search.unavailable": "Die Suche ist gerade nicht verfügbar.",
   "track.added": "Hinzugefügt",
@@ -29,13 +29,13 @@
   "played.empty": "Noch nichts gespielt.",
   "allowance.closed": "Gerade sind keine Wünsche möglich.",
   "allowance.paused": "Wünsche sind gerade kurz pausiert.",
-  "allowance.add.unlimited": "Füge so viele Songs hinzu, wie du möchtest.",
+  "allowance.add.unlimited": "Füge so viele Titel hinzu, wie du möchtest.",
   "allowance.add.left": {
-    "one": "Du kannst noch {count} Song hinzufügen.",
-    "other": "Du kannst noch {count} Songs hinzufügen."
+    "one": "Du kannst noch {count} Titel hinzufügen.",
+    "other": "Du kannst noch {count} Titel hinzufügen."
   },
-  "allowance.add.waiting": "Ein weiterer Song in {wait}.",
-  "allowance.add.used": "Du hast alle deine Songs hinzugefügt.",
+  "allowance.add.waiting": "Ein weiterer Titel in {wait}.",
+  "allowance.add.used": "Du hast alle deine Titel hinzugefügt.",
   "allowance.next.unlimited": "Nutze „Als Nächstes spielen“ so oft du willst.",
   "allowance.next.left": {
     "one": "Du kannst „Als Nächstes spielen“ noch {count}-mal nutzen.",
@@ -45,8 +45,8 @@
   "allowance.next.used": "Du hast „Als Nächstes spielen“ aufgebraucht.",
   "allowance.skip.unlimited": "Überspringe so oft du willst.",
   "allowance.skip.left": {
-    "one": "Du kannst noch {count} Song überspringen.",
-    "other": "Du kannst noch {count} Songs überspringen."
+    "one": "Du kannst noch {count} Titel überspringen.",
+    "other": "Du kannst noch {count} Titel überspringen."
   },
   "allowance.skip.waiting": "Überspringen wieder in {wait}.",
   "allowance.skip.used": "Du hast alle deine Überspringen aufgebraucht.",
@@ -56,11 +56,11 @@
   },
   "toast.queued_next": "Wird als Nächstes gespielt",
   "toast.queued": "Zur Warteschlange hinzugefügt",
-  "toast.already_queued": "Der Song ist schon in der Warteschlange.",
+  "toast.already_queued": "Der Titel ist schon in der Warteschlange.",
   "toast.nothing_left": "Gerade nichts mehr übrig.",
   "toast.nothing_left_wait": "Gerade nichts mehr übrig. Versuch es in {wait} wieder.",
   "toast.disabled": "Der Gastgeber hat das ausgeschaltet.",
-  "toast.roon_refused": "Roon hat den Song nicht angenommen.",
+  "toast.roon_refused": "Roon hat den Titel nicht angenommen.",
   "toast.skipped": "Übersprungen",
   "toast.no_skips": "Du kannst nichts mehr überspringen.",
   "toast.no_skips_wait": "Du kannst nichts mehr überspringen. Versuch es in {wait} wieder.",
@@ -71,18 +71,18 @@
   "name.change": "Ändern",
   "name.add": "Namen hinzufügen",
   "name.prompt": "Wie heißt du?",
-  "name.explain": "Dein Name steht neben den Songs, die du hinzufügst, damit alle wissen, wem sie danken können.",
+  "name.explain": "Dein Name steht neben den Titeln, die du hinzufügst, damit alle wissen, wem sie danken können.",
   "name.placeholder": "Dein Name",
   "name.go": "Los geht's",
   "name.skip": "Überspringen",
   "name.cancel": "Abbrechen",
   "locked.title": "Scanne den Code noch einmal",
   "locked.text": "Dieser Link funktioniert erst, nachdem du den Code auf dem Party-Bildschirm gescannt hast. Bitte den Gastgeber, ihn zu zeigen.",
-  "screen.scan": "Scannen, um einen Song hinzuzufügen",
-  "screen.qr_alt": "Scannen, um einen Song hinzuzufügen",
+  "screen.scan": "Scannen, um einen Titel hinzuzufügen",
+  "screen.qr_alt": "Scannen, um einen Titel hinzuzufügen",
   "screen.download_playlist": "Die Playlist herunterladen",
   "screen.closed_title": "Keine Wünsche mehr",
-  "screen.closed_text": "Danke für all die Songs.",
+  "screen.closed_text": "Danke für all die Titel.",
   "join.closed": "Die Party nimmt keine Wünsche mehr an.",
   "join.expired": "Dieser Code ist abgelaufen. Scanne den Code auf dem Bildschirm noch einmal."
 }

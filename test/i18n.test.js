@@ -197,8 +197,8 @@ for (const [header, lang] of [['es-ES,es;q=0.9', 'es'], ['es-419', 'es'], ['de-D
 }
 
 const samples = {
-  es: { up: 'A continuación', one: 'Te queda 1 canción por añadir.', many: 'Te quedan 3 canciones por añadir.', guest: 'Pedida por un invitado', wait: 'un minuto' },
-  de: { up: 'Als Nächstes', one: 'Du kannst noch 1 Song hinzufügen.', many: 'Du kannst noch 3 Songs hinzufügen.', guest: 'Gewünscht von einem Gast', wait: 'einer Minute' },
+  es: { up: 'A continuación', one: 'Te queda 1 pista por añadir.', many: 'Te quedan 3 pistas por añadir.', guest: 'Pedida por un invitado', wait: 'un minuto' },
+  de: { up: 'Als Nächstes', one: 'Du kannst noch 1 Titel hinzufügen.', many: 'Du kannst noch 3 Titel hinzufügen.', guest: 'Gewünscht von einem Gast', wait: 'einer Minute' },
   nl: { up: 'Hierna', one: 'Je kunt nog 1 nummer toevoegen.', many: 'Je kunt nog 3 nummers toevoegen.', guest: 'Aangevraagd door een gast', wait: 'een minuut' }
 };
 for (const [lang, want] of Object.entries(samples)) {

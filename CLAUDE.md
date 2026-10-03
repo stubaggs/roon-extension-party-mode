@@ -22,6 +22,10 @@ Every change that affects them updates the docs in the same commit:
 - Extension settings and the Roon status line stay in English, as in other Roon
   extensions. Guest-facing pages are translated: every page string lives in
   `public/i18n/<code>.json` (en, fr, de, es, nl), and new page text needs all of them.
+- Say **tracks**, not songs, in everything people see (pages, settings, docs): a track
+  may be a poem or a speech. In translations use the neutral word Roon uses (fr
+  "morceau", de "Titel", es "pista", nl "nummer"). "Song" stays only where it means the
+  song as opposed to one recording of it, as in duplicate matching.
 - Environment variables are named `ROON_EXTENSION_PARTY_MODE_<SETTING>` and read through
   `lib/env.js`, which also accepts the hyphenated `ROON-EXTENSION-PARTY-MODE_` spelling.
   When renaming one, keep the old name working.
