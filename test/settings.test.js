@@ -15,7 +15,7 @@
 'use strict';
 
 const assert = require('assert');
-const { RoonService, describeZone, normaliseInteger, partyName, configWritable } = require('../lib/roon-service');
+const { RoonService, describeZone, normaliseInteger, partyName, configWritable, extensionIdentity } = require('../lib/roon-service');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
@@ -151,6 +151,19 @@ check('party mode is first, with on, paused and off', () => {
   assert.strictEqual(result.layout[0].setting, 'enabled');
   assert.strictEqual(result.layout[0].title, 'Party mode');
   assert.deepStrictEqual(result.layout[0].values.map((v) => v.value), [true, 'paused', false]);
+});
+
+check('an experimental version is a separate extension to Roon; a release keeps its id', () => {
+  assert.deepStrictEqual(extensionIdentity('1.1.1'), {
+    extension_id: 'com.stubaggs.party-mode',
+    display_name: 'Party Mode',
+    display_version: '1.1.1'
+  });
+  assert.deepStrictEqual(extensionIdentity('1.2.0-experimental'), {
+    extension_id: 'com.stubaggs.party-mode.experimental',
+    display_name: 'Party Mode (experimental)',
+    display_version: '1.2.0-experimental'
+  });
 });
 
 check('the choices read as what they do from the mode the party is in now', () => {
