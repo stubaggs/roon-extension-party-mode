@@ -14,7 +14,7 @@
 
 'use strict';
 const assert = require('assert');
-const { envValue, startPort, DEFAULT_PORT } = require('../lib/env');
+const { envValue, startPort, DEFAULT_PORT, instanceName } = require('../lib/env');
 const { debugOn } = require('../lib/log');
 
 let failures = 0;
@@ -43,6 +43,12 @@ check('bad port falls back to the default', () => {
   for (const bad of ['abc', '0', '-1', '70000', '80.5']) {
     assert.strictEqual(startPort({ ROON_EXTENSION_PARTY_MODE_PORT: bad }), DEFAULT_PORT, bad);
   }
+});
+check('instance name: trimmed, at most 40 characters, empty when unset', () => {
+  assert.strictEqual(instanceName({}), '');
+  assert.strictEqual(instanceName({ ROON_EXTENSION_PARTY_MODE_INSTANCE: ' Garden ' }), 'Garden');
+  assert.strictEqual(instanceName({ 'ROON-EXTENSION-PARTY-MODE_INSTANCE': 'Dev' }), 'Dev');
+  assert.strictEqual(Array.from(instanceName({ ROON_EXTENSION_PARTY_MODE_INSTANCE: '🎉'.repeat(50) })).length, 40);
 });
 check('envValue trims and skips unset names', () =>
   assert.strictEqual(envValue('X', ['OLD_X'], { OLD_X: ' y ' }), 'y'));

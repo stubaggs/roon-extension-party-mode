@@ -345,7 +345,8 @@ An experimental build is also a separate extension to Roon (`extensionIdentity()
 `com.stubaggs.party-mode.experimental`, named "Party Mode (experimental)", while a release
 keeps `com.stubaggs.party-mode`. Roon tells extensions apart by id, wherever they run:
 two copies with one id clash even on separate machines, so run at most one release and
-one experimental build per Core. With their separate ids, those two run side by side
+one experimental build per Core, unless the copies are named (see Running several
+copies). With their separate ids, those two run side by side
 against one Core, on one machine or two, each enabled, set up and paired on its own
 (checked October 2026). They still need their own `config.json` and party zone; the port
 sorts itself out (the second takes the next free one).
@@ -434,6 +435,22 @@ in Roon says so. To stop trying it, remove the container
 (`docker rm -f party-mode-experimental`) and disable it in Roon. The Extension Manager
 always installs the released version.
 
+## Running several copies
+
+Roon tells extensions apart by id, so two copies of the same version clash against one
+Core, even on different computers. To run more, give each extra copy a name with
+`ROON_EXTENSION_PARTY_MODE_INSTANCE` (e.g. `-e ROON_EXTENSION_PARTY_MODE_INSTANCE=Garden`).
+A named copy registers as its own extension (`extensionIdentity()` in
+`lib/roon-service.js`): `com.stubaggs.party-mode.garden`, shown in Roon as "Party Mode
+(Garden)", or "Party Mode (experimental, Dev)" for a named experimental build. The id
+uses the name's letters and digits, accents dropped ("Kitchen & Bar" becomes
+`kitchen-bar`); a name with none ("厨房") gets a short hash instead. The console's first
+line says which name a copy registered as.
+
+Unset, which is everyone else, nothing changes: same id, same name, same pairing. A
+named copy is new to Roon the first time: enable it and set it up, with its own
+`config.json` and party zone. Renaming it later makes it a new extension again.
+
 ## Environment variables
 
 Every environment variable is named `ROON_EXTENSION_PARTY_MODE_<SETTING>`, read through
@@ -444,6 +461,7 @@ its old name working, checked after the new ones.
 | Variable | Meaning |
 | --- | --- |
 | `ROON_EXTENSION_PARTY_MODE_PORT` | The first port, before settings are first saved in Roon; after that, use Web port in Roon (default 8338; was `PARTY_PORT`). |
+| `ROON_EXTENSION_PARTY_MODE_INSTANCE` | A name for this copy, so it runs as a separate extension alongside others against one Core (see Running several copies). Unset for normal use. |
 | `ROON_EXTENSION_PARTY_MODE_DEBUG` | `1`, `true`, `yes` or `on` turns on the detailed log (see Logging). |
 
 ## Logging

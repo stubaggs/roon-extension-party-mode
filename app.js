@@ -39,7 +39,7 @@ function publishLinks() {
 }
 
 function logLinks() {
-  console.log(`Party Mode listening on port ${server.port}`);
+  console.log(`${roon.api.extension_reginfo.display_name} listening on port ${server.port}`);
   console.log(`Guest link: ${server.guestUrl()}`);
   console.log(`Party Hub:  ${server.hubUrl()}`);
 }

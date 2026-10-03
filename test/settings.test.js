@@ -197,6 +197,21 @@ check('an experimental version is a separate extension to Roon; a release keeps 
   });
 });
 
+check('a named copy is its own extension, and the name shows in Roon', () => {
+  assert.deepStrictEqual(extensionIdentity('1.1.1', 'Garden'), {
+    extension_id: 'com.stubaggs.party-mode.garden',
+    display_name: 'Party Mode (Garden)',
+    display_version: '1.1.1'
+  });
+  const dev = extensionIdentity('1.2.0-experimental', 'Dev');
+  assert.strictEqual(dev.extension_id, 'com.stubaggs.party-mode.experimental.dev');
+  assert.strictEqual(dev.display_name, 'Party Mode (experimental, Dev)');
+  assert.strictEqual(extensionIdentity('1.1.1', 'Kitchen & Bar').extension_id, 'com.stubaggs.party-mode.kitchen-bar');
+  assert.strictEqual(extensionIdentity('1.1.1', 'Café').extension_id, 'com.stubaggs.party-mode.cafe');
+  assert.match(extensionIdentity('1.1.1', '厨房').extension_id, /^com\.stubaggs\.party-mode\.[0-9a-f]{8}$/);
+  assert.deepStrictEqual(extensionIdentity('1.1.1', ''), extensionIdentity('1.1.1'), 'unset changes nothing');
+});
+
 check('the choices read as what they do from the mode the party is in now', () => {
   const titles = (enabled) =>
     RoonService.prototype._layout.call({ _resolveZone: () => null, settings: { enabled } }, { enabled }).layout[0].values.map((v) => v.title.split(' — ')[0]);
