@@ -10,6 +10,8 @@ Roon account, and no access to anything else in your Roon setup.
 - **Names on songs:** guests can give a nickname, shown next to the songs they add.
 - **A party screen** for a TV or tablet: QR code, what's playing and what's next.
 - **Up next and Played** lists, so everyone can see what's coming and what's been on.
+- **Keep the party's playlist:** download everything that was queued as a spreadsheet
+  file, ready to import into a music service.
 - **Roon Radio** songs are labelled, so guests know what the radio picked.
 - **In their language:** the guest pages appear in English, French, German, Spanish or
   Dutch, following each phone's language.
@@ -56,6 +58,12 @@ under **Settings → Extensions** in Roon.
    on a TV, a tablet or a laptop where guests can see it.
 3. Guests scan the QR code on the party screen with their phone camera. That's it.
 
+To keep the party's playlist, click **Download playlist** under the link on the party
+screen, on a computer rather than the TV. You get a CSV file of every song that was
+queued in the party zone: title, artist, album, length, who asked for it and when. Roon
+can't import it directly, but services such as Soundiiz or TuneMyMusic can turn it into a
+playlist on TIDAL, Qobuz or Spotify, which Roon then shows with your playlists.
+
 To stop guests adding songs, set **Guest access** to **Off**. Turning it back on makes a
 new QR code, so old links stop working.
 
@@ -83,7 +91,8 @@ never**.
 - **A guest's song gets the music going again.** If the party zone is paused, or the
   queue has run out, adding a song presses play. If you paused for a speech, it resumes
   as soon as someone adds a song, so set **Guest access** to **Off** first.
-- **Played starts fresh** when the extension restarts or you change the party zone.
+- **Played and the downloadable playlist start fresh** when the extension restarts or you
+  change the party zone, so download the playlist before either.
 - **"Roon Radio" is a best guess.** With Roon Radio on, any song no guest added is
   labelled Roon Radio, including songs you queue from the Roon app yourself.
 - **Keep it at home.** Anyone on your network who has scanned the code can add songs, and

@@ -1,0 +1,122 @@
+// Copyright 2026 Stubaggs
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+'use strict';
+
+const assert = require('assert');
+const { PartyPlaylist, playlistFileName, csvCell } = require('../lib/party-playlist');
+
+let failures = 0;
+function check(name, fn) {
+  try {
+    fn();
+    console.log(`  ok   ${name}`);
+  } catch (err) {
+    failures += 1;
+    console.log(`  FAIL ${name}\n       ${err.message}`);
+  }
+}
+
+const track = (id, title, extra) =>
+  Object.assign({ id, title, artist: 'ABBA', album: 'Arrival', length: 231 }, extra);
+const nobody = () => null;
+const rows = (playlist, creditFor) => playlist.toCsv(creditFor).replace(/^﻿/, '').trim().split('\r\n');
+const titles = (playlist) => playlist.tracks.map((t) => t.title);
+
+console.log('PartyPlaylist');
+
+check('records each queue entry once, in the order it was queued', () => {
+  const playlist = new PartyPlaylist();
+  playlist.update('o1', [track(1, 'Dancing Queen')], nobody);
+  playlist.update('o1', [track(1, 'Dancing Queen'), track(2, 'Waterloo')], nobody);
+  playlist.update('o1', [track(3, 'SOS'), track(2, 'Waterloo')], nobody);
+  assert.deepStrictEqual(titles(playlist), ['Dancing Queen', 'Waterloo', 'SOS']);
+});
+
+check('keeps tracks after they leave the queue', () => {
+  const playlist = new PartyPlaylist();
+  playlist.update('o1', [track(1, 'Dancing Queen'), track(2, 'Waterloo')], nobody);
+  playlist.update('o1', [], nobody);
+  assert.deepStrictEqual(titles(playlist), ['Dancing Queen', 'Waterloo']);
+});
+
+check('the same song queued twice is listed twice', () => {
+  const playlist = new PartyPlaylist();
+  playlist.update('o1', [track(1, 'Waterloo'), track(2, 'Waterloo')], nobody);
+  assert.strictEqual(playlist.tracks.length, 2);
+});
+
+check('no zone leaves the list alone', () => {
+  const playlist = new PartyPlaylist();
+  playlist.update('o1', [track(1, 'Waterloo')], nobody);
+  playlist.update(null, [], nobody);
+  assert.deepStrictEqual(titles(playlist), ['Waterloo']);
+});
+
+check('a new party zone starts over', () => {
+  const playlist = new PartyPlaylist();
+  playlist.update('o1', [track(1, 'Waterloo')], nobody);
+  playlist.update('o2', [track(9, 'SOS')], nobody);
+  assert.deepStrictEqual(titles(playlist), ['SOS']);
+});
+
+check('credits are kept from when the track was queued', () => {
+  const playlist = new PartyPlaylist();
+  playlist.update('o1', [track(1, 'Waterloo'), track(2, 'SOS'), track(3, 'Mamma Mia')], (t) =>
+    t.id === 1 ? { requested_by: 'Stu', kind: 'guest' } : t.id === 2 ? { requested_by: null, kind: 'radio' } : null
+  );
+  const csv = rows(playlist, nobody);
+  assert.strictEqual(csv[0], 'Title,Artist,Album,Length,Requested by,Queued at');
+  assert.ok(csv[1].startsWith('Waterloo,ABBA,Arrival,3:51,Stu,'), csv[1]);
+  assert.ok(csv[2].startsWith('SOS,ABBA,Arrival,3:51,Roon Radio,'), csv[2]);
+  assert.ok(csv[3].startsWith('Mamma Mia,ABBA,Arrival,3:51,,'), csv[3]);
+});
+
+check('a track with no credit yet is looked up again', () => {
+  const playlist = new PartyPlaylist();
+  playlist.update('o1', [track(1, 'Waterloo')], nobody);
+  const csv = rows(playlist, () => ({ requested_by: null, kind: 'guest' }));
+  assert.ok(csv[1].includes(',a guest,'), csv[1]);
+});
+
+check('queued at is local time, to the minute', () => {
+  const playlist = new PartyPlaylist();
+  playlist.update('o1', [track(1, 'Waterloo')], nobody, new Date(2026, 9, 2, 21, 5, 59).getTime());
+  assert.ok(rows(playlist)[1].endsWith(',2026-10-02 21:05'), rows(playlist)[1]);
+});
+
+check('starts with a byte order mark for spreadsheets', () => {
+  assert.ok(new PartyPlaylist().toCsv().startsWith('﻿'));
+});
+
+check('cells with commas and quotes are quoted', () => {
+  assert.strictEqual(csvCell('Love, Love, Love'), '"Love, Love, Love"');
+  assert.strictEqual(csvCell('The "Best"'), '"The ""Best"""');
+  assert.strictEqual(csvCell(null), '');
+});
+
+check('a guest name that looks like a formula is defused', () => {
+  assert.strictEqual(csvCell('=HYPERLINK("x")'), '"\'=HYPERLINK(""x"")"');
+  assert.strictEqual(csvCell('@Stu'), "'@Stu");
+});
+
+check('file name is the party and the date, without unsafe characters', () => {
+  const day = new Date(2026, 9, 2);
+  assert.strictEqual(playlistFileName('Stu\'s 50th', day), 'Stu\'s 50th 2026-10-02.csv');
+  assert.strictEqual(playlistFileName('A/B: party?', day), 'A B party 2026-10-02.csv');
+  assert.strictEqual(playlistFileName('', day), 'Party 2026-10-02.csv');
+});
+
+console.log(failures ? `\n${failures} failing` : '\nall passing');
+process.exit(failures ? 1 : 0);

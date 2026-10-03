@@ -75,6 +75,7 @@
   "locked.text": "Este enlace solo funciona después de escanear el código de la pantalla de la fiesta. Pide al anfitrión que lo muestre.",
   "screen.scan": "Escanea para poner una canción",
   "screen.qr_alt": "Escanea para añadir una canción",
+  "screen.download_playlist": "Descargar la lista",
   "join.closed": "La fiesta ya no acepta peticiones.",
   "join.expired": "Ese código ha caducado. Vuelve a escanear el código de la pantalla."
 }

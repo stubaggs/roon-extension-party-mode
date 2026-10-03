@@ -75,6 +75,7 @@
   "locked.text": "Ce lien ne fonctionne qu'après avoir scanné le code affiché sur l'écran de la soirée. Demandez à l'hôte de l'afficher.",
   "screen.scan": "Scannez pour ajouter un morceau",
   "screen.qr_alt": "Scannez pour ajouter un morceau",
+  "screen.download_playlist": "Télécharger la playlist",
   "join.closed": "La soirée n'accepte plus de demandes.",
   "join.expired": "Ce code a expiré. Scannez à nouveau le code affiché à l'écran."
 }

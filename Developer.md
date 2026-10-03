@@ -38,6 +38,7 @@ Roon Core  ──(node-roon-api over the local network)──  app.js
 | `lib/track-id.js` | Track identity: title and artist normalisation, length, hash |
 | `lib/guests.js` | Guest sessions, token-bucket limits, request attribution |
 | `lib/history.js` | Played-songs list for the guest page |
+| `lib/party-playlist.js` | Everything queued during the party, as the downloadable CSV |
 | `lib/server.js` | REST API, server-sent events, QR code, image proxy |
 | `public/` | Guest page and the RoonParty screen, no build step |
 | `public/i18n/`, `lib/i18n.js` | Page text per language, and picking the language per browser |
@@ -346,6 +347,19 @@ stale, which covers the usual case of a guest searching again before tapping.
 **Access control is a shared join code, not a login.** Anyone who can reach the port and
 has scanned the code can add tracks. The RoonParty screen and its endpoints need no session at all.
 Do not expose this to the internet.
+
+**The party playlist is a download, not a Roon playlist.** Roon's browse API offers
+extensions Play Now, Add Next, Queue and Start Radio on a track, and Play Now, Shuffle,
+Add Next, Queue and Start Radio on a playlist; nothing creates or edits one (checked
+against a Core in October 2026). So `lib/party-playlist.js` records every queue entry
+the party zone gets, once per `queue_item_id`, and `GET /api/playlist.csv` (linked from
+the party screen, no session needed, like the rest of the screen) serves it as CSV. It
+includes what was queued before the extension started, Roon Radio picks and the host's
+own additions. Credits are frozen when the entry is first seen, since closing guest
+access clears attributions. Column names and credits are English, which import services
+expect. Cells a spreadsheet would read as formulas get a leading apostrophe, as guests
+choose their names. Times are local to the extension, which in Docker is UTC unless
+`TZ` is set. Kept in memory, at most 2000 tracks, and reset with the party zone.
 
 **Played history is the extension's own.** Roon's API has no play history, so the
 "Played" list on the guest page is recorded by the extension as tracks start. It is kept
