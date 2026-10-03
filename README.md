@@ -42,7 +42,7 @@ The Extension Manager handles updates from then on.
 ### With Docker
 
 ```bash
-touch config.json && chmod 666 config.json
+touch config.json && sudo chown 1000 config.json && chmod 600 config.json
 docker run -d --name party-mode --network host --restart unless-stopped \
   --log-opt max-size=10m --log-opt max-file=3 \
   -v "$PWD/config.json:/usr/src/app/config.json" \
@@ -51,7 +51,10 @@ docker run -d --name party-mode --network host --restart unless-stopped \
 
 The `--log-opt` settings keep the log from growing without limit.
 
-`config.json` keeps your settings when the image is updated. Then enable **Party Mode**
+`config.json` keeps your settings when the image is updated. It also holds the key Roon
+gave Party Mode, so the commands above let only the extension (user 1000) read it. Without
+`sudo`, use `chmod 666 config.json` instead, which lets every account on the computer
+read and change it. Then enable **Party Mode**
 under **Settings → Extensions** in Roon.
 
 ## Starting a party
@@ -138,7 +141,8 @@ the computer running Party Mode, and that the computer's firewall allows port 83
 Scan the code on the party screen again.
 
 **Roon says settings can't be saved.** The extension can't write `config.json`. With Docker,
-run `chmod 666 config.json` on the file you mounted.
+run `sudo chown 1000 config.json && chmod 600 config.json` on the file you mounted, or
+`chmod 666 config.json` without `sudo`.
 
 **The status says a port was busy.** Something else on the computer uses that port. Party
 Mode picks the next free one and the QR code follows it. To choose one yourself, change

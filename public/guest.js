@@ -306,12 +306,8 @@
     try {
       const body = await api('/api/request', {
         method: 'POST',
-        body: JSON.stringify({
-          key: track.key,
-          mode,
-          title: track.title,
-          subtitle: track.subtitle
-        })
+        // The server knows the track by its key, from the results it sent.
+        body: JSON.stringify({ key: track.key, mode })
       });
       party.allowances = body.allowances;
       track.added = true;

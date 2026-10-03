@@ -313,7 +313,9 @@ docker run -d --name party-mode --network host \
 ```
 
 `docker-compose.yml` does the same thing. Create `config.json` first and make it writable
-(`touch config.json && chmod 666 config.json`): otherwise Docker makes a directory in its
+by uid 1000 (`touch config.json && sudo chown 1000 config.json && chmod 600 config.json`;
+`chmod 666` works without `sudo` but leaves Roon's pairing token readable by every
+account on the host): otherwise Docker makes a directory in its
 place, and the extension, which runs as the image's unprivileged `node` user (uid 1000),
 can't save its settings. If it can't, Roon's status line and the console say so. The
 Extension Manager creates the file writable itself.
@@ -416,8 +418,34 @@ same guest searches again is dropped (`search` returns null; the page ignores ou
 answers too), and only `action_list` items are returned as tracks.
 
 **Access control is a shared join code, not a login.** Anyone who can reach the port and
-has scanned the code can add tracks. The RoonParty screen and its endpoints need no session at all.
-Do not expose this to the internet.
+has scanned the code can add tracks. The RoonParty screen and its endpoints need no session at all,
+and they include the join link, so the code proves someone opened the screen, not that they
+are in the room. Allowances are per session: a guest who clears cookies and scans again
+starts afresh. Do not expose this to the internet.
+
+**What a guest can make Roon do is limited to what they were shown.** Browse item keys
+are short and numbered in sequence, so `POST /api/request` only takes a key this guest was
+sent in their search results (`GuestStore.offer`, the last 400 per guest), and uses the
+title and artist the server sent, not the phone's: a guest can't send the key of an
+album, a playlist or a search category, which would queue all of it, or pass one track off
+as another to get past the duplicate check. A key never sent answers `unknown_track`.
+
+**Allowances are taken before Roon is asked**, and handed back (`GuestStore.refund`) if
+Roon refuses, for requests and skips alike, so several sent at once can't all pass the
+check before any is counted.
+
+**Input limits.** Names go through `cleanName()` (`lib/guests.js`): control characters,
+which could fake log lines, and direction overrides, which can show a name back to
+front, are removed, and the 24-character limit counts characters, so an emoji isn't cut
+in half. Searches stop at 200 characters. At most 2000 sessions are held; the longest idle
+goes first.
+
+**Headers.** Every response carries a Content-Security-Policy allowing only the
+extension's own scripts, styles, images and connections (the pages have no inline
+script or style; `marquee.js` sets styles through the DOM, which the policy allows),
+`X-Content-Type-Options: nosniff` and `Referrer-Policy: no-referrer`. Guest pages also
+refuse to be framed (`frame-ancestors 'none'`, `X-Frame-Options: DENY`); the party
+screen may be, for a dashboard on the TV. `test/server.test.js` covers all of this.
 
 **The party playlist is a download, not a Roon playlist.** Roon's browse API offers
 extensions Play Now, Add Next, Queue and Start Radio on a track, and Play Now, Shuffle,
