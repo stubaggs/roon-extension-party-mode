@@ -263,6 +263,40 @@
   .upnext .list {
     overflow: visible;
   }
+  /* "Playing now" becomes a heading at the left edge, like "Up next",
+     with the cover and the track beneath it. */
+  .current {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    /* The label, then the cover beside title, artist and credit. No row gap:
+       the inherited flex gap would push those three apart. */
+    gap: 0 1rem;
+    align-items: center;
+  }
+  .current-text {
+    display: contents;
+  }
+  .current-label {
+    grid-column: 1 / -1;
+    margin: 0 0 0.6rem;
+    font-weight: 600;
+  }
+  .current-art {
+    grid-column: 1;
+    grid-row: 2 / span 3;
+  }
+  .current-title {
+    grid-area: 2 / 2;
+  }
+  .current-artist {
+    grid-area: 3 / 2;
+  }
+  .current-who {
+    grid-area: 4 / 2;
+  }
+  .current-who {
+    justify-self: start;
+  }
   .qr {
     width: min(60%, 16rem);
   }
