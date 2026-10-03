@@ -52,15 +52,27 @@
 }
 
 .join-closed {
-  padding: clamp(0.5rem, 2vh, 1.5rem) 0;
+  padding: 0;
+}
+
+/* "Requests are closed", where the playing track was, at the same size. */
+.closed-message[hidden],
+.current[hidden] {
+  display: none;
 }
 
 .closed-title {
   margin: 0;
-  font-size: clamp(1.4rem, 2.6vw, 2.2rem);
+  font-size: clamp(1.6rem, 4vw, 3.4rem);
   font-weight: 800;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
   color: var(--amber);
+}
+
+.closed-text {
+  margin: 0.6rem 0 0;
+  font-size: clamp(1rem, 1.8vw, 1.6rem);
 }
 
 .download {

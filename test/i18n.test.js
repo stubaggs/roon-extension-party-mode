@@ -46,8 +46,9 @@ function usedKeys() {
   for (const file of ['index.html', 'roonparty.html']) {
     for (const m of read(file).matchAll(/data-i18n(?:-[a-z-]+)?="([a-z_.]+)"/g)) keys.add(m[1]);
   }
-  keys.add('join.closed');
-  keys.add('join.expired');
+  // The server's own pages: messagePage(res, lang, 'title.key', 'text.key').
+  const server = fs.readFileSync(path.join(__dirname, '..', 'lib', 'server.js'), 'utf8');
+  for (const m of server.matchAll(/messagePage\(res, lang, '([a-z_.]+)', '([a-z_.]+)'\)/g)) keys.add(m[1]).add(m[2]);
   return keys;
 }
 
@@ -158,8 +159,10 @@ check('a browser asking for a language without a file gets English', () => {
 });
 
 check('server messages come from the same file', () => {
-  assert.strictEqual(i18n.t('en', 'join.closed'), 'Requests are closed.');
-  assert.strictEqual(i18n.t('xx', 'join.closed'), 'Requests are closed.');
+  assert.ok(usedKeys().has('join.expired'));
+  assert.strictEqual(i18n.t('en', 'screen.closed_title'), 'Requests are closed');
+  assert.strictEqual(i18n.t('fr', 'screen.closed_title'), JSON.parse(read('i18n/fr.json'))['screen.closed_title']);
+  assert.strictEqual(i18n.t('xx', 'screen.closed_title'), 'Requests are closed');
 });
 
 check('/i18n.js carries the language and its text before the runtime', () => {

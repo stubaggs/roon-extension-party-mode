@@ -26,12 +26,14 @@
   function render(data) {
     el('party-name').textContent = data.party_name || t('party.default_name');
     if (data.join_url) el('join-link').href = data.join_url;
-    // Party mode off ends the party: no QR code that no longer works, and
-    // the playlist instead, as a QR code or a link as the host chose.
-    // Paused keeps the code but says so.
+    // Party mode off ends the party: no QR code that no longer works, but
+    // the playlist, as a QR code or a link as the host chose, and "Requests
+    // are closed" where the playing track was. Paused keeps the code but says so.
     const over = data.party_mode === 'off';
     el('join-open').hidden = over;
     el('join-closed').hidden = !over;
+    el('closed').hidden = !over;
+    el('current').hidden = over;
     const qr = el('playlist-qr-offer');
     const showQr = over && data.playlist === 'qr';
     // Loaded each time it appears, so the code follows a change of address or port.

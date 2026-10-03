@@ -15,11 +15,9 @@
           <img id="qr" class="qr" src="/api/qr.svg" alt="Scan to add a track" data-i18n-alt="screen.qr_alt" />
           <p class="join-copy"><a class="join-link" id="join-link" target="_blank" rel="noopener" data-i18n="screen.scan">Scan to add a track</a></p>
         </div>
-        <!-- With party mode off: requests are closed, and the playlist is ready,
-             as a QR code or a link as the Display playlist download setting says. -->
+        <!-- With party mode off: the playlist in place of the guest code, as a QR
+             code or a link as the Display playlist download setting says. -->
         <div id="join-closed" class="join-closed" hidden>
-          <p class="closed-title" data-i18n="screen.closed_title">Requests are closed</p>
-          <p class="closed-text muted" data-i18n="screen.closed_text">Thanks for all the tracks.</p>
           <div id="playlist-qr-offer" hidden>
             <img id="playlist-qr" class="qr" alt="Scan to download the playlist" data-i18n-alt="screen.playlist_qr_alt" />
             <p class="join-copy"><a class="join-link" href="/api/playlist.csv" download data-i18n="screen.scan_playlist">Scan to download the playlist</a></p>
@@ -29,7 +27,12 @@
       </section>
 
       <section class="stack">
-        <div class="current">
+        <!-- With party mode off, in place of what's playing. -->
+        <div id="closed" class="closed-message" hidden>
+          <h2 class="closed-title" data-i18n="screen.closed_title">Requests are closed</h2>
+          <p class="closed-text muted" data-i18n="screen.closed_text">Thanks for all the tracks.</p>
+        </div>
+        <div class="current" id="current">
           <img class="art current-art" id="current-art" alt="" />
           <div class="current-text">
             <p class="current-label" id="current-label" data-i18n="playing.now">Playing now</p>

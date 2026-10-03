@@ -73,6 +73,5 @@
   "screen.playlist_qr_alt": "Scan to download the playlist",
   "screen.closed_title": "Requests are closed",
   "screen.closed_text": "Thanks for all the tracks.",
-  "join.closed": "Requests are closed.",
   "join.expired": "That code has expired. Scan the code on the screen again."
 }

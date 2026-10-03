@@ -19,6 +19,8 @@ Not released yet. You can try it on the `experimental` branch.
 - **Download the party's playlist**: every track queued during the party, with who asked
   for it and when, as a spreadsheet file. It's in the format Soundiiz imports, so you can
   turn it into a TIDAL, Qobuz or Spotify playlist that Roon then shows with your others.
+- With Party mode **Off**, the party screen says "Requests are closed" where the playing
+  track was, and guests' phones say so too, instead of asking them to scan the code again.
 - **Display playlist download** setting: once Party mode is **Off**, the party screen shows
   a QR code guests can scan to get the playlist, just a link, or nothing. The setting's
   hint gives the download address, which works whichever you pick.
@@ -48,6 +50,9 @@ Not released yet. You can try it on the `experimental` branch.
 - Pages open in English when the browser names no language.
 - Long scrolling names no longer appear enlarged on phones.
 - Accessibility fixes for the guest page and party screen.
+- The guest page no longer flashes "Scan the code again" while it loads.
+- An old or closed join link shows a readable page in the guest's language, instead of a
+  line of tiny English text.
 - Pages, settings and docs say **tracks** rather than songs, since a track may be a poem or
   a speech.
 

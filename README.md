@@ -63,8 +63,9 @@ under **Settings → Extensions** in Roon.
    on a TV, a tablet or a laptop where guests can see it.
 3. Guests scan the QR code on the party screen with their phone camera. That's it.
 
-When you're done taking requests, set **Party mode** to **Off**. The party screen swaps the QR code
-for "Requests are closed" and the playlist. By default that's a second QR code, **Scan to
+When you're done taking requests, set **Party mode** to **Off**. The party screen says
+"Requests are closed" where the playing track was, and swaps the QR code for the playlist.
+Guests' phones say requests are closed too. By default that's a second QR code, **Scan to
 download the playlist**, which anyone in the room can scan to save it on their phone; the
 line under it is a link to click on a computer. **Display playlist download** in the
 settings can show just a link instead, or nothing. Whatever you choose there, the playlist

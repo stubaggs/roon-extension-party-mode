@@ -40,18 +40,22 @@
 
   async function api(path, options) {
     const res = await fetch(path, Object.assign({ headers: { 'Content-Type': 'application/json' } }, options));
+    const body = await res.json().catch(() => ({}));
     if (res.status === 401 || res.status === 403) {
-      showLocked();
+      // Party mode Off answers "closed": requests are over, not the guest's link.
+      showLocked(body.error === 'closed' ? 'closed' : 'locked');
       throw new Error('no_session');
     }
-    const body = await res.json().catch(() => ({}));
     if (!res.ok) throw Object.assign(new Error(body.error || 'error'), { body });
     return body;
   }
 
-  function showLocked() {
+  /** In place of the page: 'locked' (scan again) or 'closed' (requests are over). */
+  function showLocked(which) {
     app.hidden = true;
-    locked.hidden = false;
+    el('nickname').hidden = true;
+    locked.hidden = which !== 'locked';
+    el('closed').hidden = which !== 'closed';
   }
 
   const { t } = window.I18N;
@@ -550,6 +554,7 @@
     }
     app.hidden = false;
     locked.hidden = true;
+    el('closed').hidden = true;
     document.title = party.party_name || t('page.title');
     const skip = el('skip');
     skip.hidden = !party.capabilities.skip;

@@ -219,7 +219,8 @@ To add a language, copy `en.json` to e.g. `de.json` and translate the values, ke
 `{name}`, `{count}` and `{wait}` placeholders. Entries like `{ "one": …, "other": … }` are
 plurals, picked by the language's own rules; add `few`, `many` and so on where the
 language has them. `npm test`
-checks that a translation uses the same keys and placeholders as English. Restart the
+checks that a translation uses the same keys and placeholders as English, and that every
+key the pages and `messagePage()` use is in `en.json`. Restart the
 extension to pick up a new file.
 
 ## Accessibility
@@ -244,6 +245,13 @@ changing them:
   they never scroll.
 - **Numbered lists** are `<ol>`; the visible number is `aria-hidden` so it isn't read
   twice. Album covers have empty `alt` text: the title next to them says it all.
+- **Say why, in the guest's language.** The guest page shows nothing until it knows
+  whether it can open, then "Scan the code again" (no session) or "Requests are closed"
+  (the API answers `closed` while party mode is off), never one in place of the other. An
+  old or closed join link (`/j/<code>`) gets a small HTML page from `messagePage()` in
+  `lib/server.js`, with `lang` and a viewport, rather than plain text a phone shows tiny.
+- **Headings follow the screen.** On the party screen, "Requests are closed" is an `<h2>`
+  in the place of the playing track's title, which is one too.
 
 ## Installing it from Roon
 
