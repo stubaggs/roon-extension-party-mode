@@ -29,6 +29,7 @@
   "played.empty": "Noch nichts gespielt.",
   "played.skipped_by": "Übersprungen von {name}",
   "played.skipped_by_guest": "Übersprungen von einem Gast",
+  "played.skipped_in_roon": "In Roon übersprungen",
   "allowance.closed": "Gerade sind keine Wünsche möglich.",
   "allowance.paused": "Wünsche sind gerade kurz pausiert.",
   "button.left": {

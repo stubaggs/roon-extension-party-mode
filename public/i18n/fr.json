@@ -29,6 +29,7 @@
   "played.empty": "Rien n'a encore été joué.",
   "played.skipped_by": "Passé par {name}",
   "played.skipped_by_guest": "Passé par un invité",
+  "played.skipped_in_roon": "Passé dans Roon",
   "allowance.closed": "Les demandes sont fermées pour le moment.",
   "allowance.paused": "Les demandes sont en pause pour un moment.",
   "button.left": {

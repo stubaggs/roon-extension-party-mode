@@ -11,7 +11,7 @@ Roon account, and no access to anything else in your Roon setup.
 - **Names on tracks:** guests can give a nickname, shown next to the tracks they add.
 - **A party screen** for a TV or tablet: QR code, what's playing and the whole queue.
 - **Up next and Played** lists, so everyone can see what's coming and what's been on,
-  including who skipped what.
+  including who skipped what (or that it was skipped in Roon).
 - **Keep the party's playlist:** download everything that was queued as a spreadsheet
   file, ready to import into a music service.
 - **Roon Radio** tracks are labelled, so guests know what the radio picked.

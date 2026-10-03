@@ -76,5 +76,60 @@ check('tracks that played to the end are not marked', () => {
   assert.ok(!history.list()[0].skipped);
 });
 
+console.log('\nPlayHistory: skipped in Roon');
+
+const ended = (title, seek, length = 200) => ({ title, artist: 'ABBA', length, seek });
+
+check('a track left well before its end was skipped in Roon', () => {
+  const history = new PlayHistory();
+  history.update('z1', playing('Waterloo'), null);
+  history.update('z1', playing('SOS'), null, ended('Waterloo', 42));
+  const [played] = history.list();
+  assert.strictEqual(played.skipped, true);
+  assert.strictEqual(played.skipped_in_roon, true);
+  assert.strictEqual(played.skipped_by, null);
+});
+
+check('a track that reached its last seconds played out', () => {
+  const history = new PlayHistory();
+  history.update('z1', playing('Waterloo'), null);
+  history.update('z1', playing('SOS'), null, ended('Waterloo', 195));
+  assert.ok(!history.list()[0].skipped);
+});
+
+check('the next track still loading: the early end is remembered', () => {
+  const history = new PlayHistory();
+  history.update('z1', playing('Waterloo'), null);
+  history.update('z1', Object.assign(playing('SOS'), { state: 'loading' }), null, ended('Waterloo', 42));
+  history.update('z1', playing('SOS'), null);
+  assert.strictEqual(history.list()[0].skipped_in_roon, true);
+});
+
+check('a guest skip keeps the guest\'s name', () => {
+  const history = new PlayHistory();
+  history.update('z1', playing('Waterloo'), null);
+  history.markSkipped(playing('Waterloo'), 'Stu');
+  history.update('z1', playing('SOS'), null, ended('Waterloo', 42));
+  const [played] = history.list();
+  assert.strictEqual(played.skipped_by, 'Stu');
+  assert.ok(!played.skipped_in_roon);
+});
+
+check('no position seen, or no length: not judged', () => {
+  const history = new PlayHistory();
+  history.update('z1', playing('Waterloo'), null);
+  history.update('z1', playing('SOS'), null, ended('Waterloo', null));
+  assert.ok(!history.list()[0].skipped);
+  history.update('z1', playing('Radio', null), null, ended('SOS', 3, null));
+  assert.ok(!history.list()[0].skipped);
+});
+
+check('a different track\'s position is ignored', () => {
+  const history = new PlayHistory();
+  history.update('z1', playing('Waterloo'), null);
+  history.update('z1', playing('SOS'), null, ended('Mamma Mia', 3));
+  assert.ok(!history.list()[0].skipped);
+});
+
 console.log(failures ? `\n${failures} failing` : '\nall passing');
 process.exit(failures ? 1 : 0);

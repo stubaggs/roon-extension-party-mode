@@ -206,6 +206,33 @@ const artists = [{ title: 'ABBA', item_key: 'x2', hint: 'list' }];
     assert.deepStrictEqual((await modeChange('paused', 'off', 'on')).controls, []);
   });
 
+  console.log('\nhow far a track got');
+
+  const zoneAt = (title, seek, length = 200) => ({
+    now_playing: { three_line: { line1: title, line2: 'ABBA' }, length, seek_position: seek }
+  });
+
+  await check('the furthest position seen is reported when the track changes', async () => {
+    const roon = service(fakeSearch({ Tracks: tracks, actions: english }));
+    assert.strictEqual(roon._notePosition(zoneAt('Waterloo', 10)), null);
+    roon._notePosition(zoneAt('Waterloo', 42));
+    roon._notePosition(zoneAt('Waterloo', 0)); // a zone update with a reset position
+    assert.deepStrictEqual(roon._notePosition(zoneAt('SOS', 0)), { title: 'Waterloo', artist: 'ABBA', length: 200, seek: 42 });
+  });
+
+  await check('no position ever seen is reported as unknown', async () => {
+    const roon = service(fakeSearch({ Tracks: tracks, actions: english }));
+    roon._notePosition(zoneAt('Waterloo', undefined));
+    assert.strictEqual(roon._notePosition(zoneAt('SOS', 0)).seek, null);
+  });
+
+  await check('nothing playing any more also ends the track', async () => {
+    const roon = service(fakeSearch({ Tracks: tracks, actions: english }));
+    roon._notePosition(zoneAt('Waterloo', 42));
+    assert.strictEqual(roon._notePosition({}).title, 'Waterloo');
+    assert.strictEqual(roon._notePosition(zoneAt('SOS', 1)), null);
+  });
+
   console.log(failures ? `\n${failures} failing` : '\nall passing');
   process.exit(failures ? 1 : 0);
 })();

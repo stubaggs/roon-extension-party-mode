@@ -406,8 +406,12 @@ access is turned back on (a new party; what is still queued is recorded again).
 in memory (last 200 tracks) and starts over when the extension restarts or the party zone
 changes. A guest's skip marks the playing track (`markSkipped`, before the skip reaches
 Roon, since the next track can start before Roon answers; undone if the skip fails), and
-Played shows "Skipped by Sam". Skips made in the Roon app aren't seen by the extension,
-so those tracks show no skip.
+Played shows "Skipped by Sam". A skip made in Roon is inferred: `RoonService._notePosition`
+keeps the furthest position Roon reported for the playing track (zone updates can carry a
+reset one), and a track left 10 seconds or more before its end (`SKIP_MARGIN` in
+`lib/history.js`) with no guest skip shows "Skipped in Roon". It is not judged without a
+length or a position, so radio streams and zones that report no position never show it.
+Anything that cuts a track short counts, such as Play Now on another track in Roon.
 
 **The queue subscription is per zone.** Changing the party zone starts a new subscription;
 the old one is ignored rather than torn down, since the API has no convenient unsubscribe.

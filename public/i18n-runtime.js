@@ -78,8 +78,9 @@
     return item.requested_by ? t('credit.requested_by', { name: item.requested_by }) : t('credit.requested_by_guest');
   }
 
-  /** "Skipped by Sam" or "Skipped by a guest", for a played track a guest skipped. */
+  /** "Skipped by Sam", "Skipped by a guest" or "Skipped in Roon", for a skipped played track. */
   function skippedBy(item) {
+    if (item.skipped_in_roon) return t('played.skipped_in_roon');
     return item.skipped_by ? t('played.skipped_by', { name: item.skipped_by }) : t('played.skipped_by_guest');
   }
 
