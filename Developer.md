@@ -87,7 +87,7 @@ party zone, and the console prints the guest link and the Party Hub's URL. The e
 Party mode (first, as the switch used most), party zone, party name, and web port.
 Roon's status line, once the zone is up, reads the same in every mode
 (`statusText()`): the mode, the party's name (the zone's when none is set), and the Party
-Hub's address, as in "Paused: EX5 Test-o-rama. Party Hub at http://…/PartyHub".
+Hub's address, as in "Paused: EX5 Test-o-rama.", with "Party Hub at http://…/PartyHub" on the line below.
 Before that it says what's missing (no Core, no zone, the zone unavailable).
 Party mode is stored as `enabled`, its name when it was an on/off "Guest access":
 `true`, `"paused"` or `false`, read through `partyMode()` (`lib/roon-service.js`), which

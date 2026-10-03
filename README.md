@@ -96,8 +96,10 @@ file; Google Sheets, Numbers and Excel's **Data → From Text/CSV** read it corr
   download the old one first.
 
 Under **Settings → Extensions**, Roon shows Party Mode's status: its Party mode, the
-party's name and the Party Hub's address, for example *Paused: EX5 Test-o-rama. Party Hub
-at http://192.168.1.73:8338/PartyHub*.
+party's name and the Party Hub's address, for example:
+
+> Paused: EX5 Test-o-rama.<br>
+> Party Hub at http://192.168.1.73:8338/PartyHub
 
 ## Settings
 
