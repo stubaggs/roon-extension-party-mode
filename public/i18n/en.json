@@ -81,8 +81,8 @@
   "screen.scan": "Scan to add a song",
   "screen.qr_alt": "Scan to add a song",
   "screen.download_playlist": "Download the playlist",
-  "screen.closed_title": "The party's over",
-  "screen.closed_text": "Thanks for coming.",
-  "join.closed": "The party is closed.",
+  "screen.closed_title": "Requests are closed",
+  "screen.closed_text": "Thanks for all the songs.",
+  "join.closed": "Requests are closed.",
   "join.expired": "That code has expired. Scan the code on the screen again."
 }

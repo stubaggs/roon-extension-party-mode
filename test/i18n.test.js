@@ -159,8 +159,8 @@ check('a browser asking for a language without a file gets English', () => {
 });
 
 check('server messages come from the same file', () => {
-  assert.strictEqual(i18n.t('en', 'join.closed'), 'The party is closed.');
-  assert.strictEqual(i18n.t('xx', 'join.closed'), 'The party is closed.');
+  assert.strictEqual(i18n.t('en', 'join.closed'), 'Requests are closed.');
+  assert.strictEqual(i18n.t('xx', 'join.closed'), 'Requests are closed.');
 });
 
 check('/i18n.js carries the language and its text before the runtime', () => {

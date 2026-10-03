@@ -81,8 +81,8 @@
   "screen.scan": "Scan om een nummer toe te voegen",
   "screen.qr_alt": "Scan om een nummer toe te voegen",
   "screen.download_playlist": "De playlist downloaden",
-  "screen.closed_title": "Het feest is voorbij",
-  "screen.closed_text": "Bedankt voor je komst.",
+  "screen.closed_title": "Verzoekjes zijn gesloten",
+  "screen.closed_text": "Bedankt voor alle nummers.",
   "join.closed": "Het feest neemt geen verzoekjes meer aan.",
   "join.expired": "Deze code is verlopen. Scan de code op het scherm opnieuw."
 }

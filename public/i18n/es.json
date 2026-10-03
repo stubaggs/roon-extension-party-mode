@@ -81,8 +81,8 @@
   "screen.scan": "Escanea para añadir una canción",
   "screen.qr_alt": "Escanea para añadir una canción",
   "screen.download_playlist": "Descargar la lista",
-  "screen.closed_title": "La fiesta ha terminado",
-  "screen.closed_text": "Gracias por venir.",
+  "screen.closed_title": "Ya no se aceptan peticiones",
+  "screen.closed_text": "Gracias por todas las canciones.",
   "join.closed": "La fiesta ya no acepta peticiones.",
   "join.expired": "Ese código ha caducado. Vuelve a escanear el código de la pantalla."
 }

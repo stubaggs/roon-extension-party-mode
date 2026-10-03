@@ -58,8 +58,8 @@ under **Settings → Extensions** in Roon.
    on a TV, a tablet or a laptop where guests can see it.
 3. Guests scan the QR code on the party screen with their phone camera. That's it.
 
-When the party ends, set **Party mode** to **Off**. The party screen swaps the QR code
-for "The party's over" and a **Download the playlist** button; click it on a computer
+When you're done taking requests, set **Party mode** to **Off**. The party screen swaps the QR code
+for "Requests are closed" and a **Download the playlist** button; click it on a computer
 rather than the TV. You get a CSV file of every song that was
 queued in the party zone: title, artist, album, length, who asked for it and when. Roon
 can't import it directly, but it's in the format Soundiiz imports: in Soundiiz, choose
@@ -72,8 +72,8 @@ file; Google Sheets, Numbers and Excel's **Data → From Text/CSV** read it corr
 - **On**: guests add songs.
 - **Paused**, for a speech or the cake: the music pauses and guests' requests wait, with
   the QR code still up. Back to **On**, the music carries on where it was.
-- **Off**, when it's over: the music pauses, guests can't add songs, and the party screen
-  says the party's over, with the playlist to download. Turning it back on starts
+- **Off**, when you're done taking requests: the music pauses, guests can't add songs, and the party screen
+  says requests are closed, with the playlist to download. Turning it back on starts
   a new party, with a new QR code (old links stop working) and a new playlist, so
   download the old one first.
 
@@ -81,7 +81,7 @@ file; Google Sheets, Numbers and Excel's **Data → From Text/CSV** read it corr
 
 | Setting | What it does |
 | --- | --- |
-| Party mode | On, Paused (music and requests on hold) or Off (the party's over, playlist ready). See above. |
+| Party mode | On, Paused (music and requests on hold) or Off (requests closed, playlist ready). See above. |
 | Party zone | Where the music plays. If you pick a speaker that's grouped with others, the whole group plays. |
 | Party name | Shown on the party screen. Leave blank to use the zone's name. |
 | Roon profile for guest requests | The Roon profile the songs are played under. Choose a "Guests" profile to keep party songs out of your own history and recommendations. |
