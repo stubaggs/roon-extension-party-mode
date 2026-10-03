@@ -40,28 +40,13 @@
   },
   "time.short": "{count} phút",
   "toast.queued_next": "Sẽ phát tiếp theo",
-  "toast.queued_next_left": {
-    "other": "Sẽ phát tiếp theo. Bạn còn làm được {count} lần nữa."
-  },
-  "toast.queued_next_last_wait": "Sẽ phát tiếp theo. Bạn có thể làm lại sau {wait}.",
-  "toast.queued_next_last": "Sẽ phát tiếp theo. Đó là lượt cuối của bạn.",
   "toast.queued": "Đã thêm vào hàng chờ",
-  "toast.queued_left": {
-    "other": "Đã thêm vào hàng chờ. Bạn còn thêm được {count} bài."
-  },
-  "toast.queued_last_wait": "Đã thêm vào hàng chờ. Bạn có thể thêm bài khác sau {wait}.",
-  "toast.queued_last": "Đã thêm vào hàng chờ. Đó là lượt cuối của bạn.",
   "toast.already_queued": "Bài này đã có trong hàng chờ.",
   "toast.nothing_left": "Tạm thời bạn đã hết lượt.",
   "toast.nothing_left_wait": "Tạm thời bạn đã hết lượt. Thử lại sau {wait}.",
   "toast.disabled": "Chủ tiệc đã tắt tính năng này.",
   "toast.roon_refused": "Roon không nhận bài này.",
   "toast.skipped": "Đã bỏ qua",
-  "toast.skipped_left": {
-    "other": "Đã bỏ qua. Còn {count} lượt bỏ qua."
-  },
-  "toast.skipped_last": "Đã bỏ qua. Đó là lượt bỏ qua cuối cùng của bạn.",
-  "toast.skipped_last_wait": "Đã bỏ qua. Lượt bỏ qua tiếp theo sau {wait}.",
   "toast.no_skips": "Bạn đã hết lượt bỏ qua.",
   "toast.no_skips_wait": "Bạn đã hết lượt bỏ qua. Thử lại sau {wait}.",
   "toast.failed": "Không thành công.",

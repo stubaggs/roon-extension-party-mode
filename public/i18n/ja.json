@@ -40,28 +40,13 @@
   },
   "time.short": "{count} 分",
   "toast.queued_next": "次に再生します",
-  "toast.queued_next_left": {
-    "other": "次に再生します。あと {count} 回できます。"
-  },
-  "toast.queued_next_last_wait": "次に再生します。{wait}後にまたできます。",
-  "toast.queued_next_last": "次に再生します。これが最後でした。",
   "toast.queued": "キューに追加しました",
-  "toast.queued_left": {
-    "other": "キューに追加しました。あと {count} 件追加できます。"
-  },
-  "toast.queued_last_wait": "キューに追加しました。{wait}後にまた追加できます。",
-  "toast.queued_last": "キューに追加しました。これが最後でした。",
   "toast.already_queued": "そのトラックはすでにキューにあります。",
   "toast.nothing_left": "今は残りがありません。",
   "toast.nothing_left_wait": "今は残りがありません。{wait}後にもう一度お試しください。",
   "toast.disabled": "ホストがこの機能をオフにしています。",
   "toast.roon_refused": "Roon がこのトラックを受け付けませんでした。",
   "toast.skipped": "スキップしました",
-  "toast.skipped_left": {
-    "other": "スキップしました。残り {count} 回スキップできます。"
-  },
-  "toast.skipped_last": "スキップしました。これが最後のスキップでした。",
-  "toast.skipped_last_wait": "スキップしました。{wait}後にまたスキップできます。",
   "toast.no_skips": "スキップの残りがありません。",
   "toast.no_skips_wait": "スキップの残りがありません。{wait}後にもう一度お試しください。",
   "toast.failed": "うまくいきませんでした。",

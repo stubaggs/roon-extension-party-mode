@@ -46,34 +46,13 @@
   },
   "time.short": "{count} min",
   "toast.queued_next": "Se redă în continuare",
-  "toast.queued_next_left": {
-    "one": "Se redă în continuare. Mai poți face asta o dată.",
-    "few": "Se redă în continuare. Mai poți face asta de {count} ori.",
-    "other": "Se redă în continuare. Mai poți face asta de {count} de ori."
-  },
-  "toast.queued_next_last_wait": "Se redă în continuare. Poți face asta din nou în {wait}.",
-  "toast.queued_next_last": "Se redă în continuare. A fost ultima.",
   "toast.queued": "Adăugată în coadă",
-  "toast.queued_left": {
-    "one": "Adăugată în coadă. Mai poți adăuga {count}.",
-    "few": "Adăugată în coadă. Mai poți adăuga {count}.",
-    "other": "Adăugată în coadă. Mai poți adăuga {count}."
-  },
-  "toast.queued_last_wait": "Adăugată în coadă. Poți adăuga alta în {wait}.",
-  "toast.queued_last": "Adăugată în coadă. A fost ultima.",
   "toast.already_queued": "Piesa este deja în coadă.",
   "toast.nothing_left": "Deocamdată nu mai ai.",
   "toast.nothing_left_wait": "Deocamdată nu mai ai. Încearcă din nou în {wait}.",
   "toast.disabled": "Gazda a dezactivat această opțiune.",
   "toast.roon_refused": "Roon nu a acceptat această piesă.",
   "toast.skipped": "Sărită",
-  "toast.skipped_left": {
-    "one": "Sărită. Mai ai {count} salt.",
-    "few": "Sărită. Mai ai {count} salturi.",
-    "other": "Sărită. Mai ai {count} de salturi."
-  },
-  "toast.skipped_last": "Sărită. A fost ultimul tău salt.",
-  "toast.skipped_last_wait": "Sărită. Următorul salt în {wait}.",
   "toast.no_skips": "Nu mai poți sări piese.",
   "toast.no_skips_wait": "Nu mai poți sări piese. Încearcă din nou în {wait}.",
   "toast.failed": "Nu a funcționat.",

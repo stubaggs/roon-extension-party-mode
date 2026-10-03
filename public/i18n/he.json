@@ -49,37 +49,13 @@
   },
   "time.short": "{count} דק׳",
   "toast.queued_next": "תתנגן הבאה",
-  "toast.queued_next_left": {
-    "one": "תתנגן הבאה. אפשר לעשות את זה עוד פעם אחת.",
-    "two": "תתנגן הבאה. אפשר לעשות את זה עוד {count} פעמים.",
-    "many": "תתנגן הבאה. אפשר לעשות את זה עוד {count} פעמים.",
-    "other": "תתנגן הבאה. אפשר לעשות את זה עוד {count} פעמים."
-  },
-  "toast.queued_next_last_wait": "תתנגן הבאה. אפשר לעשות את זה שוב בעוד {wait}.",
-  "toast.queued_next_last": "תתנגן הבאה. זו הייתה האחרונה שלך.",
   "toast.queued": "נוספה לתור",
-  "toast.queued_left": {
-    "one": "נוספה לתור. אפשר להוסיף עוד אחת.",
-    "two": "נוספה לתור. אפשר להוסיף עוד {count}.",
-    "many": "נוספה לתור. אפשר להוסיף עוד {count}.",
-    "other": "נוספה לתור. אפשר להוסיף עוד {count}."
-  },
-  "toast.queued_last_wait": "נוספה לתור. אפשר להוסיף עוד אחת בעוד {wait}.",
-  "toast.queued_last": "נוספה לתור. זו הייתה האחרונה שלך.",
   "toast.already_queued": "הרצועה הזו כבר בתור.",
   "toast.nothing_left": "לא נותר לך כלום כרגע.",
   "toast.nothing_left_wait": "לא נותר לך כלום כרגע. נסו שוב בעוד {wait}.",
   "toast.disabled": "המארח כיבה את האפשרות הזו.",
   "toast.roon_refused": "Roon לא קיבל את הרצועה הזו.",
   "toast.skipped": "דולגה",
-  "toast.skipped_left": {
-    "one": "דולגה. נותר לך דילוג אחד.",
-    "two": "דולגה. נותרו לך {count} דילוגים.",
-    "many": "דולגה. נותרו לך {count} דילוגים.",
-    "other": "דולגה. נותרו לך {count} דילוגים."
-  },
-  "toast.skipped_last": "דולגה. זה היה הדילוג האחרון שלך.",
-  "toast.skipped_last_wait": "דולגה. הדילוג הבא בעוד {wait}.",
   "toast.no_skips": "לא נותרו לך דילוגים.",
   "toast.no_skips_wait": "לא נותרו לך דילוגים. נסו שוב בעוד {wait}.",
   "toast.failed": "זה לא הצליח.",

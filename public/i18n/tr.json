@@ -43,31 +43,13 @@
   },
   "time.short": "{count} dk",
   "toast.queued_next": "Sonra çalacak",
-  "toast.queued_next_left": {
-    "one": "Sonra çalacak. Bunu {count} kez daha yapabilirsin.",
-    "other": "Sonra çalacak. Bunu {count} kez daha yapabilirsin."
-  },
-  "toast.queued_next_last_wait": "Sonra çalacak. {wait} sonra bunu yine yapabilirsin.",
-  "toast.queued_next_last": "Sonra çalacak. Bu son hakkındı.",
   "toast.queued": "Sıraya eklendi",
-  "toast.queued_left": {
-    "one": "Sıraya eklendi. {count} parça daha ekleyebilirsin.",
-    "other": "Sıraya eklendi. {count} parça daha ekleyebilirsin."
-  },
-  "toast.queued_last_wait": "Sıraya eklendi. {wait} sonra bir tane daha ekleyebilirsin.",
-  "toast.queued_last": "Sıraya eklendi. Bu son hakkındı.",
   "toast.already_queued": "Bu parça zaten sırada.",
   "toast.nothing_left": "Şimdilik hakkın kalmadı.",
   "toast.nothing_left_wait": "Şimdilik hakkın kalmadı. {wait} sonra tekrar dene.",
   "toast.disabled": "Ev sahibi bunu kapattı.",
   "toast.roon_refused": "Roon bu parçayı kabul etmedi.",
   "toast.skipped": "Atlandı",
-  "toast.skipped_left": {
-    "one": "Atlandı. {count} atlama hakkın kaldı.",
-    "other": "Atlandı. {count} atlama hakkın kaldı."
-  },
-  "toast.skipped_last": "Atlandı. Bu son atlama hakkındı.",
-  "toast.skipped_last_wait": "Atlandı. Sonraki atlama hakkın {wait} sonra.",
   "toast.no_skips": "Atlama hakkın kalmadı.",
   "toast.no_skips_wait": "Atlama hakkın kalmadı. {wait} sonra tekrar dene.",
   "toast.failed": "Olmadı.",

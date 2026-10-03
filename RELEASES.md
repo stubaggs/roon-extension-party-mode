@@ -16,8 +16,8 @@ Not released yet. You can try it on the `experimental` branch (see
   Greek, Hebrew, Hungarian, Italian, Japanese, Korean, Norwegian, Polish, Portuguese
   (Portugal and Brazil), Romanian, Russian, Swedish, Thai, Turkish, Ukrainian and
   Vietnamese. Hebrew and Arabic pages read right to left.
-- After adding a track, playing one next or skipping, the message says how many the
-  guest has left, or when the next comes back, if that is limited.
+- After adding a track, playing one next or skipping, the message shows what's left, as
+  the button does: "Added to the queue · 3 left", "Skipped · in 5 min".
 - Long translations fit narrow phones: buttons wrap instead of running off the screen,
   and messages use the screen's width. Names in another script (a Hebrew name on an
   English page, say) stay in the right order.

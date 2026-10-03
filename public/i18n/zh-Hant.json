@@ -40,28 +40,13 @@
   },
   "time.short": "{count} 分鐘",
   "toast.queued_next": "將在下一首播放",
-  "toast.queued_next_left": {
-    "other": "將在下一首播放。還可以這樣做 {count} 次。"
-  },
-  "toast.queued_next_last_wait": "將在下一首播放。{wait}後可以再這樣做。",
-  "toast.queued_next_last": "將在下一首播放。這是你的最後一次。",
   "toast.queued": "已加入佇列",
-  "toast.queued_left": {
-    "other": "已加入佇列。還可以新增 {count} 首。"
-  },
-  "toast.queued_last_wait": "已加入佇列。{wait}後可以再新增一首。",
-  "toast.queued_last": "已加入佇列。這是你的最後一次。",
   "toast.already_queued": "這首曲目已在佇列中。",
   "toast.nothing_left": "暫時沒有剩餘次數。",
   "toast.nothing_left_wait": "暫時沒有剩餘次數。請在 {wait}後重試。",
   "toast.disabled": "主人已關閉此功能。",
   "toast.roon_refused": "Roon 沒有接受這首曲目。",
   "toast.skipped": "已跳過",
-  "toast.skipped_left": {
-    "other": "已跳過。還可以跳過 {count} 次。"
-  },
-  "toast.skipped_last": "已跳過。這是你最後一次跳過。",
-  "toast.skipped_last_wait": "已跳過。{wait}後可再次跳過。",
   "toast.no_skips": "沒有剩餘的跳過次數。",
   "toast.no_skips_wait": "沒有剩餘的跳過次數。請在 {wait}後重試。",
   "toast.failed": "操作未成功。",

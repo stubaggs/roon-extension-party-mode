@@ -49,37 +49,13 @@
   },
   "time.short": "{count} min",
   "toast.queued_next": "Zařazeno jako další",
-  "toast.queued_next_left": {
-    "one": "Zařazeno jako další. Můžete to udělat ještě {count}krát.",
-    "few": "Zařazeno jako další. Můžete to udělat ještě {count}krát.",
-    "many": "Zařazeno jako další. Můžete to udělat ještě {count}krát.",
-    "other": "Zařazeno jako další. Můžete to udělat ještě {count}krát."
-  },
-  "toast.queued_next_last_wait": "Zařazeno jako další. Znovu to půjde za {wait}.",
-  "toast.queued_next_last": "Zařazeno jako další. To bylo vaše poslední.",
   "toast.queued": "Přidáno do fronty",
-  "toast.queued_left": {
-    "one": "Přidáno do fronty. Můžete přidat ještě {count}.",
-    "few": "Přidáno do fronty. Můžete přidat ještě {count}.",
-    "many": "Přidáno do fronty. Můžete přidat ještě {count}.",
-    "other": "Přidáno do fronty. Můžete přidat ještě {count}."
-  },
-  "toast.queued_last_wait": "Přidáno do fronty. Další můžete přidat za {wait}.",
-  "toast.queued_last": "Přidáno do fronty. To bylo vaše poslední.",
   "toast.already_queued": "Tahle skladba už ve frontě je.",
   "toast.nothing_left": "Teď už vám nic nezbývá.",
   "toast.nothing_left_wait": "Teď už vám nic nezbývá. Zkuste to znovu za {wait}.",
   "toast.disabled": "Hostitel tuto možnost vypnul.",
   "toast.roon_refused": "Roon tuto skladbu nepřijal.",
   "toast.skipped": "Přeskočeno",
-  "toast.skipped_left": {
-    "one": "Přeskočeno. Zbývá {count} přeskočení.",
-    "few": "Přeskočeno. Zbývají {count} přeskočení.",
-    "many": "Přeskočeno. Zbývá {count} přeskočení.",
-    "other": "Přeskočeno. Zbývá {count} přeskočení."
-  },
-  "toast.skipped_last": "Přeskočeno. To bylo vaše poslední přeskočení.",
-  "toast.skipped_last_wait": "Přeskočeno. Další přeskočení za {wait}.",
   "toast.no_skips": "Už nemůžete nic přeskočit.",
   "toast.no_skips_wait": "Už nemůžete nic přeskočit. Zkuste to znovu za {wait}.",
   "toast.failed": "Nepovedlo se to.",

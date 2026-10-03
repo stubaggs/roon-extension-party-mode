@@ -43,31 +43,13 @@
   },
   "time.short": "{count} min",
   "toast.queued_next": "Afspilles som næste",
-  "toast.queued_next_left": {
-    "one": "Afspilles som næste. Det kan du {count} gang mere.",
-    "other": "Afspilles som næste. Det kan du {count} gange mere."
-  },
-  "toast.queued_next_last_wait": "Afspilles som næste. Det kan du igen om {wait}.",
-  "toast.queued_next_last": "Afspilles som næste. Det var dit sidste.",
   "toast.queued": "Tilføjet til køen",
-  "toast.queued_left": {
-    "one": "Tilføjet til køen. Du kan tilføje {count} mere.",
-    "other": "Tilføjet til køen. Du kan tilføje {count} mere."
-  },
-  "toast.queued_last_wait": "Tilføjet til køen. Du kan tilføje et nyt om {wait}.",
-  "toast.queued_last": "Tilføjet til køen. Det var dit sidste.",
   "toast.already_queued": "Det nummer er allerede i køen.",
   "toast.nothing_left": "Ikke flere lige nu.",
   "toast.nothing_left_wait": "Ikke flere lige nu. Prøv igen om {wait}.",
   "toast.disabled": "Værten har slået det fra.",
   "toast.roon_refused": "Roon ville ikke tage det nummer.",
   "toast.skipped": "Sprunget over",
-  "toast.skipped_left": {
-    "one": "Sprunget over. {count} overspring tilbage.",
-    "other": "Sprunget over. {count} overspring tilbage."
-  },
-  "toast.skipped_last": "Sprunget over. Det var dit sidste overspring.",
-  "toast.skipped_last_wait": "Sprunget over. Du kan springe over igen om {wait}.",
   "toast.no_skips": "Du kan ikke springe flere over.",
   "toast.no_skips_wait": "Du kan ikke springe flere over. Prøv igen om {wait}.",
   "toast.failed": "Det virkede ikke.",

@@ -49,37 +49,13 @@
   },
   "time.short": "{count} min",
   "toast.queued_next": "Zagra jako następny",
-  "toast.queued_next_left": {
-    "one": "Zagra jako następny. Możesz to zrobić jeszcze {count} raz.",
-    "few": "Zagra jako następny. Możesz to zrobić jeszcze {count} razy.",
-    "many": "Zagra jako następny. Możesz to zrobić jeszcze {count} razy.",
-    "other": "Zagra jako następny. Możesz to zrobić jeszcze {count} razy."
-  },
-  "toast.queued_next_last_wait": "Zagra jako następny. Znów możesz to zrobić za {wait}.",
-  "toast.queued_next_last": "Zagra jako następny. To był twój ostatni.",
   "toast.queued": "Dodano do kolejki",
-  "toast.queued_left": {
-    "one": "Dodano do kolejki. Możesz dodać jeszcze {count}.",
-    "few": "Dodano do kolejki. Możesz dodać jeszcze {count}.",
-    "many": "Dodano do kolejki. Możesz dodać jeszcze {count}.",
-    "other": "Dodano do kolejki. Możesz dodać jeszcze {count}."
-  },
-  "toast.queued_last_wait": "Dodano do kolejki. Kolejny dodasz za {wait}.",
-  "toast.queued_last": "Dodano do kolejki. To był twój ostatni.",
   "toast.already_queued": "Ten utwór jest już w kolejce.",
   "toast.nothing_left": "Na razie nic ci nie zostało.",
   "toast.nothing_left_wait": "Na razie nic ci nie zostało. Spróbuj ponownie za {wait}.",
   "toast.disabled": "Gospodarz to wyłączył.",
   "toast.roon_refused": "Roon nie przyjął tego utworu.",
   "toast.skipped": "Pominięto",
-  "toast.skipped_left": {
-    "one": "Pominięto. Zostało {count} pominięcie.",
-    "few": "Pominięto. Zostały {count} pominięcia.",
-    "many": "Pominięto. Zostało {count} pominięć.",
-    "other": "Pominięto. Zostało {count} pominięcia."
-  },
-  "toast.skipped_last": "Pominięto. To było twoje ostatnie pominięcie.",
-  "toast.skipped_last_wait": "Pominięto. Kolejne pominięcie za {wait}.",
   "toast.no_skips": "Nie możesz już pomijać.",
   "toast.no_skips_wait": "Nie możesz już pomijać. Spróbuj ponownie za {wait}.",
   "toast.failed": "Nie udało się.",

@@ -43,31 +43,13 @@
   },
   "time.short": "{count} min",
   "toast.queued_next": "Wordt hierna afgespeeld",
-  "toast.queued_next_left": {
-    "one": "Wordt hierna gespeeld. Dat kan nog {count} keer.",
-    "other": "Wordt hierna gespeeld. Dat kan nog {count} keer."
-  },
-  "toast.queued_next_last_wait": "Wordt hierna gespeeld. Over {wait} kan dat weer.",
-  "toast.queued_next_last": "Wordt hierna gespeeld. Dat was je laatste.",
   "toast.queued": "Aan de wachtrij toegevoegd",
-  "toast.queued_left": {
-    "one": "Aan de wachtrij toegevoegd. Je kunt er nog {count} toevoegen.",
-    "other": "Aan de wachtrij toegevoegd. Je kunt er nog {count} toevoegen."
-  },
-  "toast.queued_last_wait": "Aan de wachtrij toegevoegd. Over {wait} kun je er weer een toevoegen.",
-  "toast.queued_last": "Aan de wachtrij toegevoegd. Dat was je laatste.",
   "toast.already_queued": "Dat nummer staat al in de wachtrij.",
   "toast.nothing_left": "Even niets meer over.",
   "toast.nothing_left_wait": "Even niets meer over. Probeer het over {wait} opnieuw.",
   "toast.disabled": "De host heeft dit uitgezet.",
   "toast.roon_refused": "Roon nam dat nummer niet aan.",
   "toast.skipped": "Overgeslagen",
-  "toast.skipped_left": {
-    "one": "Overgeslagen. Nog {count} keer overslaan.",
-    "other": "Overgeslagen. Nog {count} keer overslaan."
-  },
-  "toast.skipped_last": "Overgeslagen. Dat was je laatste keer overslaan.",
-  "toast.skipped_last_wait": "Overgeslagen. Je kunt over {wait} weer overslaan.",
   "toast.no_skips": "Je kunt niet meer overslaan.",
   "toast.no_skips_wait": "Je kunt niet meer overslaan. Probeer het over {wait} opnieuw.",
   "toast.failed": "Dat lukte niet.",

@@ -43,31 +43,13 @@
   },
   "time.short": "{count} min",
   "toast.queued_next": "Soi seuraavaksi",
-  "toast.queued_next_left": {
-    "one": "Soi seuraavaksi. Voit tehdä sen vielä {count} kerran.",
-    "other": "Soi seuraavaksi. Voit tehdä sen vielä {count} kertaa."
-  },
-  "toast.queued_next_last_wait": "Soi seuraavaksi. Voit tehdä sen taas {wait} päästä.",
-  "toast.queued_next_last": "Soi seuraavaksi. Se oli viimeisesi.",
   "toast.queued": "Lisätty jonoon",
-  "toast.queued_left": {
-    "one": "Lisätty jonoon. Voit lisätä vielä {count}.",
-    "other": "Lisätty jonoon. Voit lisätä vielä {count}."
-  },
-  "toast.queued_last_wait": "Lisätty jonoon. Voit lisätä seuraavan {wait} päästä.",
-  "toast.queued_last": "Lisätty jonoon. Se oli viimeisesi.",
   "toast.already_queued": "Tämä kappale on jo jonossa.",
   "toast.nothing_left": "Ei enempää tällä hetkellä.",
   "toast.nothing_left_wait": "Ei enempää tällä hetkellä. Yritä uudelleen {wait} päästä.",
   "toast.disabled": "Isäntä on poistanut tämän käytöstä.",
   "toast.roon_refused": "Roon ei hyväksynyt tätä kappaletta.",
   "toast.skipped": "Ohitettu",
-  "toast.skipped_left": {
-    "one": "Ohitettu. {count} ohitus jäljellä.",
-    "other": "Ohitettu. {count} ohitusta jäljellä."
-  },
-  "toast.skipped_last": "Ohitettu. Se oli viimeinen ohituksesi.",
-  "toast.skipped_last_wait": "Ohitettu. Seuraava ohitus {wait} päästä.",
   "toast.no_skips": "Ohituksia ei ole jäljellä.",
   "toast.no_skips_wait": "Ohituksia ei ole jäljellä. Yritä uudelleen {wait} päästä.",
   "toast.failed": "Se ei onnistunut.",

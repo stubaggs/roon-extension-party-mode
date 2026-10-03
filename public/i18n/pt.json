@@ -43,31 +43,13 @@
   },
   "time.short": "{count} min",
   "toast.queued_next": "Vai tocar a seguir",
-  "toast.queued_next_left": {
-    "one": "Vai tocar a seguir. Pode fazê-lo mais {count} vez.",
-    "other": "Vai tocar a seguir. Pode fazê-lo mais {count} vezes."
-  },
-  "toast.queued_next_last_wait": "Vai tocar a seguir. Pode voltar a fazê-lo daqui a {wait}.",
-  "toast.queued_next_last": "Vai tocar a seguir. Era a última.",
   "toast.queued": "Adicionada à fila",
-  "toast.queued_left": {
-    "one": "Adicionada à fila. Pode adicionar mais {count}.",
-    "other": "Adicionada à fila. Pode adicionar mais {count}."
-  },
-  "toast.queued_last_wait": "Adicionada à fila. Pode adicionar outra daqui a {wait}.",
-  "toast.queued_last": "Adicionada à fila. Era a última.",
   "toast.already_queued": "Essa faixa já está na fila.",
   "toast.nothing_left": "Por agora não tem mais.",
   "toast.nothing_left_wait": "Por agora não tem mais. Tente novamente daqui a {wait}.",
   "toast.disabled": "O anfitrião desativou essa opção.",
   "toast.roon_refused": "O Roon não aceitou essa faixa.",
   "toast.skipped": "Saltada",
-  "toast.skipped_left": {
-    "one": "Saltada. Resta-lhe {count} salto.",
-    "other": "Saltada. Restam-lhe {count} saltos."
-  },
-  "toast.skipped_last": "Saltada. Era o seu último salto.",
-  "toast.skipped_last_wait": "Saltada. O próximo salto fica disponível daqui a {wait}.",
   "toast.no_skips": "Já não pode saltar faixas.",
   "toast.no_skips_wait": "Já não pode saltar faixas. Tente novamente daqui a {wait}.",
   "toast.failed": "Não funcionou.",

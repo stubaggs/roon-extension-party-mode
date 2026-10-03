@@ -43,31 +43,13 @@
   },
   "time.short": "{count} perc",
   "toast.queued_next": "Következőként szól",
-  "toast.queued_next_left": {
-    "one": "Következőként szól. Még {count} alkalommal teheted meg.",
-    "other": "Következőként szól. Még {count} alkalommal teheted meg."
-  },
-  "toast.queued_next_last_wait": "Következőként szól. {wait} múlva újra megteheted.",
-  "toast.queued_next_last": "Következőként szól. Ez volt az utolsó.",
   "toast.queued": "Hozzáadva a sorhoz",
-  "toast.queued_left": {
-    "one": "Hozzáadva a sorhoz. Még {count} számot adhatsz hozzá.",
-    "other": "Hozzáadva a sorhoz. Még {count} számot adhatsz hozzá."
-  },
-  "toast.queued_last_wait": "Hozzáadva a sorhoz. {wait} múlva adhatsz hozzá újat.",
-  "toast.queued_last": "Hozzáadva a sorhoz. Ez volt az utolsó.",
   "toast.already_queued": "Ez a szám már a sorban van.",
   "toast.nothing_left": "Egyelőre elfogyott.",
   "toast.nothing_left_wait": "Egyelőre elfogyott. Próbáld újra {wait} múlva.",
   "toast.disabled": "A házigazda ezt kikapcsolta.",
   "toast.roon_refused": "A Roon nem fogadta el ezt a számot.",
   "toast.skipped": "Átugorva",
-  "toast.skipped_left": {
-    "one": "Átugorva. Még {count} átugrásod maradt.",
-    "other": "Átugorva. Még {count} átugrásod maradt."
-  },
-  "toast.skipped_last": "Átugorva. Ez volt az utolsó átugrásod.",
-  "toast.skipped_last_wait": "Átugorva. A következő átugrás {wait} múlva jár.",
   "toast.no_skips": "Nincs több átugrásod.",
   "toast.no_skips_wait": "Nincs több átugrásod. Próbáld újra {wait} múlva.",
   "toast.failed": "Ez nem sikerült.",
