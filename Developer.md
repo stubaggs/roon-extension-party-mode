@@ -210,6 +210,26 @@ language has them. Times follow the language's clock format automatically. `npm 
 checks that a translation uses the same keys and placeholders as English. Restart the
 extension to pick up a new file.
 
+## Accessibility
+
+The pages were checked by hand against WCAG 2.2 AA (October 2026); keep these when
+changing them:
+
+- **Contrast.** Text colours in `public/party.css` are all at least 4.5:1 on the
+  background; text fields use `--field-edge`, 3:1 against the page and the field.
+- **Focus survives redraws.** The guest page rebuilds its search results on every
+  change, so `renderResults(focusKey)` puts focus back on the row just opened or
+  requested. Results already queued are `aria-disabled` rows, not dead buttons.
+- **Announce, don't read out.** The results list is not a live region; a hidden
+  `role="status"` line says how many songs were found (`search.results`, a plural).
+- **The name dialog** makes the page behind `inert`, closes on Escape (as Skip or
+  Cancel), and hands focus back to the button that opened it.
+- **Moving text stops.** Long names scroll twice to the end and back, pause on hover,
+  then keep their "…" (`marquee.js`, the count is in `party.css`). With reduced motion
+  they never scroll.
+- **Numbered lists** are `<ol>`; the visible number is `aria-hidden` so it isn't read
+  twice. Album covers have empty `alt` text: the title next to them says it all.
+
 ## Installing it from Roon
 
 Once the image is on Docker Hub and the entry is in the Extension Repository, install it

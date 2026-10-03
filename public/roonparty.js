@@ -54,6 +54,8 @@
       const n = document.createElement('span');
       n.className = 'n';
       n.textContent = String(index + 1);
+      // The list is numbered already; don't read the number twice.
+      n.setAttribute('aria-hidden', 'true');
 
       // A blank tile when Roon has no cover, so the titles stay in line.
       const cover = document.createElement('img');

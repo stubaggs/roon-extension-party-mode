@@ -14,6 +14,10 @@
   "search.placeholder": "Song oder Künstler suchen",
   "search.clear": "Suche löschen",
   "search.no_results": "Keine passenden Songs. Versuch es mit dem Namen des Künstlers.",
+  "search.results": {
+    "one": "{count} Song gefunden.",
+    "other": "{count} Songs gefunden."
+  },
   "search.unavailable": "Die Suche ist gerade nicht verfügbar.",
   "track.added": "Hinzugefügt",
   "track.in_queue": "In der Warteschlange",

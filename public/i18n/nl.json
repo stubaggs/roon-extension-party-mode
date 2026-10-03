@@ -14,6 +14,10 @@
   "search.placeholder": "Zoek een nummer of artiest",
   "search.clear": "Zoekopdracht wissen",
   "search.no_results": "Geen nummers gevonden. Probeer de naam van de artiest.",
+  "search.results": {
+    "one": "{count} nummer gevonden.",
+    "other": "{count} nummers gevonden."
+  },
   "search.unavailable": "Zoeken is nu niet beschikbaar.",
   "track.added": "Toegevoegd",
   "track.in_queue": "In de wachtrij",

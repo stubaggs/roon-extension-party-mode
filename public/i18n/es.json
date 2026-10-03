@@ -14,6 +14,10 @@
   "search.placeholder": "Busca una canción o un artista",
   "search.clear": "Borrar búsqueda",
   "search.no_results": "No hay canciones que coincidan. Prueba con el nombre del artista.",
+  "search.results": {
+    "one": "{count} canción encontrada.",
+    "other": "{count} canciones encontradas."
+  },
   "search.unavailable": "La búsqueda no está disponible ahora mismo.",
   "track.added": "Añadida",
   "track.in_queue": "En la cola",

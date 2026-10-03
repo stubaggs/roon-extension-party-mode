@@ -19,6 +19,7 @@
   const app = el('app');
   const locked = el('locked');
   const results = el('results');
+  const resultsStatus = el('results-status');
   const queueList = el('queue');
   const playedList = el('played');
   const searchInput = el('search');
@@ -99,7 +100,12 @@
 
   // ------------------------------------------------------------------ search
 
-  function renderResults() {
+  /**
+   * Redraw the results. The list is rebuilt, which would drop keyboard and
+   * screen reader focus, so focus goes back to the row for focusKey: the
+   * result just opened or requested.
+   */
+  function renderResults(focusKey) {
     results.innerHTML = '';
     if (!lastResults.length) {
       if (searchInput.value.trim().length >= 2) {
@@ -115,7 +121,7 @@
       const row = document.createElement('button');
       row.className = 'row';
       row.type = 'button';
-      row.setAttribute('aria-expanded', String(expandedKey === track.key));
+      row.dataset.key = track.key;
 
       const img = document.createElement('img');
       img.className = 'art';
@@ -142,11 +148,16 @@
       row.append(img, text, state);
       results.appendChild(row);
 
-      if (track.in_queue || track.added) continue;
+      // Already queued: still in the list, and reachable, but not a working button.
+      if (track.in_queue || track.added) {
+        row.setAttribute('aria-disabled', 'true');
+        continue;
+      }
 
+      row.setAttribute('aria-expanded', String(expandedKey === track.key));
       row.addEventListener('click', () => {
         expandedKey = expandedKey === track.key ? null : track.key;
-        renderResults();
+        renderResults(track.key);
       });
 
       if (expandedKey === track.key) {
@@ -170,12 +181,24 @@
         results.appendChild(actions);
       }
     }
+
+    if (focusKey) {
+      const row = [...results.querySelectorAll('.row')].find((r) => r.dataset.key === focusKey);
+      if (row) row.focus();
+    }
+  }
+
+  function announceResults(query) {
+    if (query.trim().length < 2) resultsStatus.textContent = '';
+    else if (!lastResults.length) resultsStatus.textContent = t('search.no_results');
+    else resultsStatus.textContent = t('search.results', { count: lastResults.length });
   }
 
   async function runSearch(query) {
     if (query.trim().length < 2) {
       lastResults = [];
       renderResults();
+      announceResults(query);
       return;
     }
     try {
@@ -183,6 +206,7 @@
       lastResults = body.results;
       expandedKey = null;
       renderResults();
+      announceResults(query);
     } catch (err) {
       if (err.message !== 'no_session') toast(t('search.unavailable'));
     }
@@ -232,7 +256,7 @@
       track.added = true;
       expandedKey = null;
       renderTokens();
-      renderResults();
+      renderResults(track.key);
       toast(mode === 'next' ? t('toast.queued_next') : t('toast.queued'));
     } catch (err) {
       button.disabled = false;
@@ -277,6 +301,8 @@
       const position = document.createElement('span');
       position.className = 'queue-position';
       position.textContent = String(index + 1);
+      // The list is numbered already; don't read the number twice.
+      position.setAttribute('aria-hidden', 'true');
       return [position, ...trackCells(item)];
     });
 
@@ -375,14 +401,31 @@
   }
 
   let changingName = false;
+  let nicknameOpener = null;
 
-  /** First visit offers Skip; changing a name later offers Cancel instead. */
+  /**
+   * First visit offers Skip; changing a name later offers Cancel instead.
+   * While it is open the page behind is inert, so focus stays in the dialog.
+   */
   function askName(changing) {
     changingName = changing === true;
     el('nickname-skip').textContent = changingName ? t('name.cancel') : t('name.skip');
     nicknameInput.value = (party && party.guest_name) || remembered.get() || '';
+    nicknameOpener = document.activeElement;
+    app.inert = true;
     nickname.hidden = false;
     nicknameInput.focus();
+  }
+
+  /**
+   * Back to the button that opened it. On a first visit nothing did, and
+   * focusing the search box would pop up a phone's keyboard unasked.
+   */
+  function closeName() {
+    nickname.hidden = true;
+    app.inert = false;
+    if (nicknameOpener && nicknameOpener !== document.body) nicknameOpener.focus();
+    nicknameOpener = null;
   }
 
   el('nickname-form').addEventListener('submit', async (event) => {
@@ -390,7 +433,7 @@
     const name = nicknameInput.value.trim();
     // Skipping stores an empty name, so "Skip" isn't asked again on this phone.
     remembered.set(name);
-    nickname.hidden = true;
+    closeName();
     try {
       await saveName(name);
     } catch (err) {
@@ -398,13 +441,23 @@
     }
   });
 
-  el('nickname-skip').addEventListener('click', () => {
+  function skipName() {
     if (changingName) {
-      nickname.hidden = true;
+      closeName();
       return;
     }
     nicknameInput.value = '';
     el('nickname-form').requestSubmit();
+  }
+
+  el('nickname-skip').addEventListener('click', skipName);
+
+  // Escape does what the second button says: Cancel, or Skip on a first visit.
+  nickname.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      skipName();
+    }
   });
 
   el('whoami-change').addEventListener('click', () => askName(true));

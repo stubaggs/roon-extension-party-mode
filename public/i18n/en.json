@@ -14,6 +14,10 @@
   "search.placeholder": "Search for a song or artist",
   "search.clear": "Clear search",
   "search.no_results": "No tracks matched. Try the artist name.",
+  "search.results": {
+    "one": "{count} song found.",
+    "other": "{count} songs found."
+  },
   "search.unavailable": "Search is unavailable right now.",
   "track.added": "Added",
   "track.in_queue": "In the queue",

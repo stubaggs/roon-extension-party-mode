@@ -43,7 +43,9 @@
         <button class="link-button" id="whoami-change" type="button"></button>
       </p>
 
-      <section id="results" class="rows" aria-live="polite"></section>
+      <!-- Results are announced as a count, not read out in full each time. -->
+      <p id="results-status" class="visually-hidden" role="status" aria-live="polite"></p>
+      <section id="results" class="rows"></section>
 
       <section class="upnext">
         <h2 data-i18n="queue.up_next">Up next</h2>

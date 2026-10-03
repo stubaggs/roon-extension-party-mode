@@ -87,7 +87,7 @@ main {
   font-size: 1.05rem;
   color: var(--text);
   background: var(--raised);
-  border: 1px solid var(--edge);
+  border: 1px solid var(--field-edge);
   border-radius: 14px;
   appearance: none;
 }
@@ -141,7 +141,11 @@ main {
 }
 
 .link-button {
-  padding: 0;
+  /* At least 24px tall to tap, without moving the text around it. */
+  display: inline-block;
+  min-height: 24px;
+  padding: 0.2rem 0.3rem;
+  margin: -0.2rem -0.3rem;
   color: var(--lavender);
   text-decoration: underline;
   text-underline-offset: 2px;
@@ -195,7 +199,7 @@ main {
   font-size: 1.05rem;
   color: var(--text);
   background: var(--ink);
-  border: 1px solid var(--edge);
+  border: 1px solid var(--field-edge);
   border-radius: 12px;
 }
 
@@ -223,6 +227,10 @@ main {
   border-radius: 12px;
   width: 100%;
   text-align: left;
+}
+
+.row[aria-disabled="true"] {
+  cursor: default;
 }
 
 .row[aria-expanded="true"] {
