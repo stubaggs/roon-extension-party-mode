@@ -13,7 +13,7 @@
   "credit.radio": "Roon Radio",
   "search.placeholder": "Search for a song or artist",
   "search.clear": "Clear search",
-  "search.no_results": "No tracks matched. Try the artist name.",
+  "search.no_results": "No songs matched. Try the artist name.",
   "search.results": {
     "one": "{count} song found.",
     "other": "{count} songs found."
