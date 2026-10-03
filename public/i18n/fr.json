@@ -20,7 +20,7 @@
   "track.add": "Ajouter à la file",
   "track.next": "Lire ensuite",
   "queue.up_next": "À suivre",
-  "queue.empty": "Rien de prévu. Ajoutez le premier morceau.",
+  "queue.empty": "Rien de prévu. Ajoutez un morceau.",
   "played.title": "Déjà joués",
   "played.empty": "Rien n'a encore été joué.",
   "allowance.closed": "Les demandes sont fermées pour le moment.",

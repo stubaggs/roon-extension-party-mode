@@ -20,7 +20,7 @@
   "track.add": "Aan wachtrij toevoegen",
   "track.next": "Hierna afspelen",
   "queue.up_next": "Hierna",
-  "queue.empty": "Er staat nog niets klaar. Voeg het eerste nummer toe.",
+  "queue.empty": "Er staat nog niets klaar. Voeg een nummer toe.",
   "played.title": "Al gespeeld",
   "played.empty": "Er is nog niets gespeeld.",
   "allowance.closed": "Verzoekjes zijn nu gesloten.",

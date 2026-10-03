@@ -20,7 +20,7 @@
   "track.add": "Añadir a la cola",
   "track.next": "Poner a continuación",
   "queue.up_next": "A continuación",
-  "queue.empty": "No hay nada en cola. Añade la primera canción.",
+  "queue.empty": "No hay nada en cola. Añade una canción.",
   "played.title": "Ya sonaron",
   "played.empty": "Todavía no ha sonado nada.",
   "allowance.closed": "Las peticiones están cerradas ahora mismo.",
