@@ -130,12 +130,6 @@ check('a key missing from a language falls back to English', () => {
   assert.strictEqual(I18N.html.lang, 'de');
 });
 
-check('times follow the language', () => {
-  const at = new Date(2026, 9, 2, 21, 42).getTime();
-  assert.match(runtimeFor('en', en).time(at), /9:42\sPM/);
-  assert.strictEqual(runtimeFor('de', {}).time(at), '21:42');
-});
-
 console.log('\nserver');
 
 const request = (header) => ({
@@ -180,7 +174,6 @@ check('French text, plurals and clock', () => {
   assert.strictEqual(I18N.t('allowance.add.left', { count: 3 }), 'Il vous reste 3 morceaux à ajouter.');
   assert.strictEqual(I18N.minutes(30 * 1000), 'une minute');
   assert.strictEqual(I18N.credit({ kind: 'add', requested_by: null }), 'un invité');
-  assert.strictEqual(I18N.time(new Date(2026, 9, 2, 21, 42).getTime()), '21:42');
   assert.strictEqual(i18n.t('fr', 'join.expired'), 'Ce code a expiré. Scannez à nouveau le code affiché à l\'écran.');
 });
 
@@ -196,14 +189,13 @@ const samples = {
   nl: { up: 'Hierna', one: 'Je kunt nog 1 nummer toevoegen.', many: 'Je kunt nog 3 nummers toevoegen.', guest: 'Aangevraagd door een gast', wait: 'een minuut' }
 };
 for (const [lang, want] of Object.entries(samples)) {
-  check(`${lang}: text, plurals, "by a guest" and the clock`, () => {
+  check(`${lang}: text, plurals and "by a guest"`, () => {
     const I18N = runtimeFor(lang, JSON.parse(read(`i18n/${lang}.json`)));
     assert.strictEqual(I18N.t('queue.up_next'), want.up);
     assert.strictEqual(I18N.t('allowance.add.left', { count: 1 }), want.one);
     assert.strictEqual(I18N.t('allowance.add.left', { count: 3 }), want.many);
     assert.strictEqual(I18N.requestedBy({ kind: 'add', requested_by: null }), want.guest);
     assert.strictEqual(I18N.minutes(30 * 1000), want.wait);
-    assert.strictEqual(I18N.time(new Date(2026, 9, 2, 21, 42).getTime()), '21:42');
   });
 }
 

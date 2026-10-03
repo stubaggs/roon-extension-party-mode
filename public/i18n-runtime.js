@@ -84,13 +84,8 @@
     return t('time.minutes', { count });
   }
 
-  /** A clock time in the page's language, e.g. 9:42 PM or 21:42. */
-  function time(timestamp) {
-    return new Date(timestamp).toLocaleTimeString(data.lang, { hour: 'numeric', minute: '2-digit' });
-  }
-
   document.documentElement.lang = data.lang;
   apply();
 
-  window.I18N = { lang: data.lang, t, apply, credit, requestedBy, minutes, time };
+  window.I18N = { lang: data.lang, t, apply, credit, requestedBy, minutes };
 })();

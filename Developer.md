@@ -206,7 +206,7 @@ from Roon as they are.
 To add a language, copy `en.json` to e.g. `de.json` and translate the values, keeping the
 `{name}`, `{count}` and `{wait}` placeholders. Entries like `{ "one": …, "other": … }` are
 plurals, picked by the language's own rules; add `few`, `many` and so on where the
-language has them. Times follow the language's clock format automatically. `npm test`
+language has them. `npm test`
 checks that a translation uses the same keys and placeholders as English. Restart the
 extension to pick up a new file.
 

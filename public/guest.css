@@ -313,13 +313,7 @@ main {
 }
 
 .played .row {
-  grid-template-columns: 40px 1fr auto;
-}
-
-.played-at {
-  font-variant-numeric: tabular-nums;
-  color: var(--muted);
-  font-size: 0.8rem;
+  grid-template-columns: 40px 1fr;
 }
 
 .queue-position {

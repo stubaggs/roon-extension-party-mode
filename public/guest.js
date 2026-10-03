@@ -306,12 +306,7 @@
       return [position, ...trackCells(item)];
     });
 
-    renderList(playedList, snapshot.played || [], t('played.empty'), (item) => {
-      const time = document.createElement('span');
-      time.className = 'played-at';
-      time.textContent = window.I18N.time(item.played_at);
-      return [...trackCells(item), time];
-    });
+    renderList(playedList, snapshot.played || [], t('played.empty'), (item) => trackCells(item));
   }
 
   function creditText(track) {
