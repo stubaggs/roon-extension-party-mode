@@ -253,7 +253,7 @@ check('the hint names the download address once it is known', () => {
   assert.strictEqual(hint({ _resolveZone: () => null }), 'On the Party Hub when Party mode is Off');
   assert.strictEqual(
     hint({ _resolveZone: () => null, playlistUrl: 'http://192.168.1.73:8338/api/playlist.csv' }),
-    'On the Party Hub when Party mode is Off. Always downloadable at http://192.168.1.73:8338/api/playlist.csv'
+    'On the Party Hub when Party mode is Off\nAlways downloadable at http://192.168.1.73:8338/api/playlist.csv'
   );
 });
 

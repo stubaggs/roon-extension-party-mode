@@ -27,6 +27,8 @@ Not released yet. You can try it on the `experimental` branch (see
   Hub's address, whether the party is on, paused or off.
 - The **Party mode** setting reads **Pause** while the party is on and **Unpause** while
   it's paused, and says when turning it on starts a new party.
+- In Roon's settings, **Display playlist download** gives the address where the playlist
+  can always be downloaded on a line of its own.
 
 ## 1.1.1
 
