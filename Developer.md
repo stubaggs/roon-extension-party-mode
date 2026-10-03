@@ -350,8 +350,10 @@ still counts, since the track was queued.
 
 **Nicknames are optional.** Guests are asked for a name on their first visit; it shows as
 a badge on the tracks they add, in Up next, Played and on the RoonParty screen. The phone
-remembers it (or that they skipped), so a rescan doesn't ask again. Unnamed requests show
-as "a guest".
+remembers it (or that they skipped), so a rescan doesn't ask again. A guest without a name
+shows as "Anon" (`credit.guest`, translated: Anonyme, Anonym, Anónimo, Anoniem; "Anon" in
+the playlist file and the log). It is only a display name: the session's name stays empty,
+so naming yourself later updates your tracks.
 
 **"Roon Radio" is a guess.** Roon doesn't say where a track came from. When Roon Radio
 is switched on for the party zone, any track no guest added is labelled "Roon Radio",

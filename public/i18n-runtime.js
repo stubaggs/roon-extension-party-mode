@@ -62,26 +62,25 @@
     }
   }
 
-  /** The credit line for a track: a guest's name, "a guest", or Roon Radio. */
+  /** The name a guest goes by: theirs, or "Anon" (credit.guest) without one. */
+  const guestName = (name) => name || t('credit.guest');
+
+  /** The credit line for a track: a guest's name, "Anon", or Roon Radio. */
   function credit(item) {
     if (item.kind === 'radio') return t('credit.radio');
-    return item.requested_by || t('credit.guest');
+    return guestName(item.requested_by);
   }
 
-  /**
-   * The line under the playing track: "Requested by Sam", "Requested by a
-   * guest" or "Roon Radio". "By a guest" is its own phrase because some
-   * languages change "a guest" after "by" (German: von einem Gast).
-   */
+  /** The line under the playing track: "Requested by Sam", "Requested by Anon" or "Roon Radio". */
   function requestedBy(item) {
     if (item.kind === 'radio') return t('credit.radio');
-    return item.requested_by ? t('credit.requested_by', { name: item.requested_by }) : t('credit.requested_by_guest');
+    return t('credit.requested_by', { name: guestName(item.requested_by) });
   }
 
-  /** "Skipped by Sam", "Skipped by a guest" or "Skipped in Roon", for a skipped played track. */
+  /** "Skipped by Sam", "Skipped by Anon" or "Skipped in Roon", for a skipped played track. */
   function skippedBy(item) {
     if (item.skipped_in_roon) return t('played.skipped_in_roon');
-    return item.skipped_by ? t('played.skipped_by', { name: item.skipped_by }) : t('played.skipped_by_guest');
+    return t('played.skipped_by', { name: guestName(item.skipped_by) });
   }
 
   /** "a minute" / "12 minutes" for a wait in milliseconds. */

@@ -96,7 +96,7 @@ check('a track with no credit yet is looked up again', () => {
   const playlist = new PartyPlaylist();
   playlist.update('o1', [track(1, 'Waterloo')], nobody);
   const csv = rows(playlist, () => ({ requested_by: null, kind: 'guest' }));
-  assert.ok(csv[1].includes(',a guest,'), csv[1]);
+  assert.ok(csv[1].includes(',Anon,'), csv[1]);
 });
 
 check('queued at is local time, to the minute', () => {

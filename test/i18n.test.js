@@ -111,13 +111,14 @@ check('fills in names and counts, with plurals', () => {
   assert.strictEqual(I18N.minutes(12 * 60 * 1000), '12 minutes');
 });
 
-check('credits: a name, "a guest", or Roon Radio', () => {
+check('credits: a name, "Anon", or Roon Radio', () => {
   const I18N = runtimeFor('en', en);
   assert.strictEqual(I18N.requestedBy({ kind: 'add', requested_by: 'Sam' }), 'Requested by Sam');
-  assert.strictEqual(I18N.requestedBy({ kind: 'next', requested_by: null }), 'Requested by a guest');
+  assert.strictEqual(I18N.requestedBy({ kind: 'next', requested_by: null }), 'Requested by Anon');
+  assert.strictEqual(I18N.skippedBy({ skipped: true, skipped_by: null }), 'Skipped by Anon');
   assert.strictEqual(I18N.requestedBy({ kind: 'radio', requested_by: null }), 'Roon Radio');
   assert.strictEqual(I18N.credit({ kind: 'add', requested_by: 'Sam' }), 'Sam');
-  assert.strictEqual(I18N.credit({ kind: 'next', requested_by: null }), 'a guest');
+  assert.strictEqual(I18N.credit({ kind: 'next', requested_by: null }), 'Anon');
   assert.strictEqual(I18N.credit({ kind: 'radio', requested_by: null }), 'Roon Radio');
 });
 
@@ -184,7 +185,7 @@ check('French text, plurals and clock', () => {
   assert.strictEqual(I18N.t('button.left', { count: 1 }), '1 restant');
   assert.strictEqual(I18N.t('button.left', { count: 3 }), '3 restants');
   assert.strictEqual(I18N.minutes(30 * 1000), 'une minute');
-  assert.strictEqual(I18N.credit({ kind: 'add', requested_by: null }), 'un invité');
+  assert.strictEqual(I18N.credit({ kind: 'add', requested_by: null }), 'Anonyme');
   assert.strictEqual(i18n.t('fr', 'join.expired'), 'Ce code a expiré. Scannez à nouveau le code affiché à l\'écran.');
 });
 
@@ -195,12 +196,12 @@ for (const [header, lang] of [['es-ES,es;q=0.9', 'es'], ['es-419', 'es'], ['de-D
 }
 
 const samples = {
-  es: { up: 'A continuación', one: 'queda 1', many: 'quedan 3', guest: 'Pedida por un invitado', wait: 'un minuto' },
-  de: { up: 'Als Nächstes', one: 'noch 1', many: 'noch 3', guest: 'Gewünscht von einem Gast', wait: 'einer Minute' },
-  nl: { up: 'Hierna', one: 'nog 1', many: 'nog 3', guest: 'Aangevraagd door een gast', wait: 'een minuut' }
+  es: { up: 'A continuación', one: 'queda 1', many: 'quedan 3', guest: 'Pedida por Anónimo', wait: 'un minuto' },
+  de: { up: 'Als Nächstes', one: 'noch 1', many: 'noch 3', guest: 'Gewünscht von Anonym', wait: 'einer Minute' },
+  nl: { up: 'Hierna', one: 'nog 1', many: 'nog 3', guest: 'Aangevraagd door Anoniem', wait: 'een minuut' }
 };
 for (const [lang, want] of Object.entries(samples)) {
-  check(`${lang}: text, plurals and "by a guest"`, () => {
+  check(`${lang}: text, plurals and "by Anon"`, () => {
     const I18N = runtimeFor(lang, JSON.parse(read(`i18n/${lang}.json`)));
     assert.strictEqual(I18N.t('queue.up_next'), want.up);
     assert.strictEqual(I18N.t('button.left', { count: 1 }), want.one);
@@ -210,9 +211,9 @@ for (const [lang, want] of Object.entries(samples)) {
   });
 }
 
-check('German "a guest" changes after "by", but not on its own', () => {
+check('German: a name after "von", and the wait', () => {
   const I18N = runtimeFor('de', JSON.parse(read('i18n/de.json')));
-  assert.strictEqual(I18N.credit({ kind: 'add', requested_by: null }), 'ein Gast');
+  assert.strictEqual(I18N.credit({ kind: 'add', requested_by: null }), 'Anonym');
   assert.strictEqual(I18N.requestedBy({ kind: 'add', requested_by: 'Lena' }), 'Gewünscht von Lena');
   assert.strictEqual(I18N.t('toast.nothing_left_wait', { wait: I18N.minutes(5 * 60 * 1000) }), 'Gerade nichts mehr übrig. Versuch es in 5 Minuten wieder.');
 });
