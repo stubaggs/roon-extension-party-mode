@@ -121,7 +121,7 @@ never**.
   party zone, or you turn **Party mode** back on from **Off**, which counts as a new party
   (from **Paused** it doesn't).
   Download it before any of those. Tracks still in the queue carry over to the new list.
-- **Tag colours on the party screen** show how a track got into the queue: **lavender**
+- **Tag colours** on the party screen and guests' phones show how a track got into the queue: **lavender**
   when a guest added it, **amber** when a guest chose **Play it next**, and **mint** for
   Roon Radio. Tracks with no tag are ones you queued in Roon while Radio was off.
 - **"Roon Radio" is a best guess.** With Roon Radio on, any track no guest added is

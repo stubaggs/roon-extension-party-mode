@@ -355,6 +355,7 @@
     who.hidden = !(playing && playing.kind);
     who.textContent = who.hidden ? '' : creditText(playing);
     who.classList.toggle('radio', !who.hidden && playing.kind === 'radio');
+    who.classList.toggle('next', !who.hidden && playing.kind === 'next');
     el('playing-label').textContent =
       playing && playing.state === 'playing' ? t('playing.now') : t('playing.paused');
     setArt(el('playing-art'), playing && playing.image_key, 144);
@@ -421,7 +422,7 @@
     text.append(title, sub);
     if (item.kind) {
       const badge = document.createElement('span');
-      badge.className = item.kind === 'radio' ? 'badge radio' : 'badge';
+      badge.className = item.kind === 'next' || item.kind === 'radio' ? `badge ${item.kind}` : 'badge';
       badge.textContent = window.I18N.credit(item);
       text.appendChild(badge);
     }

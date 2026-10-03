@@ -30,7 +30,7 @@ Not released yet. You can try it on the `experimental` branch.
 - The whole queue, under everything else, with album covers.
 - "Scan to add a track" is itself the guest link, so you can click it to open the guest page.
 - Name tags are coloured by how the track was added: lavender for the end of the queue,
-  amber for Play it next, mint for Roon Radio. Playing now uses the same colours.
+  amber for Play it next, mint for Roon Radio, on the party screen and guests' phones alike.
 - On a narrow screen, "Playing now" sits at the left edge under the QR code.
 - "Nothing lined up." when the queue is empty.
 
