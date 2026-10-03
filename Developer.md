@@ -20,7 +20,7 @@ it installable from inside Roon.
 Roon Core  ──(node-roon-api over the local network)──  app.js
                                                         │
                         RoonApiSettings   host config in Roon's Extension Settings
-                        RoonApiStatus     "RoonParty at http://…"
+                        RoonApiStatus     "Party Hub at http://…"
                         RoonApiTransport  zone state, queue subscription, skip, play
                         RoonApiBrowse     search + "Queue" / "Add Next" actions
                         RoonApiImage      album art proxy
@@ -28,7 +28,7 @@ Roon Core  ──(node-roon-api over the local network)──  app.js
                                               Express on port 8338
                                                         │
                                      /            guest page (phones)
-                                     /roonparty    QR code + queue (TV)
+                                     /PartyHub     QR code + queue (TV)
 ```
 
 | File | What it does |
@@ -40,7 +40,7 @@ Roon Core  ──(node-roon-api over the local network)──  app.js
 | `lib/history.js` | Played-tracks list for the guest page |
 | `lib/party-playlist.js` | Everything queued during the party, as the downloadable CSV |
 | `lib/server.js` | REST API, server-sent events, QR code, image proxy |
-| `public/` | Guest page and the RoonParty screen, no build step |
+| `public/` | Guest page (`index.html`) and the Party Hub (`hub.html`), no build step |
 | `public/i18n/`, `lib/i18n.js` | Page text per language, and picking the language per browser |
 | `lib/env.js`, `lib/log.js` | Environment variables, and the debug log switch |
 | `test/` | Identity, attribution, settings and web server tests, `npm test` |
@@ -79,7 +79,7 @@ node app.js
 ```
 
 Then open Roon → Settings → Extensions and enable Party Mode. Open its settings, pick a
-party zone, and the console prints the guest link and RoonParty URL. The extension writes
+party zone, and the console prints the guest link and the Party Hub's URL. The extension writes
 `config.json` next to `app.js`.
 
 ## Host settings (in Roon)
@@ -95,7 +95,7 @@ and starts a new playlist (`party_mode_changed` in `lib/server.js`). Left blank,
 the party zone's name (for a grouped zone, Roon's name for the group, such as "Kitchen +
 Living Room"), and follows the zone if you change it; the setting shows which name that
 is. Saving a new port moves the
-guest and RoonParty pages there straight away, then the extension reconnects to the Core
+guest pages and the Party Hub there straight away, then the extension reconnects to the Core
 (it drops out of Roon's list for up to ten seconds) so the link Roon shows is updated.
 Open pages and phones on the old port need the new link or a fresh scan.
 `ROON_EXTENSION_PARTY_MODE_PORT` sets the port to start on before one has been saved in
@@ -209,7 +209,7 @@ the detection.
 Available: English (`en`), French (`fr`), German (`de`), Spanish (`es`), Dutch (`nl`). The
 non-English files are drafts (Thanks Claude), apologies for poor translations.
 
-The guest page and the RoonParty screen take their text from `public/i18n/<code>.json`,
+The guest page and the Party Hub take their text from `public/i18n/<code>.json`,
 one file per language. Each browser gets the language it asks for (its
 `Accept-Language`), so guests at the same party can each see their own; anything not
 translated, or a missing key, falls back to `en.json`. Track, artist and album names come
@@ -222,6 +222,15 @@ language has them. `npm test`
 checks that a translation uses the same keys and placeholders as English, and that every
 key the pages and `messagePage()` use is in `en.json`. Restart the
 extension to pick up a new file.
+
+## The Party Hub's name
+
+The TV page is the **Party Hub**, at `/PartyHub` (Express routes ignore case, so
+`/partyhub` works too); Roon's Extensions link and status line point there. Its tab title
+is the party's name plus "Hub" (`page.hub_title`, `{name} Hub`), set by `hub.js`, so a
+renamed party shows straight away. It was the RoonParty screen before 1.2.0: `/roonparty`
+redirects (301) to `/PartyHub`, and `/api/roonparty` still answers alongside `/api/hub`,
+so a screen left open across the upgrade keeps working until it reloads.
 
 ## Accessibility
 
@@ -253,7 +262,7 @@ changing them:
 - **QR codes say what they are.** Their `alt` text names the code ("QR code for the
   guest page", `screen.qr_alt`) rather than repeating the link under it, which a screen
   reader would then hear twice.
-- **Headings follow the screen.** On the party screen, "Requests are closed" is an `<h2>`
+- **Headings follow the page.** On the Party Hub, "Requests are closed" is an `<h2>`
   in the place of the playing track's title, which is one too.
 
 ## Installing it from Roon
@@ -291,7 +300,7 @@ The Dockerfile builds in two stages. The first installs dependencies exactly as
 `package-lock.json` pins them (`npm ci`, which needs `git` for the Roon packages on
 GitHub) and runs `npm test`, so a failing test stops the build. The second copies only
 the app and its dependencies onto a clean base, with a health check that requests the
-RoonParty data on the configured port.
+Party Hub data (`/api/hub`) on the configured port.
 
 The image is built for `linux/amd64`, `linux/arm64` and both 32-bit ARM variants:
 Docker reports every 32-bit ARM host as `arm`, the key the repository entry uses, and
@@ -367,7 +376,7 @@ purpose; there is no setting to turn it off. A failed `play` is logged and the r
 still counts, since the track was queued.
 
 **Nicknames are optional.** Guests are asked for a name on their first visit; it shows as
-a badge on the tracks they add, in Up next, Played and on the RoonParty screen. The phone
+a badge on the tracks they add, in Up next, Played and on the Party Hub. The phone
 remembers it (or that they skipped), so a rescan doesn't ask again. A guest without a name
 shows as "Anon" (`credit.guest`, translated: Anonyme, Anonym, Anónimo, Anoniem; "Anon" in
 the playlist file and the log). It is only a display name: the session's name stays empty.
@@ -423,8 +432,8 @@ same guest searches again is dropped (`search` returns null; the page ignores ou
 answers too), and only `action_list` items are returned as tracks.
 
 **Access control is a shared join code, not a login.** Anyone who can reach the port and
-has scanned the code can add tracks. The RoonParty screen and its endpoints need no session at all,
-and they include the join link, so the code proves someone opened the screen, not that they
+has scanned the code can add tracks. The Party Hub and its endpoints need no session at all,
+and they include the join link, so the code proves someone opened the Hub, not that they
 are in the room. Allowances are per session: a guest who clears cookies and scans again
 starts afresh. Do not expose this to the internet.
 
@@ -449,16 +458,16 @@ goes first.
 extension's own scripts, styles, images and connections (the pages have no inline
 script or style; `marquee.js` sets styles through the DOM, which the policy allows),
 `X-Content-Type-Options: nosniff` and `Referrer-Policy: no-referrer`. Guest pages also
-refuse to be framed (`frame-ancestors 'none'`, `X-Frame-Options: DENY`); the party
-screen may be, for a dashboard on the TV. `test/server.test.js` covers all of this.
+refuse to be framed (`frame-ancestors 'none'`, `X-Frame-Options: DENY`); the Party
+Hub may be, for a dashboard on the TV. `test/server.test.js` covers all of this.
 
 **The party playlist is a download, not a Roon playlist.** Roon's browse API offers
 extensions Play Now, Add Next, Queue and Start Radio on a track, and Play Now, Shuffle,
 Add Next, Queue and Start Radio on a playlist; nothing creates or edits one (checked
 against a Core in October 2026). So `lib/party-playlist.js` records every queue entry
 the party zone gets, once per `queue_item_id`, and `GET /api/playlist.csv` (offered on
-the party screen only while party mode is off, which is how a host ends a party; the
-URL itself needs no session, like the rest of the screen, and always works) serves it as CSV in
+the Party Hub only while party mode is off, which is how a host ends a party; the
+URL itself needs no session, like the rest of the Hub, and always works) serves it as CSV in
 the form Soundiiz imports: lower-case `title`, `artist`, `album` headers (the other
 columns are ignored by importers), commas, UTF-8 without a byte order mark (a BOM hides
 the first header from an importer, at the cost of Excel's double-click guessing the
@@ -469,7 +478,7 @@ expect. A guest name a spreadsheet would read as a formula gets a leading apostr
 track details are left as Roon gives them, so they still match. The Display playlist
 download setting (`playlist_download`: `'qr'`, `'link'` or `'off'`, read through
 `playlistDisplay()`, which turns the brief yes/no form into `'qr'`/`'off'`) only decides
-what the screen shows: `/api/roonparty` passes it as `playlist`, and the screen shows a QR
+what the Hub shows: `/api/hub` passes it as `playlist`, and the Hub shows a QR
 code from `GET /api/playlist-qr.svg` with the link under it, a button, or nothing. Its hint
 in Roon's settings gives the download address, which `app.js` hands over with
 `setPlaylistUrl()` alongside the website link. `test/server.test.js` runs the real web server against a

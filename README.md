@@ -10,7 +10,7 @@ Roon account, and no access to anything else in your Roon setup.
   buttons show how many are left.
 - **Names on tracks:** guests can give a nickname, shown next to the tracks they add
   ("Anon" if they'd rather not; adding a name later puts it on their earlier tracks too).
-- **A party screen** for a TV or tablet: QR code, what's playing and the whole queue.
+- **The Party Hub** for a TV or tablet: QR code, what's playing and the whole queue.
 - **Up next and Played** lists, so everyone can see what's coming and what's been on,
   including who skipped what (or that it was skipped in Roon).
 - **Keep the party's playlist:** download everything that was queued as a spreadsheet
@@ -62,11 +62,11 @@ under **Settings → Extensions** in Roon.
 1. In Roon, open **Settings → Extensions → Party Mode → Settings** and pick the **Party
    zone**: where the music plays. Give the party a name if you like; otherwise it's
    named after the zone.
-2. Click **Party Mode**'s link in the Extensions list to open the **party screen**. Put it
+2. Click **Party Mode**'s link in the Extensions list to open the **Party Hub**. Put it
    on a TV, a tablet or a laptop where guests can see it.
-3. Guests scan the QR code on the party screen with their phone camera. That's it.
+3. Guests scan the QR code on the Party Hub with their phone camera. That's it.
 
-When you're done taking requests, set **Party mode** to **Off**. The party screen says
+When you're done taking requests, set **Party mode** to **Off**. The Party Hub says
 "Requests are closed" where the playing track was, and swaps the QR code for the playlist.
 Guests' phones say requests are closed too. By default that's a second QR code, **Scan to
 download the playlist**, which anyone in the room can scan to save it on their phone; the
@@ -86,7 +86,7 @@ file; Google Sheets, Numbers and Excel's **Data → From Text/CSV** read it corr
 - **On**: guests add tracks.
 - **Paused**, for a speech or the cake: the music pauses and guests' requests wait, with
   the QR code still up. Back to **On**, the music carries on where it was.
-- **Off**, when you're done taking requests: the music pauses, guests can't add tracks, and the party screen
+- **Off**, when you're done taking requests: the music pauses, guests can't add tracks, and the Party Hub
   says requests are closed, with the playlist to download. Turning it back on starts
   a new party, with a new QR code (old links stop working) and a new playlist, so
   download the old one first.
@@ -97,8 +97,8 @@ file; Google Sheets, Numbers and Excel's **Data → From Text/CSV** read it corr
 | --- | --- |
 | Party mode | On, Paused (music and requests on hold) or Off (requests closed, playlist ready). See above. |
 | Party zone | Where the music plays. If you pick a speaker that's grouped with others, the whole group plays. |
-| Party name | Shown on the party screen. Leave blank to use the zone's name. |
-| Display playlist download | What the party screen shows once **Party mode** is **Off**: a **QR code** guests can scan (the default), a **Link only** to click on the screen itself, or **Off** for nothing. The hint gives the download address, which works whichever you pick. |
+| Party name | Shown on the Party Hub. Leave blank to use the zone's name. |
+| Display playlist download | What the Party Hub shows once **Party mode** is **Off**: a **QR code** guests can scan (the default), a **Link only** to click on the Hub itself, or **Off** for nothing. The hint gives the download address, which works whichever you pick. |
 | Roon profile for guest requests | The Roon profile the tracks are played under. Choose a "Guests" profile to keep party tracks out of your own history and recommendations. |
 | Web port | The port the guest pages use (8338). Only change it if something else on the computer uses 8338. |
 | Adding tracks | Whether guests can add tracks, whether a track already in the queue can be added again (covers, live takes and remasters count as different tracks), how many each guest gets, and how many minutes until they get another. |
@@ -121,7 +121,7 @@ never**.
   party zone, or you turn **Party mode** back on from **Off**, which counts as a new party
   (from **Paused** it doesn't).
   Download it before any of those. Tracks still in the queue carry over to the new list.
-- **Tag colours** on the party screen and guests' phones show how a track got into the queue: **lavender**
+- **Tag colours** on the Party Hub and guests' phones show how a track got into the queue: **lavender**
   when a guest added it, **amber** when a guest chose **Play it next**, and **mint** for
   Roon Radio. Tracks with no tag are ones you queued in Roon while Radio was off.
 - **"Roon Radio" is a best guess.** With Roon Radio on, any track no guest added is
@@ -130,7 +130,7 @@ never**.
   With **Display playlist download** on **QR code**, anyone at the party can scan it and
   keep a copy. If that's not what you want, choose **Link only** or **Off**.
 - **Keep it at home.** Anyone on your network who has scanned the code can add tracks, and
-  the party screen needs no code at all. Don't open the port to the internet.
+  the Party Hub needs no code at all. Don't open the port to the internet.
 
 ## Troubleshooting
 
@@ -141,7 +141,7 @@ the same network as the Roon Core. With Docker, use `--network host`, as above.
 the computer running Party Mode, and that the computer's firewall allows port 8338.
 
 **"That code has expired".** Party mode was switched off and on, which makes a new code.
-Scan the code on the party screen again.
+Scan the code on the Party Hub again.
 
 **Roon says settings can't be saved.** The extension can't write `config.json`. With Docker,
 run `sudo chown 1000 config.json && chmod 600 config.json` on the file you mounted, or

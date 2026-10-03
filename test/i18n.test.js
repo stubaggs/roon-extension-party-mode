@@ -38,12 +38,12 @@ const en = JSON.parse(read('i18n/en.json'));
 /** Keys the pages use: t('key') and the plural/credit keys used by name. */
 function usedKeys() {
   const keys = new Set();
-  for (const file of ['guest.js', 'roonparty.js', 'i18n-runtime.js']) {
+  for (const file of ['guest.js', 'hub.js', 'i18n-runtime.js']) {
     for (const m of read(file).matchAll(/\bt\('([a-z_.]+)'/g)) keys.add(m[1]);
     // Button labels relabelled in place: dataset { label: 'track.add' }.
     for (const m of read(file).matchAll(/\blabel: '([a-z_.]+)'/g)) keys.add(m[1]);
   }
-  for (const file of ['index.html', 'roonparty.html']) {
+  for (const file of ['index.html', 'hub.html']) {
     for (const m of read(file).matchAll(/data-i18n(?:-[a-z-]+)?="([a-z_.]+)"/g)) keys.add(m[1]);
   }
   // The server's own pages: messagePage(res, lang, 'title.key', 'text.key').
@@ -82,7 +82,7 @@ check('en.json has no unused keys', () => {
 });
 
 check('no hard-coded English left in the page scripts', () => {
-  for (const file of ['guest.js', 'roonparty.js']) {
+  for (const file of ['guest.js', 'hub.js']) {
     const quoted = read(file).match(/(['`])(?:[A-Z][a-z]+ )+[a-z]+[^'`]*\1/g) || [];
     assert.deepStrictEqual(quoted, [], file);
   }
@@ -189,7 +189,7 @@ check('French text, plurals and clock', () => {
   assert.strictEqual(I18N.t('button.left', { count: 3 }), '3 restants');
   assert.strictEqual(I18N.minutes(30 * 1000), 'une minute');
   assert.strictEqual(I18N.credit({ kind: 'add', requested_by: null }), 'Anonyme');
-  assert.strictEqual(i18n.t('fr', 'join.expired'), 'Ce code a expiré. Scannez à nouveau le code affiché à l\'écran.');
+  assert.strictEqual(i18n.t('fr', 'join.expired'), 'Ce code a expiré. Scannez à nouveau le code affiché sur le Party Hub.');
 });
 
 console.log('\nSpanish, German, Dutch');

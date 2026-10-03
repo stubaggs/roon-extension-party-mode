@@ -24,7 +24,10 @@
   }
 
   function render(data) {
-    el('party-name').textContent = data.party_name || t('party.default_name');
+    const name = data.party_name || t('party.default_name');
+    el('party-name').textContent = name;
+    // "EX5 Test-o-rama Hub" in the tab, a bookmark or on a tablet's home screen.
+    document.title = t('page.hub_title', { name });
     if (data.join_url) el('join-link').href = data.join_url;
     // Party mode off ends the party: no QR code that no longer works, but
     // the playlist, as a QR code or a link as the host chose, and "Requests
@@ -101,7 +104,7 @@
   }
 
   async function refresh() {
-    const res = await fetch('/api/roonparty');
+    const res = await fetch('/api/hub');
     if (res.ok) render(await res.json());
   }
 

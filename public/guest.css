@@ -69,7 +69,7 @@ main {
   color: var(--mint);
 }
 
-/* As on the party screen: lavender for a track a guest added, amber for one
+/* As on the Party Hub: lavender for a track a guest added, amber for one
    they put straight after the playing track, mint for Roon Radio. */
 .playing-who.next,
 .badge.next {

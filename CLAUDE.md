@@ -6,7 +6,7 @@ Every change that affects them updates the docs in the same commit:
 
 - **README.md** is for people installing and running a party. Update it when anything they
   see or do changes: features, settings (names, defaults, meanings), installing, the guest
-  pages or party screen, troubleshooting. Plain language, no internals.
+  pages or the Party Hub, troubleshooting. Plain language, no internals.
 - **Developer.md** is for people working on the code. Update it when how things work
   changes: architecture, files, matching and attribution rules, tests, translations,
   Docker and publishing, known limitations.

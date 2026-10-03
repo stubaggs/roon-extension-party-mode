@@ -92,23 +92,23 @@ const set = (values) => Object.assign(roon.settings, values);
 
   console.log('playlist');
 
-  await check('the party screen is told how to offer it: QR code by default', async () => {
+  await check('the Party Hub is told how to offer it: QR code by default', async () => {
     set({ enabled: false, playlist_download: 'qr' });
-    assert.strictEqual((await (await get('/api/roonparty')).json()).playlist, 'qr');
+    assert.strictEqual((await (await get('/api/hub')).json()).playlist, 'qr');
   });
 
-  await check('link only and off reach the party screen as they are', async () => {
+  await check('link only and off reach the Party Hub as they are', async () => {
     set({ playlist_download: 'link' });
-    assert.strictEqual((await (await get('/api/roonparty')).json()).playlist, 'link');
+    assert.strictEqual((await (await get('/api/hub')).json()).playlist, 'link');
     set({ playlist_download: 'off' });
-    assert.strictEqual((await (await get('/api/roonparty')).json()).playlist, 'off');
+    assert.strictEqual((await (await get('/api/hub')).json()).playlist, 'off');
   });
 
   await check('a yes/no saved before the three choices still reads right', async () => {
     set({ playlist_download: true });
-    assert.strictEqual((await (await get('/api/roonparty')).json()).playlist, 'qr');
+    assert.strictEqual((await (await get('/api/hub')).json()).playlist, 'qr');
     set({ playlist_download: false });
-    assert.strictEqual((await (await get('/api/roonparty')).json()).playlist, 'off');
+    assert.strictEqual((await (await get('/api/hub')).json()).playlist, 'off');
   });
 
   await check('the download works whatever the setting, as a named CSV file', async () => {
@@ -294,11 +294,33 @@ const set = (values) => Object.assign(roon.settings, values);
     }
   });
 
-  await check('the party screen can be shown inside a dashboard', async () => {
-    const res = await get('/roonparty');
+  await check('the Party Hub can be shown inside a dashboard', async () => {
+    const res = await get('/PartyHub');
     assert.match(res.headers.get('content-security-policy'), /script-src 'self'/);
     assert.doesNotMatch(res.headers.get('content-security-policy'), /frame-ancestors/);
     assert.strictEqual(res.headers.get('x-frame-options'), null);
+  });
+
+  console.log('\nParty Hub');
+
+  await check('the Party Hub is at /PartyHub, in any case', async () => {
+    for (const path of ['/PartyHub', '/partyhub']) {
+      const res = await get(path);
+      assert.strictEqual(res.status, 200, path);
+      assert.match(await res.text(), /<script src="\/hub\.js"><\/script>/, path);
+    }
+    assert.ok(server.hubUrl().endsWith('/PartyHub'));
+  });
+
+  await check('the old RoonParty address and its data still work', async () => {
+    for (const path of ['/roonparty', '/roonparty.html']) {
+      const res = await get(path);
+      assert.strictEqual(res.status, 301, path);
+      assert.strictEqual(res.headers.get('location'), '/PartyHub', path);
+    }
+    const old = await get('/api/roonparty');
+    assert.strictEqual(old.status, 200);
+    assert.ok('party_mode' in (await old.json()));
   });
 
   console.log(failures ? `\n${failures} failed` : '\nall passed');

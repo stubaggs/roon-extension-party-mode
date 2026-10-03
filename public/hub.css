@@ -1,4 +1,4 @@
-.roonparty {
+.hub {
   overflow: hidden;
   height: 100vh;
 }
@@ -287,7 +287,7 @@
 
 @media (max-width: 720px) {
   /* One column on a phone, and the page scrolls rather than the list. */
-  .roonparty {
+  .hub {
     overflow: auto;
     height: auto;
   }

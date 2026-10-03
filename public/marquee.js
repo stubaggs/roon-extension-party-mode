@@ -27,7 +27,7 @@
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
   // When a page redraws a name that was already scrolling, carry on from where
-  // it was instead of starting over (the RoonParty screen redraws every 30s).
+  // it was instead of starting over (the Party Hub redraws every 30s).
   const started = new Map();
   // Names that have had their turn; they keep their "…" until they leave the page.
   const finished = new Set();

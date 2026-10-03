@@ -7,6 +7,10 @@ running in its Extensions list.
 
 Not released yet. You can try it on the `experimental` branch.
 
+- The party screen is now the **Party Hub**, at `/PartyHub`. Its browser tab shows the
+  party's name, such as "EX5 Test-o-rama Hub". Roon's link and status line point there,
+  and old `/roonparty` bookmarks still open it.
+
 ## 1.1.1
 
 - No changes to the extension itself. These release notes are corrected: the environment

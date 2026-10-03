@@ -1,7 +1,7 @@
 {
   "_language": "Nederlands",
   "page.title": "Nummer toevoegen",
-  "page.screen_title": "RoonParty",
+  "page.hub_title": "{name} Hub",
   "party.default_name": "Feest",
   "playing.now": "Speelt nu",
   "playing.paused": "Gepauzeerd",
@@ -65,7 +65,7 @@
   "name.skip": "Overslaan",
   "name.cancel": "Annuleren",
   "locked.title": "Scan de code opnieuw",
-  "locked.text": "Deze link werkt pas nadat je de code op het feestscherm hebt gescand. Vraag de host om hem te laten zien.",
+  "locked.text": "Deze link werkt pas nadat je de code op de Party Hub hebt gescand. Vraag de host om hem te laten zien.",
   "screen.scan": "Scan om een nummer toe te voegen",
   "screen.qr_alt": "QR-code voor de gastenpagina",
   "screen.download_playlist": "De playlist downloaden",
@@ -73,5 +73,5 @@
   "screen.playlist_qr_alt": "QR-code voor de playlist",
   "screen.closed_title": "Verzoekjes zijn gesloten",
   "screen.closed_text": "Bedankt voor alle nummers.",
-  "join.expired": "Deze code is verlopen. Scan de code op het scherm opnieuw."
+  "join.expired": "Deze code is verlopen. Scan de code op de Party Hub opnieuw."
 }
