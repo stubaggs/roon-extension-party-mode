@@ -120,6 +120,9 @@ never**.
   Download it before any of those. Tracks still in the queue carry over to the new list.
 - **"Roon Radio" is a best guess.** With Roon Radio on, any track no guest added is
   labelled Roon Radio, including tracks you queue from the Roon app yourself.
+- **The playlist has guests' names in it.** It lists who asked for each track and when.
+  With **Display playlist download** on **QR code**, anyone at the party can scan it and
+  keep a copy. If that's not what you want, choose **Link only** or **Off**.
 - **Keep it at home.** Anyone on your network who has scanned the code can add tracks, and
   the party screen needs no code at all. Don't open the port to the internet.
 

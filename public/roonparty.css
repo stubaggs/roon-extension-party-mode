@@ -262,12 +262,6 @@
   color: var(--lavender);
 }
 
-.closed {
-  grid-column: 1 / -1;
-  text-align: center;
-  font-size: 1.4rem;
-  color: var(--muted);
-}
 
 /* With room to spare, one line per song so more of the queue fits. */
 @media (min-width: 721px) {

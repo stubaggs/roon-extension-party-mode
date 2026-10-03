@@ -43,7 +43,7 @@ Roon Core  ──(node-roon-api over the local network)──  app.js
 | `public/` | Guest page and the RoonParty screen, no build step |
 | `public/i18n/`, `lib/i18n.js` | Page text per language, and picking the language per browser |
 | `lib/env.js`, `lib/log.js` | Environment variables, and the debug log switch |
-| `test/` | Identity, attribution and settings tests, `npm test` |
+| `test/` | Identity, attribution, settings and web server tests, `npm test` |
 
 ## How a track is identified
 
@@ -439,7 +439,9 @@ download setting (`playlist_download`: `'qr'`, `'link'` or `'off'`, read through
 what the screen shows: `/api/roonparty` passes it as `playlist`, and the screen shows a QR
 code from `GET /api/playlist-qr.svg` with the link under it, a button, or nothing. Its hint
 in Roon's settings gives the download address, which `app.js` hands over with
-`setPlaylistUrl()` alongside the website link. Times are local to the extension, which in Docker is UTC unless
+`setPlaylistUrl()` alongside the website link. `test/server.test.js` runs the real web server against a
+stand-in for Roon and checks these answers, the join-link pages and the guest API's
+`no_session` and `closed` errors. Times are local to the extension, which in Docker is UTC unless
 `TZ` is set. Kept in memory, at most 2000 tracks, and reset with the party zone and when guest
 access is turned back on (a new party; what is still queued is recorded again).
 
