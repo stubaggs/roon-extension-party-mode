@@ -53,6 +53,13 @@
   "toast.disabled": "Gazda a dezactivat această opțiune.",
   "toast.roon_refused": "Roon nu a acceptat această piesă.",
   "toast.skipped": "Sărită",
+  "toast.skipped_left": {
+    "one": "Sărită. Mai ai {count} salt.",
+    "few": "Sărită. Mai ai {count} salturi.",
+    "other": "Sărită. Mai ai {count} de salturi."
+  },
+  "toast.skipped_last": "Sărită. A fost ultimul tău salt.",
+  "toast.skipped_last_wait": "Sărită. Următorul salt în {wait}.",
   "toast.no_skips": "Nu mai poți sări piese.",
   "toast.no_skips_wait": "Nu mai poți sări piese. Încearcă din nou în {wait}.",
   "toast.failed": "Nu a funcționat.",

@@ -50,6 +50,12 @@
   "toast.disabled": "Värden har stängt av det.",
   "toast.roon_refused": "Roon tog inte emot det spåret.",
   "toast.skipped": "Överhoppad",
+  "toast.skipped_left": {
+    "one": "Överhoppad. {count} överhoppning kvar.",
+    "other": "Överhoppad. {count} överhoppningar kvar."
+  },
+  "toast.skipped_last": "Överhoppad. Det var din sista överhoppning.",
+  "toast.skipped_last_wait": "Överhoppad. Du kan hoppa över igen om {wait}.",
   "toast.no_skips": "Du kan inte hoppa över fler.",
   "toast.no_skips_wait": "Du kan inte hoppa över fler. Försök igen om {wait}.",
   "toast.failed": "Det fungerade inte.",

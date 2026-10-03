@@ -50,6 +50,12 @@
   "toast.disabled": "L'hôte a désactivé cette option.",
   "toast.roon_refused": "Roon n'a pas accepté ce morceau.",
   "toast.skipped": "Morceau passé",
+  "toast.skipped_left": {
+    "one": "Morceau passé. Il vous reste {count} passage.",
+    "other": "Morceau passé. Il vous reste {count} passages."
+  },
+  "toast.skipped_last": "Morceau passé. C'était votre dernier passage.",
+  "toast.skipped_last_wait": "Morceau passé. Prochain passage dans {wait}.",
   "toast.no_skips": "Vous ne pouvez plus passer de morceau.",
   "toast.no_skips_wait": "Vous ne pouvez plus passer de morceau. Réessayez dans {wait}.",
   "toast.failed": "Ça n'a pas marché.",

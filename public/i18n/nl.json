@@ -50,6 +50,12 @@
   "toast.disabled": "De host heeft dit uitgezet.",
   "toast.roon_refused": "Roon nam dat nummer niet aan.",
   "toast.skipped": "Overgeslagen",
+  "toast.skipped_left": {
+    "one": "Overgeslagen. Nog {count} keer overslaan.",
+    "other": "Overgeslagen. Nog {count} keer overslaan."
+  },
+  "toast.skipped_last": "Overgeslagen. Dat was je laatste keer overslaan.",
+  "toast.skipped_last_wait": "Overgeslagen. Je kunt over {wait} weer overslaan.",
   "toast.no_skips": "Je kunt niet meer overslaan.",
   "toast.no_skips_wait": "Je kunt niet meer overslaan. Probeer het over {wait} opnieuw.",
   "toast.failed": "Dat lukte niet.",

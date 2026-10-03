@@ -47,6 +47,11 @@
   "toast.disabled": "Chủ tiệc đã tắt tính năng này.",
   "toast.roon_refused": "Roon không nhận bài này.",
   "toast.skipped": "Đã bỏ qua",
+  "toast.skipped_left": {
+    "other": "Đã bỏ qua. Còn {count} lượt bỏ qua."
+  },
+  "toast.skipped_last": "Đã bỏ qua. Đó là lượt bỏ qua cuối cùng của bạn.",
+  "toast.skipped_last_wait": "Đã bỏ qua. Lượt bỏ qua tiếp theo sau {wait}.",
   "toast.no_skips": "Bạn đã hết lượt bỏ qua.",
   "toast.no_skips_wait": "Bạn đã hết lượt bỏ qua. Thử lại sau {wait}.",
   "toast.failed": "Không thành công.",

@@ -47,6 +47,11 @@
   "toast.disabled": "ホストがこの機能をオフにしています。",
   "toast.roon_refused": "Roon がこのトラックを受け付けませんでした。",
   "toast.skipped": "スキップしました",
+  "toast.skipped_left": {
+    "other": "スキップしました。残り {count} 回スキップできます。"
+  },
+  "toast.skipped_last": "スキップしました。これが最後のスキップでした。",
+  "toast.skipped_last_wait": "スキップしました。{wait}後にまたスキップできます。",
   "toast.no_skips": "スキップの残りがありません。",
   "toast.no_skips_wait": "スキップの残りがありません。{wait}後にもう一度お試しください。",
   "toast.failed": "うまくいきませんでした。",

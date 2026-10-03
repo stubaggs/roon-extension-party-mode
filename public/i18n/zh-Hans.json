@@ -47,6 +47,11 @@
   "toast.disabled": "主人已关闭此功能。",
   "toast.roon_refused": "Roon 没有接受这首曲目。",
   "toast.skipped": "已跳过",
+  "toast.skipped_left": {
+    "other": "已跳过。还可以跳过 {count} 次。"
+  },
+  "toast.skipped_last": "已跳过。这是你最后一次跳过。",
+  "toast.skipped_last_wait": "已跳过。{wait}后可再次跳过。",
   "toast.no_skips": "没有剩余的跳过次数。",
   "toast.no_skips_wait": "没有剩余的跳过次数。请在 {wait}后重试。",
   "toast.failed": "操作未成功。",

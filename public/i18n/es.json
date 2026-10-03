@@ -50,6 +50,12 @@
   "toast.disabled": "El anfitrión lo ha desactivado.",
   "toast.roon_refused": "Roon no ha aceptado esa pista.",
   "toast.skipped": "Pista saltada",
+  "toast.skipped_left": {
+    "one": "Saltada. Te queda {count} salto.",
+    "other": "Saltada. Te quedan {count} saltos."
+  },
+  "toast.skipped_last": "Saltada. Era tu último salto.",
+  "toast.skipped_last_wait": "Saltada. Tu próximo salto llega en {wait}.",
   "toast.no_skips": "Ya no puedes saltar más pistas.",
   "toast.no_skips_wait": "Ya no puedes saltar más pistas. Inténtalo de nuevo en {wait}.",
   "toast.failed": "No ha funcionado.",

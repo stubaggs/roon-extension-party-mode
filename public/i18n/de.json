@@ -50,6 +50,12 @@
   "toast.disabled": "Der Gastgeber hat das ausgeschaltet.",
   "toast.roon_refused": "Roon hat den Titel nicht angenommen.",
   "toast.skipped": "Übersprungen",
+  "toast.skipped_left": {
+    "one": "Übersprungen. Noch {count} Mal überspringen.",
+    "other": "Übersprungen. Noch {count} Mal überspringen."
+  },
+  "toast.skipped_last": "Übersprungen. Das war dein letztes Überspringen.",
+  "toast.skipped_last_wait": "Übersprungen. Du kannst in {wait} wieder überspringen.",
   "toast.no_skips": "Du kannst nichts mehr überspringen.",
   "toast.no_skips_wait": "Du kannst nichts mehr überspringen. Versuch es in {wait} wieder.",
   "toast.failed": "Das hat nicht geklappt.",

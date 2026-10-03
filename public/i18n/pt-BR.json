@@ -50,6 +50,12 @@
   "toast.disabled": "O anfitrião desativou essa opção.",
   "toast.roon_refused": "O Roon não aceitou essa faixa.",
   "toast.skipped": "Pulada",
+  "toast.skipped_left": {
+    "one": "Pulada. Resta {count} pulo.",
+    "other": "Pulada. Restam {count} pulos."
+  },
+  "toast.skipped_last": "Pulada. Esse foi seu último pulo.",
+  "toast.skipped_last_wait": "Pulada. Seu próximo pulo libera em {wait}.",
   "toast.no_skips": "Você não pode mais pular faixas.",
   "toast.no_skips_wait": "Você não pode mais pular faixas. Tente de novo em {wait}.",
   "toast.failed": "Não deu certo.",

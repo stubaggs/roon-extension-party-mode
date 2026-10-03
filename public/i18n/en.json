@@ -50,6 +50,12 @@
   "toast.disabled": "The host has turned that off.",
   "toast.roon_refused": "Roon would not take that one.",
   "toast.skipped": "Skipped",
+  "toast.skipped_left": {
+    "one": "Skipped. {count} skip left.",
+    "other": "Skipped. {count} skips left."
+  },
+  "toast.skipped_last": "Skipped. That was your last skip.",
+  "toast.skipped_last_wait": "Skipped. Your next skip comes in {wait}.",
   "toast.no_skips": "No skips left.",
   "toast.no_skips_wait": "No skips left. Try again in {wait}.",
   "toast.failed": "That did not work.",

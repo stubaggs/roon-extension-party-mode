@@ -328,13 +328,24 @@
     }
   }
 
+  /**
+   * "Skipped", and with a limit, what's left: "Skipped. 2 skips left.", or after
+   * the last one, when the next comes back (or that there are no more).
+   */
+  function skippedMessage(status) {
+    if (!status || status.remaining === null) return t('toast.skipped');
+    if (status.remaining > 0) return t('toast.skipped_left', { count: status.remaining });
+    if (status.nextIn) return t('toast.skipped_last_wait', { wait: minutes(status.nextIn) });
+    return t('toast.skipped_last');
+  }
+
   el('skip').addEventListener('click', async () => {
     if (isSpent(el('skip'))) return toast(spentMessage('skip'));
     try {
       const body = await api('/api/skip', { method: 'POST' });
       party.allowances = body.allowances;
       renderAllowances();
-      toast(t('toast.skipped'));
+      toast(skippedMessage(party.allowances.skip));
     } catch (err) {
       const detail = err.body || {};
       if (err.message === 'paused') toast(t('allowance.paused'));

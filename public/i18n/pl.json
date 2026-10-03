@@ -56,6 +56,14 @@
   "toast.disabled": "Gospodarz to wyłączył.",
   "toast.roon_refused": "Roon nie przyjął tego utworu.",
   "toast.skipped": "Pominięto",
+  "toast.skipped_left": {
+    "one": "Pominięto. Zostało {count} pominięcie.",
+    "few": "Pominięto. Zostały {count} pominięcia.",
+    "many": "Pominięto. Zostało {count} pominięć.",
+    "other": "Pominięto. Zostało {count} pominięcia."
+  },
+  "toast.skipped_last": "Pominięto. To było twoje ostatnie pominięcie.",
+  "toast.skipped_last_wait": "Pominięto. Kolejne pominięcie za {wait}.",
   "toast.no_skips": "Nie możesz już pomijać.",
   "toast.no_skips_wait": "Nie możesz już pomijać. Spróbuj ponownie za {wait}.",
   "toast.failed": "Nie udało się.",

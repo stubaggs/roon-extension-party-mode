@@ -47,6 +47,11 @@
   "toast.disabled": "เจ้าภาพปิดตัวเลือกนี้ไว้",
   "toast.roon_refused": "Roon ไม่รับแทร็กนี้",
   "toast.skipped": "ข้ามแล้ว",
+  "toast.skipped_left": {
+    "other": "ข้ามแล้ว เหลือสิทธิ์ข้าม {count} ครั้ง"
+  },
+  "toast.skipped_last": "ข้ามแล้ว นี่เป็นสิทธิ์ข้ามครั้งสุดท้ายของคุณ",
+  "toast.skipped_last_wait": "ข้ามแล้ว ข้ามได้อีกครั้งในอีก {wait}",
   "toast.no_skips": "สิทธิ์ข้ามหมดแล้ว",
   "toast.no_skips_wait": "สิทธิ์ข้ามหมดแล้ว ลองใหม่อีก {wait}",
   "toast.failed": "ไม่สำเร็จ",

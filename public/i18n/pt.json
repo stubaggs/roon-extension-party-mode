@@ -50,6 +50,12 @@
   "toast.disabled": "O anfitrião desativou essa opção.",
   "toast.roon_refused": "O Roon não aceitou essa faixa.",
   "toast.skipped": "Saltada",
+  "toast.skipped_left": {
+    "one": "Saltada. Resta-lhe {count} salto.",
+    "other": "Saltada. Restam-lhe {count} saltos."
+  },
+  "toast.skipped_last": "Saltada. Era o seu último salto.",
+  "toast.skipped_last_wait": "Saltada. O próximo salto fica disponível daqui a {wait}.",
   "toast.no_skips": "Já não pode saltar faixas.",
   "toast.no_skips_wait": "Já não pode saltar faixas. Tente novamente daqui a {wait}.",
   "toast.failed": "Não funcionou.",

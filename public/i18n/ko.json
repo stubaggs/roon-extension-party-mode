@@ -47,6 +47,11 @@
   "toast.disabled": "호스트가 이 기능을 꺼 두었습니다.",
   "toast.roon_refused": "Roon이 이 트랙을 받지 않았습니다.",
   "toast.skipped": "건너뜀",
+  "toast.skipped_left": {
+    "other": "건너뛰었습니다. 건너뛰기 {count}회 남음."
+  },
+  "toast.skipped_last": "건너뛰었습니다. 마지막 건너뛰기였습니다.",
+  "toast.skipped_last_wait": "건너뛰었습니다. {wait} 후에 다시 건너뛸 수 있습니다.",
   "toast.no_skips": "남은 건너뛰기 횟수가 없습니다.",
   "toast.no_skips_wait": "남은 건너뛰기 횟수가 없습니다. {wait} 후에 다시 시도하세요.",
   "toast.failed": "실패했습니다.",

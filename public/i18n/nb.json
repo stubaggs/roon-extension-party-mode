@@ -50,6 +50,12 @@
   "toast.disabled": "Verten har slått det av.",
   "toast.roon_refused": "Roon ville ikke ta det sporet.",
   "toast.skipped": "Hoppet over",
+  "toast.skipped_left": {
+    "one": "Hoppet over. {count} overhopp igjen.",
+    "other": "Hoppet over. {count} overhopp igjen."
+  },
+  "toast.skipped_last": "Hoppet over. Det var ditt siste overhopp.",
+  "toast.skipped_last_wait": "Hoppet over. Du kan hoppe over igjen om {wait}.",
   "toast.no_skips": "Du kan ikke hoppe over flere.",
   "toast.no_skips_wait": "Du kan ikke hoppe over flere. Prøv igjen om {wait}.",
   "toast.failed": "Det fungerte ikke.",

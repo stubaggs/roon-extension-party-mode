@@ -50,6 +50,12 @@
   "toast.disabled": "Ev sahibi bunu kapattı.",
   "toast.roon_refused": "Roon bu parçayı kabul etmedi.",
   "toast.skipped": "Atlandı",
+  "toast.skipped_left": {
+    "one": "Atlandı. {count} atlama hakkın kaldı.",
+    "other": "Atlandı. {count} atlama hakkın kaldı."
+  },
+  "toast.skipped_last": "Atlandı. Bu son atlama hakkındı.",
+  "toast.skipped_last_wait": "Atlandı. Sonraki atlama hakkın {wait} sonra.",
   "toast.no_skips": "Atlama hakkın kalmadı.",
   "toast.no_skips_wait": "Atlama hakkın kalmadı. {wait} sonra tekrar dene.",
   "toast.failed": "Olmadı.",

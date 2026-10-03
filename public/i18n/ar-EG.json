@@ -57,6 +57,16 @@
   "toast.disabled": "صاحب الحفلة قفل الاختيار ده.",
   "toast.roon_refused": "Roon مرضيش ياخد التراك ده.",
   "toast.skipped": "اتعدّى",
+  "toast.skipped_left": {
+    "zero": "اتعدّى. مبقاش ليك تخطيات.",
+    "one": "اتعدّى. فاضل لك تخطي واحد.",
+    "two": "اتعدّى. فاضل لك تخطيين.",
+    "few": "اتعدّى. فاضل لك {count} تخطيات.",
+    "many": "اتعدّى. فاضل لك {count} تخطي.",
+    "other": "اتعدّى. فاضل لك {count} تخطي."
+  },
+  "toast.skipped_last": "اتعدّى. ده كان آخر تخطي ليك.",
+  "toast.skipped_last_wait": "اتعدّى. التخطي الجاي بعد {wait}.",
   "toast.no_skips": "مبقاش ليك تخطيات.",
   "toast.no_skips_wait": "مبقاش ليك تخطيات. جرّب تاني بعد {wait}.",
   "toast.failed": "منفعش.",

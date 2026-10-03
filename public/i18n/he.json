@@ -56,6 +56,14 @@
   "toast.disabled": "המארח כיבה את האפשרות הזו.",
   "toast.roon_refused": "Roon לא קיבל את הרצועה הזו.",
   "toast.skipped": "דולגה",
+  "toast.skipped_left": {
+    "one": "דולגה. נותר לך דילוג אחד.",
+    "two": "דולגה. נותרו לך {count} דילוגים.",
+    "many": "דולגה. נותרו לך {count} דילוגים.",
+    "other": "דולגה. נותרו לך {count} דילוגים."
+  },
+  "toast.skipped_last": "דולגה. זה היה הדילוג האחרון שלך.",
+  "toast.skipped_last_wait": "דולגה. הדילוג הבא בעוד {wait}.",
   "toast.no_skips": "לא נותרו לך דילוגים.",
   "toast.no_skips_wait": "לא נותרו לך דילוגים. נסו שוב בעוד {wait}.",
   "toast.failed": "זה לא הצליח.",
