@@ -65,7 +65,7 @@
   "name.skip": "Пропусни",
   "name.cancel": "Отказ",
   "lang.title": "Език",
-  "lang.automatic": "Като на този телефон",
+  "lang.automatic": "Автоматично",
   "lang.change": "Език: {language}. Промени",
   "locked.title": "Сканирай кода отново",
   "locked.text": "Тази връзка работи само след като сканираш кода от Party Hub. Помоли домакина да го покаже.",

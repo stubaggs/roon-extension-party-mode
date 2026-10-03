@@ -62,7 +62,7 @@
   "name.skip": "跳过",
   "name.cancel": "取消",
   "lang.title": "语言",
-  "lang.automatic": "与此手机相同",
+  "lang.automatic": "自动",
   "lang.change": "语言：{language}。更改",
   "locked.title": "请重新扫描二维码",
   "locked.text": "此链接只有在扫描 Party Hub 上的二维码后才能使用。请让主人展示二维码。",

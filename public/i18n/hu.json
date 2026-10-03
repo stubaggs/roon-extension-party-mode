@@ -65,7 +65,7 @@
   "name.skip": "Kihagyás",
   "name.cancel": "Mégse",
   "lang.title": "Nyelv",
-  "lang.automatic": "Ugyanaz, mint ezen a telefonon",
+  "lang.automatic": "Automatikus",
   "lang.change": "Nyelv: {language}. Módosítás",
   "locked.title": "Olvasd be újra a kódot",
   "locked.text": "Ez a link csak a Party Hubon látható kód beolvasása után működik. Kérd meg a házigazdát, hogy mutassa meg.",

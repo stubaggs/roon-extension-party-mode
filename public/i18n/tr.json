@@ -65,7 +65,7 @@
   "name.skip": "Atla",
   "name.cancel": "İptal",
   "lang.title": "Dil",
-  "lang.automatic": "Bu telefonla aynı",
+  "lang.automatic": "Otomatik",
   "lang.change": "Dil: {language}. Değiştir",
   "locked.title": "Kodu yeniden tara",
   "locked.text": "Bu bağlantı yalnızca Party Hub'daki kodu taradıktan sonra çalışır. Ev sahibinden göstermesini iste.",

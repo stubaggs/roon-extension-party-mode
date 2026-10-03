@@ -65,7 +65,7 @@
   "name.skip": "Hopp over",
   "name.cancel": "Avbryt",
   "lang.title": "Språk",
-  "lang.automatic": "Samme som denne telefonen",
+  "lang.automatic": "Automatisk",
   "lang.change": "Språk: {language}. Endre",
   "locked.title": "Skann koden på nytt",
   "locked.text": "Denne lenken virker bare etter at du har skannet koden på Party Hub. Be verten om å vise den.",

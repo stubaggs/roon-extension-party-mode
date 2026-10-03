@@ -65,7 +65,7 @@
   "name.skip": "Saltar",
   "name.cancel": "Cancelar",
   "lang.title": "Idioma",
-  "lang.automatic": "Igual a este telemóvel",
+  "lang.automatic": "Automático",
   "lang.change": "Idioma: {language}. Alterar",
   "locked.title": "Leia o código novamente",
   "locked.text": "Esta ligação só funciona depois de ler o código no Party Hub. Peça ao anfitrião para o mostrar.",

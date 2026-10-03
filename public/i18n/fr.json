@@ -65,7 +65,7 @@
   "name.skip": "Passer",
   "name.cancel": "Annuler",
   "lang.title": "Langue",
-  "lang.automatic": "Comme ce téléphone",
+  "lang.automatic": "Automatique",
   "lang.change": "Langue : {language}. Modifier",
   "locked.title": "Scannez à nouveau le code",
   "locked.text": "Ce lien ne fonctionne qu'après avoir scanné le code affiché sur le Party Hub. Demandez à l'hôte de l'afficher.",

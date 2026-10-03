@@ -62,7 +62,7 @@
   "name.skip": "スキップ",
   "name.cancel": "キャンセル",
   "lang.title": "言語",
-  "lang.automatic": "この端末と同じ",
+  "lang.automatic": "自動",
   "lang.change": "言語: {language}。変更",
   "locked.title": "もう一度コードをスキャンしてください",
   "locked.text": "このリンクは Party Hub のコードをスキャンした後でのみ使えます。ホストに見せてもらってください。",

@@ -71,7 +71,7 @@
   "name.skip": "Пропустити",
   "name.cancel": "Скасувати",
   "lang.title": "Мова",
-  "lang.automatic": "Як на цьому телефоні",
+  "lang.automatic": "Автоматично",
   "lang.change": "Мова: {language}. Змінити",
   "locked.title": "Відскануйте код ще раз",
   "locked.text": "Це посилання працює лише після сканування коду на Party Hub. Попросіть господаря показати його.",

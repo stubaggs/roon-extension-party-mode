@@ -65,7 +65,7 @@
   "name.skip": "Ohita",
   "name.cancel": "Peruuta",
   "lang.title": "Kieli",
-  "lang.automatic": "Sama kuin tässä puhelimessa",
+  "lang.automatic": "Automaattinen",
   "lang.change": "Kieli: {language}. Vaihda",
   "locked.title": "Skannaa koodi uudelleen",
   "locked.text": "Tämä linkki toimii vasta, kun olet skannannut koodin Party Hubista. Pyydä isäntää näyttämään se.",

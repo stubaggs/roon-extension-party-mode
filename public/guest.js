@@ -555,7 +555,7 @@
     location.reload();
   }
 
-  /** "Same as this phone", then every language by its own name. */
+  /** "Automatic" (the phone's language), then every language by its own name. */
   function openLanguages() {
     const list = el('language-list');
     list.innerHTML = '';

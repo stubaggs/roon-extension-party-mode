@@ -65,7 +65,7 @@
   "name.skip": "Spring over",
   "name.cancel": "Annuller",
   "lang.title": "Sprog",
-  "lang.automatic": "Samme som denne telefon",
+  "lang.automatic": "Automatisk",
   "lang.change": "Sprog: {language}. Skift",
   "locked.title": "Scan koden igen",
   "locked.text": "Dette link virker kun, efter du har scannet koden på Party Hub. Bed værten om at vise den.",

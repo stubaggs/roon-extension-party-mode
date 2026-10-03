@@ -71,7 +71,7 @@
   "name.skip": "Pomiń",
   "name.cancel": "Anuluj",
   "lang.title": "Język",
-  "lang.automatic": "Taki jak w tym telefonie",
+  "lang.automatic": "Automatycznie",
   "lang.change": "Język: {language}. Zmień",
   "locked.title": "Zeskanuj kod ponownie",
   "locked.text": "Ten link działa dopiero po zeskanowaniu kodu z Party Hub. Poproś gospodarza, żeby go pokazał.",

@@ -65,7 +65,7 @@
   "name.skip": "Overslaan",
   "name.cancel": "Annuleren",
   "lang.title": "Taal",
-  "lang.automatic": "Zelfde als deze telefoon",
+  "lang.automatic": "Automatisch",
   "lang.change": "Taal: {language}. Wijzigen",
   "locked.title": "Scan de code opnieuw",
   "locked.text": "Deze link werkt pas nadat je de code op de Party Hub hebt gescand. Vraag de host om hem te laten zien.",
