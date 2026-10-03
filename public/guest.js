@@ -541,10 +541,12 @@
   const languageDialog = el('language');
   let languageOpener = null;
 
+  /** Just a globe; the language's name is in its label and tooltip. */
   function renderLanguageChip() {
     const chip = el('lang-chip');
     const name = t('_language');
-    chip.textContent = name;
+    chip.textContent = '🌐';
+    chip.title = name;
     chip.setAttribute('aria-label', t('lang.change', { language: name }));
   }
 

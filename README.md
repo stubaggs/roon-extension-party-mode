@@ -21,7 +21,7 @@ Roon account, and no access to anything else in your Roon setup.
   Chinese (Simplified and Traditional), Czech, Danish, Dutch, Finnish, French, German,
   Greek, Hebrew, Hungarian, Italian, Japanese, Korean, Norwegian, Polish, Portuguese
   (Portugal and Brazil), Romanian, Russian, Spanish, Swedish, Thai, Turkish, Ukrainian and
-  Vietnamese. Guests can pick another with the 🌐 button at the top of their page.
+  Vietnamese. Guests can pick another with the 🌐 button next to their name at the top of the page.
 
 What's changed in each version is in [RELEASES.md](RELEASES.md).
 

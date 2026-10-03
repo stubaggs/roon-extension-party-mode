@@ -232,7 +232,8 @@ codes are mapped: `no` and `nn` to `nb`, the old `iw` to `he`, and Chinese by sc
 `zh-TW`, `zh-HK`, `zh-MO` and `zh-Hant-…` get `zh-Hant` and every other `zh` gets
 `zh-Hans`. Nothing matching, or `*`, gets English.
 
-**Chosen by the guest.** The 🌐 pill at the top of the guest page opens a list of every
+**Chosen by the guest.** The 🌐 button beside the name tag (top right; just the globe,
+its label "Language: English. Change") opens a list of every
 language by its own name (`list()`), plus "Automatic" (the phone's language). A choice is a
 `party_lang` cookie (a year, not HttpOnly: the page sets it), which `pick()` honours
 before Accept-Language, so the page reloads to switch; "Automatic" deletes it.

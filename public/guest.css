@@ -148,7 +148,7 @@ main {
 /* The name tag, top right. */
 .topbar {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 0.5rem;
   padding-top: 0.75rem;
   margin-bottom: -0.75rem;
@@ -171,9 +171,11 @@ main {
   content: "✎ ";
 }
 
-/* The page's language, at the start of the bar; the name tag sits at the end. */
-.lang-chip::before {
-  content: "🌐 ";
+/* The page's language: just the globe, beside the name tag. */
+.lang-chip {
+  flex: none;
+  min-width: 32px;
+  padding: 0.25rem 0.5rem;
 }
 
 .language-list {
