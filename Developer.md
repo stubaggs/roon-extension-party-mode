@@ -20,7 +20,7 @@ it installable from inside Roon.
 Roon Core  ──(node-roon-api over the local network)──  app.js
                                                         │
                         RoonApiSettings   host config in Roon's Extension Settings
-                        RoonApiStatus     "<party>: On. Party Hub at http://…"
+                        RoonApiStatus     "On: <party>. Party Hub at http://…"
                         RoonApiTransport  zone state, queue subscription, skip, play
                         RoonApiBrowse     search + "Queue" / "Add Next" actions
                         RoonApiImage      album art proxy
@@ -86,8 +86,8 @@ party zone, and the console prints the guest link and the Party Hub's URL. The e
 
 Party mode (first, as the switch used most), party zone, party name, and web port.
 Roon's status line, once the zone is up, reads the same in every mode
-(`statusText()`): the party's name (the zone's when none is set), the mode, and the Party
-Hub's address, as in "EX5 Test-o-rama: Paused. Party Hub at http://…/PartyHub".
+(`statusText()`): the mode, the party's name (the zone's when none is set), and the Party
+Hub's address, as in "Paused: EX5 Test-o-rama. Party Hub at http://…/PartyHub".
 Before that it says what's missing (no Core, no zone, the zone unavailable).
 Party mode is stored as `enabled`, its name when it was an on/off "Guest access":
 `true`, `"paused"` or `false`, read through `partyMode()` (`lib/roon-service.js`), which

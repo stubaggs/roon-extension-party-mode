@@ -155,10 +155,10 @@ check('party mode is first, with on, paused and off', () => {
 
 check("Roon's status line: the party's name, the mode and the Hub's address, in every mode", () => {
   const hub = 'Party Hub at http://192.168.1.73:8338/PartyHub';
-  assert.strictEqual(statusText('EX5 Test-o-rama', 'on', hub), `EX5 Test-o-rama: On. ${hub}`);
-  assert.strictEqual(statusText('EX5 Test-o-rama', 'paused', hub), `EX5 Test-o-rama: Paused. ${hub}`);
-  assert.strictEqual(statusText('EX5 Test-o-rama', 'off', hub), `EX5 Test-o-rama: Off. ${hub}`);
-  assert.strictEqual(statusText('Kitchen', 'on', ''), 'Kitchen: On.');
+  assert.strictEqual(statusText('EX5 Test-o-rama', 'on', hub), `On: EX5 Test-o-rama. ${hub}`);
+  assert.strictEqual(statusText('EX5 Test-o-rama', 'paused', hub), `Paused: EX5 Test-o-rama. ${hub}`);
+  assert.strictEqual(statusText('EX5 Test-o-rama', 'off', hub), `Off: EX5 Test-o-rama. ${hub}`);
+  assert.strictEqual(statusText('Kitchen', 'on', ''), 'On: Kitchen.');
 });
 
 check('the status line uses the party name, falling back to the zone, with the address', () => {
@@ -179,8 +179,8 @@ check('the status line uses the party name, falling back to the zone, with the a
   self.settings.enabled = false;
   RoonService.prototype._updateStatus.call(self);
   assert.deepStrictEqual(said, [
-    "Sam's 40th: Paused. Party Hub at http://h:8338/PartyHub",
-    'Kitchen: Off. Party Hub at http://h:8338/PartyHub'
+    "Paused: Sam's 40th. Party Hub at http://h:8338/PartyHub",
+    'Off: Kitchen. Party Hub at http://h:8338/PartyHub'
   ]);
 });
 
