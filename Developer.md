@@ -353,12 +353,15 @@ extensions Play Now, Add Next, Queue and Start Radio on a track, and Play Now, S
 Add Next, Queue and Start Radio on a playlist; nothing creates or edits one (checked
 against a Core in October 2026). So `lib/party-playlist.js` records every queue entry
 the party zone gets, once per `queue_item_id`, and `GET /api/playlist.csv` (linked from
-the party screen, no session needed, like the rest of the screen) serves it as CSV. It
-includes what was queued before the extension started, Roon Radio picks and the host's
-own additions. Credits are frozen when the entry is first seen, since closing guest
+the party screen, no session needed, like the rest of the screen) serves it as CSV in
+the form Soundiiz imports: lower-case `title`, `artist`, `album` headers (the other
+columns are ignored by importers), commas, UTF-8 without a byte order mark (a BOM hides
+the first header from an importer, at the cost of Excel's double-click guessing the
+encoding wrong), and Roon's ` / ` between artists written as `, `. It includes what was
+queued before the extension started, Roon Radio picks and the host's own additions. Credits are frozen when the entry is first seen, since closing guest
 access clears attributions. Column names and credits are English, which import services
-expect. Cells a spreadsheet would read as formulas get a leading apostrophe, as guests
-choose their names. Times are local to the extension, which in Docker is UTC unless
+expect. A guest name a spreadsheet would read as a formula gets a leading apostrophe;
+track details are left as Roon gives them, so they still match. Times are local to the extension, which in Docker is UTC unless
 `TZ` is set. Kept in memory, at most 2000 tracks, and reset with the party zone and when guest
 access is turned back on (a new party; what is still queued is recorded again).
 

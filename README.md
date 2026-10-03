@@ -61,8 +61,10 @@ under **Settings → Extensions** in Roon.
 To keep the party's playlist, click **Download playlist** under the link on the party
 screen, on a computer rather than the TV. You get a CSV file of every song that was
 queued in the party zone: title, artist, album, length, who asked for it and when. Roon
-can't import it directly, but services such as Soundiiz or TuneMyMusic can turn it into a
-playlist on TIDAL, Qobuz or Spotify, which Roon then shows with your playlists.
+can't import it directly, but it's in the format Soundiiz imports: in Soundiiz, choose
+**Import playlist**, then the file, and pick TIDAL, Qobuz or Spotify. Roon then shows it
+with your playlists. Excel on Windows can garble accented names when you double-click the
+file; Google Sheets, Numbers and Excel's **Data → From Text/CSV** read it correctly.
 
 To stop guests adding songs, set **Guest access** to **Off**. Turning it back on makes a
 new QR code, so old links stop working.

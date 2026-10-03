@@ -15,7 +15,7 @@
 'use strict';
 
 const assert = require('assert');
-const { PartyPlaylist, playlistFileName, csvCell } = require('../lib/party-playlist');
+const { PartyPlaylist, playlistFileName, csvCell, defuse } = require('../lib/party-playlist');
 
 let failures = 0;
 function check(name, fn) {
@@ -31,7 +31,7 @@ function check(name, fn) {
 const track = (id, title, extra) =>
   Object.assign({ id, title, artist: 'ABBA', album: 'Arrival', length: 231 }, extra);
 const nobody = () => null;
-const rows = (playlist, creditFor) => playlist.toCsv(creditFor).replace(/^﻿/, '').trim().split('\r\n');
+const rows = (playlist, creditFor) => playlist.toCsv(creditFor).trim().split('\r\n');
 const titles = (playlist) => playlist.tracks.map((t) => t.title);
 
 console.log('PartyPlaylist');
@@ -86,7 +86,7 @@ check('credits are kept from when the track was queued', () => {
     t.id === 1 ? { requested_by: 'Stu', kind: 'guest' } : t.id === 2 ? { requested_by: null, kind: 'radio' } : null
   );
   const csv = rows(playlist, nobody);
-  assert.strictEqual(csv[0], 'Title,Artist,Album,Length,Requested by,Queued at');
+  assert.strictEqual(csv[0], 'title,artist,album,length,requested by,queued at');
   assert.ok(csv[1].startsWith('Waterloo,ABBA,Arrival,3:51,Stu,'), csv[1]);
   assert.ok(csv[2].startsWith('SOS,ABBA,Arrival,3:51,Roon Radio,'), csv[2]);
   assert.ok(csv[3].startsWith('Mamma Mia,ABBA,Arrival,3:51,,'), csv[3]);
@@ -105,8 +105,20 @@ check('queued at is local time, to the minute', () => {
   assert.ok(rows(playlist)[1].endsWith(',2026-10-02 21:05'), rows(playlist)[1]);
 });
 
-check('starts with a byte order mark for spreadsheets', () => {
-  assert.ok(new PartyPlaylist().toCsv().startsWith('﻿'));
+check('Soundiiz finds the title column: no byte order mark before it', () => {
+  assert.ok(new PartyPlaylist().toCsv().startsWith('title,artist,album,'));
+});
+
+check("Roon's artist separator becomes a comma, in one quoted cell", () => {
+  const playlist = new PartyPlaylist();
+  playlist.update('o1', [track(1, 'Brand New', { artist: 'Pharrell Williams / Justin Timberlake' })], nobody);
+  assert.ok(rows(playlist)[1].startsWith('Brand New,"Pharrell Williams, Justin Timberlake",'), rows(playlist)[1]);
+});
+
+check('track details are written as Roon gives them, even with a leading dash', () => {
+  const playlist = new PartyPlaylist();
+  playlist.update('o1', [track(1, '-ness', { artist: '+44', album: '@home' })], nobody);
+  assert.ok(rows(playlist)[1].startsWith('-ness,+44,@home,'), rows(playlist)[1]);
 });
 
 check('cells with commas and quotes are quoted', () => {
@@ -116,8 +128,12 @@ check('cells with commas and quotes are quoted', () => {
 });
 
 check('a guest name that looks like a formula is defused', () => {
-  assert.strictEqual(csvCell('=HYPERLINK("x")'), '"\'=HYPERLINK(""x"")"');
-  assert.strictEqual(csvCell('@Stu'), "'@Stu");
+  assert.strictEqual(defuse('=HYPERLINK("x")'), '\'=HYPERLINK("x")');
+  assert.strictEqual(defuse('@Stu'), "'@Stu");
+  assert.strictEqual(defuse('Stu'), 'Stu');
+  const playlist = new PartyPlaylist();
+  playlist.update('o1', [track(1, 'Waterloo')], () => ({ requested_by: '=1+1', kind: 'guest' }));
+  assert.ok(rows(playlist)[1].includes(",'=1+1,"), rows(playlist)[1]);
 });
 
 check('file name is the party and the date, without unsafe characters', () => {
