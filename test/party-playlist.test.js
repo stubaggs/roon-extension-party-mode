@@ -71,6 +71,15 @@ check('a new party zone starts over', () => {
   assert.deepStrictEqual(titles(playlist), ['SOS']);
 });
 
+check('a reset starts over from what is still queued', () => {
+  const playlist = new PartyPlaylist();
+  playlist.update('o1', [track(1, 'Dancing Queen'), track(2, 'Waterloo')], nobody);
+  playlist.update('o1', [track(2, 'Waterloo')], nobody);
+  playlist.reset();
+  playlist.update('o1', [track(2, 'Waterloo'), track(3, 'SOS')], nobody);
+  assert.deepStrictEqual(titles(playlist), ['Waterloo', 'SOS']);
+});
+
 check('credits are kept from when the track was queued', () => {
   const playlist = new PartyPlaylist();
   playlist.update('o1', [track(1, 'Waterloo'), track(2, 'SOS'), track(3, 'Mamma Mia')], (t) =>

@@ -359,7 +359,8 @@ own additions. Credits are frozen when the entry is first seen, since closing gu
 access clears attributions. Column names and credits are English, which import services
 expect. Cells a spreadsheet would read as formulas get a leading apostrophe, as guests
 choose their names. Times are local to the extension, which in Docker is UTC unless
-`TZ` is set. Kept in memory, at most 2000 tracks, and reset with the party zone.
+`TZ` is set. Kept in memory, at most 2000 tracks, and reset with the party zone and when guest
+access is turned back on (a new party; what is still queued is recorded again).
 
 **Played history is the extension's own.** Roon's API has no play history, so the
 "Played" list on the guest page is recorded by the extension as tracks start. It is kept

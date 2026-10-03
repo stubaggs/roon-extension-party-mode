@@ -90,9 +90,12 @@ never**.
   when they add it, but Roon doesn't let anyone move a song that's already queued.
 - **A guest's song gets the music going again.** If the party zone is paused, or the
   queue has run out, adding a song presses play. If you paused for a speech, it resumes
-  as soon as someone adds a song, so set **Guest access** to **Off** first.
-- **Played and the downloadable playlist start fresh** when the extension restarts or you
-  change the party zone, so download the playlist before either.
+  as soon as someone adds a song, so set **Guest access** to **Off** first. Turning it
+  back on starts a new playlist, so download the playlist before you do.
+- **Played starts fresh** when the extension restarts or you change the party zone.
+- **The downloadable playlist starts fresh** when the extension restarts, you change the
+  party zone, or you turn **Guest access** back on, which counts as a new party.
+  Download it before any of those. Songs still in the queue carry over to the new list.
 - **"Roon Radio" is a best guess.** With Roon Radio on, any song no guest added is
   labelled Roon Radio, including songs you queue from the Roon app yourself.
 - **Keep it at home.** Anyone on your network who has scanned the code can add songs, and
