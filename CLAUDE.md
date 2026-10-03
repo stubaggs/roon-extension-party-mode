@@ -10,7 +10,12 @@ Every change that affects them updates the docs in the same commit:
 - **Developer.md** is for people working on the code. Update it when how things work
   changes: architecture, files, matching and attribution rules, tests, translations,
   Docker and publishing, known limitations.
-- If a change touches neither, say so in the pull request rather than editing the docs.
+- **RELEASES.md** is the user-friendly list of changes, newest version first. Every
+  change people would notice (features, settings, fixes, the pages) adds a line under the
+  version in progress, in the same commit, in the README's plain language. Internal
+  changes (refactors, tests, workflows) don't go in. A version bump in `package.json`
+  starts a new section; the version in progress says it isn't released yet.
+- If a change touches none of these, say so in the pull request rather than editing the docs.
 
 ## Conventions the owner has asked for
 

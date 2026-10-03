@@ -19,6 +19,8 @@ Roon account, and no access to anything else in your Roon setup.
 - **In their language:** the guest pages appear in English, French, German, Spanish or
   Dutch, following each phone's language.
 
+What's changed in each version is in [RELEASES.md](RELEASES.md).
+
 ## What you need
 
 - A Roon Core.
