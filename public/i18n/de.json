@@ -67,10 +67,10 @@
   "locked.title": "Scanne den Code noch einmal",
   "locked.text": "Dieser Link funktioniert erst, nachdem du den Code auf dem Party-Bildschirm gescannt hast. Bitte den Gastgeber, ihn zu zeigen.",
   "screen.scan": "Scannen, um einen Titel hinzuzufügen",
-  "screen.qr_alt": "Scannen, um einen Titel hinzuzufügen",
+  "screen.qr_alt": "QR-Code für die Gästeseite",
   "screen.download_playlist": "Die Playlist herunterladen",
   "screen.scan_playlist": "Scannen, um die Playlist herunterzuladen",
-  "screen.playlist_qr_alt": "Scannen, um die Playlist herunterzuladen",
+  "screen.playlist_qr_alt": "QR-Code für die Playlist",
   "screen.closed_title": "Keine Wünsche mehr",
   "screen.closed_text": "Danke für all die Titel.",
   "join.expired": "Dieser Code ist abgelaufen. Scanne den Code auf dem Bildschirm noch einmal."

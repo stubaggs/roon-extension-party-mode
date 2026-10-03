@@ -67,10 +67,10 @@
   "locked.title": "Vuelve a escanear el código",
   "locked.text": "Este enlace solo funciona después de escanear el código de la pantalla de la fiesta. Pide al anfitrión que lo muestre.",
   "screen.scan": "Escanea para añadir una pista",
-  "screen.qr_alt": "Escanea para añadir una pista",
+  "screen.qr_alt": "Código QR de la página de invitados",
   "screen.download_playlist": "Descargar la lista",
   "screen.scan_playlist": "Escanea para descargar la lista",
-  "screen.playlist_qr_alt": "Escanea para descargar la lista",
+  "screen.playlist_qr_alt": "Código QR de la lista",
   "screen.closed_title": "Ya no se aceptan peticiones",
   "screen.closed_text": "Gracias por todas las pistas.",
   "join.expired": "Ese código ha caducado. Vuelve a escanear el código de la pantalla."

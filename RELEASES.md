@@ -50,6 +50,7 @@ Not released yet. You can try it on the `experimental` branch.
 - Pages open in English when the browser names no language.
 - Long scrolling names no longer appear enlarged on phones.
 - Accessibility fixes for the guest page and party screen.
+- Screen readers hear what the party screen's QR codes are, instead of their caption twice.
 - The guest page no longer flashes "Scan the code again" while it loads.
 - An old or closed join link shows a readable page in the guest's language, instead of a
   line of tiny English text.

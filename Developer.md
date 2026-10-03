@@ -250,6 +250,9 @@ changing them:
   (the API answers `closed` while party mode is off), never one in place of the other. An
   old or closed join link (`/j/<code>`) gets a small HTML page from `messagePage()` in
   `lib/server.js`, with `lang` and a viewport, rather than plain text a phone shows tiny.
+- **QR codes say what they are.** Their `alt` text names the code ("QR code for the
+  guest page", `screen.qr_alt`) rather than repeating the link under it, which a screen
+  reader would then hear twice.
 - **Headings follow the screen.** On the party screen, "Requests are closed" is an `<h2>`
   in the place of the playing track's title, which is one too.
 
