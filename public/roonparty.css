@@ -159,13 +159,18 @@
 
 .list li {
   display: grid;
-  grid-template-columns: 2.2rem 1fr;
+  grid-template-columns: 2.2rem auto 1fr;
   gap: 1rem;
-  align-items: baseline;
+  align-items: center;
   padding: clamp(0.4rem, 1.1vh, 0.9rem) 0;
   border-bottom: 1px solid rgba(58, 42, 99, 0.5);
   font-size: clamp(1rem, 1.6vw, 1.5rem);
   min-width: 0;
+}
+
+.list .cover {
+  width: 2.4em;
+  height: 2.4em;
 }
 
 .list .n {

@@ -55,6 +55,13 @@
       n.className = 'n';
       n.textContent = String(index + 1);
 
+      // A blank tile when Roon has no cover, so the titles stay in line.
+      const cover = document.createElement('img');
+      cover.className = 'art cover';
+      cover.alt = '';
+      cover.loading = 'lazy';
+      if (item.image_key) cover.src = art(item.image_key, 120);
+
       const wrap = document.createElement('div');
       const title = document.createElement('div');
       title.className = 't';
@@ -70,7 +77,7 @@
         wrap.appendChild(who);
       }
 
-      li.append(n, wrap);
+      li.append(n, cover, wrap);
       list.appendChild(li);
     });
   }
