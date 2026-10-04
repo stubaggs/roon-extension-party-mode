@@ -49,7 +49,6 @@
   "toast.roon_refused": "Roon 沒有接受這首曲目。",
   "toast.skipped": "已跳過",
   "toast.no_skips": "沒有剩餘的跳過次數。",
-  "toast.station_skip": "電台無法跳過。",
   "toast.no_skips_wait": "沒有剩餘的跳過次數。請在 {wait}後重試。",
   "toast.failed": "操作未成功。",
   "toast.name_not_saved": "無法儲存你的名字。",

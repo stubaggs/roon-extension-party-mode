@@ -49,7 +49,6 @@
   "toast.roon_refused": "Roon이 이 트랙을 받지 않았습니다.",
   "toast.skipped": "건너뜀",
   "toast.no_skips": "남은 건너뛰기 횟수가 없습니다.",
-  "toast.station_skip": "라디오 방송국은 건너뛸 수 없습니다.",
   "toast.no_skips_wait": "남은 건너뛰기 횟수가 없습니다. {wait} 후에 다시 시도하세요.",
   "toast.failed": "실패했습니다.",
   "toast.name_not_saved": "이름을 저장하지 못했습니다.",

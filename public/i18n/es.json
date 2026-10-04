@@ -52,7 +52,6 @@
   "toast.roon_refused": "Roon no ha aceptado esa pista.",
   "toast.skipped": "Pista saltada",
   "toast.no_skips": "Ya no puedes saltar más pistas.",
-  "toast.station_skip": "No puedes saltar una emisora de radio.",
   "toast.no_skips_wait": "Ya no puedes saltar más pistas. Inténtalo de nuevo en {wait}.",
   "toast.failed": "No ha funcionado.",
   "toast.name_not_saved": "No se ha podido guardar tu nombre.",

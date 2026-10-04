@@ -49,7 +49,6 @@
   "toast.roon_refused": "Roon ไม่รับแทร็กนี้",
   "toast.skipped": "ข้ามแล้ว",
   "toast.no_skips": "สิทธิ์ข้ามหมดแล้ว",
-  "toast.station_skip": "ข้ามสถานีวิทยุไม่ได้",
   "toast.no_skips_wait": "สิทธิ์ข้ามหมดแล้ว ลองใหม่อีก {wait}",
   "toast.failed": "ไม่สำเร็จ",
   "toast.name_not_saved": "บันทึกชื่อของคุณไม่ได้",

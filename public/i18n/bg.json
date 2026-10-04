@@ -52,7 +52,6 @@
   "toast.roon_refused": "Roon не прие този запис.",
   "toast.skipped": "Прескочен",
   "toast.no_skips": "Нямаш повече прескачания.",
-  "toast.station_skip": "Радиостанция не може да се пропусне.",
   "toast.no_skips_wait": "Нямаш повече прескачания. Опитай пак след {wait}.",
   "toast.failed": "Не се получи.",
   "toast.name_not_saved": "Името ти не можа да се запази.",

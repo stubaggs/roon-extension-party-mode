@@ -52,7 +52,6 @@
   "toast.roon_refused": "Roon nam dat nummer niet aan.",
   "toast.skipped": "Overgeslagen",
   "toast.no_skips": "Je kunt niet meer overslaan.",
-  "toast.station_skip": "Een radiozender kun je niet overslaan.",
   "toast.no_skips_wait": "Je kunt niet meer overslaan. Probeer het over {wait} opnieuw.",
   "toast.failed": "Dat lukte niet.",
   "toast.name_not_saved": "Je naam kon niet worden opgeslagen.",

@@ -55,7 +55,6 @@
   "toast.roon_refused": "Roon nu a acceptat această piesă.",
   "toast.skipped": "Sărită",
   "toast.no_skips": "Nu mai poți sări piese.",
-  "toast.station_skip": "Un post de radio nu poate fi sărit.",
   "toast.no_skips_wait": "Nu mai poți sări piese. Încearcă din nou în {wait}.",
   "toast.failed": "Nu a funcționat.",
   "toast.name_not_saved": "Numele tău nu a putut fi salvat.",

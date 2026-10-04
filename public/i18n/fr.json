@@ -52,7 +52,6 @@
   "toast.roon_refused": "Roon n'a pas accepté ce morceau.",
   "toast.skipped": "Morceau passé",
   "toast.no_skips": "Vous ne pouvez plus passer de morceau.",
-  "toast.station_skip": "Vous ne pouvez pas passer une station de radio.",
   "toast.no_skips_wait": "Vous ne pouvez plus passer de morceau. Réessayez dans {wait}.",
   "toast.failed": "Ça n'a pas marché.",
   "toast.name_not_saved": "Impossible d'enregistrer votre nom.",

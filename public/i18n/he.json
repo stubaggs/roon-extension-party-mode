@@ -58,7 +58,6 @@
   "toast.roon_refused": "Roon לא קיבל את הרצועה הזו.",
   "toast.skipped": "דולגה",
   "toast.no_skips": "לא נותרו לך דילוגים.",
-  "toast.station_skip": "אי אפשר לדלג על תחנת רדיו.",
   "toast.no_skips_wait": "לא נותרו לך דילוגים. נסו שוב בעוד {wait}.",
   "toast.failed": "זה לא הצליח.",
   "toast.name_not_saved": "לא ניתן היה לשמור את השם שלך.",

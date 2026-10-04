@@ -58,7 +58,6 @@
   "toast.roon_refused": "Roon не принял этот трек.",
   "toast.skipped": "Пропущен",
   "toast.no_skips": "Пропусков больше нет.",
-  "toast.station_skip": "Радиостанцию нельзя пропустить.",
   "toast.no_skips_wait": "Пропусков больше нет. Попробуйте снова через {wait}.",
   "toast.failed": "Не получилось.",
   "toast.name_not_saved": "Не удалось сохранить ваше имя.",

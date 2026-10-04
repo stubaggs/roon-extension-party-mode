@@ -52,7 +52,6 @@
   "toast.roon_refused": "O Roon não aceitou essa faixa.",
   "toast.skipped": "Pulada",
   "toast.no_skips": "Você não pode mais pular faixas.",
-  "toast.station_skip": "Você não pode pular uma estação de rádio.",
   "toast.no_skips_wait": "Você não pode mais pular faixas. Tente de novo em {wait}.",
   "toast.failed": "Não deu certo.",
   "toast.name_not_saved": "Não foi possível salvar seu nome.",

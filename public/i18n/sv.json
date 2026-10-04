@@ -52,7 +52,6 @@
   "toast.roon_refused": "Roon tog inte emot det spåret.",
   "toast.skipped": "Överhoppad",
   "toast.no_skips": "Du kan inte hoppa över fler.",
-  "toast.station_skip": "En radiostation går inte att hoppa över.",
   "toast.no_skips_wait": "Du kan inte hoppa över fler. Försök igen om {wait}.",
   "toast.failed": "Det fungerade inte.",
   "toast.name_not_saved": "Kunde inte spara ditt namn.",

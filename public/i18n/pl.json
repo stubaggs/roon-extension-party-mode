@@ -58,7 +58,6 @@
   "toast.roon_refused": "Roon nie przyjął tego utworu.",
   "toast.skipped": "Pominięto",
   "toast.no_skips": "Nie możesz już pomijać.",
-  "toast.station_skip": "Nie można pominąć stacji radiowej.",
   "toast.no_skips_wait": "Nie możesz już pomijać. Spróbuj ponownie za {wait}.",
   "toast.failed": "Nie udało się.",
   "toast.name_not_saved": "Nie udało się zapisać imienia.",
