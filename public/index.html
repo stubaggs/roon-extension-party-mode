@@ -22,6 +22,7 @@
           <p class="playing-label" id="playing-label" data-i18n="playing.now">Playing now</p>
           <h1 class="playing-title" id="playing-title" data-i18n="playing.nothing_yet">Nothing yet</h1>
           <p class="playing-artist muted" id="playing-artist"></p>
+          <p class="playing-album muted" id="playing-album" hidden></p>
           <p class="playing-who" id="playing-who" hidden></p>
         </div>
         <button class="pill pill-ghost skip" id="skip" data-i18n="skip.button" hidden>Skip</button>
@@ -114,6 +115,6 @@
 
     <script src="/i18n.js"></script>
     <script src="/guest.js"></script>
-    <script src="/marquee.js" data-marquee=".playing-title, .playing-artist, .row-title, .row-sub"></script>
+    <script src="/marquee.js" data-marquee=".playing-title, .playing-artist, .playing-album, .row-title, .row-sub"></script>
   </body>
 </html>

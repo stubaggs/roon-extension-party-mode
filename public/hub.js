@@ -48,6 +48,10 @@
     const playing = data.now_playing;
     el('current-title').textContent = playing ? playing.title : t('playing.nothing');
     el('current-artist').textContent = playing ? playing.artist : '';
+    // Already in what Roon sends; radio streams and some tracks have none.
+    const album = el('current-album');
+    album.textContent = (playing && playing.album) || '';
+    album.hidden = !album.textContent;
     const who = el('current-who');
     who.hidden = !(playing && playing.kind);
     const radio = !who.hidden && playing.kind === 'radio';

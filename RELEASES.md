@@ -33,6 +33,7 @@ Not released yet. You can try it on the `experimental` branch (see
   already in the queue** is off. Guests can still add them then.
 - Search tells a band's versions of a track on different albums apart. Before, queueing
   one marked them all as in the queue, and could miss the one actually queued.
+- The playing track shows its album, on the guest page and the Party Hub.
 - **Web port** has moved under **Advanced** in Roon's settings, with a hint saying what
   it's for.
 

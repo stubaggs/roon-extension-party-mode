@@ -362,6 +362,10 @@
     const playing = snapshot.now_playing;
     el('playing-title').textContent = playing ? playing.title : t('playing.nothing');
     el('playing-artist').textContent = playing ? playing.artist : '';
+    // Already in what Roon sends; radio streams and some tracks have none.
+    const album = el('playing-album');
+    album.textContent = (playing && playing.album) || '';
+    album.hidden = !album.textContent;
     const who = el('playing-who');
     who.hidden = !(playing && playing.kind);
     who.textContent = who.hidden ? '' : creditText(playing);
