@@ -332,7 +332,7 @@ check('browse titles explain themselves in a hint', () => {
 check('the web port sits under Advanced with a two-line hint', () => {
   const lines = item(layout({}), 'port').subtitle.split('\n');
   assert.strictEqual(lines.length, 2);
-  assert.match(lines[0], /guests' phones and the Party Hub/);
+  assert.strictEqual(lines[0], 'Custom port for Party Mode');
   assert.match(lines[1], /^Changing it moves/);
 });
 
