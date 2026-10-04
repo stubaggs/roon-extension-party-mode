@@ -8,6 +8,7 @@
   "playing.nothing": "No suena nada",
   "playing.nothing_yet": "Nada todavía",
   "playing.station": "Emisora de radio",
+  "station.notice": "Está sonando una emisora de radio. Las pistas que añadas sonarán cuando el anfitrión inicie la cola.",
   "credit.requested_by": "Pedida por {name}",
   "credit.guest": "Anónimo",
   "credit.radio": "Roon Radio",

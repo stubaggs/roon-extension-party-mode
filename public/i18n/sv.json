@@ -8,6 +8,7 @@
   "playing.nothing": "Inget spelas",
   "playing.nothing_yet": "Inget än",
   "playing.station": "Radiostation",
+  "station.notice": "En radiostation spelas. Spår du lägger till spelas när värden startar kön.",
   "credit.requested_by": "Önskad av {name}",
   "credit.guest": "Anonym",
   "credit.radio": "Roon Radio",

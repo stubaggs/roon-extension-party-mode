@@ -116,11 +116,12 @@ minutes, and play next once an hour.
   queue has run out, adding a track presses play. For a speech, set **Party mode** to
   **Paused** instead of pausing in Roon: that holds the requests too.
 - **A radio station waits for you.** While a live radio station plays on the party zone,
-  guests can still add tracks, but they won't play until you switch over: in Roon, open
-  the party zone's queue and choose **Play from here** on the track to start with. Tracks
-  you queued before the station come first, so you choose how the party begins. Guests
-  can't skip a station, and it isn't listed in Played or the playlist. To have guests'
-  tracks play by themselves, use Roon Radio rather than a station.
+  guests can still add tracks, but they won't play until you switch over, and the guest
+  page and the Party Hub tell everyone so. In Roon, open the party zone's queue and
+  choose **Play from here** on the track to start with. Tracks you queued before the
+  station come first, so you choose how the party begins. Guests can't skip a station,
+  and it isn't listed in Played or the playlist. To have guests' tracks play by
+  themselves, use Roon Radio rather than a station.
 - **The Played list starts fresh** when the extension restarts or you change the party zone.
 - **Tag colours** on the Party Hub and guests' phones show how a track got into the queue: **lavender**
   when a guest added it, **amber** when a guest chose **Play it next**, and **mint** for

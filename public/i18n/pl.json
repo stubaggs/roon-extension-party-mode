@@ -8,6 +8,7 @@
   "playing.nothing": "Nic nie gra",
   "playing.nothing_yet": "Jeszcze nic",
   "playing.station": "Stacja radiowa",
+  "station.notice": "Gra stacja radiowa. Dodane utwory zagrają, gdy gospodarz uruchomi kolejkę.",
   "credit.requested_by": "Zamówienie: {name}",
   "credit.guest": "Anonim",
   "credit.radio": "Roon Radio",

@@ -64,6 +64,8 @@
         : playing && playing.state === 'playing'
           ? t('playing.now')
           : t('playing.paused');
+    // Requests wait while a radio station plays; the room should know.
+    el('current-note').hidden = !(playing && playing.station);
     const image = el('current-art');
     if (playing && playing.image_key) image.src = art(playing.image_key, 400);
     else image.removeAttribute('src');

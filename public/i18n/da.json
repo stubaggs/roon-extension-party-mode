@@ -8,6 +8,7 @@
   "playing.nothing": "Intet afspilles",
   "playing.nothing_yet": "Intet endnu",
   "playing.station": "Radiostation",
+  "station.notice": "Der spiller en radiostation. Numre, du tilføjer, afspilles, når værten starter køen.",
   "credit.requested_by": "Ønsket af {name}",
   "credit.guest": "Anonym",
   "credit.radio": "Roon Radio",

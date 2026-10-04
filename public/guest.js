@@ -26,6 +26,8 @@
   const toastEl = el('toast');
 
   let party = null;
+  // Whether a radio station is playing, for the line under the search box.
+  let onStation = false;
   let started = false;
   let expandedKey = null;
   let searchTimer = null;
@@ -116,6 +118,7 @@
     const notice = el('notice');
     if (party.party_mode === 'paused') notice.textContent = t('allowance.paused');
     else if (!party.capabilities.add && !party.capabilities.next) notice.textContent = t('allowance.closed');
+    else if (onStation) notice.textContent = t('station.notice');
     else notice.textContent = '';
     notice.hidden = !notice.textContent;
 
@@ -378,8 +381,14 @@
     who.classList.toggle('next', !who.hidden && playing.kind === 'next');
     el('playing-label').textContent = playingLabel(playing);
     setArt(el('playing-art'), playing && playing.image_key, 144);
-    // Roon can't skip a radio station, so Skip is hidden while one plays.
-    if (party && party.capabilities.skip) el('skip').hidden = Boolean(playing && playing.station);
+    // Roon can't skip a radio station, so Skip is hidden while one plays, and the
+    // line under the search box says requests wait for the host.
+    const station = Boolean(playing && playing.station);
+    if (party && party.capabilities.skip) el('skip').hidden = station;
+    if (station !== onStation) {
+      onStation = station;
+      renderAllowances();
+    }
 
     renderList(queueList, snapshot.upcoming, t('queue.empty'), (item, index) => {
       const position = document.createElement('span');

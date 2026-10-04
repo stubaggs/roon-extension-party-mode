@@ -8,6 +8,7 @@
   "playing.nothing": "Hiçbir şey çalmıyor",
   "playing.nothing_yet": "Henüz bir şey yok",
   "playing.station": "Radyo istasyonu",
+  "station.notice": "Bir radyo istasyonu çalıyor. Eklediğin parçalar, ev sahibi sırayı başlattığında çalacak.",
   "credit.requested_by": "İsteyen: {name}",
   "credit.guest": "Anonim",
   "credit.radio": "Roon Radio",

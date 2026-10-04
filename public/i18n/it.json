@@ -8,6 +8,7 @@
   "playing.nothing": "Nessuna riproduzione",
   "playing.nothing_yet": "Ancora niente",
   "playing.station": "Stazione radio",
+  "station.notice": "È in onda una stazione radio. I brani che aggiungi partiranno quando l'host avvierà la coda.",
   "credit.requested_by": "Richiesto da {name}",
   "credit.guest": "Anonimo",
   "credit.radio": "Roon Radio",

@@ -8,6 +8,7 @@
   "playing.nothing": "未在播放",
   "playing.nothing_yet": "暂无",
   "playing.station": "电台",
+  "station.notice": "正在播放电台。你添加的曲目会在主人开始播放队列后播放。",
   "credit.requested_by": "{name} 点播",
   "credit.guest": "匿名",
   "credit.radio": "Roon Radio",

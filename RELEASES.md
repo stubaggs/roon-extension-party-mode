@@ -11,7 +11,8 @@ Not released yet. You can try it on the `experimental` branch (see
 - A radio station playing on the party zone shows as one: the pages say "Radio station"
   instead of showing it as a track, it's no longer labelled Roon Radio or listed in
   Played, and Skip is hidden, since Roon can't skip a station. Guests' tracks wait in
-  the queue until you play it from Roon; the README says how.
+  the queue until you play it from Roon, and the guest page and the Party Hub say so;
+  the README says how.
 - With **Loop** on, the playlist download no longer lists a track again each time it
   comes round.
 
