@@ -76,6 +76,5 @@
   "screen.playlist_qr_alt": "Κωδικός QR για τη λίστα",
   "screen.closed_title": "Τα αιτήματα έκλεισαν",
   "screen.closed_text": "Ευχαριστούμε για όλα τα κομμάτια.",
-  "join.expired": "Ο κωδικός έχει λήξει. Σαρώστε ξανά τον κωδικό στο Party Hub.",
-  "home.hub_link": "Άνοιγμα του Party Hub"
+  "join.expired": "Ο κωδικός έχει λήξει. Σαρώστε ξανά τον κωδικό στο Party Hub."
 }

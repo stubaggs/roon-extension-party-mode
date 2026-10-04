@@ -79,6 +79,5 @@
   "screen.playlist_qr_alt": "Cod QR pentru playlist",
   "screen.closed_title": "Cererile s-au închis",
   "screen.closed_text": "Mulțumim pentru toate piesele.",
-  "join.expired": "Codul a expirat. Scanează din nou codul de pe Party Hub.",
-  "home.hub_link": "Deschide Party Hub"
+  "join.expired": "Codul a expirat. Scanează din nou codul de pe Party Hub."
 }

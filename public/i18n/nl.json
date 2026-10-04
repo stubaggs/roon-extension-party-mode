@@ -76,6 +76,5 @@
   "screen.playlist_qr_alt": "QR-code voor de playlist",
   "screen.closed_title": "Verzoekjes zijn gesloten",
   "screen.closed_text": "Bedankt voor alle nummers.",
-  "join.expired": "Deze code is verlopen. Scan de code op de Party Hub opnieuw.",
-  "home.hub_link": "De Party Hub openen"
+  "join.expired": "Deze code is verlopen. Scan de code op de Party Hub opnieuw."
 }

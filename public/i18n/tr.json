@@ -76,6 +76,5 @@
   "screen.playlist_qr_alt": "Çalma listesi için QR kod",
   "screen.closed_title": "İstekler kapandı",
   "screen.closed_text": "Tüm parçalar için teşekkürler.",
-  "join.expired": "Bu kodun süresi doldu. Party Hub'daki kodu yeniden tara.",
-  "home.hub_link": "Party Hub'ı aç"
+  "join.expired": "Bu kodun süresi doldu. Party Hub'daki kodu yeniden tara."
 }

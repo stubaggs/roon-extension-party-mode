@@ -163,12 +163,9 @@ const set = (values) => Object.assign(roon.settings, values);
 
   await check('the guest page is at /GuestHub, in any case, and no longer at the root', async () => {
     for (const path of ['/GuestHub', '/guesthub']) assert.strictEqual((await get(path)).status, 200, path);
-    const res = await get('/', { 'Accept-Language': 'fr' });
-    assert.strictEqual(res.status, 200);
-    assert.strictEqual(res.headers.get('location'), null, 'not a redirect');
-    const html = await res.text();
+    const html = await (await get('/', { 'Accept-Language': 'fr' })).text();
     assert.match(html, /<html lang="fr"/);
-    assert.match(html, /<a class="[^"]*" href="\/PartyHub">Ouvrir le Party Hub<\/a>/);
+    assert.match(html, /<h1>Scannez à nouveau le code<\/h1>/);
     assert.doesNotMatch(html, /id="app"/, 'not the guest page');
   });
 

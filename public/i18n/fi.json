@@ -76,6 +76,5 @@
   "screen.playlist_qr_alt": "QR-koodi soittolistaan",
   "screen.closed_title": "Toiveet on suljettu",
   "screen.closed_text": "Kiitos kaikista kappaleista.",
-  "join.expired": "Koodi on vanhentunut. Skannaa koodi Party Hubista uudelleen.",
-  "home.hub_link": "Avaa Party Hub"
+  "join.expired": "Koodi on vanhentunut. Skannaa koodi Party Hubista uudelleen."
 }

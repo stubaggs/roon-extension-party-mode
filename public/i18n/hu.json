@@ -76,6 +76,5 @@
   "screen.playlist_qr_alt": "QR-kód a lejátszási listához",
   "screen.closed_title": "A kérések lezárultak",
   "screen.closed_text": "Köszönjük az összes számot.",
-  "join.expired": "Ez a kód lejárt. Olvasd be újra a Party Hubon látható kódot.",
-  "home.hub_link": "A Party Hub megnyitása"
+  "join.expired": "Ez a kód lejárt. Olvasd be újra a Party Hubon látható kódot."
 }
