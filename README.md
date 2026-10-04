@@ -155,6 +155,10 @@ the same network as the Roon Core. With Docker, use `--network host`, as above.
 **Phones can't open the page after scanning.** Check that the phones are on the same Wi-Fi as
 the computer running Party Mode, and that the computer's firewall allows port 8338.
 
+**A guest's bookmark or home-screen shortcut says "Cannot GET /".** From 1.2.0 the guest
+page is at `/GuestHub`, not the address on its own, and the old address isn't redirected.
+Scan the QR code again.
+
 **"That code has expired".** Party mode was switched off and on, which makes a new code.
 Scan the code on the Party Hub again.
 

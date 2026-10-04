@@ -27,7 +27,7 @@ Roon Core  ──(node-roon-api over the local network)──  app.js
                                                         │
                                               Express on port 8338
                                                         │
-                                     /            guest page (phones)
+                                     /GuestHub     guest page (phones)
                                      /PartyHub     QR code + queue (TV)
 ```
 
@@ -240,6 +240,9 @@ detection. The first search's result categories are logged too (`Search (Library
 Search) result categories: …`), to check what the search covers.
 
 ## The guest page
+
+It's at `/GuestHub` (any case), where the join link sends guests. Before 1.2.0 it was at
+`/`, which now answers 404: it isn't redirected, so an old bookmark needs a fresh scan.
 
 - **Allowances are on the buttons they limit:** "Add to queue · 3 left", greyed out
   when used up. Skip shows nothing until it's used up, then "in 5 min". Buttons are

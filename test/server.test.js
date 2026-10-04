@@ -157,8 +157,13 @@ const set = (values) => Object.assign(roon.settings, values);
     set({ enabled: true });
     const res = await get(`/j/${guests.joinCode}`);
     assert.strictEqual(res.status, 302);
-    assert.strictEqual(res.headers.get('location'), '/');
+    assert.strictEqual(res.headers.get('location'), '/GuestHub');
     assert.match(res.headers.get('set-cookie'), /^party_sid=/);
+  });
+
+  await check('the guest page is at /GuestHub, in any case, and no longer at the root', async () => {
+    for (const path of ['/GuestHub', '/guesthub']) assert.strictEqual((await get(path)).status, 200, path);
+    assert.strictEqual((await get('/')).status, 404);
   });
 
   console.log('\nguest page');
@@ -179,7 +184,7 @@ const set = (values) => Object.assign(roon.settings, values);
   });
 
   await check('the guest page shows nothing until it knows which message is right', async () => {
-    const html = await (await get('/')).text();
+    const html = await (await get('/GuestHub')).text();
     assert.match(html, /<main id="app" hidden>/);
     assert.match(html, /<div id="locked" class="locked" hidden>/);
     assert.match(html, /<div id="closed" class="locked" hidden>/);
@@ -320,7 +325,7 @@ const set = (values) => Object.assign(roon.settings, values);
   });
 
   await check('pages allow only their own scripts and styles, and guest pages cannot be framed', async () => {
-    for (const path of ['/', '/api/party', '/j/not-the-code']) {
+    for (const path of ['/GuestHub', '/api/party', '/j/not-the-code']) {
       const res = await get(path);
       assert.match(res.headers.get('content-security-policy'), /script-src 'self'.*frame-ancestors 'none'/, path);
       assert.strictEqual(res.headers.get('x-frame-options'), 'DENY', path);
