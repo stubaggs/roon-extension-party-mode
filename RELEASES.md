@@ -6,7 +6,7 @@ running in its Extensions list.
 ## 1.2.0 (in progress)
 
 Not released yet. You can try it on the `experimental` branch (see
-[Developer.md](Developer.md#running-the-experimental-version)).
+[DEVELOPER.md](DEVELOPER.md#running-the-experimental-version)).
 
 ### Party Hub
 

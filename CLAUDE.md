@@ -8,7 +8,7 @@ Every change that affects them updates the docs in the same commit, except the R
   Don't change it unless asked. When a change affects anything they see or do (features,
   settings: names, defaults, meanings; installing, the guest pages or the Party Hub,
   troubleshooting), remind the owner what the README should add or clarify instead.
-- **Developer.md** is for people working on the code. Update it when how things work
+- **DEVELOPER.md** is for people working on the code. Update it when how things work
   changes: architecture, files, matching and attribution rules, tests, translations,
   Docker and publishing, known limitations.
 - **RELEASES.md** is the user-friendly list of changes, newest version first. Every
@@ -38,7 +38,7 @@ Every change that affects them updates the docs in the same commit, except the R
   commented out, so a tag doesn't publish the Docker image either.
 - Extension settings and the Roon status line stay in English, as in other Roon
   extensions. Guest-facing pages are translated: every page string lives in
-  `public/i18n/<code>.json` (30 languages, listed in Developer.md), and new page text
+  `public/i18n/<code>.json` (30 languages, listed in DEVELOPER.md), and new page text
   needs all of them.
 - Say **tracks**, not songs, in everything people see (pages, settings, docs): a track
   may be a poem or a speech. In translations use a neutral word, as Roon does (fr

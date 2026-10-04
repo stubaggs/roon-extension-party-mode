@@ -180,7 +180,7 @@ search for.
 ## For developers
 
 How it works, running it from source, tests, translations and publishing:
-[Developer.md](Developer.md).
+[DEVELOPER.md](DEVELOPER.md).
 
 ## Licence
 
