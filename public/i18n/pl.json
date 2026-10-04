@@ -12,6 +12,7 @@
   "credit.requested_by": "Zamówienie: {name}",
   "credit.guest": "Anonim",
   "credit.radio": "Roon Radio",
+  "credit.host": "Gospodarz",
   "search.placeholder": "Szukaj utworu lub wykonawcy",
   "search.clear": "Wyczyść wyszukiwanie",
   "search.no_results": "Nie znaleziono utworów. Spróbuj nazwy wykonawcy.",

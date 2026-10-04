@@ -12,6 +12,7 @@
   "credit.requested_by": "بطلب من {name}",
   "credit.guest": "مجهول",
   "credit.radio": "Roon Radio",
+  "credit.host": "المضيف",
   "search.placeholder": "ابحث عن مقطع أو فنان",
   "search.clear": "مسح البحث",
   "search.no_results": "لم يُعثر على أي مقطع. جرّب اسم الفنان.",

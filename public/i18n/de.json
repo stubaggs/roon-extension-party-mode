@@ -12,6 +12,7 @@
   "credit.requested_by": "Gewünscht von {name}",
   "credit.guest": "Anonym",
   "credit.radio": "Roon Radio",
+  "credit.host": "Gastgeber",
   "search.placeholder": "Titel oder Künstler suchen",
   "search.clear": "Suche löschen",
   "search.no_results": "Keine passenden Titel. Versuch es mit dem Namen des Künstlers.",

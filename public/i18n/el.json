@@ -12,6 +12,7 @@
   "credit.requested_by": "Ζητήθηκε από {name}",
   "credit.guest": "Ανώνυμος",
   "credit.radio": "Roon Radio",
+  "credit.host": "Οικοδεσπότης",
   "search.placeholder": "Αναζήτηση κομματιού ή καλλιτέχνη",
   "search.clear": "Καθαρισμός αναζήτησης",
   "search.no_results": "Δεν βρέθηκαν κομμάτια. Δοκιμάστε το όνομα του καλλιτέχνη.",

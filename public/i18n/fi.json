@@ -12,6 +12,7 @@
   "credit.requested_by": "Toiveen esitti {name}",
   "credit.guest": "Anonyymi",
   "credit.radio": "Roon Radio",
+  "credit.host": "Isäntä",
   "search.placeholder": "Hae kappaletta tai artistia",
   "search.clear": "Tyhjennä haku",
   "search.no_results": "Kappaleita ei löytynyt. Kokeile artistin nimeä.",

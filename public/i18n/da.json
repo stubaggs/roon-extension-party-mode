@@ -12,6 +12,7 @@
   "credit.requested_by": "Ønsket af {name}",
   "credit.guest": "Anonym",
   "credit.radio": "Roon Radio",
+  "credit.host": "Vært",
   "search.placeholder": "Søg efter et nummer eller en kunstner",
   "search.clear": "Ryd søgningen",
   "search.no_results": "Ingen numre fundet. Prøv kunstnerens navn.",

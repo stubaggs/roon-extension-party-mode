@@ -12,6 +12,7 @@
   "credit.requested_by": "Kérte: {name}",
   "credit.guest": "Névtelen",
   "credit.radio": "Roon Radio",
+  "credit.host": "Házigazda",
   "search.placeholder": "Szám vagy előadó keresése",
   "search.clear": "Keresés törlése",
   "search.no_results": "Nincs találat. Próbáld az előadó nevével.",

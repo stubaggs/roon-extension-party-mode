@@ -12,6 +12,7 @@
   "credit.requested_by": "בבקשת {name}",
   "credit.guest": "אנונימי",
   "credit.radio": "Roon Radio",
+  "credit.host": "המארח",
   "search.placeholder": "חיפוש רצועה או אמן",
   "search.clear": "ניקוי החיפוש",
   "search.no_results": "לא נמצאו רצועות. נסו את שם האמן.",

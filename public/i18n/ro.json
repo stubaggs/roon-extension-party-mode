@@ -12,6 +12,7 @@
   "credit.requested_by": "Cerută de {name}",
   "credit.guest": "Anonim",
   "credit.radio": "Roon Radio",
+  "credit.host": "Gazda",
   "search.placeholder": "Caută o piesă sau un artist",
   "search.clear": "Șterge căutarea",
   "search.no_results": "Nu s-a găsit nicio piesă. Încearcă numele artistului.",

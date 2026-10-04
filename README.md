@@ -123,11 +123,14 @@ minutes, and play next once an hour.
   and it isn't listed in Played or the playlist. To have guests' tracks play by
   themselves, use Roon Radio rather than a station.
 - **The Played list starts fresh** when the extension restarts or you change the party zone.
-- **Tag colours** on the Party Hub and guests' phones show how a track got into the queue: **lavender**
-  when a guest added it, **amber** when a guest chose **Play it next**, and **mint** for
-  Roon Radio. Tracks with no tag are ones you queued in Roon while Radio was off.
-- **"Roon Radio" is a best guess.** With Roon Radio on, any track no guest added is
-  labelled Roon Radio, including tracks you queue from the Roon app yourself.
+- **Tag colours** on the Party Hub and guests' phones show how a track got into the
+  queue: **lavender** when a guest added it, **amber** when a guest chose **Play it
+  next**, **mint** for Roon Radio, and **sky blue** for **Host**, anything you queued in
+  Roon.
+- **Roon Radio is recognised by how it adds tracks.** Roon doesn't say who queued a
+  track, but Roon Radio adds its picks one at a time as the queue runs out. A track you
+  add at the very moment the last one ends may be taken for Roon Radio's, and after the
+  extension restarts, Roon Radio's picks already queued show as Host.
 - **The playlist starts fresh** when the extension restarts, you change the party zone, or
   you turn **Party mode** back on from **Off**. Download it before any of those. Pausing
   keeps it.

@@ -12,6 +12,7 @@
   "credit.requested_by": "Přání od: {name}",
   "credit.guest": "Anonym",
   "credit.radio": "Roon Radio",
+  "credit.host": "Hostitel",
   "search.placeholder": "Hledat skladbu nebo interpreta",
   "search.clear": "Vymazat hledání",
   "search.no_results": "Žádné skladby nenalezeny. Zkuste jméno interpreta.",

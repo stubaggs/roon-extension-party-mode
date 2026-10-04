@@ -58,6 +58,7 @@
     who.textContent = who.hidden ? '' : window.I18N.requestedBy(playing);
     who.classList.toggle('radio', radio);
     who.classList.toggle('next', !who.hidden && playing.kind === 'next');
+    who.classList.toggle('host', !who.hidden && playing.kind === 'host');
     el('current-label').textContent =
       !playing || playing.state !== 'playing'
         ? t('playing.paused')
@@ -104,7 +105,7 @@
       wrap.append(title, a);
       if (item.kind) {
         const who = document.createElement('span');
-        who.className = item.kind === 'next' || item.kind === 'radio' ? `who ${item.kind}` : 'who';
+        who.className = ['next', 'radio', 'host'].includes(item.kind) ? `who ${item.kind}` : 'who';
         who.textContent = window.I18N.credit(item);
         wrap.appendChild(who);
       }

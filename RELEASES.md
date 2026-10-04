@@ -13,6 +13,9 @@ Not released yet. You can try it on the `experimental` branch (see
   Played, and Skip is hidden, since Roon can't skip a station. Guests' tracks wait in
   the queue until you play it from Roon, and the guest page and the Party Hub say so;
   the README says how.
+- Tracks you queue in Roon get a **Host** tag, in sky blue, on the Party Hub, the guest
+  page and in the playlist download. Before, with Roon Radio on, they were labelled Roon
+  Radio; Roon Radio's tag now goes only on the tracks it picks.
 - With **Loop** on, the playlist download no longer lists a track again each time it
   comes round.
 

@@ -51,6 +51,10 @@ const roon = Object.assign(new EventEmitter(), {
   actions: [],
   skips: 0,
   failing: false,
+  radioPicks: new Set(),
+  isRadioPick(id) {
+    return this.radioPicks.has(id);
+  },
   async search(session, query) {
     this.searches.push(query);
     return results;
@@ -311,6 +315,21 @@ const set = (values) => Object.assign(roon.settings, values);
     assert.strictEqual((await post('/api/skip', other, {})).status, 502);
     roon.failing = false;
     assert.strictEqual((await post('/api/skip', other, {})).status, 200);
+  });
+
+  await check('queued tracks no guest asked for are the host\'s, except Roon Radio\'s picks', async () => {
+    roon.queue = [
+      { queue_item_id: 21, length: 200, two_line: { line1: 'Seasons', line2: 'Bebe Rexha' } },
+      { queue_item_id: 22, length: 200, two_line: { line1: 'Fernando', line2: 'ABBA' } }
+    ];
+    roon.radioPicks.add(21);
+    try {
+      const hub = await (await get('/api/hub')).json();
+      assert.deepStrictEqual(hub.upcoming.map((t) => t.kind), ['radio', 'host']);
+    } finally {
+      roon.queue = [];
+      roon.radioPicks.clear();
+    }
   });
 
   await check('a radio station shows as a station, credited to nobody, and can\'t be skipped', async () => {

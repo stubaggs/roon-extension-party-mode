@@ -205,6 +205,20 @@ check('the same track queued again later is listed again', () => {
   assert.deepStrictEqual(titles(playlist), ['Waterloo', 'Waterloo']);
 });
 
+check('the host\'s tracks say Host; one Roon reported before the guest\'s request finished moves to the guest', () => {
+  const playlist = new PartyPlaylist();
+  const host = () => ({ requested_by: null, kind: 'host' });
+  playlist.update('o1', [track(1, 'Waterloo'), track(2, 'SOS')], host);
+  // The guest's request for SOS finishes: it's credited from then on.
+  const claimed = (t) => (t.id === 2 ? { requested_by: 'Sam', kind: 'add', guest: 'g1' } : host());
+  playlist.update('o1', [track(1, 'Waterloo'), track(2, 'SOS')], claimed);
+  const csv = rows(playlist);
+  assert.ok(csv[1].includes(',Host,'), csv[1]);
+  assert.ok(csv[2].includes(',Sam,'), csv[2]);
+  playlist.rename('g1', 'Stu');
+  assert.ok(rows(playlist)[2].includes(',Stu,'), 'and renaming reaches it');
+});
+
 check('very long titles, artists and albums are cut short', () => {
   const playlist = new PartyPlaylist();
   const long = 'x'.repeat(5000);

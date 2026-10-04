@@ -76,8 +76,10 @@ before pushing. The Docker build runs it too, so a failing test stops a build.
 - `test/server.test.js` runs the real web server against a stand-in for Roon. It checks
   the Party Hub's answers, the join-link pages, the guest API's `no_session` and `closed`
   errors, and the security headers.
-- `test/station.test.js` checks requests waiting and skips refused during a radio station, on a zone
-  shaped like the one a Core reported.
+- `test/station.test.js` checks requests waiting and skips refused during a radio
+  station, on a zone shaped like the one a Core reported.
+- `test/roon-radio.test.js` checks Roon Radio's picks are told from the host's, with the
+  queue updates a Core sent as the queue ran out.
 - `test/fixtures/` holds real search results from a Core for the duplicate check:
   "bad guy" (covers) and "pere ubu waiting for mary" (one band, five albums).
 
@@ -332,8 +334,22 @@ A request is bound to its queue item when Roon reports the insert, which is exac
 artists. A request whose insert doesn't arrive within a minute (the host cleared the
 queue, say) falls back to them.
 
+A track no guest asked for is **Roon Radio**'s or the **Host**'s (`kind` `radio` or
+`host`; a radio station gets no credit). Roon doesn't say which, but Roon Radio adds its
+picks in a way of its own, seen on a Core in October 2026: as the last queue entry ends,
+one update replaces it with exactly one new entry, which then plays as the queue's first
+item. The host's additions are appended to what's there, or put into an empty queue. So
+`RoonService._noteRadioPick` marks an entry that arrives that way, with Roon Radio on, as
+Roon Radio's, before `queue_changed`, and `requester()` credits everything else to the
+host. The marks are in memory, so after a restart Roon Radio's picks already queued are
+the host's.
+
+"Host" is only what's left when no guest is found, and Roon can report a guest's insert
+before the request finishes. So the playlist looks again at its Host entries while they're
+still queued, and once more when the file is made.
+
 The console logs each request, each queue insert with its length and hash, and each
-track start. Look there when a badge is wrong.
+track start, with its credit. Look there when a badge is wrong.
 
 ### Duplicates
 
@@ -892,9 +908,9 @@ full replies, so it's for troubleshooting only.
   requests instead). There's no setting to turn it off. A failed `play` is logged, and the
   request still counts, since the track was queued. On a radio station nothing is
   pressed: the request waits for the host (see [Radio stations](#radio-stations)).
-- **"Roon Radio" is a guess.** Roon doesn't say where a track came from. With Roon Radio
-  on for the party zone, any track no guest added is labelled "Roon Radio", including
-  tracks the host queues from the Roon app.
+- **Roon Radio is recognised by its pattern** (see [Crediting a track](#crediting-a-track)).
+  A track the host adds at the very moment the last one ends looks the same and is taken
+  for Roon Radio's; after a restart, Roon Radio's picks already queued are the host's.
 - **Some duplicates can't be seen from search** (see [Duplicates](#duplicates)):
   - Two versions on one album with the same title and artist, such as an album version
     and a single edit, look alike, so the second is refused. Once queued, they're told

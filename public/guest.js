@@ -384,6 +384,7 @@
     who.textContent = who.hidden ? '' : creditText(playing);
     who.classList.toggle('radio', !who.hidden && playing.kind === 'radio');
     who.classList.toggle('next', !who.hidden && playing.kind === 'next');
+    who.classList.toggle('host', !who.hidden && playing.kind === 'host');
     el('playing-label').textContent = playingLabel(playing);
     setArt(el('playing-art'), playing && playing.image_key, 144);
     // While a radio station plays, Skip is hidden and the line under the search
@@ -457,7 +458,7 @@
     text.append(title, sub);
     if (item.kind) {
       const badge = document.createElement('span');
-      badge.className = item.kind === 'next' || item.kind === 'radio' ? `badge ${item.kind}` : 'badge';
+      badge.className = ['next', 'radio', 'host'].includes(item.kind) ? `badge ${item.kind}` : 'badge';
       badge.textContent = window.I18N.credit(item);
       text.appendChild(badge);
     }

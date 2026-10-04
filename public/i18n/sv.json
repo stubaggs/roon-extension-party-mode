@@ -12,6 +12,7 @@
   "credit.requested_by": "Önskad av {name}",
   "credit.guest": "Anonym",
   "credit.radio": "Roon Radio",
+  "credit.host": "Värd",
   "search.placeholder": "Sök efter ett spår eller en artist",
   "search.clear": "Rensa sökningen",
   "search.no_results": "Inga spår hittades. Prova artistens namn.",

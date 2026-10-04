@@ -12,6 +12,7 @@
   "credit.requested_by": "{name} さんのリクエスト",
   "credit.guest": "匿名",
   "credit.radio": "Roon Radio",
+  "credit.host": "ホスト",
   "search.placeholder": "トラックやアーティストを検索",
   "search.clear": "検索をクリア",
   "search.no_results": "トラックが見つかりません。アーティスト名で試してください。",

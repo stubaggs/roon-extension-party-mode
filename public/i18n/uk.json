@@ -12,6 +12,7 @@
   "credit.requested_by": "Замовлення від: {name}",
   "credit.guest": "Анонім",
   "credit.radio": "Roon Radio",
+  "credit.host": "Господар",
   "search.placeholder": "Знайти трек або виконавця",
   "search.clear": "Очистити пошук",
   "search.no_results": "Треків не знайдено. Спробуйте ім'я виконавця.",

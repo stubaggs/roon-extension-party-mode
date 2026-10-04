@@ -78,15 +78,17 @@
   /** The name a guest goes by: theirs, or "Anon" (credit.guest) without one. */
   const guestName = (name) => name || t('credit.guest');
 
-  /** The credit line for a track: a guest's name, "Anon", or Roon Radio. */
+  /** The credit line for a track: a guest's name, "Anon", Roon Radio or Host. */
   function credit(item) {
     if (item.kind === 'radio') return t('credit.radio');
+    if (item.kind === 'host') return t('credit.host');
     return guestName(item.requested_by);
   }
 
-  /** The line under the playing track: "Requested by Sam", "Requested by Anon" or "Roon Radio". */
+  /** The line under the playing track: "Requested by Sam", "Requested by Anon", "Roon Radio" or "Host". */
   function requestedBy(item) {
     if (item.kind === 'radio') return t('credit.radio');
+    if (item.kind === 'host') return t('credit.host');
     return t('credit.requested_by', { name: guestName(item.requested_by) });
   }
 
