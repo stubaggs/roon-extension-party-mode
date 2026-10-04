@@ -40,6 +40,8 @@ Not released yet. You can try it on the `experimental` branch (see
   it's for.
 - The playlist download is now at `/Download/playlist.csv`. The old `/api/playlist.csv`
   address still works.
+- The party's playlist holds up to 5000 tracks, up from 2000. On a party that runs for
+  weeks, your own and Roon Radio's oldest tracks make room first, before any guest's request.
 
 ## 1.1.1
 

@@ -158,7 +158,7 @@ outgoing connections.
 - **Busy when chosen in the settings:** the extension stays on its current port and says
   so.
 - **`ROON_EXTENSION_PARTY_MODE_PORT`** only sets the
-  first run port. Roon saves every field on the first Save, the port included, even when only
+  first runo port. Roon saves every field on the first Save, the port included, even when only
   the zone was chosen. From then on the saved port wins and the variable is ignored, so
   change the port with Web port in Roon.
 
@@ -338,6 +338,9 @@ Search marks queued results `in_queue`, so guests always see "In the queue". Wit
 tracks already in the queue on, they're also `blocked`: the page won't offer them, and
 `/api/request` refuses them (`already_queued`).
 
+`test/fixtures/` has two real searches: "bad guy", where credits took the results marked
+from 24 to the one queued, and "pere ubu waiting for mary", five albums with three queued.
+
 ## Searching and browse sessions
 
 Each guest has their own browse session (`multi_session_key`), in the "browse" hierarchy
@@ -407,17 +410,9 @@ party. The Display playlist download setting decides how:
 - The setting's hint in Roon gives the download address, which `app.js` hands over with
   `setPlaylistUrl()` alongside the website link.
 
-**How long it's kept.** In memory, at most 5000 tracks (`MAX_TRACKS`), about two weeks of
-non-stop play: the queue subscription shows the first 500 entries, so the list grows only
-as fast as music plays and guests add to it. Past the limit, the oldest entries no guest
-asked for (the host's and Roon Radio's) go first, and guests' requests only when they alone
-are too many. `seen`, the queue ids already recorded, loses an id with its track, so it
-is never larger than the list. It can't simply be cut to the ids still queued: an entry
-pushed past the 500 shown comes back into view later, and a resubscription empties the
-queue for a moment, so either would record tracks twice. Title, artist and album are cut
-to 200 characters. The list starts over when the extension restarts, the party zone
-changes, or Party mode comes back on from Off (a new party). What is still queued at that
-moment is recorded again.
+**How long it's kept.** In memory, at most 2000 tracks. It starts over when the extension
+restarts, the party zone changes, or Party mode comes back on from Off (a new party). What
+is still queued at that moment is recorded again.
 
 ## Translating the pages
 
@@ -569,9 +564,7 @@ changing them:
   characters, which could fake log lines, and direction overrides, which can show a name
   back to front. The 24-character limit counts characters, so an emoji isn't cut in half.
   Searches stop at 200 characters. At most 2000 sessions are held; the longest idle goes
-  first. When a session ends, `GuestStore.onDrop` tells `RoonService.forgetSession()`,
-  which drops the guest's profile marker; a guest's latest-search ticket is kept only
-  while a search waits. So nothing kept per guest outlives their session.
+  first.
 - **Session cookies stay private.** A guest's tracks are linked to them by a separate
   `ref`, never the session `id` (see [Names](#names)).
 - **Headers.** Every response carries a Content-Security-Policy that allows only the
@@ -823,7 +816,7 @@ full replies, so it's for troubleshooting only.
 - **Credits can swap.** Two guests asking for the same recording are credited in the
   order they asked. If Roon reports those two inserts out of order, the badges swap.
 - **A rescan starts a new session.** Tracks added before it keep the name they had then.
-- **Everything is kept in memory.** Played (the last 200 tracks), the playlist (5000) and
+- **Everything is kept in memory.** Played (the last 200 tracks), the playlist (2000) and
   who asked for what start over when the extension restarts. Played also starts over when
   the party zone changes.
 - **The queue subscription is per zone.** Changing the party zone starts a new
