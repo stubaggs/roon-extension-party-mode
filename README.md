@@ -115,6 +115,12 @@ minutes, and play next once an hour.
 - **A guest's track gets the music going again.** If the party zone is paused, or the
   queue has run out, adding a track presses play. For a speech, set **Party mode** to
   **Paused** instead of pausing in Roon: that holds the requests too.
+- **A radio station gives way to guests.** While a live radio station plays on the party
+  zone, a guest's request stops it and the queue plays from the start: anything you
+  queued before the station first, then guests' tracks in order, play next first. That
+  lets you choose how the party begins; clear the queue before starting the station if
+  you'd rather guests' tracks play straight away. Guests can't skip a station, and it
+  isn't listed in Played or the playlist.
 - **The Played list starts fresh** when the extension restarts or you change the party zone.
 - **Tag colours** on the Party Hub and guests' phones show how a track got into the queue: **lavender**
   when a guest added it, **amber** when a guest chose **Play it next**, and **mint** for

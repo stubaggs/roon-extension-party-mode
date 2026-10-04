@@ -178,6 +178,33 @@ check('guests\' requests alone past the limit drop the oldest of them', () => {
   assert.strictEqual(playlist.seen.size, MAX_TRACKS);
 });
 
+check('with Loop on, a track that goes round again is listed once', () => {
+  const playlist = new PartyPlaylist();
+  const credit = (t) => (t.title === 'Waterloo' ? { requested_by: 'Sam', kind: 'add', guest: 'g1' } : null);
+  playlist.update('o1', [track(1, 'Waterloo'), track(2, 'SOS')], credit);
+  // Waterloo has played: Roon moves it to the back under a new id.
+  playlist.update('o1', [track(2, 'SOS'), track(3, 'Waterloo')], nobody);
+  playlist.update('o1', [track(3, 'Waterloo'), track(4, 'SOS')], nobody);
+  assert.deepStrictEqual(titles(playlist), ['Waterloo', 'SOS']);
+  assert.ok(rows(playlist)[1].includes(',Sam,'), 'keeps its credit');
+  assert.strictEqual(playlist.seen.size, 2);
+});
+
+check('playing the queue from a later entry doesn\'t list the ones before it again', () => {
+  const playlist = new PartyPlaylist();
+  playlist.update('o1', [track(1, 'SOS'), track(2, 'Fernando'), track(3, 'Waterloo')], nobody);
+  playlist.update('o1', [track(3, 'Waterloo'), track(4, 'SOS'), track(5, 'Fernando')], nobody);
+  assert.deepStrictEqual(titles(playlist), ['SOS', 'Fernando', 'Waterloo']);
+});
+
+check('the same track queued again later is listed again', () => {
+  const playlist = new PartyPlaylist();
+  playlist.update('o1', [track(1, 'Waterloo')], nobody);
+  playlist.update('o1', [], nobody);
+  playlist.update('o1', [track(2, 'Waterloo')], nobody);
+  assert.deepStrictEqual(titles(playlist), ['Waterloo', 'Waterloo']);
+});
+
 check('very long titles, artists and albums are cut short', () => {
   const playlist = new PartyPlaylist();
   const long = 'x'.repeat(5000);

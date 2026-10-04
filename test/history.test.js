@@ -173,5 +173,15 @@ check("guest refs never leave the server", () => {
   });
 }
 
+check('a radio station never goes into Played, but the track before it does', () => {
+  const history = new PlayHistory();
+  history.update('z1', playing('Waterloo'), null);
+  assert.strictEqual(history.update('z1', { title: 'ABC Triple J Shift', artist: '', state: 'playing', station: true }, null), true);
+  assert.deepStrictEqual(history.list().map((t) => t.title), ['Waterloo']);
+  history.update('z1', playing('SOS'), null);
+  history.update('z1', playing('Fernando'), null);
+  assert.deepStrictEqual(history.list().map((t) => t.title), ['SOS', 'Waterloo']);
+});
+
 console.log(failures ? `\n${failures} failing` : '\nall passing');
 process.exit(failures ? 1 : 0);

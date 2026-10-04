@@ -358,6 +358,11 @@
 
   // ------------------------------------------------------------------- queue
 
+  function playingLabel(playing) {
+    if (playing && playing.station) return t('playing.station');
+    return playing && playing.state === 'playing' ? t('playing.now') : t('playing.paused');
+  }
+
   function renderQueue(snapshot) {
     const playing = snapshot.now_playing;
     el('playing-title').textContent = playing ? playing.title : t('playing.nothing');
@@ -371,9 +376,10 @@
     who.textContent = who.hidden ? '' : creditText(playing);
     who.classList.toggle('radio', !who.hidden && playing.kind === 'radio');
     who.classList.toggle('next', !who.hidden && playing.kind === 'next');
-    el('playing-label').textContent =
-      playing && playing.state === 'playing' ? t('playing.now') : t('playing.paused');
+    el('playing-label').textContent = playingLabel(playing);
     setArt(el('playing-art'), playing && playing.image_key, 144);
+    // Roon can't skip a radio station; a request takes over from it instead.
+    if (party && party.capabilities.skip) el('skip').hidden = Boolean(playing && playing.station);
 
     renderList(queueList, snapshot.upcoming, t('queue.empty'), (item, index) => {
       const position = document.createElement('span');

@@ -59,7 +59,11 @@
     who.classList.toggle('radio', radio);
     who.classList.toggle('next', !who.hidden && playing.kind === 'next');
     el('current-label').textContent =
-      playing && playing.state === 'playing' ? t('playing.now') : t('playing.paused');
+      playing && playing.station
+        ? t('playing.station')
+        : playing && playing.state === 'playing'
+          ? t('playing.now')
+          : t('playing.paused');
     const image = el('current-art');
     if (playing && playing.image_key) image.src = art(playing.image_key, 400);
     else image.removeAttribute('src');

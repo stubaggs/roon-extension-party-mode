@@ -146,6 +146,16 @@ const item = (result, setting) => {
   return all.find((entry) => entry.setting === setting);
 };
 
+check('a radio station is told apart from a track, playing, paused or loading', () => {
+  const { isStation } = require('../lib/roon-service');
+  const station = { is_seek_allowed: false, now_playing: { two_line: { line1: 'ABC Triple J Shift' } } };
+  assert.strictEqual(isStation(station), true);
+  assert.strictEqual(isStation({ is_seek_allowed: true, now_playing: { length: 210 } }), false, 'a track');
+  assert.strictEqual(isStation({ is_seek_allowed: false, now_playing: { length: 210 } }), false, 'a track loading');
+  assert.strictEqual(isStation({ is_seek_allowed: false }), false, 'nothing playing');
+  assert.strictEqual(isStation(null), false);
+});
+
 check('guest defaults: 5 adds every 10 min, play next hourly, skipping off', () => {
   const { values } = layout({});
   assert.deepStrictEqual(

@@ -313,6 +313,34 @@ const set = (values) => Object.assign(roon.settings, values);
     assert.strictEqual((await post('/api/skip', other, {})).status, 200);
   });
 
+  await check('a radio station shows as a station, credited to nobody, and can\'t be skipped', async () => {
+    const cookie = await newGuest();
+    roon.zone = {
+      zone_id: 'z1',
+      display_name: 'D90',
+      state: 'playing',
+      is_seek_allowed: false,
+      is_next_allowed: false,
+      settings: { auto_radio: true },
+      now_playing: { two_line: { line1: 'ABC Triple J Shift', line2: '' }, image_key: 'jj', seek_position: 59 }
+    };
+    try {
+      const hub = await (await get('/api/hub')).json();
+      assert.strictEqual(hub.now_playing.station, true);
+      assert.strictEqual(hub.now_playing.title, 'ABC Triple J Shift');
+      assert.strictEqual(hub.now_playing.kind, undefined, 'not labelled Roon Radio');
+      roon.skips = 0;
+      const res = await post('/api/skip', cookie, {});
+      assert.strictEqual(res.status, 409);
+      assert.strictEqual((await res.json()).error, 'station');
+      assert.strictEqual(roon.skips, 0);
+      const party = await (await get('/api/party', { Cookie: cookie })).json();
+      assert.strictEqual(party.allowances.skip.remaining, 1, 'the skip is not used up');
+    } finally {
+      roon.zone = null;
+    }
+  });
+
   await check('a very long search is cut short before it reaches Roon', async () => {
     const cookie = await newGuest();
     roon.searches = [];
