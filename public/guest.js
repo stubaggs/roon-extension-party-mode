@@ -118,7 +118,7 @@
     const notice = el('notice');
     if (party.party_mode === 'paused') notice.textContent = t('allowance.paused');
     else if (!party.capabilities.add && !party.capabilities.next) notice.textContent = t('allowance.closed');
-    else if (onStation) notice.textContent = t('station.notice');
+    else if (onStation) notice.textContent = t('queue.waiting_for_host');
     else notice.textContent = '';
     notice.hidden = !notice.textContent;
 

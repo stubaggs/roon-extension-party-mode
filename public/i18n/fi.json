@@ -8,7 +8,7 @@
   "playing.nothing": "Mikään ei soi",
   "playing.nothing_yet": "Ei vielä mitään",
   "playing.station": "Radioasema",
-  "station.notice": "Lisäämäsi kappaleet soivat radion jälkeen.",
+  "queue.waiting_for_host": "Odotetaan, että isäntä käynnistää jonon.",
   "credit.requested_by": "Toiveen esitti {name}",
   "credit.guest": "Anonyymi",
   "credit.radio": "Roon Radio",

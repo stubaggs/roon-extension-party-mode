@@ -8,7 +8,7 @@
   "playing.nothing": "Er speelt niets",
   "playing.nothing_yet": "Nog niets",
   "playing.station": "Radiozender",
-  "station.notice": "Nummers die je toevoegt, spelen na de radio.",
+  "queue.waiting_for_host": "Wachten tot de host de wachtrij start.",
   "credit.requested_by": "Aangevraagd door {name}",
   "credit.guest": "Anoniem",
   "credit.radio": "Roon Radio",

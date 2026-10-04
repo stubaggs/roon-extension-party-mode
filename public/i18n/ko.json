@@ -8,7 +8,7 @@
   "playing.nothing": "재생 중인 항목 없음",
   "playing.nothing_yet": "아직 없음",
   "playing.station": "라디오 방송국",
-  "station.notice": "추가한 트랙은 라디오가 끝난 뒤 재생됩니다.",
+  "queue.waiting_for_host": "호스트가 대기열을 시작하기를 기다리는 중입니다.",
   "credit.requested_by": "{name} 님의 신청",
   "credit.guest": "익명",
   "credit.radio": "Roon Radio",

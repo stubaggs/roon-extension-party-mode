@@ -8,7 +8,7 @@
   "playing.nothing": "Nu se redă nimic",
   "playing.nothing_yet": "Încă nimic",
   "playing.station": "Post de radio",
-  "station.notice": "Piesele adăugate vor porni după radio.",
+  "queue.waiting_for_host": "Se așteaptă ca gazda să pornească coada.",
   "credit.requested_by": "Cerută de {name}",
   "credit.guest": "Anonim",
   "credit.radio": "Roon Radio",

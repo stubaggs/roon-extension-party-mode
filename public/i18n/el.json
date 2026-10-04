@@ -8,7 +8,7 @@
   "playing.nothing": "Δεν παίζει τίποτα",
   "playing.nothing_yet": "Τίποτα ακόμα",
   "playing.station": "Ραδιοφωνικός σταθμός",
-  "station.notice": "Τα κομμάτια που προσθέτετε θα παίξουν μετά το ραδιόφωνο.",
+  "queue.waiting_for_host": "Αναμονή για να ξεκινήσει ο οικοδεσπότης την ουρά.",
   "credit.requested_by": "Ζητήθηκε από {name}",
   "credit.guest": "Ανώνυμος",
   "credit.radio": "Roon Radio",

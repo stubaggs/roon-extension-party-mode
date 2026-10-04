@@ -8,7 +8,7 @@
   "playing.nothing": "Nessuna riproduzione",
   "playing.nothing_yet": "Ancora niente",
   "playing.station": "Stazione radio",
-  "station.notice": "I brani che aggiungi partiranno dopo la radio.",
+  "queue.waiting_for_host": "In attesa che l'host avvii la coda.",
   "credit.requested_by": "Richiesto da {name}",
   "credit.guest": "Anonimo",
   "credit.radio": "Roon Radio",

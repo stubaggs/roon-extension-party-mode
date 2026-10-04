@@ -8,7 +8,7 @@
   "playing.nothing": "שום דבר לא מתנגן",
   "playing.nothing_yet": "עדיין כלום",
   "playing.station": "תחנת רדיו",
-  "station.notice": "הרצועות שתוסיפו יתנגנו אחרי הרדיו.",
+  "queue.waiting_for_host": "ממתינים שהמארח יפעיל את התור.",
   "credit.requested_by": "בבקשת {name}",
   "credit.guest": "אנונימי",
   "credit.radio": "Roon Radio",

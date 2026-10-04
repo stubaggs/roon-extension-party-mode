@@ -423,8 +423,9 @@ Taking over automatically was tried and dropped as too clunky. What the Core did
 **Elsewhere:**
 
 - The pages get `now_playing.station`. They label it "Radio station" (`playing.station`),
-  and the guest page hides Skip. Both say requests wait for the host (`station.notice`):
-  the guest page in the line under the search box, the Party Hub under the station.
+  and the guest page hides Skip. Both say requests wait for the host
+  (`queue.waiting_for_host`, worded to suit anything else that holds requests for the
+  host): the guest page in the line under the search box, the Party Hub under the station.
   `POST /api/skip` answers 409 `station` without using the guest's skip, and
   `RoonService.skip()` refuses one too, since Roon would.
 - `requester()` credits a station to nobody: it isn't Roon Radio, and no guest asked for it.

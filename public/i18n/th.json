@@ -8,7 +8,7 @@
   "playing.nothing": "ไม่มีอะไรเล่นอยู่",
   "playing.nothing_yet": "ยังไม่มีอะไร",
   "playing.station": "สถานีวิทยุ",
-  "station.notice": "แทร็กที่คุณเพิ่มจะเล่นหลังวิทยุ",
+  "queue.waiting_for_host": "กำลังรอเจ้าภาพเริ่มคิว",
   "credit.requested_by": "ขอโดย {name}",
   "credit.guest": "ไม่ระบุชื่อ",
   "credit.radio": "Roon Radio",

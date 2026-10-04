@@ -8,7 +8,7 @@
   "playing.nothing": "لا شيء قيد التشغيل",
   "playing.nothing_yet": "لا شيء بعد",
   "playing.station": "محطة راديو",
-  "station.notice": "ستُشغَّل المقاطع التي تضيفها بعد الراديو.",
+  "queue.waiting_for_host": "في انتظار أن يشغّل المضيف قائمة الانتظار.",
   "credit.requested_by": "بطلب من {name}",
   "credit.guest": "مجهول",
   "credit.radio": "Roon Radio",

@@ -8,7 +8,7 @@
   "playing.nothing": "Es läuft nichts",
   "playing.nothing_yet": "Noch nichts",
   "playing.station": "Radiosender",
-  "station.notice": "Titel, die du hinzufügst, laufen nach dem Radio.",
+  "queue.waiting_for_host": "Warten, bis der Gastgeber die Warteschlange startet.",
   "credit.requested_by": "Gewünscht von {name}",
   "credit.guest": "Anonym",
   "credit.radio": "Roon Radio",

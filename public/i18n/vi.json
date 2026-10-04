@@ -8,7 +8,7 @@
   "playing.nothing": "Không có gì đang phát",
   "playing.nothing_yet": "Chưa có gì",
   "playing.station": "Đài phát thanh",
-  "station.notice": "Các bài bạn thêm sẽ phát sau radio.",
+  "queue.waiting_for_host": "Đang chờ chủ tiệc bắt đầu hàng chờ.",
   "credit.requested_by": "Do {name} yêu cầu",
   "credit.guest": "Ẩn danh",
   "credit.radio": "Roon Radio",
