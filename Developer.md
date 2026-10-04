@@ -137,9 +137,8 @@ follows the group again. The label is the place to check what it's pointing at.
 
 ### Web port (Advanced)
 
-First in the Advanced group, since few hosts need it. Its hint says what it is for
-and what changing it does, on two lines. The default is 8338. The container shares the host's network, so the port has to be
-free on the machine itself. 8338 stays clear of:
+First in the Advanced group, since few hosts need it. The default, 8338, has to be free
+on the machine itself, since the container shares the host's network. It stays clear of:
 
 - common defaults: 8080, 3000, 5000, 8000, 8443 and 9000;
 - Roon's own ports: UDP 9003, TCP 9100–9200 and 9330–9339;
@@ -223,10 +222,9 @@ Adding and playing next are on by default; skipping is off.
 ### Browse titles (Advanced)
 
 Roon translates its menus, and the API doesn't say which language the Core uses. The
-extension first tries the titles in the collapsed **Advanced** group, at the bottom of the
-settings after the web port: `Tracks`, `Queue`, `Add Next` and `Profile` in English, so an English Core
-behaves exactly as written. When one isn't found, it works the menu out instead
-(`lib/titles.js`):
+extension first tries the titles in the Advanced group, or the English ones (`Tracks`,
+`Queue`, `Add Next`, `Profile`) when those are blank. When one isn't found, it works the
+menu out instead (`lib/titles.js`):
 
 - **Track category:** the search category whose items open straight into play actions.
   Albums and artists open into further lists.
@@ -274,32 +272,27 @@ none, and `PlayHistory.list()` strips it.
 
 ## Tracks: identity, credits and duplicates
 
-### How a track is identified
+### What Roon says about a track
 
-Roon gives extensions no stable track ID to hold on to. A browse `item_key` is a cursor
-into a browse session and expires. A `queue_item_id` exists only while the track is
-queued, and has no counterpart on a browse item. So identity is rebuilt from what both
-sides carry, and they carry different things:
+Roon gives extensions no stable track ID. A browse `item_key` expires with the browse
+session, and a `queue_item_id` exists only while the track is queued. So a track is
+recognised by what each side carries:
 
-| | title | artist | length |
-| --- | --- | --- | --- |
-| Search result (browse item) | yes | yes | **no** |
-| Queue item | yes | yes | yes |
-| Now playing | yes | yes | yes |
+| | Title | Credits | Artwork | Length |
+| --- | --- | --- | --- | --- |
+| Search result | yes | performers and writers | yes | **no** |
+| Queue item, now playing | yes | performers | yes | yes |
 
-A search result has no length, so the length and hash can't be known when a guest taps
-Request. They're learned a moment later: Roon reports a queue `insert` for the track it
-just added, with the real `queue_item_id` and length, and that item is matched back to the
-pending request. From then on:
+Opening a search result, or its action list, adds nothing: no album, length or id.
 
-- attribution works from the queue item id rather than a title guess;
-- the hash, `sha1(version-sensitive title, sorted artists, length)` truncated, keeps
-  identifying the track after it leaves the queue and appears in Played.
+The length arrives just after a request. Roon reports a queue `insert` with the real
+`queue_item_id` and length, and it's matched to the pending request. From then on the
+track is known by its queue item id, and once it leaves the queue by its hash:
+`sha1(version-sensitive title, sorted artists, length)`, truncated.
 
 ### Crediting a track
 
-Roon's queue items don't say who added them. Crediting falls through five steps, most
-exact first:
+Roon's queue items don't say who added them. Crediting tries five steps, most exact first:
 
 1. the queue item id;
 2. the hash;
@@ -307,57 +300,41 @@ exact first:
 4. the same song, ignoring version tags;
 5. a title only one recent request has.
 
-A request is bound to its real queue item when Roon reports the insert, which is exact.
-The later steps match on title and artist, ignoring remaster tags, artist separators and
-extra artists. A request whose insert doesn't arrive within a minute (the host cleared
-the queue, say) falls back to title matching.
+A request is bound to its queue item when Roon reports the insert, which is exact. Steps
+3 to 5 match on title and artist, ignoring remaster tags, artist separators and extra
+artists. A request whose insert doesn't arrive within a minute (the host cleared the
+queue, say) falls back to them.
 
 The console logs each request, each queue insert with its length and hash, and each
-track start. That's the place to look when a badge is wrong.
+track start. Look there when a badge is wrong.
 
 ### Duplicates
 
-Duplicates are per recording, not per song: a remaster, a live take or a single edit is
-a fair request even when the original is queued. So the duplicate check stops at step 3
-above, because steps 4 and 5 deliberately treat a remaster as the original.
+A duplicate is the same recording, not the same song: a remaster, a live take, a single
+edit or a cover is a fair request even when the original is queued. `sameRecordingAsQueued`
+(`lib/track-id.js`) decides:
 
-**Artwork tells albums apart.** A search result carries a title, credits and an image
-key, and nothing more: opening it, and opening its action list, repeats the same three.
-No album, length or id. So when one band's versions share a title and credit, as Pere
-Ubu's five "Waiting for Mary"s do, the image key (the album's cover) is the only
-difference. Queue items carry the same key for the same album. With artwork on both
-sides (`sameRecordingAsQueued`):
+1. **The titles must match exactly,** version tags included.
+2. **Then the artwork, when both sides have it.** The image key is the album's cover, and
+   the only thing that tells one album's version from another's. A different cover is
+   another album, so not a duplicate. The same cover is a duplicate, unless no artist is
+   shared (two performers on one compilation).
+3. **Otherwise, the credits.** A search result credits writers too ("FINNEAS, Billie
+   Eilish, 2CELLOS"); a queue item only performers ("Billie Eilish"). So `sharedCredits`
+   treats names on at least half of the results with that title as writers (with fewer
+   than three results, none are), and what's left must include a queued artist. A result crediting
+   only writers is the original, and is compared on all its names.
 
-- **a different cover** is another album, so not a duplicate;
-- **the same cover** is a duplicate, unless no artist is shared: two performers' takes on
-  one compilation.
+Credits come last because they can't tell a band's own versions from a cover: "Pere Ubu"
+and "Pere Ubu, Allen Ravenstine" read just like "Leonard Cohen" and "Jeff Buckley, Leonard
+Cohen".
 
-The credits aren't used then, because they can't tell a band's own versions from a cover.
-"Pere Ubu" and "Pere Ubu, Allen Ravenstine" read exactly like "Leonard Cohen" and "Jeff
-Buckley, Leonard Cohen", and the writer inference below takes Pere Ubu for a writer.
-The cost: the same recording on another album, an original and a compilation say, isn't
-a duplicate. Neither is an album's non-primary version (see
-[Known limitations](#known-limitations)). Roon groups an album's versions, and search
-returns each group once, as its primary version. Without artwork on either side, the credits decide, as below.
+Search marks queued results `in_queue`, so guests always see "In the queue". With Block
+tracks already in the queue on, they're also `blocked`: the page won't offer them, and
+`/api/request` refuses them (`already_queued`).
 
-Search marks every queued result `in_queue`, so guests see "In the queue" whatever the
-setting. `blocked` is set too when Block tracks already in the queue is on: the page then
-won't offer the track, and `/api/request` refuses it (`already_queued`).
-
-Covers aren't duplicates either, which takes some inferring. A search result's subtitle
-credits writers as well as performers ("FINNEAS, Billie Eilish, 2CELLOS"); a queue entry
-credits performers only ("Billie Eilish"). Compared name by name, every cover would share
-its writer with the queued original. So:
-
-- `sharedCredits` (`lib/track-id.js`) treats the names credited on at least half of the
-  guest's results with that title as the writers, when there are three or more results.
-- `sameRecordingAsQueued` compares only what's left: that version's performers.
-- A result crediting only writers is the original, and is compared on all its names.
-- With fewer than three results, any shared name still counts.
-
-On a real search for "bad guy" (`test/fixtures/`), this took the results marked as
-queued from 24 to the one that was. A real search for "pere ubu waiting for mary", with
-three of its five albums queued, is there too.
+`test/fixtures/` has two real searches: "bad guy", where credits took the results marked
+from 24 to the one queued, and "pere ubu waiting for mary", five albums with three queued.
 
 ## Searching and browse sessions
 
@@ -534,8 +511,8 @@ changing them:
   background. Text fields use `--field-edge`, 3:1 against the page and the field.
 - **Focus survives redraws.** The guest page rebuilds its search results on every
   change, so `renderResults(focusKey)` puts focus back on the row just opened or
-  requested. Results that can't be requested (`blocked`, or just added) are `aria-disabled` rows,
-  not dead buttons.
+  requested. Results that can't be requested (`blocked`, or just added) are
+  `aria-disabled` rows, not dead buttons.
 - **Announce, don't read out.** The results list isn't a live region. A hidden
   `role="status"` line says how many tracks were found (`search.results`, a plural).
 - **Used-up buttons stay reachable.** They're `aria-disabled`, not `disabled`, so a screen
@@ -823,18 +800,15 @@ full replies, so it's for troubleshooting only.
 - **"Roon Radio" is a guess.** Roon doesn't say where a track came from. With Roon Radio
   on for the party zone, any track no guest added is labelled "Roon Radio", including
   tracks the host queues from the Roon app.
-- **Versions that differ only in length look the same before they're queued.** A search
-  result has no length, so an album version and a single edit on the same album, both
-  titled "Hey Jude" by the same artist, can't be told apart at search time, and the
-  second is refused as a duplicate. On different albums the artwork tells them apart.
-  Once both are queued they're distinct and get their own badges.
-- **An album's other versions aren't duplicates.** Roon groups an album's versions under
-  one primary version: copies in the library and on a streaming service, remasters,
-  deluxe editions, other resolutions. Search returns only the primary. The others have
-  their own artwork, so if the host queues one from the album's Versions in Roon, a guest
-  can still request the primary's copy of the same track. Guests' requests always use the
-  primary, so they catch each other. (Seen with an album both in the library and on
-  TIDAL, October 2026; assumed for the other kinds of version.)
+- **Some duplicates can't be seen from search** (see [Duplicates](#duplicates)):
+  - Two versions on one album with the same title and artist, such as an album version
+    and a single edit, look alike, so the second is refused. Once queued, they're told
+    apart by length.
+  - Roon groups an album's versions (library and streaming copies, remasters, deluxe
+    editions) and search shows only the primary. The others have their own artwork, so
+    if the host queues one from Versions in Roon, guests can still request the primary's
+    copy. Guests' requests all use the primary, so they catch each other. (Seen with
+    library and TIDAL copies, October 2026.)
 - **Credits can swap.** Two guests asking for the same recording are credited in the
   order they asked. If Roon reports those two inserts out of order, the badges swap.
 - **A rescan starts a new session.** Tracks added before it keep the name they had then.
