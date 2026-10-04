@@ -96,6 +96,7 @@ Google Sheets, Numbers and Excel's **Data → From Text/CSV** read it correctly.
 | Party mode | On, Paused or Off (see above). |
 | Party zone | Where the music plays. If you pick a speaker that's grouped with others, the whole group plays. |
 | Party name | Shown on the Party Hub. Leave blank to use the zone's name. |
+| Party Hub language | The language of the Party Hub, for every screen showing it. Automatic (the default) follows the screen's browser. Guests' phones always follow their own.|
 | Display playlist download | What the Party Hub shows once **Party mode** is **Off**: a **QR code** guests can scan (the default), a **Link only** to click on the Hub itself, or **Off** for nothing. |
 | Roon profile for guest requests | The Roon profile the tracks are played under. To keep party tracks out of your own history and recommendations, create a profile such as "Guests" in Roon first, then choose it here. Leave it alone to play under your own profile. |
 | Adding tracks | Whether guests can add tracks, and whether a track already in the queue can be added again (covers, live takes, remasters and the same track on another album count as different tracks). |
