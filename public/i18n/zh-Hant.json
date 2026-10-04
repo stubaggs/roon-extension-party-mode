@@ -73,5 +73,6 @@
   "screen.playlist_qr_alt": "播放清單的 QR 碼",
   "screen.closed_title": "點播已結束",
   "screen.closed_text": "感謝大家點播的所有曲目。",
-  "join.expired": "這個 QR 碼已過期。請重新掃描 Party Hub 上的 QR 碼。"
+  "join.expired": "這個 QR 碼已過期。請重新掃描 Party Hub 上的 QR 碼。",
+  "home.hub_link": "開啟 Party Hub"
 }

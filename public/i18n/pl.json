@@ -82,5 +82,6 @@
   "screen.playlist_qr_alt": "Kod QR playlisty",
   "screen.closed_title": "Zamówienia są zamknięte",
   "screen.closed_text": "Dzięki za wszystkie utwory.",
-  "join.expired": "Ten kod wygasł. Zeskanuj ponownie kod z Party Hub."
+  "join.expired": "Ten kod wygasł. Zeskanuj ponownie kod z Party Hub.",
+  "home.hub_link": "Otwórz Party Hub"
 }

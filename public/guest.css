@@ -449,6 +449,13 @@ main {
   padding: 5rem 1.5rem;
 }
 
+.message-link {
+  display: inline-block;
+  margin-top: 1rem;
+  text-decoration: none;
+  white-space: normal;
+}
+
 .locked h1 {
   font-size: 1.6rem;
   letter-spacing: -0.02em;

@@ -73,5 +73,6 @@
   "screen.playlist_qr_alt": "재생 목록 QR 코드",
   "screen.closed_title": "신청이 마감되었습니다",
   "screen.closed_text": "트랙을 신청해 주셔서 감사합니다.",
-  "join.expired": "코드가 만료되었습니다. Party Hub의 코드를 다시 스캔하세요."
+  "join.expired": "코드가 만료되었습니다. Party Hub의 코드를 다시 스캔하세요.",
+  "home.hub_link": "Party Hub 열기"
 }

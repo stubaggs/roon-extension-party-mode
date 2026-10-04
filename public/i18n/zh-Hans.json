@@ -73,5 +73,6 @@
   "screen.playlist_qr_alt": "播放列表的二维码",
   "screen.closed_title": "点播已结束",
   "screen.closed_text": "感谢大家点播的所有曲目。",
-  "join.expired": "此二维码已过期。请重新扫描 Party Hub 上的二维码。"
+  "join.expired": "此二维码已过期。请重新扫描 Party Hub 上的二维码。",
+  "home.hub_link": "打开 Party Hub"
 }

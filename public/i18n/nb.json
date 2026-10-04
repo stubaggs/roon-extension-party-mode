@@ -76,5 +76,6 @@
   "screen.playlist_qr_alt": "QR-kode til spillelisten",
   "screen.closed_title": "Det er stengt for ønsker",
   "screen.closed_text": "Takk for alle sporene.",
-  "join.expired": "Koden har utløpt. Skann koden på Party Hub på nytt."
+  "join.expired": "Koden har utløpt. Skann koden på Party Hub på nytt.",
+  "home.hub_link": "Åpne Party Hub"
 }

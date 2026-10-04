@@ -163,7 +163,13 @@ const set = (values) => Object.assign(roon.settings, values);
 
   await check('the guest page is at /GuestHub, in any case, and no longer at the root', async () => {
     for (const path of ['/GuestHub', '/guesthub']) assert.strictEqual((await get(path)).status, 200, path);
-    assert.strictEqual((await get('/')).status, 404);
+    const res = await get('/', { 'Accept-Language': 'fr' });
+    assert.strictEqual(res.status, 200);
+    assert.strictEqual(res.headers.get('location'), null, 'not a redirect');
+    const html = await res.text();
+    assert.match(html, /<html lang="fr"/);
+    assert.match(html, /<a class="[^"]*" href="\/PartyHub">Ouvrir le Party Hub<\/a>/);
+    assert.doesNotMatch(html, /id="app"/, 'not the guest page');
   });
 
   console.log('\nguest page');
@@ -325,7 +331,7 @@ const set = (values) => Object.assign(roon.settings, values);
   });
 
   await check('pages allow only their own scripts and styles, and guest pages cannot be framed', async () => {
-    for (const path of ['/GuestHub', '/api/party', '/j/not-the-code']) {
+    for (const path of ['/', '/GuestHub', '/api/party', '/j/not-the-code']) {
       const res = await get(path);
       assert.match(res.headers.get('content-security-policy'), /script-src 'self'.*frame-ancestors 'none'/, path);
       assert.strictEqual(res.headers.get('x-frame-options'), 'DENY', path);

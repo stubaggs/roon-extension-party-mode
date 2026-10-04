@@ -73,5 +73,6 @@
   "screen.playlist_qr_alt": "Mã QR cho danh sách phát",
   "screen.closed_title": "Đã ngừng nhận yêu cầu",
   "screen.closed_text": "Cảm ơn vì tất cả các bài.",
-  "join.expired": "Mã này đã hết hạn. Hãy quét lại mã trên Party Hub."
+  "join.expired": "Mã này đã hết hạn. Hãy quét lại mã trên Party Hub.",
+  "home.hub_link": "Mở Party Hub"
 }

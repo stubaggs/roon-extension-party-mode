@@ -82,5 +82,6 @@
   "screen.playlist_qr_alt": "QR-код плейлиста",
   "screen.closed_title": "Замовлення закриті",
   "screen.closed_text": "Дякуємо за всі треки.",
-  "join.expired": "Термін дії коду минув. Відскануйте код на Party Hub ще раз."
+  "join.expired": "Термін дії коду минув. Відскануйте код на Party Hub ще раз.",
+  "home.hub_link": "Відкрити Party Hub"
 }

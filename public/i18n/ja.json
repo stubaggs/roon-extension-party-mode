@@ -73,5 +73,6 @@
   "screen.playlist_qr_alt": "プレイリストの QR コード",
   "screen.closed_title": "リクエストは締め切りました",
   "screen.closed_text": "たくさんのトラックをありがとう。",
-  "join.expired": "このコードは期限切れです。Party Hub のコードをもう一度スキャンしてください。"
+  "join.expired": "このコードは期限切れです。Party Hub のコードをもう一度スキャンしてください。",
+  "home.hub_link": "Party Hub を開く"
 }

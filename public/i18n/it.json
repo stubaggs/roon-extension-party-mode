@@ -76,5 +76,6 @@
   "screen.playlist_qr_alt": "Codice QR per la playlist",
   "screen.closed_title": "Le richieste sono chiuse",
   "screen.closed_text": "Grazie per tutti i brani.",
-  "join.expired": "Questo codice è scaduto. Scansiona di nuovo il codice sul Party Hub."
+  "join.expired": "Questo codice è scaduto. Scansiona di nuovo il codice sul Party Hub.",
+  "home.hub_link": "Apri il Party Hub"
 }

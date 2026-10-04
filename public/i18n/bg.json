@@ -76,5 +76,6 @@
   "screen.playlist_qr_alt": "QR код за плейлиста",
   "screen.closed_title": "Поръчките са затворени",
   "screen.closed_text": "Благодарим за всички записи.",
-  "join.expired": "Кодът е изтекъл. Сканирай отново кода от Party Hub."
+  "join.expired": "Кодът е изтекъл. Сканирай отново кода от Party Hub.",
+  "home.hub_link": "Отвори Party Hub"
 }

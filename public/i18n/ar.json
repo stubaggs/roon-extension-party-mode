@@ -83,5 +83,6 @@
   "screen.playlist_qr_alt": "رمز QR لقائمة التشغيل",
   "screen.closed_title": "أُغلقت الطلبات",
   "screen.closed_text": "شكرًا على كل المقاطع.",
-  "join.expired": "انتهت صلاحية هذا الرمز. امسح الرمز على Party Hub مجددًا."
+  "join.expired": "انتهت صلاحية هذا الرمز. امسح الرمز على Party Hub مجددًا.",
+  "home.hub_link": "افتح Party Hub"
 }

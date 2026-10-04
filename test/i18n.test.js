@@ -50,9 +50,10 @@ function usedKeys() {
   for (const file of ['index.html', 'hub.html']) {
     for (const m of read(file).matchAll(/data-i18n(?:-[a-z-]+)?="([a-z_.]+)"/g)) keys.add(m[1]);
   }
-  // The server's own pages: messagePage(res, lang, 'title.key', 'text.key').
+  // The server's own pages: messagePage(res, lang, 'title.key', 'text.key', { linkKey }).
   const server = fs.readFileSync(path.join(__dirname, '..', 'lib', 'server.js'), 'utf8');
-  for (const m of server.matchAll(/messagePage\(res, lang, '([a-z_.]+)', '([a-z_.]+)'\)/g)) keys.add(m[1]).add(m[2]);
+  for (const m of server.matchAll(/messagePage\(res, [\w.()]+, '([a-z_.]+)', '([a-z_.]+)'/g)) keys.add(m[1]).add(m[2]);
+  for (const m of server.matchAll(/linkKey: '([a-z_.]+)'/g)) keys.add(m[1]);
   return keys;
 }
 

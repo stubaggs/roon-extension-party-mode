@@ -82,5 +82,6 @@
   "screen.playlist_qr_alt": "קוד QR לפלייליסט",
   "screen.closed_title": "הבקשות נסגרו",
   "screen.closed_text": "תודה על כל הרצועות.",
-  "join.expired": "תוקף הקוד פג. סרקו שוב את הקוד ב-Party Hub."
+  "join.expired": "תוקף הקוד פג. סרקו שוב את הקוד ב-Party Hub.",
+  "home.hub_link": "פתיחת ה-Party Hub"
 }

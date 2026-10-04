@@ -76,5 +76,6 @@
   "screen.playlist_qr_alt": "QR-kod till spellistan",
   "screen.closed_title": "Önskemålen är stängda",
   "screen.closed_text": "Tack för alla spår.",
-  "join.expired": "Koden har gått ut. Skanna koden på Party Hub igen."
+  "join.expired": "Koden har gått ut. Skanna koden på Party Hub igen.",
+  "home.hub_link": "Öppna Party Hub"
 }
