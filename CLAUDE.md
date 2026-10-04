@@ -2,11 +2,12 @@
 
 ## Keep the docs current
 
-Every change that affects them updates the docs in the same commit:
+Every change that affects them updates the docs in the same commit, except the README:
 
-- **README.md** is for people installing and running a party. Update it when anything they
-  see or do changes: features, settings (names, defaults, meanings), installing, the guest
-  pages or the Party Hub, troubleshooting. Plain language, no internals.
+- **README.md** is for people installing and running a party, and the owner edits it.
+  Don't change it unless asked. When a change affects anything they see or do (features,
+  settings: names, defaults, meanings; installing, the guest pages or the Party Hub,
+  troubleshooting), remind the owner what the README should add or clarify instead.
 - **Developer.md** is for people working on the code. Update it when how things work
   changes: architecture, files, matching and attribution rules, tests, translations,
   Docker and publishing, known limitations.
