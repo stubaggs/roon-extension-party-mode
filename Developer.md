@@ -406,7 +406,7 @@ party. The Display playlist download setting decides how:
 - `playlist_download` is `'qr'`, `'link'` or `'off'`, read through `playlistDisplay()`,
   which also turns the brief yes/no form into `'qr'` or `'off'`.
 - `/api/hub` passes it as `playlist`. The Hub shows a QR code from
-  `GET /api/playlist-qr.svg` with the link under it, a button, or nothing.
+  `GET /Download/playlist-qr.svg` with the link under it, a button, or nothing.
 - The setting's hint in Roon gives the download address, which `app.js` hands over with
   `setPlaylistUrl()` alongside the website link.
 

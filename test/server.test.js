@@ -122,14 +122,15 @@ const set = (values) => Object.assign(roon.settings, values);
     }
   });
 
-  await check('the playlist\'s old /api address still downloads it', async () => {
+  await check('the playlist\'s old /api addresses still work', async () => {
     const res = await get('/api/playlist.csv');
     assert.strictEqual(res.status, 200);
     assert.match(await res.text(), /^title,artist,album,/);
+    assert.match(await (await get('/api/playlist-qr.svg')).text(), /^<svg/);
   });
 
   await check('the playlist QR code is an SVG, and not the join code', async () => {
-    const playlist = await (await get('/api/playlist-qr.svg')).text();
+    const playlist = await (await get('/Download/playlist-qr.svg')).text();
     const join = await (await get('/api/qr.svg')).text();
     assert.match(playlist, /^<svg/);
     assert.notStrictEqual(playlist, join);

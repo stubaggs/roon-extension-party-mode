@@ -40,7 +40,7 @@
     const qr = el('playlist-qr-offer');
     const showQr = over && data.playlist === 'qr';
     // Loaded each time it appears, so the code follows a change of address or port.
-    if (showQr && qr.hidden) el('playlist-qr').src = `/api/playlist-qr.svg?t=${Date.now()}`;
+    if (showQr && qr.hidden) el('playlist-qr').src = `/Download/playlist-qr.svg?t=${Date.now()}`;
     qr.hidden = !showQr;
     el('playlist-link-offer').hidden = !(over && data.playlist === 'link');
     el('join-link').textContent = data.party_mode === 'paused' ? t('allowance.paused') : t('screen.scan');
