@@ -4,7 +4,7 @@ Let your guests pick the music. They scan a QR code with their phone, search you
 library and streaming services, and add tracks to the party's queue. No app to install, no
 Roon account, and no access to anything else in your Roon setup.
 
-- **Guests add, play next or skip tracks** from their phone, as far as you allow.
+- **Guests add, play next or skip tracks** from their phone, as many as you allow.
 - **Fair shares:** limit how many of each a guest gets, with more earned back over time.
 - **Names on tracks:** guests can give a nickname, shown next to the tracks (or "Anon" if they'd rather not).
 - **The Party Hub** for a TV or tablet: QR code, what's playing and the whole queue.
@@ -73,13 +73,13 @@ Under **Settings → Extensions**, Roon shows Party Mode's status: its Party mod
 party's name and the Party Hub's address, for example:
 
 > Paused: House Party<br>
-> Party Hub at http://192.168.1.73:8338/PartyHub
+> Party Hub at http://192.0.2.10:8338/PartyHub
 
 ## The party's playlist
 
 Once **Party mode** is **Off**, the Party Hub shows the playlist to download (see
 **Display playlist download** below). It's always at the address in that setting's hint,
-such as `http://192.168.1.73:8338/Download/playlist.csv`, which you can open in any browser on
+such as `http://192.0.2.10:8338/Download/playlist.csv`, which you can open in any browser on
 your network.
 
 It's a CSV file of every track queued in the party zone: title, artist, album, length, who
