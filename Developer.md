@@ -386,7 +386,8 @@ started, Roon Radio picks and the host's own additions. Credits are kept when an
 first seen, because turning Party mode off clears attributions; renaming still reaches
 them (see [Names](#names)).
 
-**The file.** `GET /api/playlist.csv` serves it as CSV in the form Soundiiz imports:
+**The file.** `GET /Download/playlist.csv` serves it (`/api/playlist.csv`, its address
+before 1.2.0, still works) as CSV in the form Soundiiz imports:
 
 - lower-case `title`, `artist` and `album` headers; importers ignore the other columns;
 - commas between fields, and Roon's ` / ` between artists written as `, `;

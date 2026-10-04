@@ -114,7 +114,7 @@ const set = (values) => Object.assign(roon.settings, values);
   await check('the download works whatever the setting, as a named CSV file', async () => {
     for (const choice of ['qr', 'link', 'off']) {
       set({ playlist_download: choice });
-      const res = await get('/api/playlist.csv');
+      const res = await get('/Download/playlist.csv');
       assert.strictEqual(res.status, 200, choice);
       assert.match(res.headers.get('content-type'), /^text\/csv/);
       assert.match(res.headers.get('content-disposition'), /attachment; filename="Test Party \d{4}-\d{2}-\d{2}\.csv"/);
@@ -122,12 +122,18 @@ const set = (values) => Object.assign(roon.settings, values);
     }
   });
 
+  await check('the playlist\'s old /api address still downloads it', async () => {
+    const res = await get('/api/playlist.csv');
+    assert.strictEqual(res.status, 200);
+    assert.match(await res.text(), /^title,artist,album,/);
+  });
+
   await check('the playlist QR code is an SVG, and not the join code', async () => {
     const playlist = await (await get('/api/playlist-qr.svg')).text();
     const join = await (await get('/api/qr.svg')).text();
     assert.match(playlist, /^<svg/);
     assert.notStrictEqual(playlist, join);
-    assert.ok(server.playlistUrl().endsWith('/api/playlist.csv'));
+    assert.ok(server.playlistUrl().endsWith('/Download/playlist.csv'));
   });
 
   console.log('\njoining');

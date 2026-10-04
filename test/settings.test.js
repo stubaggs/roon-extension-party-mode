@@ -252,8 +252,8 @@ check('the hint names the download address once it is known', () => {
   const hint = (self) => item(RoonService.prototype._layout.call(self, {}), 'playlist_download').subtitle;
   assert.strictEqual(hint({ _resolveZone: () => null }), 'On the Party Hub when Party mode is Off');
   assert.strictEqual(
-    hint({ _resolveZone: () => null, playlistUrl: 'http://192.168.1.73:8338/api/playlist.csv' }),
-    'On the Party Hub when Party mode is Off\nAlways downloadable at http://192.168.1.73:8338/api/playlist.csv'
+    hint({ _resolveZone: () => null, playlistUrl: 'http://192.168.1.73:8338/Download/playlist.csv' }),
+    'On the Party Hub when Party mode is Off\nAlways downloadable at http://192.168.1.73:8338/Download/playlist.csv'
   );
 });
 

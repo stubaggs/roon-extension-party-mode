@@ -79,7 +79,7 @@ party's name and the Party Hub's address, for example:
 
 Once **Party mode** is **Off**, the Party Hub shows the playlist to download (see
 **Display playlist download** below). It's always at the address in that setting's hint,
-such as `http://192.168.1.73:8338/api/playlist.csv`, which you can open in any browser on
+such as `http://192.168.1.73:8338/Download/playlist.csv`, which you can open in any browser on
 your network.
 
 It's a CSV file of every track queued in the party zone: title, artist, album, length, who

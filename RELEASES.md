@@ -38,6 +38,8 @@ Not released yet. You can try it on the `experimental` branch (see
 - The playing track shows its album, on the guest page and the Party Hub.
 - **Web port** has moved under **Advanced** in Roon's settings, with a hint saying what
   it's for.
+- The playlist download is now at `/Download/playlist.csv`. The old `/api/playlist.csv`
+  address still works.
 
 ## 1.1.1
 
