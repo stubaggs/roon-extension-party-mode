@@ -3,6 +3,68 @@
 What's new in each version of Party Mode, newest first. Roon shows the version you're
 running in its Extensions list.
 
+## 1.2.0
+
+### Party Hub
+
+- The party screen is now the **Party Hub**, at `/PartyHub`. Its browser tab shows the
+  party's name, such as "House Party Hub". Roon's link and status line point there,
+  and old `/roonparty` bookmarks still open it.
+- The playing track shows its album, on the Party Hub and the guest page.
+
+### Guest page
+
+- The guest page is now at `/GuestHub`. The QR code takes guests there as before, but a
+  bookmark or home-screen shortcut to the old address needs a fresh scan.
+- 25 more languages for the guest pages and the Party Hub, 30 in all: Arabic (including
+  Egyptian), Bulgarian, Chinese (Simplified and Traditional), Czech, Danish, Finnish,
+  Greek, Hebrew, Hungarian, Italian, Japanese, Korean, Norwegian, Polish, Portuguese
+  (Portugal and Brazil), Romanian, Russian, Swedish, Thai, Turkish, Ukrainian and
+  Vietnamese. Hebrew and Arabic pages read right to left. The translations were generated
+  by AI, so apologies for any errors; corrections from native speakers are welcome.
+- Guests can choose their page's language with a 🌐 button beside their name tag;
+  otherwise it follows the phone's.
+- Long translations fit narrow phones: buttons wrap instead of running off the screen,
+  and messages use the screen's width. Names in another script (a Hebrew name on an
+  English page, say) stay in the right order.
+- After adding a track, playing one next or skipping, the message shows what's left, as
+  the button does: "Added to the queue · 3 left", "Skipped · in 5 min".
+- Guests stay in as long as they keep using the page. Before, everyone had to scan the
+  code again 8 hours after joining. Now that only happens after 12 hours without using it.
+
+### Settings
+
+- The **Party mode** setting reads **Pause** while the party is on and **Unpause** while
+  it's paused, and says when turning it on starts a new party.
+- Roon's status line always shows the party's state and name, with the Party Hub's
+  address below, for example "Paused: House Party".
+- **Web port** has moved under **Advanced** in Roon's settings, with a hint saying what
+  it's for.
+- The **Display playlist download** hint in Roon gives the playlist's address on a line
+  of its own; it always works, whatever the setting.
+- New defaults for guests: each guest can add 5 tracks to start, earning one back every
+  10 minutes (was 10, every 2 minutes), and play next once an hour (was every 20
+  minutes). Settings you've already saved in Roon stay as they are.
+
+### Search and the playlist
+
+- Search marks tracks already in the queue as **In the queue** even when **Block tracks
+  already in the queue** is off, without stopping guests adding them.
+- Search tells a band's versions of a track on different albums apart. Before, queueing
+  one marked them all as in the queue, and could miss the one actually queued.
+- The playlist download is now at `/Download/playlist.csv`.
+- The party's playlist holds up to 5000 tracks, up from 2000. At a party that runs for
+  weeks, your own and Roon Radio's oldest tracks make room first, before any guest's
+  request.
+
+### Running it
+
+- Run more than one Party Mode against one Core: give each extra copy a name with
+  `ROON_EXTENSION_PARTY_MODE_INSTANCE`, and it shows in Roon as its own extension, such
+  as "Party Mode (Garden)", with its own settings and party zone.
+- The experimental version shows in Roon as "Party Mode (experimental)", a separate
+  extension, so it can run alongside the released one. Give it its own party zone.
+
 ## 1.1.1
 
 - No changes to the extension itself. These release notes are corrected: the environment

@@ -15,7 +15,7 @@
 'use strict';
 
 const assert = require('assert');
-const { PartyPlaylist, playlistFileName, csvCell, defuse } = require('../lib/party-playlist');
+const { PartyPlaylist, playlistFileName, csvCell, defuse, MAX_TRACKS } = require('../lib/party-playlist');
 
 let failures = 0;
 function check(name, fn) {
@@ -153,6 +153,40 @@ check('a name given later reaches the playlist', () => {
   assert.ok(csv[1].includes(',Stu,'), csv[1]);
   assert.ok(csv[2].includes(',Sam,'), csv[2]);
   assert.ok(!playlist.toCsv().includes('g1'), 'no guest refs in the file');
+});
+
+check('a full list drops the host\'s and Roon Radio\'s oldest entries before any guest\'s', () => {
+  const playlist = new PartyPlaylist();
+  // A guest's request first, then entries no guest asked for, past the limit.
+  const credit = (t) => (t.id === 1 ? { requested_by: 'Sam', kind: 'add', guest: 'g1' } : t.id % 2 ? { kind: 'radio' } : null);
+  const queue = [track(1, 'Guest pick')];
+  for (let id = 2; id <= MAX_TRACKS + 11; id += 1) queue.push(track(id, `Track ${id}`));
+  playlist.update('o1', queue, credit);
+  assert.strictEqual(playlist.tracks.length, MAX_TRACKS);
+  assert.strictEqual(playlist.tracks[0].title, 'Guest pick');
+  assert.strictEqual(playlist.tracks[1].title, 'Track 13');
+  assert.strictEqual(playlist.seen.size, MAX_TRACKS, 'seen shrinks with the list');
+});
+
+check('guests\' requests alone past the limit drop the oldest of them', () => {
+  const playlist = new PartyPlaylist();
+  const queue = [];
+  for (let id = 1; id <= MAX_TRACKS + 3; id += 1) queue.push(track(id, `Track ${id}`));
+  playlist.update('o1', queue, () => ({ requested_by: 'Sam', kind: 'add', guest: 'g1' }));
+  assert.strictEqual(playlist.tracks.length, MAX_TRACKS);
+  assert.strictEqual(playlist.tracks[0].title, 'Track 4');
+  assert.strictEqual(playlist.seen.size, MAX_TRACKS);
+});
+
+check('very long titles, artists and albums are cut short', () => {
+  const playlist = new PartyPlaylist();
+  const long = 'x'.repeat(5000);
+  playlist.update('o1', [track(1, long, { artist: long, album: long })], nobody);
+  const [entry] = playlist.tracks;
+  for (const field of ['title', 'artist', 'album']) {
+    assert.strictEqual(entry[field].length, 200, field);
+    assert.ok(entry[field].endsWith('…'), field);
+  }
 });
 
 console.log(failures ? `\n${failures} failing` : '\nall passing');

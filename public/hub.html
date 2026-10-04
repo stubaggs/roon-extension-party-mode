@@ -3,11 +3,11 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title data-i18n="page.screen_title">RoonParty</title>
+    <title>Party Hub</title>
     <link rel="stylesheet" href="/party.css" />
-    <link rel="stylesheet" href="/roonparty.css" />
+    <link rel="stylesheet" href="/hub.css" />
   </head>
-  <body class="roonparty">
+  <body class="hub">
     <div class="stage">
       <section class="join">
         <h1 id="party-name" data-i18n="party.default_name">Party</h1>
@@ -20,9 +20,9 @@
         <div id="join-closed" class="join-closed" hidden>
           <div id="playlist-qr-offer" hidden>
             <img id="playlist-qr" class="qr" alt="QR code for the playlist" data-i18n-alt="screen.playlist_qr_alt" />
-            <p class="join-copy"><a class="join-link" href="/api/playlist.csv" download data-i18n="screen.scan_playlist">Scan to download the playlist</a></p>
+            <p class="join-copy"><a class="join-link" href="/Download/playlist.csv" download data-i18n="screen.scan_playlist">Scan to download the playlist</a></p>
           </div>
-          <a id="playlist-link-offer" class="pill pill-primary download" href="/api/playlist.csv" download hidden data-i18n="screen.download_playlist">Download the playlist</a>
+          <a id="playlist-link-offer" class="pill pill-primary download" href="/Download/playlist.csv" download hidden data-i18n="screen.download_playlist">Download the playlist</a>
         </div>
       </section>
 
@@ -38,6 +38,7 @@
             <p class="current-label" id="current-label" data-i18n="playing.now">Playing now</p>
             <h2 class="current-title" id="current-title" data-i18n="playing.nothing">Nothing playing</h2>
             <p class="current-artist muted" id="current-artist"></p>
+            <p class="current-album muted" id="current-album" hidden></p>
             <p class="current-who" id="current-who" hidden></p>
           </div>
         </div>
@@ -49,7 +50,7 @@
       </section>
     </div>
     <script src="/i18n.js"></script>
-    <script src="/roonparty.js"></script>
-    <script src="/marquee.js" data-marquee=".current-title, .current-artist, .list .t, .list .a"></script>
+    <script src="/hub.js"></script>
+    <script src="/marquee.js" data-marquee=".current-title, .current-artist, .current-album, .list .t, .list .a"></script>
   </body>
 </html>

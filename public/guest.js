@@ -201,8 +201,10 @@
       row.append(img, text, state);
       results.appendChild(row);
 
-      // Already queued: still in the list, and reachable, but not a working button.
-      if (track.in_queue || track.added) {
+      // Added, or queued while duplicates are blocked: still in the list, and
+      // reachable, but not a working button. Queued but not blocked, it is
+      // marked and can still be requested.
+      if (track.blocked || track.added) {
         row.setAttribute('aria-disabled', 'true');
         continue;
       }
@@ -314,7 +316,7 @@
       expandedKey = null;
       renderAllowances();
       renderResults(track.key);
-      toast(mode === 'next' ? t('toast.queued_next') : t('toast.queued'));
+      toast(doneMessage(mode === 'next' ? 'toast.queued_next' : 'toast.queued', mode));
     } catch (err) {
       button.disabled = false;
       const detail = err.body || {};
@@ -328,13 +330,22 @@
     }
   }
 
+  /**
+   * What a done request or skip says, with what's left on that button, as
+   * the button shows it: "Added to the queue · 3 left", "Skipped · in 5 min".
+   */
+  function doneMessage(key, bucket) {
+    const note = allowanceNote(bucket).text;
+    return note ? `${t(key)} · ${note}` : t(key);
+  }
+
   el('skip').addEventListener('click', async () => {
     if (isSpent(el('skip'))) return toast(spentMessage('skip'));
     try {
       const body = await api('/api/skip', { method: 'POST' });
       party.allowances = body.allowances;
       renderAllowances();
-      toast(t('toast.skipped'));
+      toast(doneMessage('toast.skipped', 'skip'));
     } catch (err) {
       const detail = err.body || {};
       if (err.message === 'paused') toast(t('allowance.paused'));
@@ -351,6 +362,10 @@
     const playing = snapshot.now_playing;
     el('playing-title').textContent = playing ? playing.title : t('playing.nothing');
     el('playing-artist').textContent = playing ? playing.artist : '';
+    // Already in what Roon sends; radio streams and some tracks have none.
+    const album = el('playing-album');
+    album.textContent = (playing && playing.album) || '';
+    album.hidden = !album.textContent;
     const who = el('playing-who');
     who.hidden = !(playing && playing.kind);
     who.textContent = who.hidden ? '' : creditText(playing);
@@ -533,6 +548,75 @@
 
   el('name-chip').addEventListener('click', () => askName(true));
 
+  // ---------------------------------------------------------------- language
+
+  // The guest's choice is a cookie the server reads when it sends the page's
+  // text (lib/i18n.js), so the page reloads to switch. A year, like a setting.
+  const LANG_COOKIE = 'party_lang';
+  const languageDialog = el('language');
+  let languageOpener = null;
+
+  /** Just a globe; the language's name is in its label and tooltip. */
+  function renderLanguageChip() {
+    const chip = el('lang-chip');
+    const name = t('_language');
+    chip.textContent = '🌐';
+    chip.title = name;
+    chip.setAttribute('aria-label', t('lang.change', { language: name }));
+  }
+
+  function chooseLanguage(code) {
+    document.cookie = code
+      ? `${LANG_COOKIE}=${encodeURIComponent(code)}; path=/; max-age=31536000; samesite=lax`
+      : `${LANG_COOKIE}=; path=/; max-age=0; samesite=lax`;
+    location.reload();
+  }
+
+  /** "Automatic" (the phone's language), then every language by its own name. */
+  function openLanguages() {
+    const list = el('language-list');
+    list.innerHTML = '';
+    const option = (label, code, current, lang) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.textContent = label;
+      // Each name is read in its own language, and written in its own direction.
+      if (lang) button.lang = lang;
+      button.dir = 'auto';
+      if (current) button.setAttribute('aria-current', 'true');
+      button.addEventListener('click', () => (current ? closeLanguages() : chooseLanguage(code)));
+      list.appendChild(button);
+      return button;
+    };
+    const automatic = option(t('lang.automatic'), null, !window.I18N.chosen);
+    let current = automatic;
+    for (const language of window.I18N.languages) {
+      const isCurrent = window.I18N.chosen && language.code === window.I18N.lang;
+      const button = option(language.name, language.code, isCurrent, language.code);
+      if (isCurrent) current = button;
+    }
+    languageOpener = document.activeElement;
+    app.inert = true;
+    languageDialog.hidden = false;
+    current.focus();
+  }
+
+  function closeLanguages() {
+    languageDialog.hidden = true;
+    app.inert = false;
+    if (languageOpener && languageOpener !== document.body) languageOpener.focus();
+    languageOpener = null;
+  }
+
+  el('lang-chip').addEventListener('click', openLanguages);
+  el('language-cancel').addEventListener('click', closeLanguages);
+  languageDialog.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      closeLanguages();
+    }
+  });
+
   /** First visit asks; a remembered name (or a remembered skip) is applied quietly. */
   async function settleName() {
     if (party.guest_name) return;
@@ -559,6 +643,7 @@
     else delete skip.dataset.bucket;
     renderAllowances();
     renderNameChip();
+    renderLanguageChip();
 
     // boot() runs again when the party settings change; set up the rest once.
     if (started) return;

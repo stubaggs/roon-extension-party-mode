@@ -24,7 +24,10 @@
   }
 
   function render(data) {
-    el('party-name').textContent = data.party_name || t('party.default_name');
+    const name = data.party_name || t('party.default_name');
+    el('party-name').textContent = name;
+    // "EX5 Test-o-rama Hub" in the tab, a bookmark or on a tablet's home screen.
+    document.title = t('page.hub_title', { name }).replace(/[\u2068\u2069]/g, '');
     if (data.join_url) el('join-link').href = data.join_url;
     // Party mode off ends the party: no QR code that no longer works, but
     // the playlist, as a QR code or a link as the host chose, and "Requests
@@ -37,7 +40,7 @@
     const qr = el('playlist-qr-offer');
     const showQr = over && data.playlist === 'qr';
     // Loaded each time it appears, so the code follows a change of address or port.
-    if (showQr && qr.hidden) el('playlist-qr').src = `/api/playlist-qr.svg?t=${Date.now()}`;
+    if (showQr && qr.hidden) el('playlist-qr').src = `/Download/playlist-qr.svg?t=${Date.now()}`;
     qr.hidden = !showQr;
     el('playlist-link-offer').hidden = !(over && data.playlist === 'link');
     el('join-link').textContent = data.party_mode === 'paused' ? t('allowance.paused') : t('screen.scan');
@@ -45,6 +48,10 @@
     const playing = data.now_playing;
     el('current-title').textContent = playing ? playing.title : t('playing.nothing');
     el('current-artist').textContent = playing ? playing.artist : '';
+    // Already in what Roon sends; radio streams and some tracks have none.
+    const album = el('current-album');
+    album.textContent = (playing && playing.album) || '';
+    album.hidden = !album.textContent;
     const who = el('current-who');
     who.hidden = !(playing && playing.kind);
     const radio = !who.hidden && playing.kind === 'radio';
@@ -101,7 +108,7 @@
   }
 
   async function refresh() {
-    const res = await fetch('/api/roonparty');
+    const res = await fetch('/api/hub');
     if (res.ok) render(await res.json());
   }
 

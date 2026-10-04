@@ -33,15 +33,15 @@ function publishLinks() {
     roon.setStatusLine(startError);
     return;
   }
-  roon.setWebsite(server.roonpartyUrl());
+  roon.setWebsite(server.hubUrl());
   roon.setPlaylistUrl(server.playlistUrl());
-  roon.setStatusLine(`RoonParty at ${server.roonpartyUrl()}${portNote}`);
+  roon.setStatusLine(`Party Hub at ${server.hubUrl()}${portNote}`);
 }
 
 function logLinks() {
-  console.log(`Party Mode listening on port ${server.port}`);
+  console.log(`${roon.api.extension_reginfo.display_name} listening on port ${server.port}`);
   console.log(`Guest link: ${server.guestUrl()}`);
-  console.log(`RoonParty:  ${server.roonpartyUrl()}`);
+  console.log(`Party Hub:  ${server.hubUrl()}`);
 }
 
 roon.on('core_paired', publishLinks);
@@ -77,7 +77,7 @@ roon.on('settings_changed', (settings) => {
 });
 
 // Start Roon discovery once the web server knows its port, so the link Roon
-// shows for the extension points at the RoonParty screen from the first pairing.
+// shows for the extension points at the Party Hub from the first pairing.
 // If the configured port is taken (another app, or an old copy still running),
 // use the next free one rather than failing, and say so. If none is free, still
 // connect to Roon, so the host can pick another port in the settings.

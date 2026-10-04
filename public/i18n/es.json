@@ -1,7 +1,7 @@
 {
   "_language": "Español",
   "page.title": "Añadir una pista",
-  "page.screen_title": "RoonParty",
+  "page.hub_title": "{name} Hub",
   "party.default_name": "Fiesta",
   "playing.now": "Sonando ahora",
   "playing.paused": "En pausa",
@@ -64,8 +64,11 @@
   "name.go": "¡Vamos!",
   "name.skip": "Omitir",
   "name.cancel": "Cancelar",
+  "lang.title": "Idioma",
+  "lang.automatic": "Automático",
+  "lang.change": "Idioma: {language}. Cambiar",
   "locked.title": "Vuelve a escanear el código",
-  "locked.text": "Este enlace solo funciona después de escanear el código de la pantalla de la fiesta. Pide al anfitrión que lo muestre.",
+  "locked.text": "Este enlace solo funciona después de escanear el código del Party Hub. Pide al anfitrión que lo muestre.",
   "screen.scan": "Escanea para añadir una pista",
   "screen.qr_alt": "Código QR de la página de invitados",
   "screen.download_playlist": "Descargar la lista",
@@ -73,5 +76,5 @@
   "screen.playlist_qr_alt": "Código QR de la lista",
   "screen.closed_title": "Ya no se aceptan peticiones",
   "screen.closed_text": "Gracias por todas las pistas.",
-  "join.expired": "Ese código ha caducado. Vuelve a escanear el código de la pantalla."
+  "join.expired": "Ese código ha caducado. Vuelve a escanear el código del Party Hub."
 }

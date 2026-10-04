@@ -11,6 +11,6 @@ updates:
       prefix: "Docker base image"
     ignore:
       # Node 24 has no 32-bit ARM images, which the build still targets.
-      # Moving to it is a deliberate change (see Developer.md), not an automatic bump.
+      # Moving to it is a deliberate change (see DEVELOPER.md), not an automatic bump.
       - dependency-name: node
         update-types: ["version-update:semver-major"]

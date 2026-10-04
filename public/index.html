@@ -10,8 +10,9 @@
   </head>
   <body>
     <main id="app" hidden>
-      <!-- Who the guest's tracks are credited to; tap to change. -->
+      <!-- Top right: the page's language (a globe) and who the guest's tracks are credited to; tap to change. -->
       <div class="topbar">
+        <button class="name-chip lang-chip" id="lang-chip" type="button"></button>
         <button class="name-chip" id="name-chip" type="button"></button>
       </div>
 
@@ -21,6 +22,7 @@
           <p class="playing-label" id="playing-label" data-i18n="playing.now">Playing now</p>
           <h1 class="playing-title" id="playing-title" data-i18n="playing.nothing_yet">Nothing yet</h1>
           <p class="playing-artist muted" id="playing-artist"></p>
+          <p class="playing-album muted" id="playing-album" hidden></p>
           <p class="playing-who" id="playing-who" hidden></p>
         </div>
         <button class="pill pill-ghost skip" id="skip" data-i18n="skip.button" hidden>Skip</button>
@@ -29,6 +31,7 @@
       <div class="searchbar">
         <input
           id="search"
+          dir="auto"
           type="search"
           inputmode="search"
           autocomplete="off"
@@ -64,7 +67,7 @@
     <div id="locked" class="locked" hidden>
       <h1 data-i18n="locked.title">Scan the code again</h1>
       <p class="muted" data-i18n="locked.text">
-        This link only works after scanning the code on the party screen. Ask the host to show it.
+        This link only works after scanning the code on the Party Hub. Ask the host to show it.
       </p>
     </div>
 
@@ -80,6 +83,7 @@
         <p class="muted" data-i18n="name.explain">Your name shows next to the tracks you add, so everyone knows who to thank.</p>
         <input
           id="nickname-input"
+          dir="auto"
           type="text"
           maxlength="24"
           autocomplete="nickname"
@@ -97,10 +101,20 @@
       </form>
     </div>
 
+    <div class="nickname-backdrop" id="language" hidden>
+      <div class="nickname" role="dialog" aria-modal="true" aria-labelledby="language-title">
+        <h2 id="language-title" data-i18n="lang.title">Language</h2>
+        <div class="language-list" id="language-list"></div>
+        <div class="nickname-actions">
+          <button class="pill pill-ghost" id="language-cancel" type="button" data-i18n="name.cancel">Cancel</button>
+        </div>
+      </div>
+    </div>
+
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
     <script src="/i18n.js"></script>
     <script src="/guest.js"></script>
-    <script src="/marquee.js" data-marquee=".playing-title, .playing-artist, .row-title, .row-sub"></script>
+    <script src="/marquee.js" data-marquee=".playing-title, .playing-artist, .playing-album, .row-title, .row-sub"></script>
   </body>
 </html>

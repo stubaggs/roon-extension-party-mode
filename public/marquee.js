@@ -27,7 +27,7 @@
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
   // When a page redraws a name that was already scrolling, carry on from where
-  // it was instead of starting over (the RoonParty screen redraws every 30s).
+  // it was instead of starting over (the Party Hub redraws every 30s).
   const started = new Map();
   // Names that have had their turn; they keep their "…" until they leave the page.
   const finished = new Set();
@@ -66,7 +66,9 @@
     const text = target.textContent;
     if (!started.has(text)) started.set(text, performance.now());
     const elapsed = (performance.now() - started.get(text)) / 1000;
-    inner.style.setProperty('--marquee-shift', `${-shift}px`);
+    // Left to show the end of the name; right on a right-to-left page.
+    const rtl = getComputedStyle(target).direction === 'rtl';
+    inner.style.setProperty('--marquee-shift', `${rtl ? shift : -shift}px`);
     inner.style.setProperty('--marquee-time', `${seconds.toFixed(2)}s`);
     inner.style.animationDelay = `${-elapsed.toFixed(2)}s`;
     inner.addEventListener('animationend', () => {

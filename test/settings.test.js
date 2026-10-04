@@ -15,7 +15,7 @@
 'use strict';
 
 const assert = require('assert');
-const { RoonService, describeZone, normaliseInteger, partyName, configWritable } = require('../lib/roon-service');
+const { RoonService, describeZone, normaliseInteger, partyName, configWritable, extensionIdentity, statusText } = require('../lib/roon-service');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
@@ -146,11 +146,99 @@ const item = (result, setting) => {
   return all.find((entry) => entry.setting === setting);
 };
 
+check('guest defaults: 5 adds every 10 min, play next hourly, skipping off', () => {
+  const { values } = layout({});
+  assert.deepStrictEqual(
+    [values.allow_add, values.add_limit, values.add_refill, values.allow_next, values.next_limit, values.next_refill],
+    [true, 5, 10, true, 1, 60]
+  );
+  assert.deepStrictEqual([values.allow_skip, values.skip_limit, values.skip_refill, values.prevent_duplicates], [false, 1, 60, true]);
+});
+
+check('saved allowances are kept over the defaults', () => {
+  const { values } = layout({ add_limit: 10, add_refill: 2, next_refill: 20 });
+  assert.deepStrictEqual([values.add_limit, values.add_refill, values.next_refill], [10, 2, 20]);
+});
+
 check('party mode is first, with on, paused and off', () => {
   const result = layout({});
   assert.strictEqual(result.layout[0].setting, 'enabled');
   assert.strictEqual(result.layout[0].title, 'Party mode');
   assert.deepStrictEqual(result.layout[0].values.map((v) => v.value), [true, 'paused', false]);
+});
+
+check("Roon's status line: the party's name, the mode and the Hub's address, in every mode", () => {
+  const hub = 'Party Hub at http://192.0.2.10:8338/PartyHub';
+  assert.strictEqual(statusText('House Party', 'on', hub), `On: House Party\n${hub}`);
+  assert.strictEqual(statusText('House Party', 'paused', hub), `Paused: House Party\n${hub}`);
+  assert.strictEqual(statusText('House Party', 'off', hub), `Off: House Party\n${hub}`);
+  assert.strictEqual(statusText('Kitchen', 'on', ''), 'On: Kitchen');
+});
+
+check('the status line uses the party name, falling back to the zone, with the address', () => {
+  const said = [];
+  const self = {
+    svcStatus: { set_status: (message) => said.push(message) },
+    configWritable: true,
+    core: {},
+    zone: { display_name: 'Kitchen', outputs: [{ output_id: 'o1' }] },
+    statusLine: 'Party Hub at http://h:8338/PartyHub',
+    settings: { zone: { output_id: 'o1', name: 'Kitchen' }, enabled: 'paused', party_name: 'Sam\'s 40th' },
+    get partyName() {
+      return partyName(this.settings, this.zone);
+    }
+  };
+  RoonService.prototype._updateStatus.call(self);
+  self.settings.party_name = '';
+  self.settings.enabled = false;
+  RoonService.prototype._updateStatus.call(self);
+  assert.deepStrictEqual(said, [
+    "Paused: Sam's 40th\nParty Hub at http://h:8338/PartyHub",
+    'Off: Kitchen\nParty Hub at http://h:8338/PartyHub'
+  ]);
+});
+
+check('an experimental version is a separate extension to Roon; a release keeps its id', () => {
+  assert.deepStrictEqual(extensionIdentity('1.1.1'), {
+    extension_id: 'com.stubaggs.party-mode',
+    display_name: 'Party Mode',
+    display_version: '1.1.1'
+  });
+  assert.deepStrictEqual(extensionIdentity('1.2.0-experimental'), {
+    extension_id: 'com.stubaggs.party-mode.experimental',
+    display_name: 'Party Mode (experimental)',
+    display_version: '1.2.0-experimental'
+  });
+});
+
+check('a named copy is its own extension, and the name shows in Roon', () => {
+  assert.deepStrictEqual(extensionIdentity('1.1.1', 'Garden'), {
+    extension_id: 'com.stubaggs.party-mode.garden',
+    display_name: 'Party Mode (Garden)',
+    display_version: '1.1.1'
+  });
+  const dev = extensionIdentity('1.2.0-experimental', 'Dev');
+  assert.strictEqual(dev.extension_id, 'com.stubaggs.party-mode.experimental.dev');
+  assert.strictEqual(dev.display_name, 'Party Mode (experimental, Dev)');
+  assert.strictEqual(extensionIdentity('1.1.1', 'Kitchen & Bar').extension_id, 'com.stubaggs.party-mode.kitchen-bar');
+  assert.strictEqual(extensionIdentity('1.1.1', 'Café').extension_id, 'com.stubaggs.party-mode.cafe');
+  assert.match(extensionIdentity('1.1.1', '厨房').extension_id, /^com\.stubaggs\.party-mode\.[0-9a-f]{8}$/);
+  assert.deepStrictEqual(extensionIdentity('1.1.1', ''), extensionIdentity('1.1.1'), 'unset changes nothing');
+});
+
+check('the choices read as what they do from the mode the party is in now', () => {
+  const titles = (enabled) =>
+    RoonService.prototype._layout.call({ _resolveZone: () => null, settings: { enabled } }, { enabled }).layout[0].values.map((v) => v.title.split(' — ')[0]);
+  assert.deepStrictEqual(titles(true), ['On', 'Pause', 'Off']);
+  assert.deepStrictEqual(titles('paused'), ['Unpause', 'Paused', 'Off']);
+  assert.deepStrictEqual(titles(false), ['On', 'Paused', 'Off']);
+});
+
+check('the wording follows the saved mode, not the one being picked', () => {
+  const self = { _resolveZone: () => null, settings: { enabled: true } };
+  const result = RoonService.prototype._layout.call(self, { enabled: 'paused' });
+  assert.strictEqual(result.layout[0].values[1].title, 'Pause — hold playback and requests');
+  assert.strictEqual(result.values.enabled, 'paused');
 });
 
 check('a saved on/off from "Guest access" carries over, and junk reads as on', () => {
@@ -176,10 +264,10 @@ check('a saved yes/no for the playlist carries over, and junk reads as QR code',
 
 check('the hint names the download address once it is known', () => {
   const hint = (self) => item(RoonService.prototype._layout.call(self, {}), 'playlist_download').subtitle;
-  assert.strictEqual(hint({ _resolveZone: () => null }), 'On the party screen when Party mode is Off');
+  assert.strictEqual(hint({ _resolveZone: () => null }), 'On the Party Hub when Party mode is Off');
   assert.strictEqual(
-    hint({ _resolveZone: () => null, playlistUrl: 'http://192.168.1.73:8338/api/playlist.csv' }),
-    'On the party screen when Party mode is Off. Always downloadable at http://192.168.1.73:8338/api/playlist.csv'
+    hint({ _resolveZone: () => null, playlistUrl: 'http://192.0.2.10:8338/Download/playlist.csv' }),
+    'On the Party Hub when Party mode is Off\nAlways downloadable at http://192.0.2.10:8338/Download/playlist.csv'
   );
 });
 
@@ -247,12 +335,19 @@ check('browse titles explain themselves in a hint', () => {
   const group = result.layout.find((entry) => entry.type === 'group' && entry.title === 'Advanced');
   assert.ok(group, 'an "Advanced" group');
   assert.strictEqual(group.collapsable, true, 'starts closed');
-  assert.deepStrictEqual(group.items.map((i) => i.setting), ['title_tracks', 'title_add', 'title_next', 'title_profile']);
+  assert.deepStrictEqual(group.items.map((i) => i.setting), ['port', 'title_tracks', 'title_add', 'title_next', 'title_profile']);
   assert.strictEqual(
     item(result, 'title_add').subtitle,
     '"Queue" in English. Usually found automatically on a Core in another language.'
   );
   assert.match(item(result, 'title_tracks').subtitle, /^"Tracks" in English/);
+});
+
+check('the web port sits under Advanced with a two-line hint', () => {
+  const lines = item(layout({}), 'port').subtitle.split('\n');
+  assert.strictEqual(lines.length, 2);
+  assert.strictEqual(lines[0], 'Custom port for Party Mode');
+  assert.match(lines[1], /^Changing it moves/);
 });
 
 check('a title found on the Core shows in its hint', () => {

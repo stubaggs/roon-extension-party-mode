@@ -1,4 +1,4 @@
-.roonparty {
+.hub {
   overflow: hidden;
   height: 100vh;
 }
@@ -151,6 +151,14 @@
   white-space: nowrap;
 }
 
+.current-album {
+  margin: 0.2rem 0 0;
+  font-size: clamp(0.9rem, 1.5vw, 1.3rem);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .current-who {
   display: inline-block;
   margin: 0.8rem 0 0;
@@ -287,7 +295,7 @@
 
 @media (max-width: 720px) {
   /* One column on a phone, and the page scrolls rather than the list. */
-  .roonparty {
+  .hub {
     overflow: auto;
     height: auto;
   }
@@ -305,8 +313,8 @@
   .current {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr);
-    /* The label, then the cover beside title, artist and credit. No row gap:
-       the inherited flex gap would push those three apart. */
+    /* The label, then the cover beside title, artist, album and credit. No row
+       gap: the inherited flex gap would push those apart. */
     gap: 0 1rem;
     align-items: center;
   }
@@ -320,7 +328,7 @@
   }
   .current-art {
     grid-column: 1;
-    grid-row: 2 / span 3;
+    grid-row: 2 / span 4;
   }
   .current-title {
     grid-area: 2 / 2;
@@ -328,8 +336,11 @@
   .current-artist {
     grid-area: 3 / 2;
   }
-  .current-who {
+  .current-album {
     grid-area: 4 / 2;
+  }
+  .current-who {
+    grid-area: 5 / 2;
   }
   .current-who {
     justify-self: start;

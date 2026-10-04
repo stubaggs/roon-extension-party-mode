@@ -92,29 +92,29 @@ const set = (values) => Object.assign(roon.settings, values);
 
   console.log('playlist');
 
-  await check('the party screen is told how to offer it: QR code by default', async () => {
+  await check('the Party Hub is told how to offer it: QR code by default', async () => {
     set({ enabled: false, playlist_download: 'qr' });
-    assert.strictEqual((await (await get('/api/roonparty')).json()).playlist, 'qr');
+    assert.strictEqual((await (await get('/api/hub')).json()).playlist, 'qr');
   });
 
-  await check('link only and off reach the party screen as they are', async () => {
+  await check('link only and off reach the Party Hub as they are', async () => {
     set({ playlist_download: 'link' });
-    assert.strictEqual((await (await get('/api/roonparty')).json()).playlist, 'link');
+    assert.strictEqual((await (await get('/api/hub')).json()).playlist, 'link');
     set({ playlist_download: 'off' });
-    assert.strictEqual((await (await get('/api/roonparty')).json()).playlist, 'off');
+    assert.strictEqual((await (await get('/api/hub')).json()).playlist, 'off');
   });
 
   await check('a yes/no saved before the three choices still reads right', async () => {
     set({ playlist_download: true });
-    assert.strictEqual((await (await get('/api/roonparty')).json()).playlist, 'qr');
+    assert.strictEqual((await (await get('/api/hub')).json()).playlist, 'qr');
     set({ playlist_download: false });
-    assert.strictEqual((await (await get('/api/roonparty')).json()).playlist, 'off');
+    assert.strictEqual((await (await get('/api/hub')).json()).playlist, 'off');
   });
 
   await check('the download works whatever the setting, as a named CSV file', async () => {
     for (const choice of ['qr', 'link', 'off']) {
       set({ playlist_download: choice });
-      const res = await get('/api/playlist.csv');
+      const res = await get('/Download/playlist.csv');
       assert.strictEqual(res.status, 200, choice);
       assert.match(res.headers.get('content-type'), /^text\/csv/);
       assert.match(res.headers.get('content-disposition'), /attachment; filename="Test Party \d{4}-\d{2}-\d{2}\.csv"/);
@@ -122,12 +122,19 @@ const set = (values) => Object.assign(roon.settings, values);
     }
   });
 
+  await check('the playlist\'s old /api addresses still work', async () => {
+    const res = await get('/api/playlist.csv');
+    assert.strictEqual(res.status, 200);
+    assert.match(await res.text(), /^title,artist,album,/);
+    assert.match(await (await get('/api/playlist-qr.svg')).text(), /^<svg/);
+  });
+
   await check('the playlist QR code is an SVG, and not the join code', async () => {
-    const playlist = await (await get('/api/playlist-qr.svg')).text();
+    const playlist = await (await get('/Download/playlist-qr.svg')).text();
     const join = await (await get('/api/qr.svg')).text();
     assert.match(playlist, /^<svg/);
     assert.notStrictEqual(playlist, join);
-    assert.ok(server.playlistUrl().endsWith('/api/playlist.csv'));
+    assert.ok(server.playlistUrl().endsWith('/Download/playlist.csv'));
   });
 
   console.log('\njoining');
@@ -138,7 +145,7 @@ const set = (values) => Object.assign(roon.settings, values);
     assert.strictEqual(res.status, 403);
     assert.match(res.headers.get('content-type'), /^text\/html/);
     const html = await res.text();
-    assert.match(html, /<html lang="fr">/);
+    assert.match(html, /<html lang="fr" dir="ltr">/);
     assert.match(html, /name="viewport"/);
     assert.match(html, /<h1>Les demandes sont fermées<\/h1>/);
   });
@@ -148,7 +155,7 @@ const set = (values) => Object.assign(roon.settings, values);
     const res = await get('/j/not-the-code');
     assert.strictEqual(res.status, 403);
     const html = await res.text();
-    assert.match(html, /<html lang="en">/);
+    assert.match(html, /<html lang="en" dir="ltr">/);
     assert.match(html, /<h1>Scan the code again<\/h1>/);
     assert.match(html, /That code has expired/);
   });
@@ -157,8 +164,28 @@ const set = (values) => Object.assign(roon.settings, values);
     set({ enabled: true });
     const res = await get(`/j/${guests.joinCode}`);
     assert.strictEqual(res.status, 302);
-    assert.strictEqual(res.headers.get('location'), '/');
+    assert.strictEqual(res.headers.get('location'), '/GuestHub');
     assert.match(res.headers.get('set-cookie'), /^party_sid=/);
+  });
+
+  await check('the session cookie lasts 12 hours and is renewed whenever it is used', async () => {
+    set({ enabled: true });
+    const joined = (await get(`/j/${guests.joinCode}`)).headers.get('set-cookie');
+    assert.match(joined, /Max-Age=43200/);
+    const cookie = joined.split(';')[0];
+    const res = await get('/api/party', { Cookie: cookie });
+    assert.strictEqual(res.status, 200);
+    const renewed = res.headers.get('set-cookie') || '';
+    assert.strictEqual(renewed.split(';')[0], cookie, 'the same session');
+    assert.match(renewed, /Max-Age=43200/);
+  });
+
+  await check('the guest page is at /GuestHub, in any case, and no longer at the root', async () => {
+    for (const path of ['/GuestHub', '/guesthub']) assert.strictEqual((await get(path)).status, 200, path);
+    const html = await (await get('/', { 'Accept-Language': 'fr' })).text();
+    assert.match(html, /<html lang="fr"/);
+    assert.match(html, /<h1>Scannez à nouveau le code<\/h1>/);
+    assert.doesNotMatch(html, /id="app"/, 'not the guest page');
   });
 
   console.log('\nguest page');
@@ -179,7 +206,7 @@ const set = (values) => Object.assign(roon.settings, values);
   });
 
   await check('the guest page shows nothing until it knows which message is right', async () => {
-    const html = await (await get('/')).text();
+    const html = await (await get('/GuestHub')).text();
     assert.match(html, /<main id="app" hidden>/);
     assert.match(html, /<div id="locked" class="locked" hidden>/);
     assert.match(html, /<div id="closed" class="locked" hidden>/);
@@ -189,6 +216,41 @@ const set = (values) => Object.assign(roon.settings, values);
 
   set({ enabled: true, prevent_duplicates: true, allow_add: true, add_limit: 10, allow_skip: true, skip_limit: 1 });
   roon.ready = true;
+
+  await check('search marks a queued track, and blocks it only when duplicates are blocked', async () => {
+    const cookie = await newGuest();
+    roon.queue = [{ queue_item_id: 1, two_line: { line1: 'Waterloo', line2: 'ABBA' } }];
+    const search = async () => (await (await get('/api/search?q=abba', { Cookie: cookie })).json()).results;
+    try {
+      let [waterloo, sos] = await search();
+      assert.deepStrictEqual([waterloo.in_queue, waterloo.blocked], [true, true]);
+      assert.deepStrictEqual([sos.in_queue, sos.blocked], [false, false]);
+      set({ prevent_duplicates: false });
+      [waterloo] = await search();
+      assert.deepStrictEqual([waterloo.in_queue, waterloo.blocked], [true, false]);
+    } finally {
+      roon.queue = [];
+      set({ prevent_duplicates: true });
+    }
+  });
+
+  await check('another album\'s version of a queued track isn\'t blocked, the same one is', async () => {
+    results[0].image_key = 'arrival';
+    roon.queue = [{ queue_item_id: 1, two_line: { line1: 'Waterloo', line2: 'ABBA' }, image_key: 'gold' }];
+    try {
+      let cookie = await newGuest();
+      const [waterloo] = (await (await get('/api/search?q=abba', { Cookie: cookie })).json()).results;
+      assert.deepStrictEqual([waterloo.in_queue, waterloo.blocked], [false, false]);
+      roon.queue[0].image_key = 'arrival';
+      cookie = await newGuest();
+      const res = await post('/api/request', cookie, { key: '10:0', mode: 'add' });
+      assert.strictEqual(res.status, 409);
+      assert.strictEqual((await res.json()).error, 'already_queued');
+    } finally {
+      delete results[0].image_key;
+      roon.queue = [];
+    }
+  });
 
   await check('a key the guest was never sent is refused, and Roon is not asked', async () => {
     const cookie = await newGuest();
@@ -285,7 +347,7 @@ const set = (values) => Object.assign(roon.settings, values);
   });
 
   await check('pages allow only their own scripts and styles, and guest pages cannot be framed', async () => {
-    for (const path of ['/', '/api/party', '/j/not-the-code']) {
+    for (const path of ['/', '/GuestHub', '/api/party', '/j/not-the-code']) {
       const res = await get(path);
       assert.match(res.headers.get('content-security-policy'), /script-src 'self'.*frame-ancestors 'none'/, path);
       assert.strictEqual(res.headers.get('x-frame-options'), 'DENY', path);
@@ -294,11 +356,56 @@ const set = (values) => Object.assign(roon.settings, values);
     }
   });
 
-  await check('the party screen can be shown inside a dashboard', async () => {
-    const res = await get('/roonparty');
+  await check('the Party Hub can be shown inside a dashboard', async () => {
+    const res = await get('/PartyHub');
     assert.match(res.headers.get('content-security-policy'), /script-src 'self'/);
     assert.doesNotMatch(res.headers.get('content-security-policy'), /frame-ancestors/);
     assert.strictEqual(res.headers.get('x-frame-options'), null);
+  });
+
+  console.log('\nParty Hub');
+
+  await check('the Party Hub is at /PartyHub, in any case', async () => {
+    for (const path of ['/PartyHub', '/partyhub']) {
+      const res = await get(path);
+      assert.strictEqual(res.status, 200, path);
+      assert.match(await res.text(), /<script src="\/hub\.js"><\/script>/, path);
+    }
+    assert.ok(server.hubUrl().endsWith('/PartyHub'));
+  });
+
+  await check("the Hub's title is the party's name, before any script runs", async () => {
+    roon.partyName = 'Kate & Sam <3 $& Co';
+    const en = await (await get('/PartyHub')).text();
+    assert.match(en, /<title>Kate &#38; Sam &#60;3 \$&#38; Co Hub<\/title>/);
+    const fr = await (await get('/partyhub', { 'Accept-Language': 'fr' })).text();
+    assert.match(fr, /<html lang="fr" dir="ltr">/);
+    const he = await (await get('/PartyHub', { 'Accept-Language': 'he-IL' })).text();
+    assert.match(he, /<html lang="he" dir="rtl">/);
+    roon.partyName = '';
+    const unnamed = await (await get('/PartyHub', { 'Accept-Language': 'nl' })).text();
+    assert.match(unnamed, /<title>Feest Hub<\/title>/);
+    roon.partyName = 'Test Party';
+  });
+
+  await check("the page's text follows a language the guest chose", async () => {
+    const chosen = await (await get('/i18n.js', { 'Accept-Language': 'fr', Cookie: 'party_lang=ko' })).text();
+    assert.match(chosen, /"lang":"ko"/);
+    assert.match(chosen, /"chosen":true/);
+    const browser = await (await get('/i18n.js', { 'Accept-Language': 'fr' })).text();
+    assert.match(browser, /"lang":"fr"/);
+    assert.match(browser, /"chosen":false/);
+  });
+
+  await check('the old RoonParty address and its data still work', async () => {
+    for (const path of ['/roonparty', '/roonparty.html']) {
+      const res = await get(path);
+      assert.strictEqual(res.status, 301, path);
+      assert.strictEqual(res.headers.get('location'), '/PartyHub', path);
+    }
+    const old = await get('/api/roonparty');
+    assert.strictEqual(old.status, 200);
+    assert.ok('party_mode' in (await old.json()));
   });
 
   console.log(failures ? `\n${failures} failed` : '\nall passed');

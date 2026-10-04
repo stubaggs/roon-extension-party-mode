@@ -36,7 +36,7 @@ function configuredPort() {
 
 function answers(port) {
   return new Promise((resolve) => {
-    const req = http.get({ host: '127.0.0.1', port, path: '/api/roonparty', timeout: 1500 }, (res) => {
+    const req = http.get({ host: '127.0.0.1', port, path: '/api/hub', timeout: 1500 }, (res) => {
       res.resume();
       resolve(res.statusCode === 200);
     });

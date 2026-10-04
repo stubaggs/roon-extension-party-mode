@@ -1,6 +1,6 @@
 {
   "name": "roon-extension-party-mode",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "Roon Extension that lets party guests search your library and add tracks to a zone's queue from their phone",
   "main": "app.js",
   "repository": {

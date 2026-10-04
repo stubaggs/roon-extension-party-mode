@@ -191,6 +191,23 @@ function fakeRoon(profiles, menuTitle = 'Profile') {
     assert.strictEqual(found.length, 1);
   });
 
+  await check('nothing is kept per guest once their searches finish and their session ends', async () => {
+    const { GuestStore } = require('../lib/guests');
+    const core = fakeBrowseCore({ categories: { Tracks: tracks } });
+    const roon = serviceFor(core, { guest_profile: 'Party' });
+    const guests = new GuestStore();
+    guests.onDrop = (id) => roon.forgetSession(id);
+    const one = guests.create();
+    const two = guests.create();
+    await Promise.all([roon.search(one.id, 'abba'), roon.search(one.id, 'queen'), roon.search(two.id, 'abba')]);
+    assert.strictEqual(roon.latestSearch.size, 0, 'no finished searches kept');
+    assert.strictEqual(roon.profileSessions.size, 2);
+    guests._drop(one.id);
+    assert.deepStrictEqual([...roon.profileSessions.keys()], [two.id]);
+    guests.clear();
+    assert.strictEqual(roon.profileSessions.size, 0);
+  });
+
   console.log(failures ? `\n${failures} failing` : '\nall passing');
   process.exit(failures ? 1 : 0);
 })();

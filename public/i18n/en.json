@@ -1,7 +1,7 @@
 {
   "_language": "English",
   "page.title": "Add a track",
-  "page.screen_title": "RoonParty",
+  "page.hub_title": "{name} Hub",
   "party.default_name": "Party",
   "playing.now": "Playing now",
   "playing.paused": "Paused",
@@ -64,8 +64,11 @@
   "name.go": "Let's go",
   "name.skip": "Skip",
   "name.cancel": "Cancel",
+  "lang.title": "Language",
+  "lang.automatic": "Automatic",
+  "lang.change": "Language: {language}. Change",
   "locked.title": "Scan the code again",
-  "locked.text": "This link only works after scanning the code on the party screen. Ask the host to show it.",
+  "locked.text": "This link only works after scanning the code on the Party Hub. Ask the host to show it.",
   "screen.scan": "Scan to add a track",
   "screen.qr_alt": "QR code for the guest page",
   "screen.download_playlist": "Download the playlist",
@@ -73,5 +76,5 @@
   "screen.playlist_qr_alt": "QR code for the playlist",
   "screen.closed_title": "Requests are closed",
   "screen.closed_text": "Thanks for all the tracks.",
-  "join.expired": "That code has expired. Scan the code on the screen again."
+  "join.expired": "That code has expired. Scan the code on the Party Hub again."
 }

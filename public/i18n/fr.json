@@ -1,7 +1,7 @@
 {
   "_language": "Français",
   "page.title": "Ajouter un morceau",
-  "page.screen_title": "RoonParty",
+  "page.hub_title": "{name} Hub",
   "party.default_name": "Soirée",
   "playing.now": "En cours de lecture",
   "playing.paused": "En pause",
@@ -64,8 +64,11 @@
   "name.go": "C'est parti",
   "name.skip": "Passer",
   "name.cancel": "Annuler",
+  "lang.title": "Langue",
+  "lang.automatic": "Automatique",
+  "lang.change": "Langue : {language}. Modifier",
   "locked.title": "Scannez à nouveau le code",
-  "locked.text": "Ce lien ne fonctionne qu'après avoir scanné le code affiché sur l'écran de la soirée. Demandez à l'hôte de l'afficher.",
+  "locked.text": "Ce lien ne fonctionne qu'après avoir scanné le code affiché sur le Party Hub. Demandez à l'hôte de l'afficher.",
   "screen.scan": "Scannez pour ajouter un morceau",
   "screen.qr_alt": "Code QR de la page des invités",
   "screen.download_playlist": "Télécharger la playlist",
@@ -73,5 +76,5 @@
   "screen.playlist_qr_alt": "Code QR de la playlist",
   "screen.closed_title": "Les demandes sont fermées",
   "screen.closed_text": "Merci pour tous les morceaux.",
-  "join.expired": "Ce code a expiré. Scannez à nouveau le code affiché à l'écran."
+  "join.expired": "Ce code a expiré. Scannez à nouveau le code affiché sur le Party Hub."
 }

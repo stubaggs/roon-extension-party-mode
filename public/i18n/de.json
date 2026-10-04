@@ -1,7 +1,7 @@
 {
   "_language": "Deutsch",
   "page.title": "Titel hinzufügen",
-  "page.screen_title": "RoonParty",
+  "page.hub_title": "{name} Hub",
   "party.default_name": "Party",
   "playing.now": "Läuft gerade",
   "playing.paused": "Pausiert",
@@ -64,8 +64,11 @@
   "name.go": "Los geht's",
   "name.skip": "Überspringen",
   "name.cancel": "Abbrechen",
+  "lang.title": "Sprache",
+  "lang.automatic": "Automatisch",
+  "lang.change": "Sprache: {language}. Ändern",
   "locked.title": "Scanne den Code noch einmal",
-  "locked.text": "Dieser Link funktioniert erst, nachdem du den Code auf dem Party-Bildschirm gescannt hast. Bitte den Gastgeber, ihn zu zeigen.",
+  "locked.text": "Dieser Link funktioniert erst, nachdem du den Code auf dem Party Hub gescannt hast. Bitte den Gastgeber, ihn zu zeigen.",
   "screen.scan": "Scannen, um einen Titel hinzuzufügen",
   "screen.qr_alt": "QR-Code für die Gästeseite",
   "screen.download_playlist": "Die Playlist herunterladen",
@@ -73,5 +76,5 @@
   "screen.playlist_qr_alt": "QR-Code für die Playlist",
   "screen.closed_title": "Keine Wünsche mehr",
   "screen.closed_text": "Danke für all die Titel.",
-  "join.expired": "Dieser Code ist abgelaufen. Scanne den Code auf dem Bildschirm noch einmal."
+  "join.expired": "Dieser Code ist abgelaufen. Scanne den Code auf dem Party Hub noch einmal."
 }

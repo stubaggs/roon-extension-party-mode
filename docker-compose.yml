@@ -10,7 +10,9 @@ services:
     network_mode: host
     restart: unless-stopped
     environment:
-      - ROON_EXTENSION_PARTY_MODE_PORT=8338   # port to start on, until one is saved in Roon
+      # The first port only: once settings are saved in Roon (even just choosing the
+      # zone), change it with Web port there. A busy port falls back to the next free one.
+      - ROON_EXTENSION_PARTY_MODE_PORT=8338
       # - ROON_EXTENSION_PARTY_MODE_DEBUG=1   # detailed log, including every message to and from Roon
     volumes:
       - ./config.json:/usr/src/app/config.json

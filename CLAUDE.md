@@ -2,12 +2,13 @@
 
 ## Keep the docs current
 
-Every change that affects them updates the docs in the same commit:
+Every change that affects them updates the docs in the same commit, except the README:
 
-- **README.md** is for people installing and running a party. Update it when anything they
-  see or do changes: features, settings (names, defaults, meanings), installing, the guest
-  pages or party screen, troubleshooting. Plain language, no internals.
-- **Developer.md** is for people working on the code. Update it when how things work
+- **README.md** is for people installing and running a party, and the owner edits it.
+  Don't change it unless asked. When a change affects anything they see or do (features,
+  settings: names, defaults, meanings; installing, the guest pages or the Party Hub,
+  troubleshooting), remind the owner what the README should add or clarify instead.
+- **DEVELOPER.md** is for people working on the code. Update it when how things work
   changes: architecture, files, matching and attribution rules, tests, translations,
   Docker and publishing, known limitations.
 - **RELEASES.md** is the user-friendly list of changes, newest version first. Every
@@ -16,25 +17,35 @@ Every change that affects them updates the docs in the same commit:
   changes (refactors, tests, workflows) don't go in. Security fixes are summed up as
   "Various security enhancements", with details only for what a host or guest would
   notice in normal use. A version bump in `package.json`
-  starts a new section; the version in progress says it isn't released yet.
+  starts a new section; the version in progress says it isn't released yet. On `experimental`, `package.json`'s
+  version keeps a suffix (`1.2.0-experimental`) until the release bump: the publish
+  workflow refuses an experimental build without one.
 - If a change touches none of these, say so in the pull request rather than editing the docs.
+- Example addresses in the docs and tests use the TEST-NET-1 range `192.0.2.0/24` (e.g.
+  `http://192.0.2.10:8338/PartyHub`), never a real private address. Tests that bind a
+  port use `127.0.0.1`.
 
 ## Conventions the owner has asked for
 
 - Work on a branch and merge into `main` through a pull request, only when asked.
-- **Never publish the Docker image automatically.** Publishing is manual (Actions →
-  Publish Docker image). Keep the workflow's push and schedule triggers commented out, and
-  put `[skip ci]` in merge commit titles.
+- **Never publish the Docker image, and never set it to publish automatically.** The
+  owner publishes it by hand (Actions → Publish Docker image). Don't run that workflow,
+  keep its push, tags and schedule triggers commented out, and put `[skip ci]` in merge
+  commit titles. After every release, remind the owner to publish it.
 - Bump `version` in `package.json` for a release; Roon shows it as the extension's version.
 - After merging a release into `main`, tag the merge commit with an annotated tag
   `v<version>` (e.g. `v1.1.0`) and push the tag. The workflow's `tags` trigger stays
   commented out, so a tag doesn't publish the Docker image either.
 - Extension settings and the Roon status line stay in English, as in other Roon
   extensions. Guest-facing pages are translated: every page string lives in
-  `public/i18n/<code>.json` (en, fr, de, es, nl), and new page text needs all of them.
+  `public/i18n/<code>.json` (30 languages, listed in DEVELOPER.md), and new page text
+  needs all of them.
 - Say **tracks**, not songs, in everything people see (pages, settings, docs): a track
-  may be a poem or a speech. In translations use the neutral word Roon uses (fr
-  "morceau", de "Titel", es "pista", nl "nummer"). "Song" stays only where it means the
+  may be a poem or a speech. In translations use a neutral word, as Roon does (fr
+  "morceau", de "Titel", es "pista", nl "nummer", it "brano", pt "faixa", sv/nb "spår"/
+  "spor", da "nummer", fi "kappale", pl "utwór", cs "skladba", hu "szám", ro "piesă",
+  ru/uk "трек", bg "запис", el "κομμάτι", tr "parça", vi "bài", he "רצועה", ar "مقطع",
+  ar-EG "تراك", th "แทร็ก", ko "트랙", ja "トラック", zh "曲目"). "Song" stays only where it means the
   song as opposed to one recording of it, as in duplicate matching.
 - Environment variables are named `ROON_EXTENSION_PARTY_MODE_<SETTING>` and read through
   `lib/env.js`, which also accepts the hyphenated `ROON-EXTENSION-PARTY-MODE_` spelling.
