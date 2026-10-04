@@ -399,6 +399,7 @@ A live radio station plays outside Roon's queue and never ends. Seen on a Core i
 
 - **Now playing** is the station's name, with no artist, no length and a position that
   counts up; this station sent no song titles. Seeking, next and previous are blocked.
+  Paused, the zone reports `stopped`, still with no length and no seeking.
 - **The queue stays as it was.** The track the station replaced is still the queue's
   current item. Queue adds after it, at the end; Add Next goes straight after it.
 - **So a request never plays** while the station does, and pressing play only resumes
@@ -422,10 +423,13 @@ Taking over automatically was tried and dropped as too clunky. What the Core did
 
 **Elsewhere:**
 
-- The pages get `now_playing.station`. They label it "Radio station" (`playing.station`),
-  and the guest page hides Skip. Both say requests wait for the host
-  (`queue.waiting_for_host`, worded to suit anything else that holds requests for the
-  host): the guest page in the line under the search box, the Party Hub under the station.
+- The pages get `now_playing.station`. They label it "Radio station" (`playing.station`)
+  while it plays, and "Paused" like a track when it doesn't. The guest page hides Skip
+  (`showSkip()`, which also runs when Party mode changes and the page reloads its
+  settings). Both say requests wait for the host (`queue.waiting_for_host`, worded to
+  suit anything else that holds requests for the host): the guest page in the line under
+  the search box, the Party Hub under the station. While the party is paused, the paused
+  message takes that place on both.
   `POST /api/skip` answers 409 `station` without using the guest's skip, and
   `RoonService.skip()` refuses one too, since Roon would.
 - `requester()` credits a station to nobody: it isn't Roon Radio, and no guest asked for it.

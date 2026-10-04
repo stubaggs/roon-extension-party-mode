@@ -362,8 +362,13 @@
   // ------------------------------------------------------------------- queue
 
   function playingLabel(playing) {
-    if (playing && playing.station) return t('playing.station');
-    return playing && playing.state === 'playing' ? t('playing.now') : t('playing.paused');
+    if (!playing || playing.state !== 'playing') return t('playing.paused');
+    return playing.station ? t('playing.station') : t('playing.now');
+  }
+
+  /** Skip shows when the host allows it, except while a radio station plays (Roon can't skip one). */
+  function showSkip() {
+    el('skip').hidden = !(party && party.capabilities.skip) || onStation;
   }
 
   function renderQueue(snapshot) {
@@ -381,12 +386,12 @@
     who.classList.toggle('next', !who.hidden && playing.kind === 'next');
     el('playing-label').textContent = playingLabel(playing);
     setArt(el('playing-art'), playing && playing.image_key, 144);
-    // Roon can't skip a radio station, so Skip is hidden while one plays, and the
-    // line under the search box says requests wait for the host.
+    // While a radio station plays, Skip is hidden and the line under the search
+    // box says requests wait for the host.
     const station = Boolean(playing && playing.station);
-    if (party && party.capabilities.skip) el('skip').hidden = station;
     if (station !== onStation) {
       onStation = station;
+      showSkip();
       renderAllowances();
     }
 
@@ -653,7 +658,8 @@
     el('closed').hidden = true;
     document.title = party.party_name || t('page.title');
     const skip = el('skip');
-    skip.hidden = !party.capabilities.skip;
+    // Runs again when Party mode changes, with the station still playing.
+    showSkip();
     if (party.capabilities.skip) Object.assign(skip.dataset, { bucket: 'skip', label: 'skip.button', quiet: '' });
     else delete skip.dataset.bucket;
     renderAllowances();

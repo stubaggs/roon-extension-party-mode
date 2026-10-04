@@ -59,13 +59,14 @@
     who.classList.toggle('radio', radio);
     who.classList.toggle('next', !who.hidden && playing.kind === 'next');
     el('current-label').textContent =
-      playing && playing.station
-        ? t('playing.station')
-        : playing && playing.state === 'playing'
-          ? t('playing.now')
-          : t('playing.paused');
-    // Requests wait while a radio station plays; the room should know.
-    el('current-note').hidden = !(playing && playing.station);
+      !playing || playing.state !== 'playing'
+        ? t('playing.paused')
+        : playing.station
+          ? t('playing.station')
+          : t('playing.now');
+    // Requests wait while a radio station plays; the room should know. Paused,
+    // the caption under the QR code already says requests are on hold.
+    el('current-note').hidden = !(playing && playing.station) || data.party_mode === 'paused';
     const image = el('current-art');
     if (playing && playing.image_key) image.src = art(playing.image_key, 400);
     else image.removeAttribute('src');
