@@ -124,7 +124,7 @@ Google Sheets, Numbers and Excel's **Data → From Text/CSV** read it correctly.
 - **The playlist has guests' names in it.** It lists who asked for each track and when.
   With **Display playlist download** on **QR code**, anyone at the party can scan it and
   keep a copy. If that's not what you want, choose **Link only** or **Off**.
-- **The playlist keeps up to 5000 tracks.** For a very long party (!) the oldest tracks added by in Roon/Roon Radio are dropped first.
+- **The playlist keeps up to 5000 tracks.** For a very long party (!) the oldest tracks added by in Roon or by Roon Radio are dropped first.
 - **Keep it at home.** Anyone on your network who has scanned the code can add tracks, and
   the Party Hub needs no code at all. Don't open the port to the internet.
 
