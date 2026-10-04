@@ -9,7 +9,7 @@ Not released yet. You can try it on the `experimental` branch (see
 [Developer.md](Developer.md#running-the-experimental-version)).
 
 - The party screen is now the **Party Hub**, at `/PartyHub`. Its browser tab shows the
-  party's name, such as "EX5 Test-o-rama Hub". Roon's link and status line point there,
+  party's name, such as "House Party Hub". Roon's link and status line point there,
   and old `/roonparty` bookmarks still open it.
 - 25 more languages for the guest pages and the Party Hub, 30 in all: Arabic (including
   Egyptian), Bulgarian, Chinese (Simplified and Traditional), Czech, Danish, Finnish,

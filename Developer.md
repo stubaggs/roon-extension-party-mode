@@ -20,16 +20,18 @@ it installable from inside Roon.
 Roon Core  ──(node-roon-api over the local network)──  app.js
                                                         │
                         RoonApiSettings   host config in Roon's Extension Settings
-                        RoonApiStatus     "On: <party>. Party Hub at http://…"
+                        RoonApiStatus     mode, party name and Party Hub link
                         RoonApiTransport  zone state, queue subscription, skip, play
                         RoonApiBrowse     search + "Queue" / "Add Next" actions
                         RoonApiImage      album art proxy
                                                         │
                                               Express on port 8338
                                                         │
-                                     /             "Reserved"
+                                     /             "Scan the code again"
+                                     /j/<code>     join link → session cookie → /GuestHub
                                      /GuestHub     guest page (phones)
                                      /PartyHub     QR code + queue (TV)
+                                     /Download/…   the party playlist
 ```
 
 | File | What it does |
@@ -37,12 +39,17 @@ Roon Core  ──(node-roon-api over the local network)──  app.js
 | `app.js` | Wires the Roon service to the web server |
 | `lib/roon-service.js` | Pairing, settings layout, search, queue actions, queue subscription |
 | `lib/track-id.js` | Track identity: title and artist normalisation, length, hash |
+| `lib/titles.js` | Finding Roon's browse titles (Tracks, Queue, Add Next, Profile) on a Core in any language |
+| `lib/profiles.js` | Selecting the guest profile in a browse session |
 | `lib/guests.js` | Guest sessions, token-bucket limits, request attribution |
 | `lib/history.js` | Played-tracks list for the guest page |
 | `lib/party-playlist.js` | Everything queued during the party, as the downloadable CSV |
 | `lib/server.js` | REST API, server-sent events, QR code, image proxy |
-| `public/` | Guest page (`index.html`) and the Party Hub (`hub.html`), no build step |
-| `public/i18n/`, `lib/i18n.js` | Page text per language, and picking the language per browser |
+| `lib/ports.js` | Opening the web port, and the next free one when it's busy |
+| `healthcheck.js` | Docker's health check: is the web server answering? |
+| `public/` | Guest page (`index.html`, `guest.js`) and the Party Hub (`hub.html`, `hub.js`), no build step |
+| `public/marquee.js` | Scrolling long names |
+| `public/i18n/`, `lib/i18n.js`, `public/i18n-runtime.js` | Page text per language, picking the language per browser, and applying it in the page |
 | `lib/env.js`, `lib/log.js` | Environment variables, and the debug log switch |
 | `test/` | Identity, attribution, settings and web server tests, `npm test` |
 
@@ -57,7 +64,7 @@ node app.js
 2. Open its settings and pick a party zone.
 3. The console prints the guest link and the Party Hub's address.
 
-The extension writes `config.json` next to `app.js`.
+The extension writes `config.json` in the folder you start it from.
 
 ## Tests
 
@@ -88,7 +95,7 @@ anything else as on.
 | Mode | Music | Guests |
 | --- | --- | --- |
 | On | Plays | Add tracks, play next, skip |
-| Paused | Pauses if playing. Back to On presses play, if Roon allows | Stay in, but requests and skips are refused (409 `paused`) |
+| Paused | Pauses if playing. **Unpause** presses play, if Roon allows | Stay in, but requests and skips are refused (409 `paused`) |
 | Off | Pauses | The guest pages close |
 
 Back to On from Off doesn't press play: a new party waits for the host or the first
@@ -138,8 +145,7 @@ follows the group again. The label is the place to check what it's pointing at.
 
 ### Web port (Advanced)
 
-First in the Advanced group, since few hosts need it. The default, 8338, has to be free
-on the machine itself, since the container shares the host's network. It stays clear of:
+The default, 8338, has to be free on the machine itself, since the container shares the host's network. It stays clear of:
 
 - common defaults: 8080, 3000, 5000, 8000, 8443 and 9000;
 - Roon's own ports: UDP 9003, TCP 9100–9200 and 9330–9339;
@@ -157,10 +163,10 @@ outgoing connections.
   ten are taken, it still connects to Roon and asks for another port in the settings.
 - **Busy when chosen in the settings:** the extension stays on its current port and says
   so.
-- **`ROON_EXTENSION_PARTY_MODE_PORT`** only sets the
-  first run port. Roon saves every field on the first Save, the port included, even when only
-  the zone was chosen. From then on the saved port wins and the variable is ignored, so
-  change the port with Web port in Roon.
+- **`ROON_EXTENSION_PARTY_MODE_PORT`** only sets the first run's port. Roon saves every
+  field on the first Save, the port included, even when only the zone was chosen. From
+  then on the saved port wins and the variable is ignored, so change the port with Web
+  port in Roon.
 
 Links and QR codes use the machine's first non-internal IPv4 address.
 
@@ -421,17 +427,21 @@ party. The Display playlist download setting decides how:
 - The setting's hint in Roon gives the download address, which `app.js` hands over with
   `setPlaylistUrl()` alongside the website link.
 
-**How long it's kept.** In memory, at most 5000 tracks (`MAX_TRACKS`), about two weeks of
-non-stop play: the queue subscription shows the first 500 entries, so the list grows only
-as fast as music plays and guests add to it. Past the limit, the oldest entries no guest
-asked for (the host's and Roon Radio's) go first, and guests' requests only when they alone
-are too many. `seen`, the queue ids already recorded, loses an id with its track, so it
-is never larger than the list. It can't simply be cut to the ids still queued: an entry
-pushed past the 500 shown comes back into view later, and a resubscription empties the
-queue for a moment, so either would record tracks twice. Title, artist and album are cut
-to 200 characters. The list starts over when the extension restarts, the party zone
-changes, or Party mode comes back on from Off (a new party). What is still queued at that
-moment is recorded again.
+**How long it's kept.** In memory:
+
+- **At most 5000 tracks** (`MAX_TRACKS`), about two weeks of non-stop play. The queue
+  subscription shows the first 500 entries, so the list grows only as fast as music plays
+  and guests add to it.
+- **Past the limit**, the oldest entries no guest asked for (the host's and Roon Radio's)
+  go first, and guests' requests only when they alone are too many.
+- **`seen`**, the queue ids already recorded, loses an id with its track, so it is never
+  larger than the list. It can't simply be cut to the ids still queued: an entry pushed
+  past the 500 shown comes back into view later, and a resubscription empties the queue
+  for a moment, so either would record tracks twice.
+- **Title, artist and album** are cut to 200 characters.
+- **It starts over** when the extension restarts, the party zone changes, or Party mode
+  comes back on from Off (a new party). What is still queued at that moment is recorded
+  again.
 
 ## Translating the pages
 
@@ -520,7 +530,7 @@ Its tab title is the party's name plus "Hub" (`page.hub_title`, `{name} Hub`). T
 server writes it into the page, with the page's `lang`, before sending it, so bookmarks
 and home-screen icons get it as the page arrives. `hub.js` sets it again on each update,
 so a renamed party shows straight away. Safari on macOS drops what open tabs' titles have
-in common, so with the guest page ("EX5 Test-o-rama") open beside it, the Hub's tab reads
+in common, so with the guest page ("House Party") open beside it, the Hub's tab reads
 just "Hub".
 
 It was the RoonParty screen before 1.2.0. `/roonparty` redirects (301) to `/PartyHub`, and
@@ -568,8 +578,8 @@ changing them:
   scanned the code can add tracks. The Party Hub and its endpoints need no session, and
   they include the join link, so the code proves someone opened the Hub, not that they're
   in the room. Don't expose the port to the internet.
-- **Allowances are per session.** A guest who clears cookies and scans again starts
-  afresh.
+- **Allowances are per session.** A guest who scans the code again gets a new session
+  with full allowances.
 - **Guests can only queue what they were shown.** Browse item keys are short and numbered
   in sequence, so `POST /api/request` only takes a key this guest was sent in their search
   results (`GuestStore.offer`, the last 400 per guest). It uses the title and artist the
@@ -583,15 +593,16 @@ changing them:
   characters, which could fake log lines, and direction overrides, which can show a name
   back to front. The 24-character limit counts characters, so an emoji isn't cut in half.
   Searches stop at 200 characters. At most 2000 sessions are held; the longest idle goes
-  first. When a session ends, `GuestStore.onDrop` tells `RoonService.forgetSession()`,
-  which drops the guest's profile marker; a guest's latest-search ticket is kept only
-  while a search waits. So nothing kept per guest outlives their session.
+  first.
 - **Session cookies stay private.** A guest's tracks are linked to them by a separate
   `ref`, never the session `id` (see [Names](#names)).
 - **Sessions last 12 hours from last use** (`SESSION_TTL_MS`, `lib/guests.js`). Every
   guest API call renews the `party_sid` cookie for the same 12 hours, so a guest who keeps
   using the page stays in. One idle that long gets "Scan the code again" on their next
   action, and a new session (name and allowances start over) when they scan.
+- **Nothing outlives a session.** When a session ends, `GuestStore.onDrop` tells
+  `RoonService.forgetSession()`, which drops the guest's profile marker; a guest's
+  latest-search ticket is kept only while a search waits.
 - **Headers.** Every response carries a Content-Security-Policy that allows only the
   extension's own scripts, styles, images and connections. The pages have no inline script
   or style; `marquee.js` sets styles through the DOM, which the policy allows. Responses
@@ -683,7 +694,8 @@ once a new image is published. To update by hand, change both `FROM` lines toget
 ### Running the image by hand
 
 ```bash
-docker run -d --name party-mode --network host \
+docker run -d --name party-mode --network host --restart unless-stopped \
+  --log-opt max-size=10m --log-opt max-file=3 \
   -v "$PWD/config.json:/usr/src/app/config.json" \
   stubaggs/roon-extension-party-mode:latest
 ```
@@ -840,7 +852,8 @@ full replies, so it's for troubleshooting only.
     library and TIDAL copies, October 2026.)
 - **Credits can swap.** Two guests asking for the same recording are credited in the
   order they asked. If Roon reports those two inserts out of order, the badges swap.
-- **A rescan starts a new session.** Tracks added before it keep the name they had then.
+- **A rescan starts a new session**, and so does coming back after 12 hours without using
+  the page. Tracks added before it keep the name they had then.
 - **Everything is kept in memory.** Played (the last 200 tracks), the playlist (5000) and
   who asked for what start over when the extension restarts. Played also starts over when
   the party zone changes.
