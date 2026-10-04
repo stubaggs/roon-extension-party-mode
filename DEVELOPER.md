@@ -86,8 +86,8 @@ before pushing. The Docker build runs it too, so a failing test stops a build.
 ## Host settings (in Roon)
 
 Party mode comes first, as the switch hosts use most. Then, in order: the party zone, the
-party name, Display playlist download (see [The party playlist](#the-party-playlist)),
-Party Hub language (see [Choosing the language](#choosing-the-language)), the Roon profile, the allowances (Adding tracks, Playing next, Skipping), and the
+party name, Party Hub language (see [Choosing the language](#choosing-the-language)),
+Display playlist download (see [The party playlist](#the-party-playlist)), the Roon profile, the allowances (Adding tracks, Playing next, Skipping), and the
 collapsed Advanced group: the web port, then the browse titles.
 
 ### Party mode
