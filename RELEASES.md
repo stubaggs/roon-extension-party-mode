@@ -31,6 +31,8 @@ Not released yet. You can try it on the `experimental` branch (see
   can always be downloaded on a line of its own.
 - Search marks tracks already in the queue as **In the queue** even when **Block tracks
   already in the queue** is off. Guests can still add them then.
+- Search tells a band's versions of a track on different albums apart. Before, queueing
+  one marked them all as in the queue, and could miss the one actually queued.
 - **Web port** has moved under **Advanced** in Roon's settings, with a hint saying what
   it's for.
 

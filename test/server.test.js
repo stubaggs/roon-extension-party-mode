@@ -207,6 +207,24 @@ const set = (values) => Object.assign(roon.settings, values);
     }
   });
 
+  await check('another album\'s version of a queued track isn\'t blocked, the same one is', async () => {
+    results[0].image_key = 'arrival';
+    roon.queue = [{ queue_item_id: 1, two_line: { line1: 'Waterloo', line2: 'ABBA' }, image_key: 'gold' }];
+    try {
+      let cookie = await newGuest();
+      const [waterloo] = (await (await get('/api/search?q=abba', { Cookie: cookie })).json()).results;
+      assert.deepStrictEqual([waterloo.in_queue, waterloo.blocked], [false, false]);
+      roon.queue[0].image_key = 'arrival';
+      cookie = await newGuest();
+      const res = await post('/api/request', cookie, { key: '10:0', mode: 'add' });
+      assert.strictEqual(res.status, 409);
+      assert.strictEqual((await res.json()).error, 'already_queued');
+    } finally {
+      delete results[0].image_key;
+      roon.queue = [];
+    }
+  });
+
   await check('a key the guest was never sent is refused, and Roon is not asked', async () => {
     const cookie = await newGuest();
     roon.actions = [];

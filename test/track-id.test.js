@@ -202,5 +202,35 @@ console.log('\nduplicates: covers are not the queued original');
   });
 }
 
+console.log('\nduplicates: one band\'s versions on different albums');
+
+{
+  const { sharedCredits, sameRecordingAsQueued } = require('../lib/track-id');
+  const { results, queued } = require('./fixtures/waiting-for-mary-search.json');
+  const asCandidate = (r) => ({ title: r.title, artist: r.subtitle, image_key: r.image_key });
+  const marked = (queue) =>
+    results.map((r) => queue.some((q) => sameRecordingAsQueued(q, asCandidate(r), sharedCredits(results, r.title))));
+
+  check('the albums queued are marked, and only those, whatever the credits', () => {
+    // Cloudland credits "Pere Ubu, Allen Ravenstine"; the queue says "Pere Ubu".
+    assert.deepStrictEqual(marked(queued), [true, false, true, true, false]);
+  });
+
+  check('one album queued marks one result, not every version', () => {
+    assert.deepStrictEqual(marked([queued[0]]), [false, false, true, false, false]);
+  });
+
+  check('the same cover by another artist is not a duplicate (a compilation)', () => {
+    const queuedTake = { title: 'Silent Night', artist: 'Bing Crosby', image_key: 'comp' };
+    const otherTake = { title: 'Silent Night', artist: 'Elvis Presley, Franz Gruber', image_key: 'comp' };
+    assert.strictEqual(sameRecordingAsQueued(queuedTake, otherTake), false);
+  });
+
+  check('without artwork on both sides, the credits decide as before', () => {
+    const noArt = (r) => ({ title: r.title, artist: r.subtitle });
+    assert.strictEqual(sameRecordingAsQueued({ title: 'Waiting for Mary', artist: 'Pere Ubu' }, noArt(results[1])), true);
+  });
+}
+
 console.log(failures ? `\n${failures} failing` : '\nall passing');
 process.exit(failures ? 1 : 0);

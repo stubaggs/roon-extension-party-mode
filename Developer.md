@@ -68,8 +68,8 @@ before pushing. The Docker build runs it too, so a failing test stops a build.
 - `test/server.test.js` runs the real web server against a stand-in for Roon. It checks
   the Party Hub's answers, the join-link pages, the guest API's `no_session` and `closed`
   errors, and the security headers.
-- `test/fixtures/` holds real search results from a Core, such as a search for
-  "bad guy", for the duplicate check.
+- `test/fixtures/` holds real search results from a Core for the duplicate check:
+  "bad guy" (covers) and "pere ubu waiting for mary" (one band, five albums).
 
 ## Host settings (in Roon)
 
@@ -321,6 +321,23 @@ Duplicates are per recording, not per song: a remaster, a live take or a single 
 a fair request even when the original is queued. So the duplicate check stops at step 3
 above, because steps 4 and 5 deliberately treat a remaster as the original.
 
+**Artwork tells albums apart.** A search result carries a title, credits and an image
+key, and nothing more: opening it, and opening its action list, repeats the same three.
+No album, length or id. So when one band's versions share a title and credit, as Pere
+Ubu's five "Waiting for Mary"s do, the image key (the album's cover) is the only
+difference. Queue items carry the same key for the same album. With artwork on both
+sides (`sameRecordingAsQueued`):
+
+- **a different cover** is another album, so not a duplicate;
+- **the same cover** is a duplicate, unless no artist is shared: two performers' takes on
+  one compilation.
+
+The credits aren't used then, because they can't tell a band's own versions from a cover.
+"Pere Ubu" and "Pere Ubu, Allen Ravenstine" read exactly like "Leonard Cohen" and "Jeff
+Buckley, Leonard Cohen", and the writer inference below takes Pere Ubu for a writer.
+The cost: the same recording on another album, an original and a compilation say, isn't
+a duplicate. Without artwork on either side, the credits decide, as below.
+
 Search marks every queued result `in_queue`, so guests see "In the queue" whatever the
 setting. `blocked` is set too when Block tracks already in the queue is on: the page then
 won't offer the track, and `/api/request` refuses it (`already_queued`).
@@ -337,7 +354,8 @@ its writer with the queued original. So:
 - With fewer than three results, any shared name still counts.
 
 On a real search for "bad guy" (`test/fixtures/`), this took the results marked as
-queued from 24 to the one that was.
+queued from 24 to the one that was. A real search for "pere ubu waiting for mary", with
+three of its five albums queued, is there too.
 
 ## Searching and browse sessions
 

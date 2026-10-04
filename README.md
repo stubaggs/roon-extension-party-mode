@@ -116,7 +116,7 @@ party's name and the Party Hub's address, for example:
 | Party name | Shown on the Party Hub. Leave blank to use the zone's name. |
 | Display playlist download | What the Party Hub shows once **Party mode** is **Off**: a **QR code** guests can scan (the default), a **Link only** to click on the Hub itself, or **Off** for nothing. The hint gives the download address, which works whichever you pick. |
 | Roon profile for guest requests | The Roon profile the tracks are played under. Choose a "Guests" profile to keep party tracks out of your own history and recommendations. |
-| Adding tracks | Whether guests can add tracks, whether a track already in the queue can be added again (covers, live takes and remasters count as different tracks; search marks queued tracks either way), how many each guest gets, and how many minutes until they get another. |
+| Adding tracks | Whether guests can add tracks, whether a track already in the queue can be added again (covers, live takes, remasters and the same track on another album count as different tracks; search marks queued tracks either way), how many each guest gets, and how many minutes until they get another. |
 | Playing next | The same, for putting a track straight after the current one. |
 | Skipping | The same, for skipping the current track. Off unless you turn it on. |
 | Advanced | **Web port**: the port the guest pages and the Party Hub use (8338). Only change it if something else on the computer uses 8338. If the port is busy when Party Mode starts, it uses the next free one.<br>The browse titles: only needed if search or queueing doesn't work on a Core that isn't in English. Usually it sorts itself out. |

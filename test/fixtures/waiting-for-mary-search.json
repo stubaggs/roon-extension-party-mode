@@ -1,0 +1,15 @@
+{
+  "_about": "A real search for \"pere ubu waiting for mary\" on a Roon Core (October 2026), with three of its versions queued. Five versions on five albums; the image key (the album's cover) is the only thing that tells them apart. The queue entries' albums are from Roon's queue; the search results carry none.",
+  "results": [
+    { "title": "Waiting for Mary", "subtitle": "Pere Ubu, Allen Ravenstine", "image_key": "1f3364b1da4b036c122eee973024842b" },
+    { "title": "Waiting for Mary", "subtitle": "Pere Ubu", "image_key": "951e1bb40bd9ba8816b95866dfe4428a" },
+    { "title": "Waiting for Mary", "subtitle": "Pere Ubu", "image_key": "90e023d2961c718c2efe31363be65d16" },
+    { "title": "Waiting for Mary", "subtitle": "Pere Ubu", "image_key": "378752027c06ab1237fcfbae6ca4e432" },
+    { "title": "Waiting for Mary", "subtitle": "Pere Ubu", "image_key": "28d8074dbbba16429e5c35cab7c6b790" }
+  ],
+  "queued": [
+    { "title": "Waiting for Mary", "artist": "Pere Ubu", "album": "Les Haricots sont pas salés 1987–1991", "length": 202, "image_key": "90e023d2961c718c2efe31363be65d16" },
+    { "title": "Waiting for Mary", "artist": "Pere Ubu", "album": "Cloudland", "length": 210, "image_key": "1f3364b1da4b036c122eee973024842b" },
+    { "title": "Waiting for Mary", "artist": "Pere Ubu", "album": "Fiddler on the Desk: 1989", "length": 199, "image_key": "378752027c06ab1237fcfbae6ca4e432" }
+  ]
+}
