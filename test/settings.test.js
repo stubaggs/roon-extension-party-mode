@@ -321,12 +321,19 @@ check('browse titles explain themselves in a hint', () => {
   const group = result.layout.find((entry) => entry.type === 'group' && entry.title === 'Advanced');
   assert.ok(group, 'an "Advanced" group');
   assert.strictEqual(group.collapsable, true, 'starts closed');
-  assert.deepStrictEqual(group.items.map((i) => i.setting), ['title_tracks', 'title_add', 'title_next', 'title_profile']);
+  assert.deepStrictEqual(group.items.map((i) => i.setting), ['port', 'title_tracks', 'title_add', 'title_next', 'title_profile']);
   assert.strictEqual(
     item(result, 'title_add').subtitle,
     '"Queue" in English. Usually found automatically on a Core in another language.'
   );
   assert.match(item(result, 'title_tracks').subtitle, /^"Tracks" in English/);
+});
+
+check('the web port sits under Advanced with a two-line hint', () => {
+  const lines = item(layout({}), 'port').subtitle.split('\n');
+  assert.strictEqual(lines.length, 2);
+  assert.match(lines[0], /guests' phones and the Party Hub/);
+  assert.match(lines[1], /^Changing it moves/);
 });
 
 check('a title found on the Core shows in its hint', () => {

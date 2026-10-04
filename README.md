@@ -58,8 +58,8 @@ docker run -d --name party-mode --network host --restart unless-stopped \
 The `--log-opt` settings keep the log from growing without limit.
 
 Party Mode uses port 8338. If that port is busy when it starts, it uses the next free one,
-and Roon's status line says so. To choose the port yourself, use **Web port** in Party
-Mode's settings in Roon.
+and Roon's status line says so. To choose the port yourself, use **Web port** under
+**Advanced** in Party Mode's settings in Roon.
 
 `config.json` keeps your settings when the image is updated. It also holds the key Roon
 gave Party Mode, so the commands above let only the extension (user 1000) read it. Without
@@ -116,11 +116,10 @@ party's name and the Party Hub's address, for example:
 | Party name | Shown on the Party Hub. Leave blank to use the zone's name. |
 | Display playlist download | What the Party Hub shows once **Party mode** is **Off**: a **QR code** guests can scan (the default), a **Link only** to click on the Hub itself, or **Off** for nothing. The hint gives the download address, which works whichever you pick. |
 | Roon profile for guest requests | The Roon profile the tracks are played under. Choose a "Guests" profile to keep party tracks out of your own history and recommendations. |
-| Web port | The port the guest pages and the Party Hub use (8338). Only change it if something else on the computer uses 8338. If the port is busy when Party Mode starts, it uses the next free one. |
 | Adding tracks | Whether guests can add tracks, whether a track already in the queue can be added again (covers, live takes and remasters count as different tracks), how many each guest gets, and how many minutes until they get another. |
 | Playing next | The same, for putting a track straight after the current one. |
 | Skipping | The same, for skipping the current track. Off unless you turn it on. |
-| Advanced | Only needed if search or queueing doesn't work on a Core that isn't in English. Usually it sorts itself out. |
+| Advanced | **Web port**: the port the guest pages and the Party Hub use (8338). Only change it if something else on the computer uses 8338. If the port is busy when Party Mode starts, it uses the next free one.<br>The browse titles: only needed if search or queueing doesn't work on a Core that isn't in English. Usually it sorts itself out. |
 
 In the per-guest numbers, **0 means no limit**. For "Minutes to earn one back", **0 means
 never**.
@@ -165,7 +164,7 @@ run `sudo chown 1000 config.json && chmod 600 config.json` on the file you mount
 
 **The status says a port was busy.** Something else on the computer uses that port. Party
 Mode picks the next free one and the QR code follows it, so this is fine to leave. To
-choose one yourself, change **Web port** in the settings.
+choose one yourself, change **Web port** under **Advanced** in the settings.
 
 **Search finds nothing, or adding fails, on a Core in another language.** Open the
 **Advanced** section of the settings and fill in the titles your Core uses.

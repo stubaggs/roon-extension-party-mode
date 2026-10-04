@@ -29,6 +29,8 @@ Not released yet. You can try it on the `experimental` branch (see
   it's paused, and says when turning it on starts a new party.
 - In Roon's settings, **Display playlist download** gives the address where the playlist
   can always be downloaded on a line of its own.
+- **Web port** has moved under **Advanced** in Roon's settings, with a hint saying what
+  it's for.
 
 ## 1.1.1
 

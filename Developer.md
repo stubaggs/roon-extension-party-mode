@@ -75,8 +75,8 @@ before pushing. The Docker build runs it too, so a failing test stops a build.
 
 Party mode comes first, as the switch hosts use most. Then, in order: the party zone, the
 party name, Display playlist download (see [The party playlist](#the-party-playlist)),
-the Roon profile, the web port, the allowances (Adding tracks, Playing next, Skipping),
-and the browse titles under Advanced.
+the Roon profile, the allowances (Adding tracks, Playing next, Skipping), and the
+collapsed Advanced group: the web port, then the browse titles.
 
 ### Party mode
 
@@ -135,9 +135,10 @@ the extension quietly follows that one endpoint: guests keep adding tracks, but 
 that speaker plays. Nothing errors, since the endpoint still exists. Regroup and it
 follows the group again. The label is the place to check what it's pointing at.
 
-### Web port
+### Web port (Advanced)
 
-The default is 8338. The container shares the host's network, so the port has to be
+First in the Advanced group, since few hosts need it. Its hint says what it is for
+and what changing it does, on two lines. The default is 8338. The container shares the host's network, so the port has to be
 free on the machine itself. 8338 stays clear of:
 
 - common defaults: 8080, 3000, 5000, 8000, 8443 and 9000;
@@ -223,7 +224,7 @@ Adding and playing next are on by default; skipping is off.
 
 Roon translates its menus, and the API doesn't say which language the Core uses. The
 extension first tries the titles in the collapsed **Advanced** group, at the bottom of the
-settings: `Tracks`, `Queue`, `Add Next` and `Profile` in English, so an English Core
+settings after the web port: `Tracks`, `Queue`, `Add Next` and `Profile` in English, so an English Core
 behaves exactly as written. When one isn't found, it works the menu out instead
 (`lib/titles.js`):
 
