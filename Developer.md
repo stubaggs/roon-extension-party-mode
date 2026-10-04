@@ -218,7 +218,21 @@ token-bucket model: they start with N goes and earn one back every M minutes.
 - 0 minutes means a used go never comes back.
 - To stop guests doing something at all, set its "Let guests …" to No.
 
-Adding and playing next are on by default; skipping is off.
+Adding and playing next are on by default; skipping is off. The defaults:
+
+| | Goes | Earn one back every |
+| --- | --- | --- |
+| Adding | 5 | 10 minutes |
+| Playing next | 1 | 60 minutes |
+| Skipping | 1 | 60 minutes |
+
+About 15 tracks play an hour. Adding is set so one guest can't queue far faster than that
+(the queue only grows at the end, so an early burst holds everyone else back), while a few
+guests together still earn more than can play. Playing next jumps everyone already
+waiting, and Roon puts each one straight after the current track, so it stays rare. These
+apply until the host saves the settings in Roon, which stores every value; a guest who
+rescans gets a new session with full allowances, so they keep things polite rather than
+enforce anything.
 
 ### Browse titles (Advanced)
 

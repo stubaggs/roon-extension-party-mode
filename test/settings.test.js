@@ -146,6 +146,20 @@ const item = (result, setting) => {
   return all.find((entry) => entry.setting === setting);
 };
 
+check('guest defaults: 5 adds every 10 min, play next hourly, skipping off', () => {
+  const { values } = layout({});
+  assert.deepStrictEqual(
+    [values.allow_add, values.add_limit, values.add_refill, values.allow_next, values.next_limit, values.next_refill],
+    [true, 5, 10, true, 1, 60]
+  );
+  assert.deepStrictEqual([values.allow_skip, values.skip_limit, values.skip_refill, values.prevent_duplicates], [false, 1, 60, true]);
+});
+
+check('saved allowances are kept over the defaults', () => {
+  const { values } = layout({ add_limit: 10, add_refill: 2, next_refill: 20 });
+  assert.deepStrictEqual([values.add_limit, values.add_refill, values.next_refill], [10, 2, 20]);
+});
+
 check('party mode is first, with on, paused and off', () => {
   const result = layout({});
   assert.strictEqual(result.layout[0].setting, 'enabled');

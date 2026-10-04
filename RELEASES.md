@@ -44,6 +44,9 @@ Not released yet. You can try it on the `experimental` branch (see
   weeks, your own and Roon Radio's oldest tracks make room first, before any guest's request.
 - Guests stay in as long as they keep using the page. Before, everyone had to scan the
   code again 8 hours after joining. Now that only happens after 12 hours without using it.
+- New defaults for guests: 5 tracks to start, earning one back every 10 minutes (was 10, every
+  2 minutes), and play next once an hour (was every 20 minutes). Settings you've already
+  saved in Roon stay as they are.
 
 ## 1.1.1
 
