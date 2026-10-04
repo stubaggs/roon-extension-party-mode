@@ -1,14 +1,14 @@
 # Party Mode: developer notes
 
-How the extension works, how to run and test it, and how it is packaged and published.
+How the extension works, how to run and test it, and how it's packaged and published.
 For installing and using it, see the [README](README.md).
 
 Guests scan a QR code, search your Roon library and streaming services, and add tracks
-to one zone's queue from their phone. No Roon account, no remote, no access to anything
-else in your system.
+to one zone's queue from their phone. They need no Roon account and no remote, and get
+no access to anything else in your system.
 
-Packaged the way the [Extension Manager](https://github.com/TheAppgineer/roon-extension-manager)
-expects: a Docker image with settings persisted in a bind-mounted `config.json`, and a
+It's packaged the way the [Extension Manager](https://github.com/TheAppgineer/roon-extension-manager)
+expects: a Docker image with its settings in a bind-mounted `config.json`, and a
 [repository entry](https://github.com/TheAppgineer/roon-extension-repository) that makes
 it installable from inside Roon.
 
@@ -45,32 +45,6 @@ Roon Core  ──(node-roon-api over the local network)──  app.js
 | `lib/env.js`, `lib/log.js` | Environment variables, and the debug log switch |
 | `test/` | Identity, attribution, settings and web server tests, `npm test` |
 
-## How a track is identified
-
-Roon gives extensions no stable track ID to hold on to. A browse `item_key` is a
-cursor into a browse session and expires; a `queue_item_id` exists only while the
-track is queued and has no counterpart on a browse item. So identity is rebuilt from
-what both sides carry — and the two sides carry different things:
-
-| | title | artist | length |
-| --- | --- | --- | --- |
-| Search result (browse item) | yes | yes | **no** |
-| Queue item | yes | yes | yes |
-| Now playing | yes | yes | yes |
-
-Because a search result has no length, the length and hash cannot be known when a
-guest taps Request. They are learned a moment later: Roon reports a queue `insert`
-for the track it just added, carrying the real `queue_item_id` and length, and that
-item is matched back to the pending request. Attribution then works from the queue
-item id rather than from a title guess, and the hash — `sha1(version-sensitive title,
-sorted artists, length)`, truncated — keeps identifying the track after it leaves the
-queue and appears in Played.
-
-Crediting a track falls through five steps, exact first: queue item id, hash, same
-recording by version-sensitive title, same song ignoring version tags, then a title
-only one recent request has. Duplicate checking stops at the version-sensitive step,
-because the last two deliberately treat a remaster as the original.
-
 ## Running it during development
 
 ```bash
@@ -78,67 +52,136 @@ npm install
 node app.js
 ```
 
-Then open Roon → Settings → Extensions and enable Party Mode. Open its settings, pick a
-party zone, and the console prints the guest link and the Party Hub's URL. The extension writes
-`config.json` next to `app.js`.
+1. In Roon, open Settings → Extensions and enable Party Mode.
+2. Open its settings and pick a party zone.
+3. The console prints the guest link and the Party Hub's address.
+
+The extension writes `config.json` next to `app.js`.
+
+## Tests
+
+`npm test` runs the test files listed in `package.json`; add a new file there. Run it
+before pushing. The Docker build runs it too, so a failing test stops a build.
+
+- `test/fake-roon.js` is a fake Core shaped like a real browse menu (Library → Search,
+  Settings → Profile), with its own position and profile per session.
+- `test/server.test.js` runs the real web server against a stand-in for Roon. It checks
+  the Party Hub's answers, the join-link pages, the guest API's `no_session` and `closed`
+  errors, and the security headers.
+- `test/fixtures/` holds real search results from a Core, such as a search for
+  "bad guy", for the duplicate check.
 
 ## Host settings (in Roon)
 
-Party mode (first, as the switch used most), party zone, party name, and web port.
-Roon's status line, once the zone is up, reads the same in every mode
-(`statusText()`): the mode, the party's name (the zone's when none is set), and the Party
-Hub's address, as in "Paused: EX5 Test-o-rama.", with "Party Hub at http://…/PartyHub" on the line below.
-Before that it says what's missing (no Core, no zone, the zone unavailable).
-Party mode is stored as `enabled`, its name when it was an on/off "Guest access":
-`true`, `"paused"` or `false`, read through `partyMode()` (`lib/roon-service.js`), which
-treats anything else as on. Roon's settings have no buttons, so the dropdown's choices
-are worded from the saved mode (`partyModeChoices()`): Pause while on, Unpause while
-paused, "start a new party" while off. The layout sent back after a save is rebuilt from
-the new mode, so the wording swaps over. Paused pauses the zone if it is playing and refuses requests
-and skips (409 `paused`) while guests stay in; back to on presses play if Roon allows.
-Off pauses the zone too and closes the guest pages; back on from off doesn't press play
-(a new party waits for the host or the first request), and leaving off rotates the join code
-and starts a new playlist (`party_mode_changed` in `lib/server.js`). Left blank, the party name is
-the party zone's name (for a grouped zone, Roon's name for the group, such as "Kitchen +
-Living Room"), and follows the zone if you change it; the setting shows which name that
-is. Saving a new port moves the
-guest pages and the Party Hub there straight away, then the extension reconnects to the Core
-(it drops out of Roon's list for up to ten seconds) so the link Roon shows is updated.
-Open pages and phones on the old port need the new link or a fresh scan.
-`ROON_EXTENSION_PARTY_MODE_PORT` (the older `PARTY_PORT` still works) only sets the first
-port: Roon saves every field on the first Save, the port included, even when only the
-zone was chosen, so from then on the saved port wins and the variable is ignored. To
-change the port after setup, use Web port in Roon. Either way, a busy port at startup
-falls through to the next free one.
+Party mode comes first, as the switch hosts use most. Then, in order: the party zone, the
+party name, Display playlist download (see [The party playlist](#the-party-playlist)),
+the Roon profile, the web port, the allowances (Adding tracks, Playing next, Skipping),
+and the browse titles under Advanced.
 
-The default port is 8338. The container shares the host's network, so the port has to be
-free on the machine itself; 8338 was picked to stay clear of common defaults (8080, 3000,
-5000, 8000, 8443, 9000), Roon's own ports (UDP 9003, TCP 9100-9200 and 9330-9339) and the
-other Extension Manager extensions (8088, 9010, 3000). If you change it, stay between 1024
-and 49151: higher ports are handed out by the OS for outgoing connections.
+### Party mode
 
-If the saved port is taken when the extension starts, it uses the next free one of the
-following nine, and Roon's status line says so ("port 8338 was busy"); the QR code and
-links follow. If all ten are taken, it still connects to Roon and asks for another port
-in the settings. A port chosen in the settings while running is not swapped for another:
-if it is busy, the extension stays where it is and says so.
+It's stored as `enabled`, its name when it was an on/off "Guest access": `true`,
+`"paused"` or `false`. `partyMode()` in `lib/roon-service.js` reads it and treats
+anything else as on.
+
+| Mode | Music | Guests |
+| --- | --- | --- |
+| On | Plays | Add tracks, play next, skip |
+| Paused | Pauses if playing. Back to On presses play, if Roon allows | Stay in, but requests and skips are refused (409 `paused`) |
+| Off | Pauses | The guest pages close |
+
+Back to On from Off doesn't press play: a new party waits for the host or the first
+request. Leaving Off starts a new party, with a new join code and a new playlist
+(`party_mode_changed` in `lib/server.js`).
+
+Roon's settings have no buttons, so the dropdown's choices are worded from the saved
+mode (`partyModeChoices()`): "Pause" while on, "Unpause" while paused, and "start a new
+party" while off. The layout sent back after a save is rebuilt from the new mode, so
+the wording swaps over at once.
+
+### Status line
+
+Once the zone is up, Roon's status line reads the same way in every mode
+(`statusText()`): the mode and the party's name, then the Party Hub's address on its own
+line.
+
+```
+Paused: EX5 Test-o-rama.
+Party Hub at http://…/PartyHub
+```
+
+Before that, it says what's missing: no Core, no zone, or the zone is unavailable.
+
+### Party name
+
+Left blank, the party name is the party zone's name. For a grouped zone, that's Roon's
+name for the group, such as "Kitchen + Living Room". It follows the zone if you change
+it, and the setting shows which name that is.
+
+### Party zone
+
+Roon's zone picker lists **endpoints**, not zones, so a zone made by grouping three
+speakers appears as three separate endpoints. Picking any one of them plays to the whole
+group, because Roon resolves an endpoint to the zone that contains it right now. So the
+picker's label names the zone it resolves to:
+
+```
+Party zone — plays to Kitchen + Living Room + Study (3 endpoints)
+```
+
+The setting stores one endpoint, not the group, and grouping is dynamic. So the zone
+means "whichever zone holds this endpoint right now". Ungroup the speakers mid-party and
+the extension quietly follows that one endpoint: guests keep adding tracks, but only
+that speaker plays. Nothing errors, since the endpoint still exists. Regroup and it
+follows the group again. The label is the place to check what it's pointing at.
+
+### Web port
+
+The default is 8338. The container shares the host's network, so the port has to be
+free on the machine itself. 8338 stays clear of:
+
+- common defaults: 8080, 3000, 5000, 8000, 8443 and 9000;
+- Roon's own ports: UDP 9003, TCP 9100–9200 and 9330–9339;
+- the other Extension Manager extensions: 8088, 9010 and 3000.
+
+If you change it, stay between 1024 and 49151. The OS hands out higher ports for
+outgoing connections.
+
+- **Saving a new port** moves the guest pages and the Party Hub there straight away. The
+  extension then reconnects to the Core so the link Roon shows is updated; it drops out of
+  Roon's list for up to ten seconds. Open pages and phones on the old port need the new
+  link or a fresh scan.
+- **Busy at startup:** the extension uses the next free one of the following nine ports,
+  and the status line says so ("port 8338 was busy"). The QR code and links follow. If all
+  ten are taken, it still connects to Roon and asks for another port in the settings.
+- **Busy when chosen in the settings:** the extension stays on its current port and says
+  so.
+- **`ROON_EXTENSION_PARTY_MODE_PORT`** (the older `PARTY_PORT` still works) only sets the
+  first port. Roon saves every field on the first Save, the port included, even when only
+  the zone was chosen. From then on the saved port wins and the variable is ignored, so
+  change the port with Web port in Roon.
+
+Links and QR codes use the machine's first non-internal IPv4 address.
 
 ### Guest profile
 
-"Roon profile for guest requests" picks the Roon profile the extension uses, so the
-tracks guests add count toward that profile's play history and Roon Radio instead of
-yours. A "Guests" profile keeps party plays out of your own history. "Leave as it is"
-doesn't touch the profile.
+"Roon profile for guest requests" picks the profile guests' tracks are played under, so
+they count toward that profile's play history and Roon Radio instead of yours. A
+"Guests" profile keeps party plays out of your own history. "Leave as it is" doesn't
+touch the profile.
 
 Roon's API has no profile call, so the extension opens the Profile entry in Roon's
 Settings menu and selects the profile there.
 
-Roon keeps the profile **per browse session and per hierarchy**: each
-`multi_session_key` has its own profile in each hierarchy, a session nobody has selected
-one in uses Roon's default ("Guest"), and a queue action counts toward the profile of the
-session and hierarchy it was made in. Found on a real Core: selecting in a guest's
-"settings" hierarchy switched it there ("Guest" → "Pat") while tracks the same guest
-queued from the "search" hierarchy still counted as Guest.
+Roon keeps the profile **per browse session and per hierarchy**:
+
+- each `multi_session_key` has its own profile in each hierarchy;
+- a session nobody has selected one in uses Roon's default, "Guest";
+- a queue action counts toward the profile of the session and hierarchy it was made in.
+
+This was found on a real Core: selecting in a guest's "settings" hierarchy switched it
+there ("Guest" → "Pat"), while tracks the same guest queued from the "search" hierarchy
+still counted as Guest.
 
 So guests search and queue in Roon's main **"browse"** hierarchy, the only one holding
 both pieces:
@@ -148,73 +191,227 @@ Library  → Search (takes input) → Tracks → a track → Queue / Add Next
 Settings → Profile → the profiles
 ```
 
-Before a guest's first search or request, `RoonService._profileFor` selects the chosen
-profile in that guest's browse session through Settings → Profile
-(`selectProfileInBrowse`), once per guest, and again after the setting changes or the
-Core reconnects. Their search then runs through Library → Search in the same session
-(`_openSearch`), and everything after it (track category, action list) is unchanged.
-Library and Settings are found by what they hold, not their names (`openTopEntry` in
-`lib/titles.js`): Library is the top-level entry with a search box (an item with
-`input_prompt`), Settings the one with the Profile entry. The extension's own session in
-the "settings" hierarchy (`party-profile`) only reads the list for the settings dropdown.
+Before a guest's first search or request, `RoonService._profileFor` selects the profile in
+that guest's browse session through Settings → Profile (`selectProfileInBrowse`). It does
+this once per guest, and again after the setting changes or the Core reconnects. The
+search then runs through Library → Search in the same session (`_openSearch`).
 
-The console logs `Profile "Party" selected for guest session …` with Roon's answer and
-the profile before and after, and the first search's result categories
-(`Search (Library → Search) result categories: …`), to check what the search covers. The
-Profile entry is matched by its title, "Profile" in English, or its translations; on a
+Library and Settings are found by what they hold, not their names (`openTopEntry` in
+`lib/titles.js`). Library is the top-level entry with a search box (an item with
+`input_prompt`); Settings is the one with the Profile entry. The extension's own session
+in the "settings" hierarchy (`party-profile`) only reads the list for the settings
+dropdown.
+
+The Profile entry is matched by its title: "Profile" in English, or a translation. On a
 Core in another language that doesn't match, put its title in "Profile entry in
 Settings". If something doesn't match, the setting shows what Roon offered and the
-console logs it. Tests use a fake Core shaped like a real browse menu
-(`test/fake-roon.js`).
+console logs it. The console also logs `Profile "Party" selected for guest session …`,
+with Roon's answer and the profile before and after.
 
-### Picking the party zone
+### Allowances
 
-Roon's zone picker lists **endpoints**, not zones, so a zone made by grouping three
-speakers appears as its three separate endpoints. Picking any one of them plays to the
-whole group, because Roon resolves an endpoint to the zone that currently contains it.
-That is why the picker's label names the zone it resolves to:
+Each guest has separate allowances for adding, playing next and skipping, on a
+token-bucket model: they start with N goes and earn one back every M minutes.
 
-```
-Party zone — plays to Kitchen + Living Room + Study (3 endpoints)
-```
+- 0 goes per guest means no limit.
+- 0 minutes means a used go never comes back.
+- To stop guests doing something at all, set its "Let guests …" to No.
 
-The setting stores one endpoint, not the group, and grouping is dynamic. So the zone
-means "whichever zone holds this endpoint right now": ungroup the speakers while a party
-is running and the extension quietly follows that one endpoint — guests keep adding
-tracks, but only that speaker plays. Nothing errors, since the endpoint still exists.
-Regroup and it follows the group again. The label is the place to check what it is
-actually pointing at.
+Adding and playing next are on by default; skipping is off.
 
-Links use the machine's first non-internal IPv4 address. Per-action allowances follow the token
-bucket model: each guest starts with N goes and earns one back every M minutes, with
-separate budgets for adding, playing next, and skipping. 0 goes per guest means no limit,
-and 0 minutes means a used go never comes back; to stop guests doing something at all,
-set its "Let guests …" to No. Adding and playing next are on
-by default, skipping is off. The guest page shows each allowance on the button it limits
-("Add to queue · 3 left", greyed out when used up; Skip shows nothing until it is used up,
-then "in 5 min"), relabelled in place
-from `party.allowances` (`labelButton` in `public/guest.js`) and fetched again when a used
-go is due back. A line under the search box appears only when requests are closed or
-paused. The guest's name is a tag at the top right that opens the name dialog.
+### Browse titles (Advanced)
 
-**Browse titles.** Roon localises its menus and the API doesn't say which language the
-Core uses. The extension tries the titles in the collapsed **Advanced** group at the bottom of the
-settings first (English by default: `Tracks`, `Queue`, `Add Next`, `Profile`), so an English Core behaves exactly as
-written. When one isn't found, it works the menu out instead (`lib/titles.js`):
+Roon translates its menus, and the API doesn't say which language the Core uses. The
+extension first tries the titles in the collapsed **Advanced** group, at the bottom of the
+settings: `Tracks`, `Queue`, `Add Next` and `Profile` in English, so an English Core
+behaves exactly as written. When one isn't found, it works the menu out instead
+(`lib/titles.js`):
 
-- **Track category:** the search category whose items open straight into play actions
-  (albums and artists open into further lists).
+- **Track category:** the search category whose items open straight into play actions.
+  Albums and artists open into further lists.
 - **Profile entry:** the word for "Profile" in the languages Roon is translated into.
 - **Queue and Add Next:** by position in a track's action list (Play Now, Add Next,
   Queue, Start Radio), and only when the list has exactly those four actions. Any other
-  shape is refused rather than guessed, since pressing the wrong one could play a
-  guest's track straight away.
+  shape is refused rather than guessed, since pressing the wrong one could play a guest's
+  track straight away.
 
 What it found shows in each setting's hint and in the console (`Browse titles: using
-"Titel" as the Track category`). Typing the Core's own title into a setting overrides
-the detection.
+"Titel" as the Track category`). Typing the Core's own title into a setting overrides the
+detection. The first search's result categories are logged too (`Search (Library →
+Search) result categories: …`), to check what the search covers.
+
+## The guest page
+
+- **Allowances are on the buttons they limit:** "Add to queue · 3 left", greyed out
+  when used up. Skip shows nothing until it's used up, then "in 5 min". Buttons are
+  relabelled in place from `party.allowances` (`labelButton` in `public/guest.js`), and the
+  page fetches the allowances again when a used go is due back.
+- **A line under the search box** appears only when requests are closed or paused.
+- **The name tag**, top right, opens the name dialog. The 🌐 button beside it chooses the
+  language (see [Translating the pages](#translating-the-pages)).
+
+### Names
+
+Guests are asked for a name on their first visit. It shows as a badge on the tracks they
+add, in Up next, Played and on the Party Hub. The phone remembers it, or that they
+skipped, so a rescan doesn't ask again.
+
+A guest without a name shows as "Anon" (`credit.guest`, translated on the pages; "Anon" in
+the playlist file and the log). It's only a display name: the session's name stays
+empty.
+
+Naming yourself later, or changing your name, reaches everything you've already added:
+
+- Each session has a `ref`: random, and separate from its `id`, which is the session
+  cookie.
+- Requests, Played entries, skips and playlist rows record the `ref`.
+- `POST /api/name` renames by it (`GuestStore.rename`, `PlayHistory.rename`,
+  `PartyPlaylist.rename`) and pushes a fresh queue to the pages.
+
+The `ref` never leaves the server. The pages' credits come from `requester()`, which has
+none, and `PlayHistory.list()` strips it.
+
+## Tracks: identity, credits and duplicates
+
+### How a track is identified
+
+Roon gives extensions no stable track ID to hold on to. A browse `item_key` is a cursor
+into a browse session and expires. A `queue_item_id` exists only while the track is
+queued, and has no counterpart on a browse item. So identity is rebuilt from what both
+sides carry, and they carry different things:
+
+| | title | artist | length |
+| --- | --- | --- | --- |
+| Search result (browse item) | yes | yes | **no** |
+| Queue item | yes | yes | yes |
+| Now playing | yes | yes | yes |
+
+A search result has no length, so the length and hash can't be known when a guest taps
+Request. They're learned a moment later: Roon reports a queue `insert` for the track it
+just added, with the real `queue_item_id` and length, and that item is matched back to the
+pending request. From then on:
+
+- attribution works from the queue item id rather than a title guess;
+- the hash, `sha1(version-sensitive title, sorted artists, length)` truncated, keeps
+  identifying the track after it leaves the queue and appears in Played.
+
+### Crediting a track
+
+Roon's queue items don't say who added them. Crediting falls through five steps, most
+exact first:
+
+1. the queue item id;
+2. the hash;
+3. the same recording, by version-sensitive title;
+4. the same song, ignoring version tags;
+5. a title only one recent request has.
+
+A request is bound to its real queue item when Roon reports the insert, which is exact.
+The later steps match on title and artist, ignoring remaster tags, artist separators and
+extra artists. A request whose insert doesn't arrive within a minute (the host cleared
+the queue, say) falls back to title matching.
+
+The console logs each request, each queue insert with its length and hash, and each
+track start. That's the place to look when a badge is wrong.
+
+### Duplicates
+
+Duplicates are per recording, not per song: a remaster, a live take or a single edit is
+a fair request even when the original is queued. So the duplicate check stops at step 3
+above, because steps 4 and 5 deliberately treat a remaster as the original.
+
+Covers aren't duplicates either, which takes some inferring. A search result's subtitle
+credits writers as well as performers ("FINNEAS, Billie Eilish, 2CELLOS"); a queue entry
+credits performers only ("Billie Eilish"). Compared name by name, every cover would share
+its writer with the queued original. So:
+
+- `sharedCredits` (`lib/track-id.js`) treats the names credited on at least half of the
+  guest's results with that title as the writers, when there are three or more results.
+- `sameRecordingAsQueued` compares only what's left: that version's performers.
+- A result crediting only writers is the original, and is compared on all its names.
+- With fewer than three results, any shared name still counts.
+
+On a real search for "bad guy" (`test/fixtures/`), this took the results marked as
+queued from 24 to the one that was.
+
+## Searching and browse sessions
+
+Each guest has their own browse session (`multi_session_key`), in the "browse" hierarchy
+(see [Guest profile](#guest-profile)).
+
+- **Item keys go stale.** They're only valid until that guest's session moves on. If a
+  request's key has gone stale, the server replays the guest's search and retries once.
+  That covers the usual case of a guest searching again before tapping.
+- **A guest's operations take turns** (`RoonService._inSession`). A session has one
+  position, and a search or a request is several steps through it. When two interleaved,
+  one search opened Tracks while another took the session back to the result categories,
+  and the first then read "Tracks, Artists, TIDAL" as tracks.
+- **Only the latest search runs.** A search still waiting when the same guest searches
+  again is dropped (`search` returns null), and the page ignores out-of-date answers too.
+- **Only tracks come back:** `action_list` items, never a category.
+
+## Played history and skips
+
+Roon's API has no play history, so the extension records the guest page's Played list
+itself, as tracks start (last 200 tracks).
+
+- **A guest's skip** marks the playing track (`markSkipped`), and Played shows "Skipped by
+  Sam". The mark is made before the skip reaches Roon, since the next track can start
+  before Roon answers, and is undone if the skip fails.
+- **A skip made in Roon** is inferred. `RoonService._notePosition` keeps the furthest
+  position Roon reported for the playing track; zone updates can carry a reset one. A
+  track left 10 seconds or more before its end (`SKIP_MARGIN` in `lib/history.js`), with
+  no guest skip, shows "Skipped in Roon". Anything that cuts a track short counts, such as
+  Play Now on another track in Roon.
+- **No judgement without data:** a track with no length or no reported position is never
+  marked, so radio streams and zones that report no position never show it.
+
+## The party playlist
+
+Roon's browse API offers extensions Play Now, Add Next, Queue and Start Radio on a track,
+and Play Now, Shuffle, Add Next, Queue and Start Radio on a playlist. Nothing creates or
+edits a playlist (checked against a Core in October 2026). So the playlist is a download,
+not a Roon playlist.
+
+**What's recorded.** `lib/party-playlist.js` records every queue entry the party zone
+gets, once per `queue_item_id`. That includes what was queued before the extension
+started, Roon Radio picks and the host's own additions. Credits are kept when an entry is
+first seen, because turning Party mode off clears attributions; renaming still reaches
+them (see [Names](#names)).
+
+**The file.** `GET /api/playlist.csv` serves it as CSV in the form Soundiiz imports:
+
+- lower-case `title`, `artist` and `album` headers; importers ignore the other columns;
+- commas between fields, and Roon's ` / ` between artists written as `, `;
+- UTF-8 without a byte order mark. A BOM hides the first header from an importer, at the
+  cost of Excel's double-click guessing the encoding wrong;
+- column names and credits in English, which import services expect;
+- a guest name a spreadsheet would read as a formula gets a leading apostrophe. Track
+  details are left as Roon gives them, so they still match.
+
+Times are local to the extension, which in Docker is UTC unless `TZ` is set.
+
+**Where it's offered.** The URL needs no session, like the rest of the Party Hub, and
+always works. The Hub only offers it while Party mode is off, which is how a host ends a
+party. The Display playlist download setting decides how:
+
+- `playlist_download` is `'qr'`, `'link'` or `'off'`, read through `playlistDisplay()`,
+  which also turns the brief yes/no form into `'qr'` or `'off'`.
+- `/api/hub` passes it as `playlist`. The Hub shows a QR code from
+  `GET /api/playlist-qr.svg` with the link under it, a button, or nothing.
+- The setting's hint in Roon gives the download address, which `app.js` hands over with
+  `setPlaylistUrl()` alongside the website link.
+
+**How long it's kept.** In memory, at most 2000 tracks. It starts over when the extension
+restarts, the party zone changes, or Party mode comes back on from Off (a new party). What
+is still queued at that moment is recorded again.
 
 ## Translating the pages
+
+The guest page and the Party Hub take their text from `public/i18n/<code>.json`, one file
+per language. Each browser gets its own language, so guests at the same party can each
+see theirs. Anything not translated, or a missing key, falls back to `en.json`. Track,
+artist and album names are shown as Roon gives them.
 
 Available (30): English (`en`), Arabic (`ar`), Egyptian Arabic (`ar-EG`), Bulgarian (`bg`),
 Czech (`cs`), Danish (`da`), German (`de`), Greek (`el`), Spanish (`es`), Finnish (`fi`),
@@ -222,177 +419,234 @@ French (`fr`), Hebrew (`he`), Hungarian (`hu`), Italian (`it`), Japanese (`ja`),
 (`ko`), Norwegian Bokmål (`nb`), Dutch (`nl`), Polish (`pl`), Portuguese (`pt`, Portugal),
 Brazilian Portuguese (`pt-BR`), Romanian (`ro`), Russian (`ru`), Swedish (`sv`), Thai
 (`th`), Turkish (`tr`), Ukrainian (`uk`), Vietnamese (`vi`), Simplified Chinese
-(`zh-Hans`) and Traditional Chinese (`zh-Hant`). The non-English files are drafts (Thanks
-Claude), apologies for poor translations; corrections from native speakers are welcome.
+(`zh-Hans`) and Traditional Chinese (`zh-Hant`).
 
-**Choosing the file** (`pick()` and `match()` in `lib/i18n.js`): the browser's
-Accept-Language entries, best first, each matched as the tag itself (`pt-BR`), then the
-language with its region or script, then the language alone (`fr-CA` gets `fr`). A few
-codes are mapped: `no` and `nn` to `nb`, the old `iw` to `he`, and Chinese by script, so
-`zh-TW`, `zh-HK`, `zh-MO` and `zh-Hant-…` get `zh-Hant` and every other `zh` gets
-`zh-Hans`. Nothing matching, or `*`, gets English.
+The non-English files are AI drafts (thanks, Claude), so apologies for any poor
+translations. Corrections from native speakers are welcome.
 
-**Chosen by the guest.** The 🌐 button beside the name tag (top right; just the globe,
-its label "Language: English. Change") opens a list of every
-language by its own name (`list()`), plus "Automatic" (the phone's language). A choice is a
-`party_lang` cookie (a year, not HttpOnly: the page sets it), which `pick()` honours
-before Accept-Language, so the page reloads to switch; "Automatic" deletes it.
-`/i18n.js` tells the page whether the language was chosen (`chosen`), to mark the list,
-and varies on `Cookie`. The same cookie applies to the Party Hub and join pages in that
-browser.
+### Adding a language
 
-**Right to left.** Hebrew and Arabic pages get `dir="rtl"` (`dir()` in `lib/i18n.js`; the
-runtime sets it, and the server writes it into the Party Hub and its message pages). The
-styles use logical properties (`inset-inline-end`, `padding-inline`, `text-align: start`)
-so they mirror, and scrolling names slide the other way. Text guests type (search, name)
-takes its direction from what is typed (`dir="auto"`), and a guest's name or a language
-name dropped into a sentence is wrapped in first-strong isolates (U+2068…U+2069) on a
-right-to-left page, or when the name itself is right to left, so "Requested by יוסי" and
-"דולגה על ידי Sam" keep their order (`isolate()` in `i18n-runtime.js`).
+1. Copy `en.json` to, for example, `de.json`, and translate the values.
+2. Keep the `{name}`, `{count}` and `{wait}` placeholders.
+3. Entries like `{ "one": …, "other": … }` are plurals, picked by the language's own rules
+   (`Intl.PluralRules`). Add `zero`, `two`, `few` and `many` where the language has them: Arabic has
+   all six; Czech, Polish, Russian and Ukrainian need `few` and `many`; Japanese, Korean,
+   Chinese, Thai and Vietnamese need only `other`. A form left out falls back to `other`.
+4. Restart the extension to pick up the new file.
 
-**Length.** Translations run longer than English (Arabic and Hungarian button labels are
-over 35 characters with the allowance), so action buttons wrap rather than overflow, lose
-their indent on phones under 400px, and toasts are as wide as their message up to the
-screen. Track, artist and album names from Roon are shown as Roon gives them; one in a
-different script from the page keeps the page's alignment.
+`npm test` checks that each translation uses the same keys and placeholders as English,
+and that every key the pages and `messagePage()` use is in `en.json`.
 
-The guest page and the Party Hub take their text from `public/i18n/<code>.json`,
-one file per language. Each browser gets the language it asks for (its
-`Accept-Language`), so guests at the same party can each see their own; anything not
-translated, or a missing key, falls back to `en.json`. Track, artist and album names come
-from Roon as they are.
+### Choosing the language
 
-To add a language, copy `en.json` to e.g. `de.json` and translate the values, keeping the
-`{name}`, `{count}` and `{wait}` placeholders. Entries like `{ "one": …, "other": … }` are
-plurals, picked by the language's own rules (`Intl.PluralRules`); add `zero`, `two`,
-`few` and `many` where the language has them (Arabic has all six; Czech, Polish, Russian
-and Ukrainian need `few` and `many`; Japanese, Korean, Chinese, Thai and Vietnamese need
-only `other`). A form left out falls back to `other`. `npm test`
-checks that a translation uses the same keys and placeholders as English, and that every
-key the pages and `messagePage()` use is in `en.json`. Restart the
-extension to pick up a new file.
+**From the browser** (`pick()` and `match()` in `lib/i18n.js`). Accept-Language entries
+are tried best first. Each is matched as the tag itself (`pt-BR`), then as the language
+with its region or script, then as the language alone (`fr-CA` gets `fr`). A few codes are
+mapped:
+
+- `no` and `nn` to `nb`, and the old `iw` to `he`;
+- Chinese by script: `zh-TW`, `zh-HK`, `zh-MO` and `zh-Hant-…` get `zh-Hant`, and every
+  other `zh` gets `zh-Hans`.
+
+Nothing matching, or `*`, gets English.
+
+**By the guest.** The 🌐 button beside the name tag (just the globe; its label reads
+"Language: English. Change") opens a list of every language by its own name (`list()`),
+plus "Automatic", the phone's language.
+
+- A choice is saved as a `party_lang` cookie for a year. It isn't HttpOnly, because the
+  page sets it. "Automatic" deletes it.
+- `pick()` honours the cookie before Accept-Language, so the page reloads to switch.
+- `/i18n.js` tells the page whether the language was chosen (`chosen`), to mark the list,
+  and varies on `Cookie`.
+- The same cookie applies to the Party Hub and the join pages in that browser.
+
+### Right to left
+
+Hebrew and Arabic pages get `dir="rtl"` (`dir()` in `lib/i18n.js`). The runtime sets it,
+and the server writes it into the Party Hub and its message pages.
+
+- The styles use logical properties (`inset-inline-end`, `padding-inline`,
+  `text-align: start`), so they mirror, and scrolling names slide the other way.
+- Text guests type (search, name) takes its direction from what's typed (`dir="auto"`).
+- A guest's name or a language name dropped into a sentence is wrapped in first-strong
+  isolates (U+2068…U+2069), on a right-to-left page or when the name itself is right to
+  left. So "Requested by יוסי" and "דולגה על ידי Sam" keep their order (`isolate()` in
+  `i18n-runtime.js`).
+
+### Long translations
+
+Translations run longer than English: Arabic and Hungarian button labels pass 35
+characters with the allowance. So:
+
+- action buttons wrap rather than overflow, and lose their indent on phones under 400px;
+- toasts are as wide as their message, up to the screen's width;
+- a track, artist or album name in a different script from the page keeps the page's
+  alignment.
 
 ## The Party Hub's name
 
-The TV page is the **Party Hub**, at `/PartyHub` (Express routes ignore case, so
-`/partyhub` works too); Roon's Extensions link and status line point there. Its tab title
-is the party's name plus "Hub" (`page.hub_title`, `{name} Hub`). The server writes it
-into the page, with the page's `lang`, before sending it, so bookmarks and home-screen
-icons get it as the page arrives; `hub.js` sets it again on each update, so a renamed
-party shows straight away. Safari on macOS drops what open tabs' titles have in common,
-so with the guest page ("EX5 Test-o-rama") open beside it, the Hub's tab reads just "Hub". It was the RoonParty screen before 1.2.0: `/roonparty`
-redirects (301) to `/PartyHub`, and `/api/roonparty` still answers alongside `/api/hub`,
-so a screen left open across the upgrade keeps working until it reloads.
+The TV page is the **Party Hub**, at `/PartyHub`. Express routes ignore case, so
+`/partyhub` works too. Roon's Extensions link and status line point there.
+
+Its tab title is the party's name plus "Hub" (`page.hub_title`, `{name} Hub`). The
+server writes it into the page, with the page's `lang`, before sending it, so bookmarks
+and home-screen icons get it as the page arrives. `hub.js` sets it again on each update,
+so a renamed party shows straight away. Safari on macOS drops what open tabs' titles have
+in common, so with the guest page ("EX5 Test-o-rama") open beside it, the Hub's tab reads
+just "Hub".
+
+It was the RoonParty screen before 1.2.0. `/roonparty` redirects (301) to `/PartyHub`, and
+`/api/roonparty` still answers alongside `/api/hub`, so a screen left open across the
+upgrade keeps working until it reloads.
 
 ## Accessibility
 
-The pages were checked by hand against WCAG 2.2 AA (October 2026); keep these when
+The pages were checked by hand against WCAG 2.2 AA (October 2026). Keep these when
 changing them:
 
 - **Contrast.** Text colours in `public/party.css` are all at least 4.5:1 on the
-  background; text fields use `--field-edge`, 3:1 against the page and the field.
+  background. Text fields use `--field-edge`, 3:1 against the page and the field.
 - **Focus survives redraws.** The guest page rebuilds its search results on every
   change, so `renderResults(focusKey)` puts focus back on the row just opened or
   requested. Results already queued are `aria-disabled` rows, not dead buttons.
-- **Announce, don't read out.** The results list is not a live region; a hidden
+- **Announce, don't read out.** The results list isn't a live region. A hidden
   `role="status"` line says how many tracks were found (`search.results`, a plural).
-- **Used-up buttons stay reachable.** They are `aria-disabled`, not `disabled`, so a
-  screen reader still hears "Skip, in 5 min"; pressing one shows why in a toast. They
-  are outlined rather than faded, so the wait stays readable.
+- **Used-up buttons stay reachable.** They're `aria-disabled`, not `disabled`, so a screen
+  reader still hears "Skip, in 5 min". Pressing one shows why in a toast. They're outlined
+  rather than faded, so the wait stays readable.
 - **The name dialog** makes the page behind `inert`, closes on Escape (as Skip or
   Cancel), and hands focus back to the button that opened it.
 - **Moving text stops.** Long names scroll twice to the end and back, pause on hover,
-  then keep their "…" (`marquee.js`, the count is in `party.css`). With reduced motion
+  then keep their "…" (`marquee.js`; the count is in `party.css`). With reduced motion
   they never scroll.
-- **Numbered lists** are `<ol>`; the visible number is `aria-hidden` so it isn't read
+- **Numbered lists** are `<ol>`, and the visible number is `aria-hidden` so it isn't read
   twice. Album covers have empty `alt` text: the title next to them says it all.
 - **Say why, in the guest's language.** The guest page shows nothing until it knows
-  whether it can open, then "Scan the code again" (no session) or "Requests are closed"
-  (the API answers `closed` while party mode is off), never one in place of the other. An
-  old or closed join link (`/j/<code>`) gets a small HTML page from `messagePage()` in
-  `lib/server.js`, with `lang` and a viewport, rather than plain text a phone shows tiny.
+  whether it can open. Then it says "Scan the code again" (no session) or "Requests are
+  closed" (the API answers `closed` while Party mode is off), never one in place of the
+  other. An old or closed join link (`/j/<code>`) gets a small HTML page from
+  `messagePage()` in `lib/server.js`, with `lang` and a viewport, rather than plain text a
+  phone shows tiny.
 - **QR codes say what they are.** Their `alt` text names the code ("QR code for the
   guest page", `screen.qr_alt`) rather than repeating the link under it, which a screen
   reader would then hear twice.
-- **Headings follow the page.** On the Party Hub, "Requests are closed" is an `<h2>`
-  in the place of the playing track's title, which is one too.
+- **Headings follow the page.** On the Party Hub, "Requests are closed" is an `<h2>`, in
+  the place of the playing track's title, which is one too.
+
+## Security
+
+- **Access is a shared join code, not a login.** Anyone who can reach the port and has
+  scanned the code can add tracks. The Party Hub and its endpoints need no session, and
+  they include the join link, so the code proves someone opened the Hub, not that they're
+  in the room. Don't expose the port to the internet.
+- **Allowances are per session.** A guest who clears cookies and scans again starts
+  afresh.
+- **Guests can only queue what they were shown.** Browse item keys are short and numbered
+  in sequence, so `POST /api/request` only takes a key this guest was sent in their search
+  results (`GuestStore.offer`, the last 400 per guest). It uses the title and artist the
+  server sent, not the phone's. So a guest can't send the key of an album, a playlist or a
+  search category, which would queue all of it, or pass one track off as another to get
+  past the duplicate check. A key never sent answers `unknown_track`.
+- **Allowances are taken before Roon is asked**, and handed back (`GuestStore.refund`) if
+  Roon refuses, for requests and skips alike. So several sent at once can't all pass the
+  check before any is counted.
+- **Input limits.** Names go through `cleanName()` (`lib/guests.js`). It removes control
+  characters, which could fake log lines, and direction overrides, which can show a name
+  back to front. The 24-character limit counts characters, so an emoji isn't cut in half.
+  Searches stop at 200 characters. At most 2000 sessions are held; the longest idle goes
+  first.
+- **Session cookies stay private.** A guest's tracks are linked to them by a separate
+  `ref`, never the session `id` (see [Names](#names)).
+- **Headers.** Every response carries a Content-Security-Policy that allows only the
+  extension's own scripts, styles, images and connections. The pages have no inline script
+  or style; `marquee.js` sets styles through the DOM, which the policy allows. Responses
+  also carry `X-Content-Type-Options: nosniff` and `Referrer-Policy: no-referrer`. Guest
+  pages refuse to be framed (`frame-ancestors 'none'`, `X-Frame-Options: DENY`); the Party
+  Hub may be, for a dashboard on the TV. `test/server.test.js` covers all of this.
 
 ## Installing it from Roon
 
 Once the image is on Docker Hub and the entry is in the Extension Repository, install it
 with the [Extension Manager](https://github.com/TheAppgineer/roon-extension-manager):
 Roon → Settings → Extensions → Extension Manager → Settings, pick the category, pick
-Party Mode, choose Install. The Manager runs it with host networking (Roon discovery uses
-UDP broadcast on port 9003) and bind-mounts `config.json` so settings survive updates.
+Party Mode, and choose Install.
+
+The Manager runs it with host networking, since Roon discovery uses UDP broadcast on
+port 9003. It bind-mounts `config.json`, so settings survive updates.
 
 ## Publishing the image
 
 `.github/workflows/docker-publish.yml` builds `linux/amd64`, `linux/arm/v6`,
-`linux/arm/v7` and `linux/arm64` and pushes `stubaggs/roon-extension-party-mode` to Docker Hub,
-tagged by the branch chosen under **Use workflow from** when it's run:
+`linux/arm/v7` and `linux/arm64`, and pushes `stubaggs/roon-extension-party-mode` to Docker
+Hub. Its tags depend on the branch chosen under **Use workflow from**:
 
 | Branch | Tags | Who gets it |
 | --- | --- | --- |
-| `main` | `latest`, and the version (`1.1.1`) | The Extension Manager (`repository-entry.json` asks for `latest`), and Docker users on `latest`; the version tag lets anyone pin or roll back |
+| `main` | `latest`, and the version (`1.1.1`) | The Extension Manager (`repository-entry.json` asks for `latest`), and Docker users on `latest`. The version tag lets anyone pin or roll back |
 | `experimental` | `experimental`, and the version (`1.2.0-experimental`) | Only those who ask for `:experimental` |
 
-The workflow refuses any other branch, and refuses `experimental` when its
+The workflow refuses any other branch. It also refuses `experimental` when its
 `package.json` version has no suffix, so an experimental build can never take `latest` or
 a release's number.
 
-An experimental build is also a separate extension to Roon (`extensionIdentity()` in
-`lib/roon-service.js`): a version with a suffix registers as
-`com.stubaggs.party-mode.experimental`, named "Party Mode (experimental)", while a release
-keeps `com.stubaggs.party-mode`. Roon tells extensions apart by id, wherever they run:
-two copies with one id clash even on separate machines, so run at most one release and
-one experimental build per Core, unless the copies are named (see Running several
-copies). With their separate ids, those two run side by side
-against one Core, on one machine or two, each enabled, set up and paired on its own
-(checked October 2026). They still need their own `config.json` and party zone; the port
-sorts itself out (the second takes the next free one).
+### Running the workflow
 
-The workflow only runs when started by hand (Actions → Publish Docker image → Run workflow);
-the commented-out `push` trigger in the workflow publishes on every merge to `main` once
-restored, and a commented-out weekly `schedule` rebuilds and republishes every Monday so
-installs pick up base-image security fixes without a manual publish. It needs two
-repository secrets, under Settings → Secrets and variables → Actions:
+It only runs when started by hand: Actions → Publish Docker image → Run workflow. Two
+triggers are commented out:
+
+- `push` would publish on every merge to `main`;
+- a weekly `schedule` would rebuild and republish every Monday, so installs pick up
+  base-image security fixes.
+
+It needs two repository secrets, under Settings → Secrets and variables → Actions:
 
 | Secret | Value |
 | --- | --- |
 | `DOCKERHUB_USERNAME` | `stubaggs` |
 | `DOCKERHUB_TOKEN` | A Docker Hub access token with Read & Write scope |
 
-A release bumps `version` in `package.json`, gives RELEASES.md its section, merges into
-`main` through a pull request, and tags the merge commit `v<version>` (an annotated tag,
-from `v1.1.0` on). The workflow's `tags: ['v*']` trigger is commented out with `push`, so
-tagging doesn't publish; run the workflow by hand.
+The Extension Manager checks Docker Hub for a newer `latest`, so publishing a new `latest`
+is how an update reaches people who have it installed.
 
-The Extension Manager checks Docker Hub for a newer `latest`, so publishing a new
-`latest` is how an update reaches people who have it installed.
+### Releasing
 
-The Dockerfile builds in two stages. The first installs dependencies exactly as
-`package-lock.json` pins them (`npm ci`, which needs `git` for the Roon packages on
-GitHub) and runs `npm test`, so a failing test stops the build. The second copies only
-the app and its dependencies onto a clean base, with a health check that requests the
-Party Hub data (`/api/hub`) on the configured port.
+1. Bump `version` in `package.json` and give RELEASES.md its section.
+2. Merge into `main` through a pull request.
+3. Tag the merge commit `v<version>` (an annotated tag, from `v1.1.0` on).
+4. Run the workflow by hand. Its `tags: ['v*']` trigger is commented out with `push`, so
+   tagging doesn't publish.
 
-The image is built for `linux/amd64`, `linux/arm64` and both 32-bit ARM variants:
-Docker reports every 32-bit ARM host as `arm`, the key the repository entry uses, and
-Pi Zero and Pi 1 need `arm/v6` while later Pis use `arm/v7`.
+### The Dockerfile
 
-The base is `node:22-alpine`, pinned by digest. Node 22 is the newest line with 32-bit
-ARM images (Node 24 dropped `linux/arm/v7`) and is supported until April 2027; before
-then, move to Node 24 and drop `arm/v7` from the workflow and the repository entry.
+It builds in two stages:
+
+1. Install dependencies exactly as `package-lock.json` pins them (`npm ci`, which needs
+   `git` for the Roon packages on GitHub), and run `npm test`, so a failing test stops the
+   build.
+2. Copy only the app and its dependencies onto a clean base, with a health check that
+   requests the Party Hub's data (`/api/hub`) on the configured port.
+
+The image covers both 32-bit ARM variants because Docker reports every 32-bit ARM host as
+`arm`, the key the repository entry uses: Pi Zero and Pi 1 need `arm/v6`, later Pis
+`arm/v7`.
+
+### The base image
+
+The base is `node:22-alpine`, pinned by digest. Node 22 is the newest line with 32-bit ARM
+images (Node 24 dropped `linux/arm/v7`), and is supported until April 2027. Before then,
+move to Node 24 and drop `arm/v7` from the workflow and the repository entry.
 
 Dependabot (`.github/dependabot.yml`) checks the base weekly. When the official image is
-rebuilt with Alpine or Node security fixes, its digest changes and Dependabot opens a pull
-request updating both `FROM` lines. It skips major Node versions, so it never moves the
-image to Node 24 on its own. Merging that pull request changes the Dockerfile only: the
-fixes reach installed copies once a new image is published. To update by hand, change
-both `FROM` lines together (`docker buildx imagetools inspect node:22-alpine` prints the
-current digest).
+rebuilt with Alpine or Node security fixes, its digest changes, and Dependabot opens a
+pull request updating both `FROM` lines. It skips major Node versions, so it never moves
+the image to Node 24 on its own.
 
-To run the image by hand instead:
+Merging that pull request changes only the Dockerfile: the fixes reach installed copies
+once a new image is published. To update by hand, change both `FROM` lines together;
+`docker buildx imagetools inspect node:22-alpine` prints the current digest.
+
+### Running the image by hand
 
 ```bash
 docker run -d --name party-mode --network host \
@@ -400,23 +654,40 @@ docker run -d --name party-mode --network host \
   stubaggs/roon-extension-party-mode:latest
 ```
 
-`docker-compose.yml` does the same thing. Create `config.json` first and make it writable
-by uid 1000 (`touch config.json && sudo chown 1000 config.json && chmod 600 config.json`;
-`chmod 666` works without `sudo` but leaves Roon's pairing token readable by every
-account on the host): otherwise Docker makes a directory in its
-place, and the extension, which runs as the image's unprivileged `node` user (uid 1000),
-can't save its settings. If it can't, Roon's status line and the console say so. The
-Extension Manager creates the file writable itself.
+`docker-compose.yml` does the same thing.
+
+Create `config.json` first, writable by uid 1000:
+
+```bash
+touch config.json && sudo chown 1000 config.json && chmod 600 config.json
+```
+
+`chmod 666` works without `sudo`, but leaves Roon's pairing token readable by every
+account on the host. Without the file, Docker makes a directory in its place. The
+extension runs as the image's unprivileged `node` user (uid 1000), so it then can't save
+its settings; Roon's status line and the console say so. The Extension Manager creates the
+file writable itself.
 
 ## Running the experimental version
 
-New features are tried out before each release in an **experimental** version, built
-from the `experimental` branch and published by hand as the `:experimental` Docker tag
-(see Publishing the image). It may change or break between updates. It shows in Roon as a
-separate extension, **Party Mode (experimental)**, so it can run alongside the released
-Party Mode, even on the same computer. Run only one copy of each per Roon Core, though:
-two copies of the same one clash, even on different computers. Give it its own folder,
-container name and party zone:
+New features are tried out before each release in an **experimental** version. It's
+built from the `experimental` branch and published by hand as the `:experimental` Docker
+tag (see [Publishing the image](#publishing-the-image)). It may change or break between
+updates.
+
+It's a separate extension to Roon (`extensionIdentity()` in `lib/roon-service.js`):
+
+- a version with a suffix registers as `com.stubaggs.party-mode.experimental`, named
+  "Party Mode (experimental)";
+- a release keeps `com.stubaggs.party-mode`.
+
+Roon tells extensions apart by id, wherever they run. So the two run side by side against
+one Core, on one machine or two, each enabled, set up and paired on its own (checked
+October 2026). But two copies with the **same** id clash, even on separate machines: run
+at most one release and one experimental build per Core, unless the copies are named (see
+[Running several copies](#running-several-copies)).
+
+Give the experimental one its own folder, container name, `config.json` and party zone:
 
 ```bash
 mkdir party-mode-experimental && cd party-mode-experimental
@@ -427,50 +698,61 @@ docker run -d --name party-mode-experimental --network host --restart unless-sto
   stubaggs/roon-extension-party-mode:experimental
 ```
 
-Then enable **Party Mode (experimental)** under **Settings → Extensions** in Roon and
-choose its settings. Pick a different party zone from the released Party Mode's: two on
-one zone would both pause and resume it, each with its own join code. If the released one
-already uses port 8338, the experimental one uses the next free port, and its status line
-in Roon says so. To stop trying it, remove the container
-(`docker rm -f party-mode-experimental`) and disable it in Roon. The Extension Manager
-always installs the released version.
+1. In Roon, enable **Party Mode (experimental)** under **Settings → Extensions** and
+   choose its settings.
+2. Pick a different party zone from the released Party Mode's. Two on one zone would both
+   pause and resume it, each with its own join code.
+
+If the released one already uses port 8338, the experimental one takes the next free port,
+and its status line in Roon says so.
+
+To stop trying it, remove the container (`docker rm -f party-mode-experimental`) and
+disable it in Roon. The Extension Manager always installs the released version.
 
 ## Running several copies
 
 Roon tells extensions apart by id, so two copies of the same version clash against one
 Core, even on different computers. To run more, give each extra copy a name with
-`ROON_EXTENSION_PARTY_MODE_INSTANCE` (e.g. `-e ROON_EXTENSION_PARTY_MODE_INSTANCE=Garden`).
-A named copy registers as its own extension (`extensionIdentity()` in
-`lib/roon-service.js`): `com.stubaggs.party-mode.garden`, shown in Roon as "Party Mode
-(Garden)", or "Party Mode (experimental, Dev)" for a named experimental build. The id
-uses the name's letters and digits, accents dropped ("Kitchen & Bar" becomes
-`kitchen-bar`); a name with none ("厨房") gets a short hash instead. The console's first
-line says which name a copy registered as.
+`ROON_EXTENSION_PARTY_MODE_INSTANCE`, for example
+`-e ROON_EXTENSION_PARTY_MODE_INSTANCE=Garden`.
 
-Names may have spaces. In `docker-compose.yml`, write them as they are:
+A named copy registers as its own extension (`extensionIdentity()`):
+
+- `com.stubaggs.party-mode.garden`, shown in Roon as "Party Mode (Garden)";
+- "Party Mode (experimental, Dev)" for a named experimental build.
+
+The id uses the name's letters and digits, with accents dropped: "Kitchen & Bar" becomes
+`kitchen-bar`. A name with none of those ("厨房") gets a short hash instead. The console's
+first line says which name a copy registered as.
+
+Left unset, which is everyone else, nothing changes: same id, same name, same pairing. A
+named copy is new to Roon the first time: enable it and set it up, with its own
+`config.json` and party zone. Renaming it later makes it a new extension again.
+
+### Names with spaces
+
+In `docker-compose.yml`, write the name as it is:
 
 ```yaml
     environment:
       - ROON_EXTENSION_PARTY_MODE_INSTANCE=Living Room
 ```
 
-or `ROON_EXTENSION_PARTY_MODE_INSTANCE: Living Room` in the `key: value` style. Don't
-quote the value after the `=` in the list style: YAML keeps the quotes, and they would
-show in Roon's name for it (the id ignores them). A ` #` starts a YAML comment, so quote
-the whole line for such a name, or one starting with a symbol such as `&`, `*` or `!`:
-`- "ROON_EXTENSION_PARTY_MODE_INSTANCE=Bar #2"`. With `docker run`, the shell needs the
-quotes: `-e "ROON_EXTENSION_PARTY_MODE_INSTANCE=Living Room"`.
+or `ROON_EXTENSION_PARTY_MODE_INSTANCE: Living Room` in the `key: value` style.
 
-Unset, which is everyone else, nothing changes: same id, same name, same pairing. A
-named copy is new to Roon the first time: enable it and set it up, with its own
-`config.json` and party zone. Renaming it later makes it a new extension again.
+- Don't quote the value after the `=` in the list style: YAML keeps the quotes, and they'd
+  show in Roon's name for it (the id ignores them).
+- ` #` starts a YAML comment, so quote the whole line for such a name, or for one starting
+  with a symbol such as `&`, `*` or `!`: `- "ROON_EXTENSION_PARTY_MODE_INSTANCE=Bar #2"`.
+- With `docker run`, the shell needs the quotes:
+  `-e "ROON_EXTENSION_PARTY_MODE_INSTANCE=Living Room"`.
 
 ## Environment variables
 
-Every environment variable is named `ROON_EXTENSION_PARTY_MODE_<SETTING>`, read through
-`lib/env.js` (`envValue`). The hyphenated spelling, `ROON-EXTENSION-PARTY-MODE_<SETTING>`,
-is accepted too: Docker can pass it, though shells can't set it. A renamed variable keeps
-its old name working, checked after the new ones.
+Every environment variable is named `ROON_EXTENSION_PARTY_MODE_<SETTING>` and read
+through `lib/env.js` (`envValue`). The hyphenated spelling,
+`ROON-EXTENSION-PARTY-MODE_<SETTING>`, works too: Docker can pass it, though shells can't
+set it. A renamed variable keeps its old name working, checked after the new ones.
 
 | Variable | Meaning |
 | --- | --- |
@@ -480,159 +762,54 @@ its old name working, checked after the new ones.
 
 ## Logging
 
-The normal log is short: the port and links at startup, one line per guest request
-(`Request (add) from Sam: …`), per queue insert (`Queued: …` with length and hash) and
-per track start (`Playing: … -> Sam`), one line when each guest's session gets the
-profile, and warnings. That is enough to diagnose a wrong name on a track.
+The normal log is short:
 
-`ROON_EXTENSION_PARTY_MODE_DEBUG=1` (`lib/log.js`) adds detail: the profile before and after each switch,
-the profiles on offer, the first search's result categories, and node-roon-api's own log
-of every message to and from the Core (its `log_level`, otherwise `"none"`). That last
-part is large and includes guests' searches and Roon's full replies, so it is for
-troubleshooting only. `docker-compose.yml` and the README's `docker run` cap the
-container log at 3 × 10 MB.
+- the port and links at startup;
+- one line per guest request (`Request (add) from Sam: …`);
+- one per queue insert (`Queued: …`, with length and hash);
+- one per track start (`Playing: … -> Sam`);
+- one when each guest's session gets the profile;
+- warnings.
+
+That's enough to diagnose a wrong name on a track.
+
+`ROON_EXTENSION_PARTY_MODE_DEBUG=1` (`lib/log.js`) adds detail: the profile before and
+after each switch, the profiles on offer, the first search's result categories, and
+node-roon-api's own log of every message to and from the Core (its `log_level`,
+otherwise `"none"`). That last part is large and includes guests' searches and Roon's
+full replies, so it's for troubleshooting only.
+
+`docker-compose.yml` and the README's `docker run` cap the container log at 3 × 10 MB.
 
 ## Known limitations
 
-**No queue reordering.** Roon's API can add a track to the end of the queue or directly
-after the current one, and it can skip. It cannot move an item that is already in the
-queue. So a guest can ask for a track to play next when they add it, but nobody can
-promote a track that is already waiting. If you have seen Music Assistant's "boost an
-upcoming song", that part does not have a Roon equivalent.
-
-**A request presses play.** Roon's Queue and Add Next actions leave a paused or stopped
-zone as it is, so a track requested after the queue ran out would sit there unplayed.
-After either action succeeds, `performAction` sends the transport `play` control unless
-the zone is already playing or loading. That also resumes a zone the host paused on
-purpose; there is no setting to turn it off. A failed `play` is logged and the request
-still counts, since the track was queued.
-
-**Nicknames are optional.** Guests are asked for a name on their first visit; it shows as
-a badge on the tracks they add, in Up next, Played and on the Party Hub. The phone
-remembers it (or that they skipped), so a rescan doesn't ask again. A guest without a name
-shows as "Anon" (`credit.guest`, translated: Anonyme, Anonym, Anónimo, Anoniem; "Anon" in
-the playlist file and the log). It is only a display name: the session's name stays empty.
-Naming yourself later, or changing your name, reaches everything you already added: each
-session has a `ref` (random, separate from its `id`, which is the session cookie) that
-requests, Played entries, skips and playlist rows record, and `POST /api/name` renames by
-it (`GuestStore.rename`, `PlayHistory.rename`, `PartyPlaylist.rename`) and pushes a fresh
-queue to the pages. The ref never leaves the server: the pages' credits come from
-`requester()`, which has none, and `PlayHistory.list()` strips it. A new scan starts a new
-session, so tracks added before a rescan keep the name they had.
-
-**"Roon Radio" is a guess.** Roon doesn't say where a track came from. When Roon Radio
-is switched on for the party zone, any track no guest added is labelled "Roon Radio",
-which includes tracks the host queues from the Roon app.
-
-**Duplicates are per recording, not per song.** A remaster, a live take or a single
-edit is a fair request even when the original is queued, so duplicate checking is
-version-sensitive. The limit is that a search result has no length: where two
-recordings share a title and artist and differ only in length — an album version and
-a single edit both titled "Hey Jude" — they cannot be told apart at search time and
-the second is refused as a duplicate. Once both are queued they are distinct, and get
-their own badges.
-
-**Covers are not duplicates, which takes some inferring.** A search result's subtitle
-credits writers as well as performers ("FINNEAS, Billie Eilish, 2CELLOS"); a queue entry
-credits performers only ("Billie Eilish"). Compared name by name, every cover of a song
-would share its writer with the queued original. So `sharedCredits` (`lib/track-id.js`)
-takes the names credited on at least half of the guest's results with that title, when
-there are three or more, as the writers, and `sameRecordingAsQueued` compares only what
-is left: the version's performers. A result crediting only writers is the original and
-is compared on all its names. On a real search for "bad guy" (`test/fixtures/`), this
-took the results marked as queued from 24 to the one that was. With fewer than three
-results to compare, any shared name still counts, as before.
-
-**Attribution is exact once a track is queued, best-effort before that.** Roon queue
-items carry no "who added this" field. A request is bound to its real queue item when
-Roon reports the insert, which is exact; the fallbacks below that match on title and
-artist, and ignore remaster tags, artist separators and extra artists. Two guests
-asking for the same recording are credited in the order they asked, so if those two
-inserts arrive out of order the badges swap. A request whose insert never arrives
-within a minute — the host clears the queue, say — falls back to title matching. The
-console logs each request, each queue insert with its length and hash, and each track
-start, which is the place to look when a badge is wrong.
-
-**Browse sessions are stateful.** Item keys are only valid until that guest's browse
-session moves on. The server replays the search and retries once when a key has gone
-stale, which covers the usual case of a guest searching again before tapping.
-A session also has one position, and a search or a request is several steps through
-it, so a guest's operations take turns (`RoonService._inSession`): interleaved, one
-search opened Tracks while another took the session back to the result categories, and
-the first then read "Tracks, Artists, TIDAL" as tracks. A search still waiting when the
-same guest searches again is dropped (`search` returns null; the page ignores out-of-date
-answers too), and only `action_list` items are returned as tracks.
-
-**Access control is a shared join code, not a login.** Anyone who can reach the port and
-has scanned the code can add tracks. The Party Hub and its endpoints need no session at all,
-and they include the join link, so the code proves someone opened the Hub, not that they
-are in the room. Allowances are per session: a guest who clears cookies and scans again
-starts afresh. Do not expose this to the internet.
-
-**What a guest can make Roon do is limited to what they were shown.** Browse item keys
-are short and numbered in sequence, so `POST /api/request` only takes a key this guest was
-sent in their search results (`GuestStore.offer`, the last 400 per guest), and uses the
-title and artist the server sent, not the phone's: a guest can't send the key of an
-album, a playlist or a search category, which would queue all of it, or pass one track off
-as another to get past the duplicate check. A key never sent answers `unknown_track`.
-
-**Allowances are taken before Roon is asked**, and handed back (`GuestStore.refund`) if
-Roon refuses, for requests and skips alike, so several sent at once can't all pass the
-check before any is counted.
-
-**Input limits.** Names go through `cleanName()` (`lib/guests.js`): control characters,
-which could fake log lines, and direction overrides, which can show a name back to
-front, are removed, and the 24-character limit counts characters, so an emoji isn't cut
-in half. Searches stop at 200 characters. At most 2000 sessions are held; the longest idle
-goes first.
-
-**Headers.** Every response carries a Content-Security-Policy allowing only the
-extension's own scripts, styles, images and connections (the pages have no inline
-script or style; `marquee.js` sets styles through the DOM, which the policy allows),
-`X-Content-Type-Options: nosniff` and `Referrer-Policy: no-referrer`. Guest pages also
-refuse to be framed (`frame-ancestors 'none'`, `X-Frame-Options: DENY`); the Party
-Hub may be, for a dashboard on the TV. `test/server.test.js` covers all of this.
-
-**The party playlist is a download, not a Roon playlist.** Roon's browse API offers
-extensions Play Now, Add Next, Queue and Start Radio on a track, and Play Now, Shuffle,
-Add Next, Queue and Start Radio on a playlist; nothing creates or edits one (checked
-against a Core in October 2026). So `lib/party-playlist.js` records every queue entry
-the party zone gets, once per `queue_item_id`, and `GET /api/playlist.csv` (offered on
-the Party Hub only while party mode is off, which is how a host ends a party; the
-URL itself needs no session, like the rest of the Hub, and always works) serves it as CSV in
-the form Soundiiz imports: lower-case `title`, `artist`, `album` headers (the other
-columns are ignored by importers), commas, UTF-8 without a byte order mark (a BOM hides
-the first header from an importer, at the cost of Excel's double-click guessing the
-encoding wrong), and Roon's ` / ` between artists written as `, `. It includes what was
-queued before the extension started, Roon Radio picks and the host's own additions. Credits are frozen when the entry is first seen, since closing guest
-access clears attributions. Column names and credits are English, which import services
-expect. A guest name a spreadsheet would read as a formula gets a leading apostrophe;
-track details are left as Roon gives them, so they still match. The Display playlist
-download setting (`playlist_download`: `'qr'`, `'link'` or `'off'`, read through
-`playlistDisplay()`, which turns the brief yes/no form into `'qr'`/`'off'`) only decides
-what the Hub shows: `/api/hub` passes it as `playlist`, and the Hub shows a QR
-code from `GET /api/playlist-qr.svg` with the link under it, a button, or nothing. Its hint
-in Roon's settings gives the download address, which `app.js` hands over with
-`setPlaylistUrl()` alongside the website link. `test/server.test.js` runs the real web server against a
-stand-in for Roon and checks these answers, the join-link pages and the guest API's
-`no_session` and `closed` errors. Times are local to the extension, which in Docker is UTC unless
-`TZ` is set. Kept in memory, at most 2000 tracks, and reset with the party zone and when guest
-access is turned back on (a new party; what is still queued is recorded again).
-
-**Played history is the extension's own.** Roon's API has no play history, so the
-"Played" list on the guest page is recorded by the extension as tracks start. It is kept
-in memory (last 200 tracks) and starts over when the extension restarts or the party zone
-changes. A guest's skip marks the playing track (`markSkipped`, before the skip reaches
-Roon, since the next track can start before Roon answers; undone if the skip fails), and
-Played shows "Skipped by Sam". A skip made in Roon is inferred: `RoonService._notePosition`
-keeps the furthest position Roon reported for the playing track (zone updates can carry a
-reset one), and a track left 10 seconds or more before its end (`SKIP_MARGIN` in
-`lib/history.js`) with no guest skip shows "Skipped in Roon". It is not judged without a
-length or a position, so radio streams and zones that report no position never show it.
-Anything that cuts a track short counts, such as Play Now on another track in Roon.
-
-**The queue subscription is per zone.** Changing the party zone starts a new subscription;
-the old one is ignored rather than torn down, since the API has no convenient unsubscribe.
+- **No queue reordering.** Roon's API can add a track to the end of the queue or right
+  after the current one, and it can skip, but it can't move a track already in the
+  queue. So a guest can ask for a track to play next when they add it, but nobody can
+  promote one that's already waiting. Music Assistant's "boost an upcoming song" has no
+  Roon equivalent.
+- **A request presses play.** Roon's Queue and Add Next leave a paused or stopped zone as
+  it is, so a track requested after the queue ran out would sit there unplayed. After
+  either succeeds, `performAction` sends `play` unless the zone is already playing or
+  loading. That also resumes a zone the host paused in Roon (Party mode's Paused refuses
+  requests instead). There's no setting to turn it off. A failed `play` is logged, and the
+  request still counts, since the track was queued.
+- **"Roon Radio" is a guess.** Roon doesn't say where a track came from. With Roon Radio
+  on for the party zone, any track no guest added is labelled "Roon Radio", including
+  tracks the host queues from the Roon app.
+- **Versions that differ only in length look the same before they're queued.** A search
+  result has no length, so an album version and a single edit, both titled "Hey Jude" by
+  the same artist, can't be told apart at search time, and the second is refused as a
+  duplicate. Once both are queued they're distinct and get their own badges.
+- **Credits can swap.** Two guests asking for the same recording are credited in the
+  order they asked. If Roon reports those two inserts out of order, the badges swap.
+- **A rescan starts a new session.** Tracks added before it keep the name they had then.
+- **Everything is kept in memory.** Played (the last 200 tracks), the playlist (2000) and
+  who asked for what start over when the extension restarts. Played also starts over when
+  the party zone changes.
+- **The queue subscription is per zone.** Changing the party zone starts a new
+  subscription. The old one is ignored rather than torn down, since the API has no
+  convenient unsubscribe.
 
 ## Licence
 
