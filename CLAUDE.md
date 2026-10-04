@@ -21,8 +21,9 @@ Every change that affects them updates the docs in the same commit, except the R
   version keeps a suffix (`1.2.0-experimental`) until the release bump: the publish
   workflow refuses an experimental build without one.
 - If a change touches none of these, say so in the pull request rather than editing the docs.
-- Example addresses in the docs use the TEST-NET-1 range `192.0.2.0/24` (e.g.
-  `http://192.0.2.10:8338/PartyHub`), never a real private address.
+- Example addresses in the docs and tests use the TEST-NET-1 range `192.0.2.0/24` (e.g.
+  `http://192.0.2.10:8338/PartyHub`), never a real private address. Tests that bind a
+  port use `127.0.0.1`.
 
 ## Conventions the owner has asked for
 

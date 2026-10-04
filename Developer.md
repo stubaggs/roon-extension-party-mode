@@ -27,7 +27,7 @@ Roon Core  ──(node-roon-api over the local network)──  app.js
                                                         │
                                               Express on port 8338
                                                         │
-                                     /             "Scan the code again"
+                                     /             "Reserved"
                                      /GuestHub     guest page (phones)
                                      /PartyHub     QR code + queue (TV)
 ```

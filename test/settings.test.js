@@ -154,7 +154,7 @@ check('party mode is first, with on, paused and off', () => {
 });
 
 check("Roon's status line: the party's name, the mode and the Hub's address, in every mode", () => {
-  const hub = 'Party Hub at http://192.168.1.73:8338/PartyHub';
+  const hub = 'Party Hub at http://192.0.2.10:8338/PartyHub';
   assert.strictEqual(statusText('EX5 Test-o-rama', 'on', hub), `On: EX5 Test-o-rama.\n${hub}`);
   assert.strictEqual(statusText('EX5 Test-o-rama', 'paused', hub), `Paused: EX5 Test-o-rama.\n${hub}`);
   assert.strictEqual(statusText('EX5 Test-o-rama', 'off', hub), `Off: EX5 Test-o-rama.\n${hub}`);
@@ -252,8 +252,8 @@ check('the hint names the download address once it is known', () => {
   const hint = (self) => item(RoonService.prototype._layout.call(self, {}), 'playlist_download').subtitle;
   assert.strictEqual(hint({ _resolveZone: () => null }), 'On the Party Hub when Party mode is Off');
   assert.strictEqual(
-    hint({ _resolveZone: () => null, playlistUrl: 'http://192.168.1.73:8338/Download/playlist.csv' }),
-    'On the Party Hub when Party mode is Off\nAlways downloadable at http://192.168.1.73:8338/Download/playlist.csv'
+    hint({ _resolveZone: () => null, playlistUrl: 'http://192.0.2.10:8338/Download/playlist.csv' }),
+    'On the Party Hub when Party mode is Off\nAlways downloadable at http://192.0.2.10:8338/Download/playlist.csv'
   );
 });
 

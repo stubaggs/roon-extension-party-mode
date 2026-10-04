@@ -46,7 +46,7 @@ docker run -d --name party-mode --network host --restart unless-stopped \
 
 Then enable **Party Mode** under **Settings → Extensions** in Roon.
 
-`config.json` keeps your settings when the image is updated. It also holds the key Roon
+The file `config.json` keeps your settings when the image is updated. It also holds the key Roon
 gave Party Mode, so the commands above let only the extension (user 1000) read it. Without
 `sudo`, use `chmod 666 config.json` instead, which lets every account on the computer
 read and change it. The `--log-opt` settings keep the log from growing without limit.
