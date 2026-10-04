@@ -157,8 +157,8 @@ outgoing connections.
   ten are taken, it still connects to Roon and asks for another port in the settings.
 - **Busy when chosen in the settings:** the extension stays on its current port and says
   so.
-- **`ROON_EXTENSION_PARTY_MODE_PORT`** (the older `PARTY_PORT` still works) only sets the
-  first port. Roon saves every field on the first Save, the port included, even when only
+- **`ROON_EXTENSION_PARTY_MODE_PORT`** only sets the
+  first runo port. Roon saves every field on the first Save, the port included, even when only
   the zone was chosen. From then on the saved port wins and the variable is ignored, so
   change the port with Web port in Roon.
 
@@ -778,8 +778,6 @@ The normal log is short:
 - one per track start (`Playing: … -> Sam`);
 - one when each guest's session gets the profile;
 - warnings.
-
-That's enough to diagnose a wrong name on a track.
 
 `ROON_EXTENSION_PARTY_MODE_DEBUG=1` (`lib/log.js`) adds detail: the profile before and
 after each switch, the profiles on offer, the first search's result categories, and
