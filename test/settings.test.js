@@ -170,6 +170,17 @@ check('saved allowances are kept over the defaults', () => {
   assert.deepStrictEqual([values.add_limit, values.add_refill, values.next_refill], [10, 2, 20]);
 });
 
+check('Party Hub language: Automatic first, then every language by its own name; unknown reads as Automatic', () => {
+  const result = layout({ hub_language: 'de' });
+  const setting = item(result, 'hub_language');
+  assert.deepStrictEqual(setting.values[0], { title: 'Automatic', value: '' });
+  assert.strictEqual(setting.values.length, 31);
+  assert.ok(setting.values.some((v) => v.value === 'de' && v.title === 'Deutsch'));
+  assert.strictEqual(result.values.hub_language, 'de');
+  assert.strictEqual(layout({ hub_language: 'xx' }).values.hub_language, '');
+  assert.strictEqual(layout({}).values.hub_language, '');
+});
+
 check('party mode is first, with on, paused and off', () => {
   const result = layout({});
   assert.strictEqual(result.layout[0].setting, 'enabled');

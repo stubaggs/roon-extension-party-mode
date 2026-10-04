@@ -87,7 +87,7 @@ before pushing. The Docker build runs it too, so a failing test stops a build.
 
 Party mode comes first, as the switch hosts use most. Then, in order: the party zone, the
 party name, Display playlist download (see [The party playlist](#the-party-playlist)),
-the Roon profile, the allowances (Adding tracks, Playing next, Skipping), and the
+Party Hub language (see [Choosing the language](#choosing-the-language)), the Roon profile, the allowances (Adding tracks, Playing next, Skipping), and the
 collapsed Advanced group: the web port, then the browse titles.
 
 ### Party mode
@@ -566,6 +566,16 @@ plus "Automatic", the phone's language.
 - `/i18n.js` tells the page whether the language was chosen (`chosen`), to mark the list,
   and varies on `Cookie`.
 - The same cookie applies to the Party Hub and the join pages in that browser.
+
+**For the Party Hub, by the host.** A TV's browser is often hard to set, so the Party Hub
+language setting (`hub_language`, `''` for Automatic) can fix the Hub's language for
+every screen. Its choices are "Automatic" and the languages by their own names
+(`list()`); the title and hint stay in English, like the other settings. A chosen
+language wins over the Hub browser's cookie and Accept-Language (`hubLanguage()` in
+`lib/server.js`); guests' pages never use it. The Hub page and its text ask for it:
+`/PartyHub` is written in it, and the Hub loads `/i18n.js?for=hub`. `/api/hub` returns
+`language`, so an open Hub reloads when the host changes the setting. A value that isn't
+a language reads as Automatic.
 
 ### Right to left
 

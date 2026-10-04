@@ -24,6 +24,11 @@
   }
 
   function render(data) {
+    // The host chose another language for the Hub in Roon's settings.
+    if (data.language && data.language !== window.I18N.lang) {
+      window.location.reload();
+      return;
+    }
     const name = data.party_name || t('party.default_name');
     el('party-name').textContent = name;
     // "EX5 Test-o-rama Hub" in the tab, a bookmark or on a tablet's home screen.

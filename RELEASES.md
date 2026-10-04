@@ -18,6 +18,9 @@ Not released yet. You can try it on the `experimental` branch (see
   Radio; Roon Radio's tag now goes only on the tracks it picks.
 - With **Loop** on, the playlist download no longer lists a track again each time it
   comes round.
+- New **Party Hub language** setting in Roon: choose the Party Hub's language for every
+  screen showing it, handy for a TV whose browser is hard to set. **Automatic** (the
+  default) follows the screen's browser, as before. Guests' phones still follow their own.
 
 ## 1.2.0
 

@@ -421,6 +421,22 @@ const set = (values) => Object.assign(roon.settings, values);
     assert.ok(server.hubUrl().endsWith('/PartyHub'));
   });
 
+  await check('the Party Hub language setting wins over the browser, and only for the Hub', async () => {
+    const french = { 'Accept-Language': 'fr' };
+    try {
+      set({ hub_language: 'de' });
+      assert.match(await (await get('/PartyHub', french)).text(), /<html lang="de"/);
+      assert.match(await (await get('/i18n.js?for=hub', french)).text(), /"lang":"de"/);
+      assert.strictEqual((await (await get('/api/hub', french)).json()).language, 'de');
+      assert.match(await (await get('/i18n.js', french)).text(), /"lang":"fr"/, 'guest pages follow the phone');
+      set({ hub_language: '' });
+      assert.match(await (await get('/PartyHub', french)).text(), /<html lang="fr"/, 'Automatic follows the browser');
+      assert.strictEqual((await (await get('/api/hub', french)).json()).language, 'fr');
+    } finally {
+      set({ hub_language: '' });
+    }
+  });
+
   await check("the Hub's title is the party's name, before any script runs", async () => {
     roon.partyName = 'Kate & Sam <3 $& Co';
     const en = await (await get('/PartyHub')).text();
