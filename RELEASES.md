@@ -18,12 +18,13 @@ Not released yet. You can try it on the `experimental` branch (see
 ### Guest page
 
 - The guest page is now at `/GuestHub`. The QR code takes guests there as before, but a
-  bookmark or home-screen shortcut to the old address needs a fresh scan, and says so.
+  bookmark or home-screen shortcut to the old address needs a fresh scan.
 - 25 more languages for the guest pages and the Party Hub, 30 in all: Arabic (including
   Egyptian), Bulgarian, Chinese (Simplified and Traditional), Czech, Danish, Finnish,
   Greek, Hebrew, Hungarian, Italian, Japanese, Korean, Norwegian, Polish, Portuguese
   (Portugal and Brazil), Romanian, Russian, Swedish, Thai, Turkish, Ukrainian and
-  Vietnamese. Hebrew and Arabic pages read right to left.
+  Vietnamese. Hebrew and Arabic pages read right to left. The translations were generated
+  by AI, so apologies for any errors; corrections from native speakers are welcome.
 - Guests can choose their page's language with a 🌐 button beside their name tag;
   otherwise it follows the phone's.
 - Long translations fit narrow phones: buttons wrap instead of running off the screen,
@@ -51,11 +52,10 @@ Not released yet. You can try it on the `experimental` branch (see
 ### Search and the playlist
 
 - Search marks tracks already in the queue as **In the queue** even when **Block tracks
-  already in the queue** is off. Guests can still add them then.
+  already in the queue** is off, without stopping guests adding them.
 - Search tells a band's versions of a track on different albums apart. Before, queueing
   one marked them all as in the queue, and could miss the one actually queued.
-- The playlist download is now at `/Download/playlist.csv`. The old `/api/playlist.csv`
-  address still works.
+- The playlist download is now at `/Download/playlist.csv`.
 - The party's playlist holds up to 5000 tracks, up from 2000. At a party that runs for
   weeks, your own and Roon Radio's oldest tracks make room first, before any guest's
   request.
