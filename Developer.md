@@ -336,9 +336,9 @@ The credits aren't used then, because they can't tell a band's own versions from
 "Pere Ubu" and "Pere Ubu, Allen Ravenstine" read exactly like "Leonard Cohen" and "Jeff
 Buckley, Leonard Cohen", and the writer inference below takes Pere Ubu for a writer.
 The cost: the same recording on another album, an original and a compilation say, isn't
-a duplicate. Neither is an album's non-primary copy (see
-[Known limitations](#known-limitations)). An album both in the library and on TIDAL
-comes back from search once, as Roon's primary version. Without artwork on either side, the credits decide, as below.
+a duplicate. Neither is an album's non-primary version (see
+[Known limitations](#known-limitations)). Roon groups an album's versions, and search
+returns each group once, as its primary version. Without artwork on either side, the credits decide, as below.
 
 Search marks every queued result `in_queue`, so guests see "In the queue" whatever the
 setting. `blocked` is set too when Block tracks already in the queue is on: the page then
@@ -828,12 +828,13 @@ full replies, so it's for troubleshooting only.
   titled "Hey Jude" by the same artist, can't be told apart at search time, and the
   second is refused as a duplicate. On different albums the artwork tells them apart.
   Once both are queued they're distinct and get their own badges.
-- **An album's other copy isn't a duplicate.** When an album is both in the library and
-  on a streaming service, Roon merges them, and search returns only the primary version.
-  The other copy has different artwork, so if the host queues it from the album's
-  Versions in Roon, a guest can still request the primary copy of the same track.
-  Requests from guests always use the primary copy, so they catch each other. (Seen on a
-  Core with TIDAL, October 2026.)
+- **An album's other versions aren't duplicates.** Roon groups an album's versions under
+  one primary version: copies in the library and on a streaming service, remasters,
+  deluxe editions, other resolutions. Search returns only the primary. The others have
+  their own artwork, so if the host queues one from the album's Versions in Roon, a guest
+  can still request the primary's copy of the same track. Guests' requests always use the
+  primary, so they catch each other. (Seen with an album both in the library and on
+  TIDAL, October 2026; assumed for the other kinds of version.)
 - **Credits can swap.** Two guests asking for the same recording are credited in the
   order they asked. If Roon reports those two inserts out of order, the badges swap.
 - **A rescan starts a new session.** Tracks added before it keep the name they had then.
