@@ -190,6 +190,23 @@ const set = (values) => Object.assign(roon.settings, values);
   set({ enabled: true, prevent_duplicates: true, allow_add: true, add_limit: 10, allow_skip: true, skip_limit: 1 });
   roon.ready = true;
 
+  await check('search marks a queued track, and blocks it only when duplicates are blocked', async () => {
+    const cookie = await newGuest();
+    roon.queue = [{ queue_item_id: 1, two_line: { line1: 'Waterloo', line2: 'ABBA' } }];
+    const search = async () => (await (await get('/api/search?q=abba', { Cookie: cookie })).json()).results;
+    try {
+      let [waterloo, sos] = await search();
+      assert.deepStrictEqual([waterloo.in_queue, waterloo.blocked], [true, true]);
+      assert.deepStrictEqual([sos.in_queue, sos.blocked], [false, false]);
+      set({ prevent_duplicates: false });
+      [waterloo] = await search();
+      assert.deepStrictEqual([waterloo.in_queue, waterloo.blocked], [true, false]);
+    } finally {
+      roon.queue = [];
+      set({ prevent_duplicates: true });
+    }
+  });
+
   await check('a key the guest was never sent is refused, and Roon is not asked', async () => {
     const cookie = await newGuest();
     roon.actions = [];

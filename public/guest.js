@@ -201,8 +201,10 @@
       row.append(img, text, state);
       results.appendChild(row);
 
-      // Already queued: still in the list, and reachable, but not a working button.
-      if (track.in_queue || track.added) {
+      // Added, or queued while duplicates are blocked: still in the list, and
+      // reachable, but not a working button. Queued but not blocked, it is
+      // marked and can still be requested.
+      if (track.blocked || track.added) {
         row.setAttribute('aria-disabled', 'true');
         continue;
       }

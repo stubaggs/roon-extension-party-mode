@@ -321,6 +321,10 @@ Duplicates are per recording, not per song: a remaster, a live take or a single 
 a fair request even when the original is queued. So the duplicate check stops at step 3
 above, because steps 4 and 5 deliberately treat a remaster as the original.
 
+Search marks every queued result `in_queue`, so guests see "In the queue" whatever the
+setting. `blocked` is set too when Block tracks already in the queue is on: the page then
+won't offer the track, and `/api/request` refuses it (`already_queued`).
+
 Covers aren't duplicates either, which takes some inferring. A search result's subtitle
 credits writers as well as performers ("FINNEAS, Billie Eilish, 2CELLOS"); a queue entry
 credits performers only ("Billie Eilish"). Compared name by name, every cover would share
@@ -510,7 +514,8 @@ changing them:
   background. Text fields use `--field-edge`, 3:1 against the page and the field.
 - **Focus survives redraws.** The guest page rebuilds its search results on every
   change, so `renderResults(focusKey)` puts focus back on the row just opened or
-  requested. Results already queued are `aria-disabled` rows, not dead buttons.
+  requested. Results that can't be requested (`blocked`, or just added) are `aria-disabled` rows,
+  not dead buttons.
 - **Announce, don't read out.** The results list isn't a live region. A hidden
   `role="status"` line says how many tracks were found (`search.results`, a plural).
 - **Used-up buttons stay reachable.** They're `aria-disabled`, not `disabled`, so a screen
