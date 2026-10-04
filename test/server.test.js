@@ -168,6 +168,18 @@ const set = (values) => Object.assign(roon.settings, values);
     assert.match(res.headers.get('set-cookie'), /^party_sid=/);
   });
 
+  await check('the session cookie lasts 12 hours and is renewed whenever it is used', async () => {
+    set({ enabled: true });
+    const joined = (await get(`/j/${guests.joinCode}`)).headers.get('set-cookie');
+    assert.match(joined, /Max-Age=43200/);
+    const cookie = joined.split(';')[0];
+    const res = await get('/api/party', { Cookie: cookie });
+    assert.strictEqual(res.status, 200);
+    const renewed = res.headers.get('set-cookie') || '';
+    assert.strictEqual(renewed.split(';')[0], cookie, 'the same session');
+    assert.match(renewed, /Max-Age=43200/);
+  });
+
   await check('the guest page is at /GuestHub, in any case, and no longer at the root', async () => {
     for (const path of ['/GuestHub', '/guesthub']) assert.strictEqual((await get(path)).status, 200, path);
     const html = await (await get('/', { 'Accept-Language': 'fr' })).text();

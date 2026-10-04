@@ -42,6 +42,8 @@ Not released yet. You can try it on the `experimental` branch (see
   address still works.
 - The party's playlist holds up to 5000 tracks, up from 2000. On a party that runs for
   weeks, your own and Roon Radio's oldest tracks make room first, before any guest's request.
+- Guests stay in as long as they keep using the page. Before, everyone had to scan the
+  code again 8 hours after joining. Now that only happens after 12 hours without using it.
 
 ## 1.1.1
 

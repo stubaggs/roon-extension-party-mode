@@ -574,6 +574,10 @@ changing them:
   while a search waits. So nothing kept per guest outlives their session.
 - **Session cookies stay private.** A guest's tracks are linked to them by a separate
   `ref`, never the session `id` (see [Names](#names)).
+- **Sessions last 12 hours from last use** (`SESSION_TTL_MS`, `lib/guests.js`). Every
+  guest API call renews the `party_sid` cookie for the same 12 hours, so a guest who keeps
+  using the page stays in. One idle that long gets "Scan the code again" on their next
+  action, and a new session (name and allowances start over) when they scan.
 - **Headers.** Every response carries a Content-Security-Policy that allows only the
   extension's own scripts, styles, images and connections. The pages have no inline script
   or style; `marquee.js` sets styles through the DOM, which the policy allows. Responses
