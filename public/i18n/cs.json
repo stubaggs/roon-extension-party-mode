@@ -8,7 +8,7 @@
   "playing.nothing": "Nic nehraje",
   "playing.nothing_yet": "Zatím nic",
   "playing.station": "Rozhlasová stanice",
-  "station.notice": "Hraje rozhlasová stanice. Skladby, které přidáte, začnou hrát, až hostitel spustí frontu.",
+  "station.notice": "Přidané skladby zahrají po rádiu.",
   "credit.requested_by": "Přání od: {name}",
   "credit.guest": "Anonym",
   "credit.radio": "Roon Radio",

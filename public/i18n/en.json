@@ -8,7 +8,7 @@
   "playing.nothing": "Nothing playing",
   "playing.nothing_yet": "Nothing yet",
   "playing.station": "Radio station",
-  "station.notice": "A radio station is playing. Tracks you add will play once the host starts the queue.",
+  "station.notice": "Tracks you add will play after the radio.",
   "credit.requested_by": "Requested by {name}",
   "credit.guest": "Anon",
   "credit.radio": "Roon Radio",

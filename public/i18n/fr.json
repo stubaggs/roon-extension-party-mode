@@ -8,7 +8,7 @@
   "playing.nothing": "Rien en lecture",
   "playing.nothing_yet": "Rien pour l'instant",
   "playing.station": "Station de radio",
-  "station.notice": "Une station de radio est en cours. Les morceaux que vous ajoutez seront joués quand l'hôte lancera la file d'attente.",
+  "station.notice": "Les morceaux ajoutés passeront après la radio.",
   "credit.requested_by": "Demandé par {name}",
   "credit.guest": "Anonyme",
   "credit.radio": "Roon Radio",

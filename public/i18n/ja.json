@@ -8,7 +8,7 @@
   "playing.nothing": "再生していません",
   "playing.nothing_yet": "まだありません",
   "playing.station": "ラジオ局",
-  "station.notice": "ラジオ局を再生中です。追加したトラックは、ホストがキューを再生すると流れます。",
+  "station.notice": "追加したトラックはラジオの後に流れます。",
   "credit.requested_by": "{name} さんのリクエスト",
   "credit.guest": "匿名",
   "credit.radio": "Roon Radio",

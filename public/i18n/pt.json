@@ -8,7 +8,7 @@
   "playing.nothing": "Nada a tocar",
   "playing.nothing_yet": "Ainda nada",
   "playing.station": "Estação de rádio",
-  "station.notice": "Está a tocar uma estação de rádio. As faixas que adicionar tocam quando o anfitrião iniciar a fila.",
+  "station.notice": "As faixas que adicionar tocam depois da rádio.",
   "credit.requested_by": "Pedido por {name}",
   "credit.guest": "Anónimo",
   "credit.radio": "Roon Radio",

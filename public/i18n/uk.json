@@ -8,7 +8,7 @@
   "playing.nothing": "Нічого не грає",
   "playing.nothing_yet": "Поки нічого",
   "playing.station": "Радіостанція",
-  "station.notice": "Грає радіостанція. Додані треки заграють, коли господар запустить чергу.",
+  "station.notice": "Додані треки заграють після радіо.",
   "credit.requested_by": "Замовлення від: {name}",
   "credit.guest": "Анонім",
   "credit.radio": "Roon Radio",

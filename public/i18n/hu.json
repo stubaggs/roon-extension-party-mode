@@ -8,7 +8,7 @@
   "playing.nothing": "Semmi sem szól",
   "playing.nothing_yet": "Még semmi",
   "playing.station": "Rádióállomás",
-  "station.notice": "Rádióállomás szól. A hozzáadott számok akkor szólnak, amikor a házigazda elindítja a sort.",
+  "station.notice": "A hozzáadott számok a rádió után szólnak.",
   "credit.requested_by": "Kérte: {name}",
   "credit.guest": "Névtelen",
   "credit.radio": "Roon Radio",

@@ -8,7 +8,7 @@
   "playing.nothing": "مفيش حاجة شغّالة",
   "playing.nothing_yet": "لسه مفيش حاجة",
   "playing.station": "محطة راديو",
-  "station.notice": "فيه محطة راديو شغالة. التراكات اللي بتضيفها هتشتغل لما صاحب الحفلة يشغّل الطابور.",
+  "station.notice": "التراكات اللي بتضيفها هتشتغل بعد الراديو.",
   "credit.requested_by": "طلب {name}",
   "credit.guest": "مجهول",
   "credit.radio": "Roon Radio",

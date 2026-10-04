@@ -8,7 +8,7 @@
   "playing.nothing": "Нищо не звучи",
   "playing.nothing_yet": "Още нищо",
   "playing.station": "Радиостанция",
-  "station.notice": "Пуснато е радио. Записите, които добавиш, ще тръгнат, когато домакинът пусне опашката.",
+  "station.notice": "Записите, които добавиш, ще тръгнат след радиото.",
   "credit.requested_by": "Поръчан от {name}",
   "credit.guest": "Анонимен",
   "credit.radio": "Roon Radio",
