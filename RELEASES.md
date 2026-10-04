@@ -8,11 +8,10 @@ running in its Extensions list.
 Not released yet. You can try it on the `experimental` branch (see
 [DEVELOPER.md](DEVELOPER.md#running-the-experimental-version)).
 
-- A radio station playing on the party zone gives way to guests: their first request
-  stops it and the queue plays, starting with anything you'd queued before. Before,
-  guests' tracks waited behind the station for good. The pages say "Radio station"
+- A radio station playing on the party zone shows as one: the pages say "Radio station"
   instead of showing it as a track, it's no longer labelled Roon Radio or listed in
-  Played, and guests can't skip it.
+  Played, and Skip is disabled, since Roon can't skip a station. Guests' tracks wait in
+  the queue until you play it from Roon; the README says how.
 - With **Loop** on, the playlist download no longer lists a track again each time it
   comes round.
 

@@ -52,6 +52,7 @@
   "toast.roon_refused": "Roon bu parçayı kabul etmedi.",
   "toast.skipped": "Atlandı",
   "toast.no_skips": "Atlama hakkın kalmadı.",
+  "toast.station_skip": "Radyo istasyonu atlanamaz.",
   "toast.no_skips_wait": "Atlama hakkın kalmadı. {wait} sonra tekrar dene.",
   "toast.failed": "Olmadı.",
   "toast.name_not_saved": "Adın kaydedilemedi.",

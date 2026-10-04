@@ -52,6 +52,7 @@
   "toast.roon_refused": "Roon ville ikke tage det nummer.",
   "toast.skipped": "Sprunget over",
   "toast.no_skips": "Du kan ikke springe flere over.",
+  "toast.station_skip": "En radiostation kan ikke springes over.",
   "toast.no_skips_wait": "Du kan ikke springe flere over. Prøv igen om {wait}.",
   "toast.failed": "Det virkede ikke.",
   "toast.name_not_saved": "Dit navn kunne ikke gemmes.",

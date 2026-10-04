@@ -52,6 +52,7 @@
   "toast.roon_refused": "A Roon nem fogadta el ezt a számot.",
   "toast.skipped": "Átugorva",
   "toast.no_skips": "Nincs több átugrásod.",
+  "toast.station_skip": "Rádióállomást nem lehet átugrani.",
   "toast.no_skips_wait": "Nincs több átugrásod. Próbáld újra {wait} múlva.",
   "toast.failed": "Ez nem sikerült.",
   "toast.name_not_saved": "Nem sikerült menteni a neved.",

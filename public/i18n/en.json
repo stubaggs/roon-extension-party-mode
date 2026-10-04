@@ -52,6 +52,7 @@
   "toast.roon_refused": "Roon would not take that one.",
   "toast.skipped": "Skipped",
   "toast.no_skips": "No skips left.",
+  "toast.station_skip": "A radio station can't be skipped.",
   "toast.no_skips_wait": "No skips left. Try again in {wait}.",
   "toast.failed": "That did not work.",
   "toast.name_not_saved": "Could not save your name.",

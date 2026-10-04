@@ -59,6 +59,7 @@
   "toast.roon_refused": "لم يقبل Roon هذا المقطع.",
   "toast.skipped": "تم التخطي",
   "toast.no_skips": "لم تتبقَّ لك مرات تخطٍّ.",
+  "toast.station_skip": "لا يمكن تخطي محطة راديو.",
   "toast.no_skips_wait": "لم تتبقَّ لك مرات تخطٍّ. حاول مجددًا بعد {wait}.",
   "toast.failed": "لم ينجح ذلك.",
   "toast.name_not_saved": "تعذّر حفظ اسمك.",

@@ -52,6 +52,7 @@
   "toast.roon_refused": "Roon hat den Titel nicht angenommen.",
   "toast.skipped": "Übersprungen",
   "toast.no_skips": "Du kannst nichts mehr überspringen.",
+  "toast.station_skip": "Einen Radiosender kannst du nicht überspringen.",
   "toast.no_skips_wait": "Du kannst nichts mehr überspringen. Versuch es in {wait} wieder.",
   "toast.failed": "Das hat nicht geklappt.",
   "toast.name_not_saved": "Dein Name konnte nicht gespeichert werden.",

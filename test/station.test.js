@@ -14,9 +14,9 @@
 
 'use strict';
 
-// A request while a radio station plays: the queue takes over from its first
-// item (see RoonService._playQueueOverStation). Shaped on what a Core sent in
-// October 2026: the station plays outside the queue, with no length and no seek.
+// A radio station on the party zone: requests wait for the host, and skips are
+// refused. Shaped on what a Core sent in October 2026: the station plays outside
+// the queue, with no length and no seek.
 
 const assert = require('assert');
 const { EventEmitter } = require('events');
@@ -51,8 +51,6 @@ function service(zone, queue) {
   roon.queue = queue;
   roon.calls = [];
   const transport = {
-    // Like the Core: does it, and never answers.
-    play_from_here: (z, id) => roon.calls.push(['play_from_here', id]),
     control: (z, control, cb) => {
       roon.calls.push([control]);
       cb(false);
@@ -62,38 +60,36 @@ function service(zone, queue) {
   return roon;
 }
 
-const queued = (id, title) => ({ queue_item_id: id, two_line: { line1: title } });
-
 (async () => {
   console.log('Radio station');
 
-  await check('a request plays the queue from its first item, the host\'s queue first', async () => {
-    const roon = service(station, [queued(7, 'Apsheron Quintet'), queued(8, 'Fade To Grey')]);
-    await roon._playQueueOverStation();
-    assert.deepStrictEqual(roon.calls, [['play_from_here', 7]]);
+  const { fakeBrowseCore, serviceFor } = require('./fake-roon');
+  const tracks = [{ title: 'Dancing Queen', subtitle: 'ABBA', item_key: 't1', hint: 'action_list' }];
+
+  /** A request on a fake Core, with the zone given; returns the transport calls. */
+  async function request(zone) {
+    const roon = serviceFor(fakeBrowseCore({ categories: { Tracks: tracks } }));
+    const calls = [];
+    roon.core.services.RoonApiTransport = { control: (z, control, cb) => calls.push(control) && cb(false) };
+    roon.zone = zone;
+    const found = await roon.search('guest-1', 'abba');
+    await roon.performAction('guest-1', found[0].item_key, 'add');
+    return calls;
+  }
+
+  await check('a request over a station is queued and waits for the host: nothing is pressed', async () => {
+    assert.deepStrictEqual(await request(station), []);
+    assert.deepStrictEqual(await request(Object.assign({}, station, { state: 'paused' })), [], 'a paused station stays paused');
   });
 
-  await check('with nothing queued before, it waits for the request to reach the queue', async () => {
-    const roon = service(station, []);
-    const done = roon._playQueueOverStation();
-    setTimeout(() => {
-      roon.queue = [queued(9, 'Fade To Grey')];
-      roon.emit('queue_changed');
-    }, 20);
-    await done;
-    assert.deepStrictEqual(roon.calls, [['play_from_here', 9]]);
+  await check('a request on a paused track still presses play', async () => {
+    assert.deepStrictEqual(await request(track), ['play']);
   });
 
   await check('a skip is refused while a station plays, without asking Roon', async () => {
     const roon = service(station, []);
     await assert.rejects(roon.skip(), /station/);
     assert.deepStrictEqual(roon.calls, []);
-  });
-
-  await check('an ordinary paused track is still just played', async () => {
-    const roon = service(track, [queued(1, 'Waterloo')]);
-    await roon._resumePlayback();
-    assert.deepStrictEqual(roon.calls, [['play']]);
   });
 
   console.log(failures ? `\n${failures} failing` : '\nall passing');

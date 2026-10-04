@@ -26,6 +26,8 @@
   const toastEl = el('toast');
 
   let party = null;
+  // Whether a radio station is playing: Skip is disabled then.
+  let onStation = false;
   let started = false;
   let expandedKey = null;
   let searchTimer = null;
@@ -71,6 +73,8 @@
   function allowanceNote(bucket) {
     const status = party.allowances[bucket];
     if (party.party_mode === 'paused') return { text: t('button.paused'), usable: false };
+    // Roon can't skip a radio station.
+    if (bucket === 'skip' && onStation) return { text: '', usable: false };
     if (status.remaining === null) return { text: '', usable: true };
     if (status.remaining > 0) return { text: t('button.left', { count: status.remaining }), usable: true };
     if (status.nextIn) {
@@ -103,6 +107,7 @@
   /** What to say when a used-up button is pressed. */
   function spentMessage(bucket) {
     if (party.party_mode === 'paused') return t('allowance.paused');
+    if (bucket === 'skip' && onStation) return t('toast.station_skip');
     const wait = party.allowances[bucket].nextIn;
     if (bucket === 'skip') return wait ? t('toast.no_skips_wait', { wait: minutes(wait) }) : t('toast.no_skips');
     return wait ? t('toast.nothing_left_wait', { wait: minutes(wait) }) : t('toast.nothing_left');
@@ -349,6 +354,7 @@
     } catch (err) {
       const detail = err.body || {};
       if (err.message === 'paused') toast(t('allowance.paused'));
+      else if (err.message === 'station') toast(t('toast.station_skip'));
       else if (err.message === 'rate_limited') {
         refreshParty();
         toast(detail.next_in ? t('toast.no_skips_wait', { wait: minutes(detail.next_in) }) : t('toast.no_skips'));
@@ -378,8 +384,12 @@
     who.classList.toggle('next', !who.hidden && playing.kind === 'next');
     el('playing-label').textContent = playingLabel(playing);
     setArt(el('playing-art'), playing && playing.image_key, 144);
-    // Roon can't skip a radio station; a request takes over from it instead.
-    if (party && party.capabilities.skip) el('skip').hidden = Boolean(playing && playing.station);
+    // Skip is disabled while a radio station plays (see allowanceNote).
+    const station = Boolean(playing && playing.station);
+    if (station !== onStation) {
+      onStation = station;
+      renderAllowances();
+    }
 
     renderList(queueList, snapshot.upcoming, t('queue.empty'), (item, index) => {
       const position = document.createElement('span');

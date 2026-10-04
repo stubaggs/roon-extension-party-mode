@@ -59,6 +59,7 @@
   "toast.roon_refused": "Roon مرضيش ياخد التراك ده.",
   "toast.skipped": "اتعدّى",
   "toast.no_skips": "مبقاش ليك تخطيات.",
+  "toast.station_skip": "مينفعش تتخطى محطة راديو.",
   "toast.no_skips_wait": "مبقاش ليك تخطيات. جرّب تاني بعد {wait}.",
   "toast.failed": "منفعش.",
   "toast.name_not_saved": "معرفناش نحفظ اسمك.",

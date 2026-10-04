@@ -76,7 +76,7 @@ before pushing. The Docker build runs it too, so a failing test stops a build.
 - `test/server.test.js` runs the real web server against a stand-in for Roon. It checks
   the Party Hub's answers, the join-link pages, the guest API's `no_session` and `closed`
   errors, and the security headers.
-- `test/station.test.js` checks a request taking over from a radio station, on a zone
+- `test/station.test.js` checks requests waiting and skips refused during a radio station, on a zone
   shaped like the one a Core reported.
 - `test/fixtures/` holds real search results from a Core for the duplicate check:
   "bad guy" (covers) and "pere ubu waiting for mary" (one band, five albums).
@@ -407,23 +407,25 @@ A live radio station plays outside Roon's queue and never ends. Seen on a Core i
 `isStation()` (`lib/roon-service.js`) recognises one: a now playing with no length that
 can't be seeked. A track always has a length, even while it loads.
 
-**A request takes over.** After a guest's Queue or Add Next, `_playQueueOverStation`
-calls the transport's `play_from_here` on the queue's **first** item, rather than pressing
-play. The host's leftover queue plays first, then guests' requests in order (Add Next ones
-first among them), so the host decides how the party starts by what they leave queued.
-With nothing queued, the first item is the request itself, once Roon reports it.
-The call isn't waited for: the Core plays from there but never answered it (October 2026),
-and waiting held up the guest's request, and every later one from that guest, for good.
+**Requests wait for the host.** A guest's track is queued as usual, but nothing is pressed
+afterwards: play would only resume the station. The host plays the queue from Roon (the
+README says how).
 
-Playing from the guest's own entry instead would be wrong: with Loop off, Roon drops every
-entry before the one played from, other guests' requests included. With Loop on it moves
-them to the back instead, under new ids (see [The party playlist](#the-party-playlist)).
+Taking over automatically was tried and dropped as too clunky. What the Core did
+(October 2026), for whoever tries again:
+
+- The transport's `play_from_here` stops the station and plays from that entry, but the
+  Core never answers it, so it can't be waited for.
+- With Loop off it drops every entry before the one played from, other guests' requests
+  included; with Loop on it moves them to the back under new ids.
+- Play Now on a track replaced the whole queue with that one track.
 
 **Elsewhere:**
 
-- The pages get `now_playing.station`. They label it "Radio station" (`playing.station`)
-  and the guest page hides Skip; `POST /api/skip` answers 409 `station` without using
-  the guest's skip, since Roon would refuse it.
+- The pages get `now_playing.station`. They label it "Radio station" (`playing.station`),
+  and the guest page disables Skip, which explains when pressed (`toast.station_skip`).
+  `POST /api/skip` answers 409 `station` without using the guest's skip, and
+  `RoonService.skip()` refuses one too, since Roon would.
 - `requester()` credits a station to nobody: it isn't Roon Radio, and no guest asked for it.
 - Played never lists a station. The track it replaced moves into Played as it starts
   (`PlayHistory.update`), as "Skipped in Roon" if it was cut short.
@@ -882,8 +884,8 @@ full replies, so it's for troubleshooting only.
   either succeeds, `performAction` sends `play` unless the zone is already playing or
   loading. That also resumes a zone the host paused in Roon (Party mode's Paused refuses
   requests instead). There's no setting to turn it off. A failed `play` is logged, and the
-  request still counts, since the track was queued. On a radio station the queue takes
-  over instead (see [Radio stations](#radio-stations)).
+  request still counts, since the track was queued. On a radio station nothing is
+  pressed: the request waits for the host (see [Radio stations](#radio-stations)).
 - **"Roon Radio" is a guess.** Roon doesn't say where a track came from. With Roon Radio
   on for the party zone, any track no guest added is labelled "Roon Radio", including
   tracks the host queues from the Roon app.

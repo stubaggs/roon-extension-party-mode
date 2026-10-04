@@ -49,6 +49,7 @@
   "toast.roon_refused": "Roon không nhận bài này.",
   "toast.skipped": "Đã bỏ qua",
   "toast.no_skips": "Bạn đã hết lượt bỏ qua.",
+  "toast.station_skip": "Bạn không thể bỏ qua đài phát thanh.",
   "toast.no_skips_wait": "Bạn đã hết lượt bỏ qua. Thử lại sau {wait}.",
   "toast.failed": "Không thành công.",
   "toast.name_not_saved": "Không lưu được tên của bạn.",
