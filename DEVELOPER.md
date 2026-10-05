@@ -55,7 +55,7 @@ Roon Core  ──(node-roon-api over the local network)──  app.js
 
 ## Running it with Node.js
 
-You need Node.js 18 or newer (the Docker image uses Node 22) and git, since the Roon API
+You need Node.js 22 or newer, as in the Docker image, and git, since the Roon API
 packages come straight from GitHub:
 
 ```bash
@@ -828,6 +828,13 @@ It builds in two stages:
    most of what vulnerability scanners report in a Node image. So `npm` doesn't work
    inside the container; build a new image instead.
 
+The health check runs every 60 seconds and allows 15 seconds, with a minute's grace at
+startup. Each check starts Node, which takes seconds on a Pi Zero or Pi 1, so a tighter
+timeout would report a slow Pi as unhealthy, and more frequent checks would take CPU from
+serving guests. Nothing restarts an unhealthy container in a plain Docker or Compose
+setup; the status shows in `docker ps`. Even under QEMU emulation (testing `arm` images
+on another machine), where Node takes about 10 seconds to start, the check passes.
+
 The image covers both 32-bit ARM variants because Docker reports every 32-bit ARM host as
 `arm`, the key the repository entry uses: Pi Zero and Pi 1 need `arm/v6`, later Pis
 `arm/v7`.
@@ -835,8 +842,11 @@ The image covers both 32-bit ARM variants because Docker reports every 32-bit AR
 ### The base image
 
 The base is `node:22-alpine`, pinned by digest. Node 22 is the newest line with 32-bit ARM
-images (Node 24 dropped `linux/arm/v7`), and is supported until April 2027. Before then,
-move to Node 24 and drop `arm/v7` from the workflow and the repository entry.
+images (`node:24-alpine` has neither `linux/arm/v6` nor `linux/arm/v7`), and is
+supported until April 2027. Before then, move to Node 24 and drop both from the workflow,
+and `arm` from the repository entry: Pi Zero, Pi 1 and 32-bit Raspberry Pi OS lose
+support. Move `engines` in `package.json` and the Node version in [Running it with
+Node.js](#running-it-with-nodejs) along with it.
 
 Dependabot (`.github/dependabot.yml`) checks the base weekly. When the official image is
 rebuilt with Alpine or Node security fixes, its digest changes, and Dependabot opens a

@@ -14,7 +14,7 @@
   "author": "Stubaggs",
   "license": "Apache-2.0",
   "engines": {
-    "node": ">=18"
+    "node": ">=22"
   },
   "dependencies": {
     "cookie-parser": "^1.4.7",

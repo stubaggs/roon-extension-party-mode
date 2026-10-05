@@ -61,8 +61,11 @@ USER node
 # can be changed in the extension's settings in Roon.
 EXPOSE 8338
 
-# Checks the web server on whatever port the settings say.
-HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+# Checks the web server on whatever port the settings say. Each check starts
+# Node, which takes seconds on a Pi Zero or Pi 1, so the timings are generous:
+# a tight timeout would report a slow Pi as unhealthy, and frequent checks
+# would take CPU from serving guests.
+HEALTHCHECK --interval=60s --timeout=15s --start-period=60s --retries=3 \
   CMD ["node", "healthcheck.js"]
 
 # app.js exits cleanly on SIGTERM, so `docker stop` doesn't need an init process.
