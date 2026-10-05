@@ -4,7 +4,7 @@ Let your guests pick the music. They scan a QR code with their phone, search you
 library and streaming services, and add tracks to the party's queue. No app to install, no
 Roon account, and no access to anything else in your Roon setup.
 
-- **Guests add, play next or skip tracks** from their phone, as many as you allow.
+- **Guests add, play next or skip tracks** from their phone.
 - **Fair shares:** limit how many of each a guest gets, with more earned back over time.
 - **Names on tracks:** guests can give a nickname, shown next to the tracks they add (or
   "Anon" if they'd rather not).
@@ -13,14 +13,15 @@ Roon account, and no access to anything else in your Roon setup.
 - **Keep the party's playlist:** download everything that was queued as a spreadsheet
   file, ready to import into a music service.
 - **In their language:** the guest pages and the Party Hub follow each phone's or
-  screen's language, in 30 languages (see [Languages](#languages)).
+  screen's language, or one you choose for the Hub in the settings, in 30 languages
+  (see [Languages](#languages)).
 
 What's changed in each version is in [RELEASES.md](RELEASES.md).
 
 ## What you need
 
 - A Roon Core.
-- A computer on the same network that runs the extension, usually the same machine as the
+- A computer on the same network to run the extension, usually the same machine as the
   [Extension Manager](https://github.com/TheAppgineer/roon-extension-manager): a 64-bit
   PC or NAS, or any Raspberry Pi, including Pi Zero and Pi 1.
 - Guests' phones on the same Wi-Fi as that computer.
@@ -47,16 +48,25 @@ docker run -d --name party-mode --network host --restart unless-stopped \
 
 Then enable **Party Mode** under **Settings → Extensions** in Roon.
 
-The file `config.json` keeps your settings when the image is updated. It also holds the key Roon
-gave Party Mode, so the commands above let only the extension (user 1000) read it. Without
-`sudo`, use `chmod 666 config.json` instead, which lets every account on the computer
-read and change it. The `--log-opt` settings keep the log from growing without limit.
+The file `config.json` keeps your settings when the image is updated. It also holds the
+key Roon gave Party Mode, so the commands above let only the extension (user 1000) read
+it. Without `sudo`, use `chmod 666 config.json` instead, which lets every account on the
+computer read and change it. The `--log-opt` settings keep the log from growing without
+limit.
+
+### Running more than one party
+
+To run two parties against one Roon Core, in different rooms, say, give each extra copy a
+name: add `-e ROON_EXTENSION_PARTY_MODE_INSTANCE=Garden` to its `docker run`, with its own
+container name, its own `config.json` and its own party zone. It shows in Roon as
+**Party Mode (Garden)**, a separate extension to enable and set up.
 
 ## Starting a party
 
 1. In Roon, open **Settings → Extensions → Party Mode → Settings** and pick the **Party
    zone**: where the music plays. Give the party a name if you like; otherwise it's
-   named after the zone.
+   named after the zone. Choose a **Party profile** if you want a record of the party,
+   and a **Party Hub language** if the Hub's screen is hard to set.
 2. Click **Party Mode**'s link in the Extensions list to open the **Party Hub**. Put it
    on a TV, a tablet or a laptop where guests can see it.
 3. Guests scan the QR code on the Party Hub with their phone camera. That's it.
@@ -95,46 +105,41 @@ Google Sheets, Numbers and Excel's **Data → From Text/CSV** read it correctly.
 | --- | --- |
 | Party mode | On, Paused or Off (see above). |
 | Party zone | Where the music plays. If you pick a speaker that's grouped with others, the whole group plays. |
+| Party profile | The Roon profile guests' tracks play under, so they count toward its play history and recommendations. Unless you choose one, that's Roon's default profile (normally **Guest**). To keep a record of the party, create a profile such as "Party" in Roon first, then choose it here. |
 | Party name | Shown on the Party Hub. Leave blank to use the zone's name. |
-| Party Hub language | The language of the Party Hub, for every screen showing it. Automatic (the default) follows the screen's browser. Guests' phones always follow their own.|
+| Party Hub language | The language of the Party Hub, for every screen showing it. Automatic (the default) follows the screen's browser. Guests' phones always follow their own. |
 | Playlist on the Party Hub | What the Party Hub shows once **Party mode** is **Off**: a **QR code** guests can scan (the default), a **Link only** to click on the Hub itself, or **Off** for nothing. |
-| Roon profile for guest requests | The Roon profile the tracks are played under. To keep party tracks out of your own history and recommendations, create a profile such as "Guests" in Roon first, then choose it here. Leave it alone to play under your own profile. |
-| Adding tracks | Whether guests can add tracks, and whether a track already in the queue can be added again (covers, live takes, remasters and the same track on another album count as different tracks). **Also let guests play a track next** lets them put a track straight after the current one; it needs adding on. |
+| Adding tracks | Whether guests can add tracks, and whether a track already in the queue can be added again (covers, live takes, remasters and the same track on another album count as different tracks). **Also let guests play a track next** lets them put a track straight after the current one (only while adding is on). |
 | Skipping | Whether guests can skip the currently playing track. Off unless you turn it on. |
 | Advanced | **Web port**: the port the guest pages and the Party Hub use (8338). If it's busy when Party Mode starts, it uses the next free one and the status line says so. Only change it if something else on the computer uses 8338.<br>**Browse titles**: Party Mode usually finds them by itself; only fill them in if search or queuing doesn't work on a Core that isn't in English. |
 
 **"Add to queue" per guest**, **"Play it next" per guest** and **"Skip" per guest** set
 how many of each a guest gets (**0 means no limit**), and **Minutes to earn one back**
-how long until they get another (**0 means never**). By default skipping is disabled,
-each guest can add 5 tracks, earning one back every 10 minutes, and play next once an
-hour.
+how long until they get another (**0 means never**). By default, skipping is off; each
+guest can add 5 tracks, earning one back every 10 minutes, and play next once an hour.
 
 ## Good to know
 
 - **Guests can't rearrange the queue.** They can add a track to the end, or play one next
   when they add it, but Roon doesn't yet let anyone move a queued track.
-- **A guest's track gets the music going again.** If the party zone is paused, or the
-  queue has run out, adding a track presses play. For a speech, set **Party mode** to
-  **Paused** instead of pausing in Roon: that holds the requests too.
+- **A guest's track gets the music going again** (except over a radio station). If the
+  party zone is paused, or the queue has run out, adding a track presses play. For a
+  speech, set **Party mode** to **Paused** instead of pausing in Roon: that holds the
+  requests too.
 - **A radio station waits for you.** While a live radio station plays on the party zone,
-  guests can still add tracks, but they won't play until you switch over, and the guest
-  page and the Party Hub tell everyone so. In Roon, open the party zone's queue and
-  choose **Play from here** on the track to start with. Tracks you queued before the
-  station come first, so you choose how the party begins. Guests can't skip a station,
-  and it isn't listed in Played or the playlist. To have guests' tracks play by
-  themselves, use Roon Radio rather than a station.
-- **The Played list starts fresh** when the extension restarts or you change the party zone.
+  guests can still add tracks, but they won't play until you switch over. In Roon, open
+  the party zone's queue and choose **Play from here** on the track to start with, so you
+  choose how the party begins. Guests can't skip a station.
 - **Tag colours** on the Party Hub and guests' phones show how a track got into the
   queue: **lavender** when a guest added it, **amber** when a guest chose **Play it
   next**, **mint** for Roon Radio, and **sky blue** for **Host**, anything you queued in
   Roon.
-- **Roon Radio is recognised by how it adds tracks.** Roon doesn't say who queued a
-  track, but Roon Radio adds its picks one at a time as the queue runs out. A track you
-  add at the very moment the last one ends may be taken for Roon Radio's, and after the
-  extension restarts, Roon Radio's picks already queued show as Host.
-- **The playlist starts fresh** when the extension restarts, you change the party zone, or
-  you turn **Party mode** back on from **Off**. Download it before any of those. Pausing
-  keeps it.
+- **The Roon Radio tag is a good guess.** A track you add just as the last one ends may
+  be tagged Roon Radio, and after a restart, Roon Radio's picks already queued show as
+  Host.
+- **Played and the playlist start fresh** when the extension restarts or you change the
+  party zone; the playlist also clears when you turn **Party mode** back on from **Off**.
+  Download it before any of those.
 - **The playlist has guests' names in it.** It lists who asked for each track and when.
   With **Playlist on the Party Hub** set to **QR code**, anyone at the party can scan it and
   keep a copy. If that's not what you want, choose **Link only** or **Off**.
@@ -156,6 +161,9 @@ from native speakers are welcome.
 
 ## Troubleshooting
 
+**There's no Skip button.** Skipping is off in the settings, a radio station is playing, or
+it's the last track with Roon Radio off, so there's nothing to skip to.
+
 **Party Mode doesn't appear in Roon's Extensions list.** The computer running it must be on
 the same network as the Roon Core. With Docker, use `--network host`, as above.
 
@@ -168,8 +176,8 @@ using the page, or they opened an old bookmark (from 1.2.0 the guest page is at
 `/GuestHub`). Scanning the QR code again lets them back in; they'll need to enter their
 name again.
 
-**"That code has expired".** Party mode was switched off and on, which makes a new code.
-Scan the code on the Party Hub again.
+**"That code has expired".** Party mode was set to Off and back to On, which makes a new
+code. Scan the code on the Party Hub again.
 
 **Roon says settings can't be saved.** The extension can't write `config.json`. With Docker,
 run `sudo chown 1000 config.json && chmod 600 config.json` on the file you mounted, or
@@ -183,10 +191,10 @@ choose one yourself, change **Web port** under **Advanced** in the settings.
 **Advanced** section of the settings and fill in the titles your Core uses.
 
 **Something else isn't working.** Start the extension with
-`ROON_EXTENSION_PARTY_MODE_DEBUG=1` (with Docker, add `-e ROON_EXTENSION_PARTY_MODE_DEBUG=1`)
-for a detailed log, including every message to and from Roon, and
-include it in an issue. Turn it off again afterwards: it's large and records what guests
-search for.
+`ROON_EXTENSION_PARTY_MODE_DEBUG=1` (with Docker, add
+`-e ROON_EXTENSION_PARTY_MODE_DEBUG=1`) for a detailed log, including every message to
+and from Roon, and include it in an issue. Turn it off again afterwards: it's large and
+records what guests search for.
 
 ## For developers
 

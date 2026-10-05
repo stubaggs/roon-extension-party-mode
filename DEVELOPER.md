@@ -85,11 +85,12 @@ before pushing. The Docker build runs it too, so a failing test stops a build.
 
 ## Host settings (in Roon)
 
-Party mode comes first, as the switch hosts use most. Then, in order: the party zone, the
-party name, Party Hub language (see [Choosing the language](#choosing-the-language)),
-Playlist on the Party Hub (see [The party playlist](#the-party-playlist)), the Roon
-profile, the allowances (Adding tracks, which includes playing next, then Skipping), and
-the collapsed Advanced group: the web port, then the browse titles.
+Party mode comes first, as the switch hosts use most. Then, in order: the party zone and
+the Roon profile (how the party plays in Roon), the party name, Party Hub language (see
+[Choosing the language](#choosing-the-language)), Playlist on the Party Hub (see [The
+party playlist](#the-party-playlist)), the allowances (Adding tracks, which includes
+playing next, then Skipping), and the collapsed Advanced group: the web port, then the
+browse titles.
 
 ### Party mode
 
@@ -175,12 +176,18 @@ outgoing connections.
 
 Links and QR codes use the machine's first non-internal IPv4 address.
 
-### Guest profile
+### Party profile
 
-"Roon profile for guest requests" picks the profile guests' tracks are played under, so
-they count toward that profile's play history and Roon Radio instead of yours. A
-"Guests" profile keeps party plays out of your own history. "Leave as it is" doesn't
-touch the profile.
+The Party profile setting picks the Roon profile guests' tracks are played under, so
+they count toward that profile's play history and Roon Radio instead of yours. Its hint
+says so.
+
+Left unset, nothing is selected and guests play under the profile Roon gives a new
+session: "Guest" on a Core in October 2026, never the host's. The API doesn't name that
+profile, and the Guest profile can be deleted, so `_readDefaultProfile` opens a new
+session each time the settings open and reads its Profile entry, selecting nothing. The
+choice reads "Roon's default (Guest)", or "Roon's default profile" when that can't be
+read. What a Core gives new sessions once Guest is deleted hasn't been seen.
 
 Roon's API has no profile call, so the extension opens the Profile entry in Roon's
 Settings menu and selects the profile there.
@@ -409,7 +416,7 @@ tracks already in the queue on, they're also `blocked`: the page won't offer the
 ## Searching and browse sessions
 
 Each guest has their own browse session (`multi_session_key`), in the "browse" hierarchy
-(see [Guest profile](#guest-profile)).
+(see [Party profile](#party-profile)).
 
 - **Item keys go stale.** They're only valid until that guest's session moves on. If a
   request's key has gone stale, the server replays the guest's search and retries once.

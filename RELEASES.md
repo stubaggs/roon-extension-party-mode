@@ -21,6 +21,9 @@ Not released yet. You can try it on the `experimental` branch (see
 - Clearer setting names in Roon: **Display playlist download** is now **Playlist on the
   Party Hub**, the limits are named after the guest page's buttons ("Add to queue",
   "Play it next" and "Skip" per guest), and their hints are shorter.
+- **Roon profile for guest requests** is now **Party profile**, next to **Party zone**. Its
+  first choice names the profile guests' tracks play under when you don't choose one,
+  normally Roon's **Guest** profile, instead of "Leave as it is".
 - With **Let guests add tracks** on No, guests can't play a track next either, since that
   adds a track too, so the play next settings have moved into **Adding tracks**.
   Skipping still follows its own setting.
