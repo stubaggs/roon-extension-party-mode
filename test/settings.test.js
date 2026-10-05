@@ -341,8 +341,20 @@ check('the hints under the settings say what 0 means', () => {
   }
   for (const setting of ['add_refill', 'next_refill', 'skip_refill']) {
     assert.strictEqual(item(result, setting).subtitle, '0 = a used one never comes back', setting);
+  }
+  for (const setting of ['add_refill', 'next_refill', 'skip_refill']) {
     assert.strictEqual(item(result, setting).title, 'Minutes to earn one back', setting);
   }
+  assert.strictEqual(item(result, 'add_limit').title, '"Add to queue" per guest', 'named after the button');
+  assert.strictEqual(item(result, 'next_limit').title, '"Play it next" per guest', 'named after the button');
+});
+
+check('playing next sits in the Adding tracks group, with no heading of its own', () => {
+  const groups = layout({}).layout.filter((entry) => entry.type === 'group');
+  assert.deepStrictEqual(groups.map((g) => g.title), ['Adding tracks', 'Skipping', 'Advanced']);
+  assert.deepStrictEqual(groups[0].items.map((i) => i.setting), [
+    'allow_add', 'prevent_duplicates', 'add_limit', 'add_refill', 'allow_next', 'next_limit', 'next_refill'
+  ]);
 });
 
 check('an out-of-range value keeps its hint alongside the error', () => {

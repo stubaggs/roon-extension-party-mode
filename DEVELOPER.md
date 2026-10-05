@@ -87,7 +87,8 @@ before pushing. The Docker build runs it too, so a failing test stops a build.
 
 Party mode comes first, as the switch hosts use most. Then, in order: the party zone, the
 party name, Party Hub language (see [Choosing the language](#choosing-the-language)),
-Display playlist download (see [The party playlist](#the-party-playlist)), the Roon profile, the allowances (Adding tracks, Playing next, Skipping), and the
+Display playlist download (see [The party playlist](#the-party-playlist)), the Roon profile, the allowances (Adding tracks, which includes playing next, then
+Skipping), and the
 collapsed Advanced group: the web port, then the browse titles.
 
 ### Party mode
@@ -227,10 +228,13 @@ token-bucket model: they start with N goes and earn one back every M minutes.
 - 0 goes per guest means no limit.
 - 0 minutes means a used go never comes back.
 - To stop guests doing something at all, set its "Let guests …" to No.
-- Playing next is a way of adding, so it needs adding on: with "Let guests add tracks"
-  on No, play next is off whatever its own setting says (`GuestStore.check`, and the
-  `capabilities` `/api/party` sends). Its hint in Roon says so. Skipping stays
-  independent: a host can let guests only skip, as a veto.
+- Playing next is a way of adding, so it needs adding on: with "Let guests add tracks" on
+  No, play next is off whatever its own setting says (`GuestStore.check`, and the
+  `capabilities` `/api/party` sends). So its settings sit in the Adding tracks group,
+  after the adding ones, as "Also let guests play a track next". The two counts are named
+  after the guest page's buttons, "Add to queue" per guest and "Play it next" per guest,
+  so it's clear both add a track. Skipping stays independent: a host can let guests only
+  skip, as a veto.
 
 Adding and playing next are on by default; skipping is off. The defaults:
 
