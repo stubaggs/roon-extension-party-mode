@@ -799,9 +799,10 @@ port 9003. It bind-mounts `config.json`, so settings survive updates.
 
 ## Code scanning
 
-`.github/workflows/codeql.yml` runs GitHub's CodeQL on pushes and pull requests to `main`
-and `experimental`, and weekly. It analyses the JavaScript, with the security-extended
-queries, and the workflows themselves (`.github/codeql/codeql-config.yml` leaves out
+`.github/workflows/codeql.yml` runs GitHub's CodeQL when started by hand: Actions →
+CodeQL → Run workflow, on `experimental` before merging into `main`. Its push, pull
+request and weekly triggers are commented out. It analyses the JavaScript, with the
+security-extended queries, and the workflows themselves (`.github/codeql/codeql-config.yml` leaves out
 `node_modules` and `test`). It only reads the code. Results are under the repository's
 Security tab → Code scanning. Two JavaScript alerts are known and accepted:
 `js/missing-token-validation`, which doesn't see the `SameSite` cookie and Origin check
@@ -848,9 +849,10 @@ is how an update reaches people who have it installed.
 ### Releasing
 
 1. Bump `version` in `package.json` and give RELEASES.md its section.
-2. Merge into `main` through a pull request.
-3. Tag the merge commit `v<version>` (an annotated tag, from `v1.1.0` on).
-4. Run the workflow by hand. Its `tags: ['v*']` trigger is commented out with `push`, so
+2. Run CodeQL on `experimental` (see [Code scanning](#code-scanning)) and check its results.
+3. Merge into `main` through a pull request.
+4. Tag the merge commit `v<version>` (an annotated tag, from `v1.1.0` on).
+5. Run the workflow by hand. Its `tags: ['v*']` trigger is commented out with `push`, so
    tagging doesn't publish.
 
 ### The Dockerfile
