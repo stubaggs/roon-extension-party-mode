@@ -89,8 +89,8 @@ Party mode comes first, as the switch hosts use most. Then, in order: the party 
 the Roon profile (how the party plays in Roon), the party name, Party Hub language (see
 [Choosing the language](#choosing-the-language)), Playlist on the Party Hub (see [The
 party playlist](#the-party-playlist)), the allowances (Adding tracks, which includes
-playing next, then Skipping), and the collapsed Advanced group: the web port, then the
-browse titles.
+playing next, then Skipping), and the collapsed Advanced group: the web port, Hide names
+in playlist, then the browse titles.
 
 ### Party mode
 
@@ -516,7 +516,11 @@ before 1.2.0, still works) as CSV in the form Soundiiz imports:
   cost of Excel's double-click guessing the encoding wrong;
 - column names and credits in English, which import services expect;
 - a guest name a spreadsheet would read as a formula gets a leading apostrophe. Track
-  details are left as Roon gives them, so they still match.
+  details are left as Roon gives them, so they still match;
+- with Hide names in playlist (`playlist_hide_names`, Advanced, off by default) every
+  guest's track is credited `Anon`; Roon Radio and Host stay. Only the file changes: the
+  names are still recorded, so turning it off shows them again, and the pages and log
+  still show them.
 
 Times are local to the extension, which in Docker is UTC unless `TZ` is set.
 

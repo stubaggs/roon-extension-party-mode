@@ -155,6 +155,21 @@ check('a name given later reaches the playlist', () => {
   assert.ok(!playlist.toCsv().includes('g1'), 'no guest refs in the file');
 });
 
+check('hidden names credit every guest as Anon, and keep Roon Radio and Host', () => {
+  const playlist = new PartyPlaylist();
+  const credit = (t) =>
+    ({ 1: { requested_by: 'Sam', kind: 'add', guest: 'g1' }, 2: { requested_by: 'Jo', kind: 'next', guest: 'g2' }, 3: { kind: 'radio' }, 4: { kind: 'host' } })[t.id];
+  playlist.update('o1', [track(1, 'Waterloo'), track(2, 'SOS'), track(3, 'Fernando'), track(4, 'Chiquitita')], credit);
+  const hidden = playlist.toCsv(credit, { hideNames: true });
+  assert.ok(!hidden.includes('Sam') && !hidden.includes('Jo'), hidden);
+  const csv = hidden.trim().split('\r\n');
+  assert.ok(csv[1].includes(',Anon,'), csv[1]);
+  assert.ok(csv[2].includes(',Anon,'), csv[2]);
+  assert.ok(csv[3].includes(',Roon Radio,'), csv[3]);
+  assert.ok(csv[4].includes(',Host,'), csv[4]);
+  assert.ok(rows(playlist, credit)[1].includes(',Sam,'), 'names show by default');
+});
+
 check('a full list drops the host\'s and Roon Radio\'s oldest entries before any guest\'s', () => {
   const playlist = new PartyPlaylist();
   // A guest's request first, then entries no guest asked for, past the limit.

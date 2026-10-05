@@ -292,6 +292,15 @@ check('the hint names the download address once it is known', () => {
   );
 });
 
+check('hide names in playlist: a Yes/No in Advanced, off unless chosen', () => {
+  const advanced = layout({}).layout.find((entry) => entry.title === 'Advanced');
+  const entry = advanced.items.find((i) => i.setting === 'playlist_hide_names');
+  assert.strictEqual(entry.title, 'Hide names in playlist');
+  assert.strictEqual(entry.subtitle, 'Replace guest names with Anon');
+  assert.deepStrictEqual(entry.values.map((v) => v.value), [true, false]);
+  assert.strictEqual(layout({}).values.playlist_hide_names, false);
+});
+
 check('numbers in range pass through', () => {
   assert.strictEqual(normaliseInteger(10, 0, 999, 0), 10);
   assert.strictEqual(normaliseInteger(0, 0, 999, 0), 0);
@@ -369,7 +378,7 @@ check('browse titles explain themselves in a hint', () => {
   const group = result.layout.find((entry) => entry.type === 'group' && entry.title === 'Advanced');
   assert.ok(group, 'an "Advanced" group');
   assert.strictEqual(group.collapsable, true, 'starts closed');
-  assert.deepStrictEqual(group.items.map((i) => i.setting), ['port', 'title_tracks', 'title_add', 'title_next', 'title_profile']);
+  assert.deepStrictEqual(group.items.map((i) => i.setting), ['port', 'playlist_hide_names', 'title_tracks', 'title_add', 'title_next', 'title_profile']);
   assert.strictEqual(
     item(result, 'title_add').subtitle,
     '"Queue" in English. Usually found automatically on a Core in another language.'

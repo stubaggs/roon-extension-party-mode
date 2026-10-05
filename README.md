@@ -94,7 +94,8 @@ such as `http://192.0.2.10:8338/Download/playlist.csv`, which you can open in an
 your network.
 
 It's a CSV file of every track queued in the party zone: title, artist, album, length, who
-asked for it and when. Roon can't import it directly, but Soundiiz can: choose **Import
+asked for it and when. To leave guests' names out, turn on **Hide names in playlist** under
+**Advanced**. Roon can't import it directly, but Soundiiz can: choose **Import
 playlist**, then the file, and pick TIDAL, Qobuz or Spotify. Roon then shows it with your
 playlists. Excel on Windows can garble accented names when you double-click the file;
 Google Sheets, Numbers and Excel's **Data → From Text/CSV** read it correctly.
@@ -111,7 +112,7 @@ Google Sheets, Numbers and Excel's **Data → From Text/CSV** read it correctly.
 | Playlist on the Party Hub | What the Party Hub shows once **Party mode** is **Off**: a **QR code** guests can scan (the default), a **Link only** to click on the Hub itself, or **Off** for nothing. |
 | Adding tracks | Whether guests can add tracks, and whether a track already in the queue can be added again (covers, live takes, remasters and the same track on another album count as different tracks). **Also let guests play a track next** lets them put a track straight after the current one (only while adding is on). |
 | Skipping | Whether guests can skip the currently playing track. Off unless you turn it on. |
-| Advanced | **Web port**: the port the guest pages and the Party Hub use (8338). If it's busy when Party Mode starts, it uses the next free one and the status line says so. Only change it if something else on the computer uses 8338.<br>**Browse titles**: Party Mode usually finds them by itself; only fill them in if search or queuing doesn't work on a Core that isn't in English. |
+| Advanced | **Web port**: the port the guest pages and the Party Hub use (8338). If it's busy when Party Mode starts, it uses the next free one and the status line says so. Only change it if something else on the computer uses 8338.<br>**Hide names in playlist**: the playlist download says **Anon** instead of each guest's name. Tracks Roon Radio picked or you queued still say **Roon Radio** or **Host**. Off by default.<br>**Browse titles**: Party Mode usually finds them by itself; only fill them in if search or queuing doesn't work on a Core that isn't in English. |
 
 **"Add to queue" per guest**, **"Play it next" per guest** and **"Skip" per guest** set
 how many of each a guest gets (**0 means no limit**), and **Minutes to earn one back**
@@ -142,7 +143,8 @@ guest can add 5 tracks, earning one back every 10 minutes, and play next once an
   Download it before any of those.
 - **The playlist has guests' names in it.** It lists who asked for each track and when.
   With **Playlist on the Party Hub** set to **QR code**, anyone at the party can scan it and
-  keep a copy. If that's not what you want, choose **Link only** or **Off**.
+  keep a copy. If that's not what you want, turn on **Hide names in playlist** under
+  **Advanced**, or choose **Link only** or **Off**.
 - **The playlist keeps up to 5000 tracks**, about two weeks of non-stop music. Past that,
   the oldest tracks you queued yourself or Roon Radio picked are dropped first; guests'
   requests are kept longest.
