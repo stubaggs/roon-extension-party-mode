@@ -90,8 +90,10 @@ There are no development dependencies: the tests use Node's built-in `assert`.
 
 ## Tests
 
-`npm test` runs the test files listed in `package.json`; add a new file there. Run it
-before pushing. The Docker build runs it too, so a failing test stops a build.
+`npm test` runs the test files listed in `package.json`; add a new file there. Before
+pushing, run it, then build and run the image locally (see [Running the image by
+hand](#running-the-image-by-hand)). The Docker build runs the tests too, so a failing
+test stops a build.
 
 - `test/fake-roon.js` is a fake Core shaped like a real browse menu (Library → Search,
   Settings → Profile), with its own position and profile per session.
@@ -173,7 +175,8 @@ follows the group again. The label is the place to check what it's pointing at.
 
 ### Web port (Advanced)
 
-The default, 8338, has to be free on the machine itself, since the container shares the host's network. It stays clear of:
+The default, 8338, has to be free on the machine itself, since the container shares the
+host's network. It stays clear of:
 
 - common defaults: 8080, 3000, 5000, 8000, 8443 and 9000;
 - Roon's own ports: UDP 9003, TCP 9100–9200 and 9330–9339;
@@ -201,8 +204,7 @@ Links and QR codes use the machine's first non-internal IPv4 address.
 ### Party profile
 
 The Party profile setting picks the Roon profile guests' tracks are played under, so
-they count toward that profile's play history and Roon Radio instead of yours. Its hint
-says so.
+they count toward that profile's play history and Roon Radio instead of yours.
 
 Left unset, nothing is selected and guests play under the profile Roon gives a new
 session: "Guest" on a Core in October 2026, never the host's. The API doesn't name that
@@ -424,8 +426,8 @@ edit or a cover is a fair request even when the original is queued. `sameRecordi
 3. **Otherwise, the credits.** A search result credits writers too ("FINNEAS, Billie
    Eilish, 2CELLOS"); a queue item only performers ("Billie Eilish"). So `sharedCredits`
    treats names on at least half of the results with that title as writers (with fewer
-   than three results, none are), and what's left must include a queued artist. A result crediting
-   only writers is the original, and is compared on all its names.
+   than three results, none are), and what's left must include a queued artist. A result
+   crediting only writers is the original, and is compared on all its names.
 
 Credits come last because they can't tell a band's own versions from a cover: "Pere Ubu"
 and "Pere Ubu, Allen Ravenstine" read just like "Leonard Cohen" and "Jeff Buckley, Leonard
@@ -539,10 +541,10 @@ before 1.2.0, still works) as CSV in the form Soundiiz imports:
 - column names and credits in English, which import services expect;
 - a guest name a spreadsheet would read as a formula gets a leading apostrophe. Track
   details are left as Roon gives them, so they still match;
-- with Hide names in downloadable playlist (`playlist_hide_names`, Advanced, off by default) every
-  guest's track is credited `Anon`; Roon Radio and Host stay. Only the file changes: the
-  names are still recorded, so turning it off shows them again, and the pages and log
-  still show them.
+- with Hide names in downloadable playlist (`playlist_hide_names`, Advanced, off by
+  default) every guest's track is credited `Anon`; Roon Radio and Host stay. Only the
+  file changes: the names are still recorded, so turning it off shows them again, and
+  the pages and log still show them.
 
 Times are local to the extension, which in Docker is UTC unless `TZ` is set.
 
@@ -596,9 +598,10 @@ translations. Corrections from native speakers are welcome.
 1. Copy `en.json` to, for example, `de.json`, and translate the values.
 2. Keep the `{name}`, `{count}` and `{wait}` placeholders.
 3. Entries like `{ "one": …, "other": … }` are plurals, picked by the language's own rules
-   (`Intl.PluralRules`). Add `zero`, `two`, `few` and `many` where the language has them: Arabic has
-   all six; Czech, Polish, Russian and Ukrainian need `few` and `many`; Japanese, Korean,
-   Chinese, Thai and Vietnamese need only `other`. A form left out falls back to `other`.
+   (`Intl.PluralRules`). Add `zero`, `two`, `few` and `many` where the language has them:
+   Arabic has all six; Czech, Polish, Russian and Ukrainian need `few` and `many`;
+   Japanese, Korean, Chinese, Thai and Vietnamese need only `other`. A form left out falls
+   back to `other`.
 4. Restart the extension to pick up the new file.
 
 `npm test` checks that each translation uses the same keys and placeholders as English,
@@ -767,9 +770,7 @@ changing them:
 ## Installing it from Roon
 
 Once the image is on Docker Hub and the entry is in the Extension Repository, install it
-with the [Extension Manager](https://github.com/TheAppgineer/roon-extension-manager):
-Roon → Settings → Extensions → Extension Manager → Settings, pick the category, pick
-Party Mode, and choose Install.
+with the [Extension Manager](https://github.com/TheAppgineer/roon-extension-manager).
 
 The Manager runs it with host networking, since Roon discovery uses UDP broadcast on
 port 9003. It bind-mounts `config.json`, so settings survive updates.
@@ -864,17 +865,8 @@ before merging, like any change.
 
 ### Running the image by hand
 
-```bash
-docker run -d --name roon-extension-party-mode --network host --restart unless-stopped \
-  --log-opt max-size=10m --log-opt max-file=3 \
-  --read-only --cap-drop ALL --security-opt no-new-privileges \
-  -v "$PWD/config.json:/usr/src/app/config.json" \
-  stubaggs/roon-extension-party-mode:latest
-```
-
-`docker-compose.yml` does the same thing.
-
-Both lock the container down:
+Install it as the README's [With Docker](README.md#with-docker) says; `docker-compose.yml`
+does the same. Both lock the container down:
 
 - `--read-only` (`read_only: true`): the image's files can't change. node-roon-api
   rewrites `config.json` in place, which works on the mounted file, and nothing else
@@ -883,19 +875,13 @@ Both lock the container down:
   port 1024 and finds the Core by UDP multicast and broadcast, none of which needs one.
 - `--security-opt no-new-privileges`: nothing in the container can gain privileges.
 
-The Extension Manager starts the container its own way, so these don't apply there.
+The Extension Manager starts the container its own way, so these don't apply there; it
+creates `config.json` writable itself.
 
-Create `config.json` first, writable by uid 1000:
-
-```bash
-touch config.json && sudo chown 1000 config.json && chmod 600 config.json
-```
-
-`chmod 666` works without `sudo`, but leaves Roon's pairing token readable by every
-account on the host. Without the file, Docker makes a directory in its place. The
-extension runs as the image's unprivileged `node` user (uid 1000), so it then can't save
-its settings; Roon's status line and the console say so. The Extension Manager creates the
-file writable itself.
+`config.json` must exist and be writable by uid 1000 before the container starts. Without
+it, Docker makes a directory in its place, and the extension can't save its settings or
+Roon's pairing; Roon's status line and the console say so. `chmod 666` works without
+`sudo`, but leaves the pairing token readable by every account on the host.
 
 ## Running the experimental version
 
@@ -919,9 +905,9 @@ at most one release and one experimental build per Core, unless the copies are n
 Give the experimental one its own folder, container name, `config.json` and party zone:
 
 ```bash
-mkdir party-mode-experimental && cd party-mode-experimental
+mkdir roon-extension-party-mode-experimental && cd roon-extension-party-mode-experimental
 touch config.json && sudo chown 1000 config.json && chmod 600 config.json
-docker run -d --name party-mode-experimental --network host --restart unless-stopped \
+docker run -d --name roon-extension-party-mode-experimental --network host --restart unless-stopped \
   --log-opt max-size=10m --log-opt max-file=3 \
   --read-only --cap-drop ALL --security-opt no-new-privileges \
   -v "$PWD/config.json:/usr/src/app/config.json" \
@@ -936,8 +922,10 @@ docker run -d --name party-mode-experimental --network host --restart unless-sto
 If the released one already uses port 8338, the experimental one takes the next free port,
 and its status line in Roon says so.
 
-To stop trying it, remove the container (`docker rm -f party-mode-experimental`) and
-disable it in Roon. The Extension Manager always installs the released version.
+To stop trying it, remove the container
+(`docker rm -f roon-extension-party-mode-experimental`, or `party-mode-experimental` if
+you set it up before 1.3.0) and disable it in Roon. The Extension Manager always installs
+the released version.
 
 ## Running several copies
 
@@ -1040,8 +1028,8 @@ full replies, so it's for troubleshooting only.
 - **A rescan starts a new session**, and so does coming back after 12 hours without using
   the page. Tracks added before it keep the name they had then.
 - **Everything is kept in memory.** Played (the last 200 tracks), the playlist (5000) and
-  who asked for what start over when the extension restarts. Played also starts over when
-  the party zone changes.
+  who asked for what start over when the extension restarts. Played and the playlist also
+  start over when the party zone changes.
 - **The queue subscription is per zone.** Changing the party zone starts a new
   subscription. The old one is ignored rather than torn down, since the API has no
   convenient unsubscribe.

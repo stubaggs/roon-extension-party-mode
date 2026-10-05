@@ -30,18 +30,18 @@ What's changed in each version is in [RELEASES.md](RELEASES.md).
 
 ### With the Extension Manager
 
-*This method is awaiting inclusion in the extenstion manager repository, until then please use
-one of the other install options.*
+*This method is awaiting inclusion in the Extension Manager repository. Until then, please
+use one of the other install options.*
 
-1. In Roon, open **Settings → Extensions → Extension Manager → Settings**.
-2. Pick the **Playback** category, then **Party Mode**, and choose **Install**.
-3. Back in **Settings → Extensions**, find **Party Mode** and click **Enable**.
-
-The Extension Manager handles updates from then on.
+Install **Party Mode** with the
+[Extension Manager](https://github.com/TheAppgineer/roon-extension-manager), then enable it
+under **Settings → Extensions** in Roon. The Extension Manager handles updates from then
+on.
 
 ### With Docker
 
 ```bash
+mkdir roon-extension-party-mode && cd roon-extension-party-mode
 touch config.json && sudo chown 1000 config.json && chmod 600 config.json
 docker run -d --name roon-extension-party-mode --network host --restart unless-stopped \
   --log-opt max-size=10m --log-opt max-file=3 \
@@ -52,13 +52,19 @@ docker run -d --name roon-extension-party-mode --network host --restart unless-s
 
 Then enable **Party Mode** under **Settings → Extensions** in Roon.
 
-The file `config.json` keeps your settings when the image is updated. It also holds the
-key Roon gave Party Mode, so the commands above let only the extension (user 1000) read
-it. Without `sudo`, use `chmod 666 config.json` instead, which lets every account on the
-computer read and change it. The `--log-opt` settings keep the log from growing without
-limit. The `--read-only`, `--cap-drop` and `--security-opt` settings lock the container
-down: nothing in it can be changed except `config.json`, and it can't gain extra
-privileges.
+To update to a new version, run this in the same folder, then the `docker run` command
+above again:
+
+```bash
+docker pull stubaggs/roon-extension-party-mode:latest
+docker rm -f roon-extension-party-mode
+```
+
+Your settings and Roon's pairing stay in `config.json`. If you started Party Mode before
+1.3.0, its container is called `party-mode`: use `docker rm -f party-mode` instead, once.
+
+To stop Party Mode, run `docker stop roon-extension-party-mode`. It stays stopped, even
+after a restart of the computer, until you run `docker start roon-extension-party-mode`.
 
 #### With Docker Compose
 
@@ -66,7 +72,7 @@ The repository includes a `docker-compose.yml` file that does the same as the `d
 command above. Put it in a folder of its own, next to the `config.json` it saves to:
 
 ```bash
-mkdir party-mode && cd party-mode
+mkdir roon-extension-party-mode && cd roon-extension-party-mode
 curl -O https://raw.githubusercontent.com/stubaggs/roon-extension-party-mode/main/docker-compose.yml
 touch config.json && sudo chown 1000 config.json && chmod 600 config.json
 docker compose up -d
@@ -80,8 +86,8 @@ To update to a new version, run this in the same folder:
 docker compose pull && docker compose up -d
 ```
 
-Your settings and Roon's pairing stay in `config.json`. To see the log, run
-`docker compose logs -f`. To stop Party Mode, run `docker compose down`.
+Your settings and Roon's pairing stay in `config.json`. To stop Party Mode, run
+`docker compose down`.
 
 To change the first port or turn on the detailed log, edit the `environment` lines in
 `docker-compose.yml`, then run `docker compose up -d` again.
@@ -121,9 +127,9 @@ your network.
 It's a CSV file of every track queued in the party zone: title, artist, album, length, who
 asked for it and when. To leave guests' names out, turn on **Hide names in downloadable
 playlist** under **Advanced**. Roon can't import it directly, but Soundiiz can: choose
-**Import playlist**, then the file, and pick TIDAL, Qobuz or Spotify. Roon then shows it with your
-playlists. Excel on Windows can garble accented names when you double-click the file;
-Google Sheets, Numbers and Excel's **Data → From Text/CSV** read it correctly.
+**Import playlist**, then the file, and pick TIDAL, Qobuz or Spotify. Roon then shows it
+with your playlists. Excel on Windows can garble accented names when you double-click the
+file; Google Sheets, Numbers and Excel's **Data → From Text/CSV** read it correctly.
 
 ## Settings
 
@@ -221,8 +227,9 @@ choose one yourself, change **Web port** under **Advanced** in the settings.
 `ROON_EXTENSION_PARTY_MODE_DEBUG=1` (with Docker, add
 `-e ROON_EXTENSION_PARTY_MODE_DEBUG=1`; with Docker Compose, remove the `#` in front of
 that line in `docker-compose.yml` and run `docker compose up -d`) for a detailed log,
-including every message to and from Roon, and include it in an issue. Turn it off again
-afterwards: it's large and records what guests search for.
+including every message to and from Roon, and include it in an issue. See it with
+`docker logs roon-extension-party-mode`, or `docker compose logs` in its folder. Turn it
+off again afterwards: it's large and records what guests search for.
 
 ## Running more than one party
 
@@ -234,7 +241,7 @@ own `config.json`, and its own container name. For example, a second copy named 
 **With Docker**
 
 ```bash
-mkdir party-mode-garden && cd party-mode-garden
+mkdir roon-extension-party-mode-garden && cd roon-extension-party-mode-garden
 touch config.json && sudo chown 1000 config.json && chmod 600 config.json
 docker run -d --name roon-extension-party-mode-garden --network host --restart unless-stopped \
   --log-opt max-size=10m --log-opt max-file=3 \
@@ -260,6 +267,25 @@ they are:
 It shows in Roon as **Party Mode (Garden)**, a separate extension. Enable it and choose
 its own party zone. With the first copy on port 8338, it takes the next free port by
 itself.
+
+## Uninstalling
+
+**With the Extension Manager:** uninstall it with the
+[Extension Manager](https://github.com/TheAppgineer/roon-extension-manager).
+
+**With Docker:** remove the container and the image, then delete the folder you made for
+it, which removes `config.json` and with it your settings and Roon's pairing:
+
+```bash
+docker rm -f roon-extension-party-mode
+docker rmi stubaggs/roon-extension-party-mode:latest
+```
+
+**With Docker Compose:** in its folder, run `docker compose down --rmi all`, then delete
+the folder.
+
+A **Party profile** you created stays in Roon until you delete it. For a second copy, such
+as Garden, do the same with its own container name and folder.
 
 ## For developers
 

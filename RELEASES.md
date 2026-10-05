@@ -11,8 +11,7 @@ Not released yet. You can try it on the `experimental` branch (see
 - A radio station playing on the party zone shows as one: the pages say "Radio station"
   instead of showing it as a track, it's no longer labelled Roon Radio or listed in
   Played, and Skip is hidden, since Roon can't skip a station. Guests' tracks wait in
-  the queue until you play it from Roon, and the guest page and the Party Hub say so;
-  the README says how.
+  the queue until you play it from Roon.
 - Tracks you queue in Roon get a **Host** tag, in sky blue, on the Party Hub, the guest
   page and in the playlist download. Before, with Roon Radio on, they were labelled Roon
   Radio; Roon Radio's tag now goes only on the tracks it picks.
@@ -20,7 +19,8 @@ Not released yet. You can try it on the `experimental` branch (see
   download credits every guest's track to Anon instead of their name. Roon Radio and Host
   stay.
 - Various security enhancements.
-- The README explains how to run Party Mode with Docker Compose. Its `docker run` example
+- The README explains how to run Party Mode with Docker Compose, and how to update, stop
+  and uninstall it. Its `docker run` example
   now names the container `roon-extension-party-mode`, as the Compose file does. A
   container you already run as `party-mode` keeps working under that name.
 - With **Loop** on, the playlist download no longer lists a track again each time it
