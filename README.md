@@ -79,7 +79,7 @@ party's name and the Party Hub's address, for example:
 ## The party's playlist
 
 Once **Party mode** is **Off**, the Party Hub shows the playlist to download (see
-**Display playlist download** below). It's always at the address in that setting's hint,
+**Playlist on the Party Hub** below). It's always at the address in that setting's hint,
 such as `http://192.0.2.10:8338/Download/playlist.csv`, which you can open in any browser on
 your network.
 
@@ -97,17 +97,17 @@ Google Sheets, Numbers and Excel's **Data → From Text/CSV** read it correctly.
 | Party zone | Where the music plays. If you pick a speaker that's grouped with others, the whole group plays. |
 | Party name | Shown on the Party Hub. Leave blank to use the zone's name. |
 | Party Hub language | The language of the Party Hub, for every screen showing it. Automatic (the default) follows the screen's browser. Guests' phones always follow their own.|
-| Display playlist download | What the Party Hub shows once **Party mode** is **Off**: a **QR code** guests can scan (the default), a **Link only** to click on the Hub itself, or **Off** for nothing. |
+| Playlist on the Party Hub | What the Party Hub shows once **Party mode** is **Off**: a **QR code** guests can scan (the default), a **Link only** to click on the Hub itself, or **Off** for nothing. |
 | Roon profile for guest requests | The Roon profile the tracks are played under. To keep party tracks out of your own history and recommendations, create a profile such as "Guests" in Roon first, then choose it here. Leave it alone to play under your own profile. |
-| Adding tracks | Whether guests can add tracks, and whether a track already in the queue can be added again (covers, live takes, remasters and the same track on another album count as different tracks). |
-| Playing next | Whether guests can put a track straight after the current one. |
-| Skipping | Whether guests can skip the current track. Off unless you turn it on. |
+| Adding tracks | Whether guests can add tracks, and whether a track already in the queue can be added again (covers, live takes, remasters and the same track on another album count as different tracks). **Also let guests play a track next** lets them put a track straight after the current one; it needs adding on. |
+| Skipping | Whether guests can skip the currently playing track. Off unless you turn it on. |
 | Advanced | **Web port**: the port the guest pages and the Party Hub use (8338). If it's busy when Party Mode starts, it uses the next free one and the status line says so. Only change it if something else on the computer uses 8338.<br>**Browse titles**: Party Mode usually finds them by itself; only fill them in if search or queuing doesn't work on a Core that isn't in English. |
 
-**Adding tracks**, **Playing next** and **Skipping** each set how many a guest gets
-(**0 means no limit**) and the minutes until they earn one back (**0 means never**). By
-default skipping is disabled, each guest can add 5 tracks, earning one back every 10
-minutes, and play next once an hour.
+**"Add to queue" per guest**, **"Play it next" per guest** and **"Skip" per guest** set
+how many of each a guest gets (**0 means no limit**), and **Minutes to earn one back**
+how long until they get another (**0 means never**). By default skipping is disabled,
+each guest can add 5 tracks, earning one back every 10 minutes, and play next once an
+hour.
 
 ## Good to know
 
@@ -136,7 +136,7 @@ minutes, and play next once an hour.
   you turn **Party mode** back on from **Off**. Download it before any of those. Pausing
   keeps it.
 - **The playlist has guests' names in it.** It lists who asked for each track and when.
-  With **Display playlist download** on **QR code**, anyone at the party can scan it and
+  With **Playlist on the Party Hub** set to **QR code**, anyone at the party can scan it and
   keep a copy. If that's not what you want, choose **Link only** or **Off**.
 - **The playlist keeps up to 5000 tracks**, about two weeks of non-stop music. Past that,
   the oldest tracks you queued yourself or Roon Radio picked are dropped first; guests'

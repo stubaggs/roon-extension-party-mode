@@ -270,7 +270,7 @@ check('a saved on/off from "Guest access" carries over, and junk reads as on', (
 
 check('display playlist download: QR code, link or off, QR code unless chosen', () => {
   const entry = item(layout({}), 'playlist_download');
-  assert.strictEqual(entry.title, 'Display playlist download');
+  assert.strictEqual(entry.title, 'Playlist on the Party Hub');
   assert.deepStrictEqual(entry.values.map((v) => v.value), ['qr', 'link', 'off']);
   assert.strictEqual(layout({}).values.playlist_download, 'qr');
   assert.strictEqual(layout({ playlist_download: 'link' }).values.playlist_download, 'link');
@@ -340,13 +340,14 @@ check('the hints under the settings say what 0 means', () => {
     assert.doesNotMatch(item(result, setting).title, /0 =/, setting);
   }
   for (const setting of ['add_refill', 'next_refill', 'skip_refill']) {
-    assert.strictEqual(item(result, setting).subtitle, '0 = a used one never comes back', setting);
+    assert.strictEqual(item(result, setting).subtitle, '0 = never', setting);
   }
   for (const setting of ['add_refill', 'next_refill', 'skip_refill']) {
     assert.strictEqual(item(result, setting).title, 'Minutes to earn one back', setting);
   }
   assert.strictEqual(item(result, 'add_limit').title, '"Add to queue" per guest', 'named after the button');
   assert.strictEqual(item(result, 'next_limit').title, '"Play it next" per guest', 'named after the button');
+  assert.strictEqual(item(result, 'skip_limit').title, '"Skip" per guest', 'named after the button');
 });
 
 check('playing next sits in the Adding tracks group, with no heading of its own', () => {

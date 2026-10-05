@@ -18,6 +18,9 @@ Not released yet. You can try it on the `experimental` branch (see
   Radio; Roon Radio's tag now goes only on the tracks it picks.
 - With **Loop** on, the playlist download no longer lists a track again each time it
   comes round.
+- Clearer setting names in Roon: **Display playlist download** is now **Playlist on the
+  Party Hub**, the limits are named after the guest page's buttons ("Add to queue",
+  "Play it next" and "Skip" per guest), and their hints are shorter.
 - With **Let guests add tracks** on No, guests can't play a track next either, since that
   adds a track too, so the play next settings have moved into **Adding tracks**.
   Skipping still follows its own setting.

@@ -87,9 +87,9 @@ before pushing. The Docker build runs it too, so a failing test stops a build.
 
 Party mode comes first, as the switch hosts use most. Then, in order: the party zone, the
 party name, Party Hub language (see [Choosing the language](#choosing-the-language)),
-Display playlist download (see [The party playlist](#the-party-playlist)), the Roon profile, the allowances (Adding tracks, which includes playing next, then
-Skipping), and the
-collapsed Advanced group: the web port, then the browse titles.
+Playlist on the Party Hub (see [The party playlist](#the-party-playlist)), the Roon
+profile, the allowances (Adding tracks, which includes playing next, then Skipping), and
+the collapsed Advanced group: the web port, then the browse titles.
 
 ### Party mode
 
@@ -515,7 +515,7 @@ Times are local to the extension, which in Docker is UTC unless `TZ` is set.
 
 **Where it's offered.** The URL needs no session, like the rest of the Party Hub, and
 always works. The Hub only offers it while Party mode is off, which is how a host ends a
-party. The Display playlist download setting decides how:
+party. The Playlist on the Party Hub setting decides how:
 
 - `playlist_download` is `'qr'`, `'link'` or `'off'`, read through `playlistDisplay()`,
   which also turns the brief yes/no form into `'qr'` or `'off'`.
