@@ -293,6 +293,17 @@ main {
   margin-top: 1rem;
 }
 
+/* Why a name was turned down, or that someone already uses it. */
+.nickname .nickname-note {
+  margin: 0.75rem 0 0;
+  color: var(--amber);
+  font-weight: 600;
+}
+
+.nickname-note[hidden] {
+  display: none;
+}
+
 .rows {
   display: flex;
   flex-direction: column;

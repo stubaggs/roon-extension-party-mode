@@ -509,14 +509,30 @@
     chip.setAttribute('aria-label', name ? `${t('name.adding_as', { name })}. ${t('name.change')}` : t('name.add'));
   }
 
-  async function saveName(name) {
-    const body = await api('/api/name', { method: 'POST', body: JSON.stringify({ name }) });
+  /**
+   * `confirm` says the guest knows another guest goes by this name; without it
+   * the server answers `name_taken` instead. A remembered name is sent with it:
+   * it's this phone's own, often still on its session from before a rescan.
+   */
+  async function saveName(name, confirm = false) {
+    const body = await api('/api/name', { method: 'POST', body: JSON.stringify({ name, confirm }) });
     party.guest_name = body.guest_name;
     renderNameChip();
   }
 
   let changingName = false;
   let nicknameOpener = null;
+  // The name the guest was just told someone else uses; sending it again confirms.
+  let takenName = null;
+  const nicknameNote = el('nickname-note');
+  const nicknameGo = el('nickname-go');
+
+  /** A line in the dialog, or none; "Use it anyway" only while it asks. */
+  function setNameNote(text, asking = false) {
+    nicknameNote.textContent = text || '';
+    nicknameNote.hidden = !text;
+    nicknameGo.textContent = asking ? t('name.use_anyway') : t('name.go');
+  }
 
   /**
    * First visit offers Skip; changing a name later offers Cancel instead.
@@ -526,6 +542,8 @@
     changingName = changing === true;
     el('nickname-skip').textContent = changingName ? t('name.cancel') : t('name.skip');
     nicknameInput.value = (party && party.guest_name) || remembered.get() || '';
+    takenName = null;
+    setNameNote(null);
     nicknameOpener = document.activeElement;
     app.inert = true;
     nickname.hidden = false;
@@ -546,13 +564,30 @@
   el('nickname-form').addEventListener('submit', async (event) => {
     event.preventDefault();
     const name = nicknameInput.value.trim();
+    try {
+      await saveName(name, name !== '' && name === takenName);
+    } catch (err) {
+      // Turned down, or someone else uses it: say so and leave the dialog open.
+      if (err.message === 'name_reserved' || err.message === 'name_taken') {
+        const asking = err.message === 'name_taken';
+        takenName = asking ? name : null;
+        const vars = { name: err.body.name };
+        setNameNote(asking ? t('name.taken', vars) : t('name.reserved', vars), asking);
+        nicknameInput.focus();
+        return;
+      }
+      if (err.message !== 'no_session') toast(t('toast.name_not_saved'));
+    }
     // Skipping stores an empty name, so "Skip" isn't asked again on this phone.
     remembered.set(name);
     closeName();
-    try {
-      await saveName(name);
-    } catch (err) {
-      if (err.message !== 'no_session') toast(t('toast.name_not_saved'));
+  });
+
+  // Typing something else clears the note about the old name.
+  nicknameInput.addEventListener('input', () => {
+    if (!nicknameNote.hidden && nicknameInput.value.trim() !== takenName) {
+      takenName = null;
+      setNameNote(null);
     }
   });
 
@@ -651,7 +686,7 @@
     if (party.guest_name) return;
     const name = remembered.get();
     if (name === null) return askName();
-    if (name) await saveName(name).catch(() => {});
+    if (name) await saveName(name, true).catch(() => {});
   }
 
   // -------------------------------------------------------------- lifecycle

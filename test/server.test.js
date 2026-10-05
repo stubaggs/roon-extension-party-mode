@@ -509,6 +509,38 @@ const set = (values) => Object.assign(roon.settings, values);
     assert.match(res.headers.get('content-security-policy'), /default-src 'self'/);
   });
 
+  await check("Party Mode's own labels can't be a guest's name, in any language or spelling", async () => {
+    const cookie = await newGuest();
+    for (const name of ['Host', ' roon  RADIO ', 'anon!', 'Gastgeber', 'Hote', 'Ev sahibi', '主人', 'Radio', 'radio station', 'Radiosender', 'Rádio', 'Радио', 'ラジオ', '라디오']) {
+      const res = await post('/api/name', cookie, { name, confirm: true });
+      assert.strictEqual(res.status, 400, name);
+      assert.strictEqual((await res.json()).error, 'name_reserved', name);
+    }
+    assert.strictEqual((await get('/api/party', { Cookie: cookie }).then((r) => r.json())).guest_name, '');
+    // A name that only contains one is fine.
+    assert.strictEqual((await post('/api/name', cookie, { name: 'Hostess Jo' })).status, 200);
+    assert.strictEqual((await post('/api/name', cookie, { name: 'Radio Ga Ga' })).status, 200);
+  });
+
+  await check('a name another guest uses is asked about first, then allowed', async () => {
+    const sam = await newGuest();
+    const other = await newGuest();
+    assert.strictEqual((await post('/api/name', sam, { name: 'Sam' })).status, 200);
+    for (const name of ['Sam', 'sam.', 'S A M']) {
+      const res = await post('/api/name', other, { name });
+      assert.strictEqual(res.status, 409, name);
+      assert.deepStrictEqual(await res.json(), { error: 'name_taken', name }, name);
+    }
+    assert.strictEqual((await get('/api/party', { Cookie: other }).then((r) => r.json())).guest_name, '', 'not taken yet');
+    const res = await post('/api/name', other, { name: 'Sam', confirm: true });
+    assert.strictEqual(res.status, 200);
+    assert.strictEqual((await res.json()).guest_name, 'Sam');
+    // Saving your own name again isn't a clash, and nor is having none.
+    assert.strictEqual((await post('/api/name', sam, { name: 'Sam' })).status, 409, 'two Sams now: the first is asked too');
+    assert.strictEqual((await post('/api/name', sam, { name: '' })).status, 200);
+    assert.strictEqual((await post('/api/name', sam, { name: 'Sam', confirm: true })).status, 200);
+  });
+
   await check('a guest action sent from another site is refused, before anything happens', async () => {
     const cookie = await newGuest();
     const send = (origin) =>

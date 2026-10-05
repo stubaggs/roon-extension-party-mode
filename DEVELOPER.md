@@ -333,6 +333,22 @@ A guest without a name shows as "Anon" (`credit.guest`, translated on the pages;
 the playlist file and the log). It's only a display name: the session's name stays
 empty.
 
+Names are compared by `nameKey()` (`lib/guests.js`): case, accents, spaces and punctuation
+ignored, so "Sam", "sam." and "S A M" are one name.
+
+- **Party Mode's own labels can't be taken.** `POST /api/name` refuses "Host", "Roon
+  Radio", "Radio station" and "Anon" in all 30 languages (`credit.host`, `credit.radio`,
+  `playing.station`, `credit.guest`), and the word "radio" in each (`RADIO_WORDS`), with
+  400 `name_reserved`, so "Requested by Host" always means the host. They're gathered
+  into `RESERVED_NAMES` at startup. A name that only contains one ("Hostess", "Radio Ga
+  Ga") is fine.
+- **A name another guest uses is asked about, not refused.** Two guests can share a name,
+  and a guest who rescans comes back under their old name while their old session still
+  holds it. So `POST /api/name` answers 409 `name_taken` (`GuestStore.nameInUse`) until
+  it's sent again with `confirm: true`. The dialog stays open and asks ("Someone here is
+  already called Sam. Use it anyway?"), and its button becomes "Use it anyway". The name
+  the phone remembers is sent with `confirm`, so a returning guest isn't asked.
+
 Naming yourself later, or changing your name, reaches everything you've already added:
 
 - Each session has a `ref`: random, and separate from its `id`, which is the session
