@@ -476,11 +476,12 @@ const set = (values) => Object.assign(roon.settings, values);
     }
   });
 
-  await check('other sites can neither embed the files nor keep hold of a page', async () => {
+  await check('other sites cannot embed the files, and the pages load only their own', async () => {
     for (const path of ['/', '/PartyHub', '/api/hub', '/api/qr.svg', '/Download/playlist.csv']) {
       const res = await get(path);
       assert.strictEqual(res.headers.get('cross-origin-resource-policy'), 'same-origin', path);
-      assert.strictEqual(res.headers.get('cross-origin-opener-policy'), 'same-origin', path);
+      // Ignored over plain HTTP, with an error in the console, so not sent.
+      assert.strictEqual(res.headers.get('cross-origin-opener-policy'), null, path);
       assert.strictEqual(res.headers.get('cross-origin-embedder-policy'), 'require-corp', path);
     }
   });

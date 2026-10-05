@@ -748,11 +748,12 @@ changing them:
   or style; `marquee.js` sets styles through the DOM, which the policy allows. Responses
   also carry `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`, and a
   `Permissions-Policy` that switches off browser features the pages never use (camera,
-  microphone, location, payment and the like). `Cross-Origin-Resource-Policy`,
-  `-Opener-Policy` (both `same-origin`) and `-Embedder-Policy` (`require-corp`) stop
-  other sites embedding the extension's files or keeping hold of a page they opened,
-  and the pages loading anything from elsewhere; everything they load is their own, and
-  none of them applies to the Party Hub shown in a frame. Guest pages refuse to be framed
+  microphone, location, payment and the like). `Cross-Origin-Resource-Policy:
+  same-origin` and `Cross-Origin-Embedder-Policy: require-corp` stop other sites
+  embedding the extension's files, and the pages loading anything from elsewhere;
+  everything they load is their own, and neither applies to the Party Hub shown in a
+  frame. There's no `Cross-Origin-Opener-Policy`: browsers ignore it over plain HTTP on
+  a LAN address, and log an error on every page saying so. Guest pages refuse to be framed
   (`frame-ancestors 'none'`, `X-Frame-Options: DENY`); the Party Hub may be, for a
   dashboard on the TV. `test/server.test.js` covers all of this.
 - **Plain errors.** An unknown address gets a plain `Not found`, and a malformed request a
