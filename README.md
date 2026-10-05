@@ -45,6 +45,7 @@ The Extension Manager handles updates from then on.
 touch config.json && sudo chown 1000 config.json && chmod 600 config.json
 docker run -d --name roon-extension-party-mode --network host --restart unless-stopped \
   --log-opt max-size=10m --log-opt max-file=3 \
+  --read-only --cap-drop ALL --security-opt no-new-privileges \
   -v "$PWD/config.json:/usr/src/app/config.json" \
   stubaggs/roon-extension-party-mode:latest
 ```
@@ -55,7 +56,9 @@ The file `config.json` keeps your settings when the image is updated. It also ho
 key Roon gave Party Mode, so the commands above let only the extension (user 1000) read
 it. Without `sudo`, use `chmod 666 config.json` instead, which lets every account on the
 computer read and change it. The `--log-opt` settings keep the log from growing without
-limit.
+limit. The `--read-only`, `--cap-drop` and `--security-opt` settings lock the container
+down: nothing in it can be changed except `config.json`, and it can't gain extra
+privileges.
 
 #### With Docker Compose
 
@@ -235,6 +238,7 @@ mkdir party-mode-garden && cd party-mode-garden
 touch config.json && sudo chown 1000 config.json && chmod 600 config.json
 docker run -d --name roon-extension-party-mode-garden --network host --restart unless-stopped \
   --log-opt max-size=10m --log-opt max-file=3 \
+  --read-only --cap-drop ALL --security-opt no-new-privileges \
   -e ROON_EXTENSION_PARTY_MODE_INSTANCE=Garden \
   -v "$PWD/config.json:/usr/src/app/config.json" \
   stubaggs/roon-extension-party-mode:latest

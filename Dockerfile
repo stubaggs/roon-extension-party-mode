@@ -45,7 +45,13 @@ COPY public ./public
 # The Extension Manager bind-mounts this file so settings survive image updates
 # (it creates it world-writable). The copy in the image is for runs without a
 # bind, owned by the user the extension runs as.
-RUN touch config.json && chown node:node config.json
+# The extension needs only node at runtime, so npm, npx, corepack and yarn go:
+# they are most of what vulnerability scanners report in a Node image, and a
+# package manager is one less tool for anyone who gets into the container.
+RUN touch config.json && chown node:node config.json \
+ && rm -rf /usr/local/lib/node_modules /opt/yarn-* \
+      /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack \
+      /usr/local/bin/yarn /usr/local/bin/yarnpkg
 
 # Run as the image's unprivileged node user (uid 1000), like the Extension
 # Manager and TheAppgineer's other extensions.

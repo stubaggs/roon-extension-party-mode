@@ -746,9 +746,22 @@ changing them:
 - **Headers.** Every response carries a Content-Security-Policy that allows only the
   extension's own scripts, styles, images and connections. The pages have no inline script
   or style; `marquee.js` sets styles through the DOM, which the policy allows. Responses
-  also carry `X-Content-Type-Options: nosniff` and `Referrer-Policy: no-referrer`. Guest
-  pages refuse to be framed (`frame-ancestors 'none'`, `X-Frame-Options: DENY`); the Party
-  Hub may be, for a dashboard on the TV. `test/server.test.js` covers all of this.
+  also carry `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`, and a
+  `Permissions-Policy` that switches off browser features the pages never use (camera,
+  microphone, location, payment and the like). `Cross-Origin-Resource-Policy`,
+  `-Opener-Policy` (both `same-origin`) and `-Embedder-Policy` (`require-corp`) stop
+  other sites embedding the extension's files or keeping hold of a page they opened,
+  and the pages loading anything from elsewhere; everything they load is their own, and
+  none of them applies to the Party Hub shown in a frame. Guest pages refuse to be framed
+  (`frame-ancestors 'none'`, `X-Frame-Options: DENY`); the Party Hub may be, for a
+  dashboard on the TV. `test/server.test.js` covers all of this.
+- **Plain errors.** An unknown address gets a plain `Not found`, and a malformed request a
+  plain `Bad request`, both with the headers above, instead of Express's own error page,
+  which names Express and drops them. Anything else is logged and answered `Something
+  went wrong`.
+- **Album art gives up.** `/api/image/:key` needs no session, and Roon never answers for
+  an image key it doesn't know. So `getImage()` stops waiting after 5 seconds
+  (`IMAGE_TIMEOUT_MS`) and answers 404, rather than holding the connection open.
 
 ## Installing it from Roon
 
@@ -810,7 +823,10 @@ It builds in two stages:
    `git` for the Roon packages on GitHub), and run `npm test`, so a failing test stops the
    build.
 2. Copy only the app and its dependencies onto a clean base, with a health check that
-   requests the Party Hub's data (`/api/hub`) on the configured port.
+   requests the Party Hub's data (`/api/hub`) on the configured port. npm, npx,
+   corepack and yarn are removed from it: the extension needs only `node`, and they're
+   most of what vulnerability scanners report in a Node image. So `npm` doesn't work
+   inside the container; build a new image instead.
 
 The image covers both 32-bit ARM variants because Docker reports every 32-bit ARM host as
 `arm`, the key the repository entry uses: Pi Zero and Pi 1 need `arm/v6`, later Pis
@@ -836,11 +852,23 @@ once a new image is published. To update by hand, change both `FROM` lines toget
 ```bash
 docker run -d --name roon-extension-party-mode --network host --restart unless-stopped \
   --log-opt max-size=10m --log-opt max-file=3 \
+  --read-only --cap-drop ALL --security-opt no-new-privileges \
   -v "$PWD/config.json:/usr/src/app/config.json" \
   stubaggs/roon-extension-party-mode:latest
 ```
 
 `docker-compose.yml` does the same thing.
+
+Both lock the container down:
+
+- `--read-only` (`read_only: true`): the image's files can't change. node-roon-api
+  rewrites `config.json` in place, which works on the mounted file, and nothing else
+  writes to disk. A new feature that writes a file needs a mount or a `tmpfs` for it.
+- `--cap-drop ALL`: no Linux capabilities. The extension runs as uid 1000, listens above
+  port 1024 and finds the Core by UDP multicast and broadcast, none of which needs one.
+- `--security-opt no-new-privileges`: nothing in the container can gain privileges.
+
+The Extension Manager starts the container its own way, so these don't apply there.
 
 Create `config.json` first, writable by uid 1000:
 
@@ -880,6 +908,7 @@ mkdir party-mode-experimental && cd party-mode-experimental
 touch config.json && sudo chown 1000 config.json && chmod 600 config.json
 docker run -d --name party-mode-experimental --network host --restart unless-stopped \
   --log-opt max-size=10m --log-opt max-file=3 \
+  --read-only --cap-drop ALL --security-opt no-new-privileges \
   -v "$PWD/config.json:/usr/src/app/config.json" \
   stubaggs/roon-extension-party-mode:experimental
 ```

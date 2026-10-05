@@ -21,7 +21,7 @@ const assert = require('assert');
 const EventEmitter = require('events');
 const { createServer } = require('../lib/server');
 const { GuestStore, cleanName, MAX_SESSIONS } = require('../lib/guests');
-const { DEFAULT_SETTINGS } = require('../lib/roon-service');
+const { DEFAULT_SETTINGS, RoonService } = require('../lib/roon-service');
 
 let failures = 0;
 async function check(name, fn) {
@@ -467,6 +467,52 @@ const set = (values) => Object.assign(roon.settings, values);
       assert.strictEqual(res.headers.get('x-content-type-options'), 'nosniff', path);
       assert.strictEqual(res.headers.get('referrer-policy'), 'no-referrer', path);
     }
+  });
+
+  await check('every page switches off camera, microphone, location and the like', async () => {
+    for (const path of ['/', '/PartyHub', '/api/hub']) {
+      const policy = (await get(path)).headers.get('permissions-policy');
+      for (const feature of ['camera=()', 'microphone=()', 'geolocation=()']) assert.ok(policy.includes(feature), `${path}: ${policy}`);
+    }
+  });
+
+  await check('other sites can neither embed the files nor keep hold of a page', async () => {
+    for (const path of ['/', '/PartyHub', '/api/hub', '/api/qr.svg', '/Download/playlist.csv']) {
+      const res = await get(path);
+      assert.strictEqual(res.headers.get('cross-origin-resource-policy'), 'same-origin', path);
+      assert.strictEqual(res.headers.get('cross-origin-opener-policy'), 'same-origin', path);
+      assert.strictEqual(res.headers.get('cross-origin-embedder-policy'), 'require-corp', path);
+    }
+  });
+
+  await check('an unknown address gets a plain 404 that keeps the security headers', async () => {
+    for (const path of ['/nope', '/robots.txt', '/api/nope']) {
+      const res = await get(path);
+      assert.strictEqual(res.status, 404, path);
+      assert.strictEqual(await res.text(), 'Not found', path);
+      assert.match(res.headers.get('content-security-policy'), /frame-ancestors 'none'/, path);
+      assert.ok(res.headers.get('permissions-policy'), path);
+    }
+  });
+
+  await check('a malformed request body gets a plain 400 that names nothing', async () => {
+    const cookie = await newGuest();
+    const res = await fetch(`${base}/api/name`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Cookie: cookie },
+      body: '{not json'
+    });
+    assert.strictEqual(res.status, 400);
+    const text = await res.text();
+    assert.strictEqual(text, 'Bad request');
+    assert.match(res.headers.get('content-security-policy'), /default-src 'self'/);
+  });
+
+  await check('album art Roon never answers for gives up instead of hanging', async () => {
+    const silent = { imageSvc: { get_image() {} } };
+    const started = Date.now();
+    await assert.rejects(RoonService.prototype.getImage.call(silent, 'unknown', 200, 50), /did not answer/);
+    assert.ok(Date.now() - started < 1000);
   });
 
   await check('the Party Hub can be shown inside a dashboard', async () => {

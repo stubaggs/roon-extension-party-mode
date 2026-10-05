@@ -9,6 +9,13 @@ services:
     container_name: roon-extension-party-mode
     network_mode: host
     restart: unless-stopped
+    # Locked down: nothing in the image can change (config.json is mounted, so
+    # settings still save), no Linux capabilities, and no gaining privileges.
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
     environment:
       # The first port only: once settings are saved in Roon (even just choosing the
       # zone), change it with Web port there. A busy port falls back to the next free one.

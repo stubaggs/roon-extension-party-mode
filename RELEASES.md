@@ -3,7 +3,7 @@
 What's new in each version of Party Mode, newest first. Roon shows the version you're
 running in its Extensions list.
 
-## 1.3.0 (in progress)
+## 2.0.0 (in progress)
 
 Not released yet. You can try it on the `experimental` branch (see
 [DEVELOPER.md](DEVELOPER.md#running-the-experimental-version)).
@@ -19,6 +19,7 @@ Not released yet. You can try it on the `experimental` branch (see
 - New **Hide names in downloadable playlist** setting, under **Advanced**: the playlist
   download credits every guest's track to Anon instead of their name. Roon Radio and Host
   stay.
+- Various security enhancements.
 - The README explains how to run Party Mode with Docker Compose. Its `docker run` example
   now names the container `roon-extension-party-mode`, as the Compose file does. A
   container you already run as `party-mode` keeps working under that name.
