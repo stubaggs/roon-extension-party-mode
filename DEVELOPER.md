@@ -847,6 +847,10 @@ Merging that pull request changes only the Dockerfile: the fixes reach installed
 once a new image is published. To update by hand, change both `FROM` lines together;
 `docker buildx imagetools inspect node:22-alpine` prints the current digest.
 
+It also checks the npm dependencies and the workflow's actions weekly. Minor and patch
+npm updates come as one pull request; each needs `npm test` and the local Docker check
+before merging, like any change.
+
 ### Running the image by hand
 
 ```bash
