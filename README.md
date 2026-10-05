@@ -30,6 +30,9 @@ What's changed in each version is in [RELEASES.md](RELEASES.md).
 
 ### With the Extension Manager
 
+*This method is awaiting inclusion in the extenstion manager repository, until then please use
+one of the other install options.*
+
 1. In Roon, open **Settings → Extensions → Extension Manager → Settings**.
 2. Pick the **Playback** category, then **Party Mode**, and choose **Install**.
 3. Back in **Settings → Extensions**, find **Party Mode** and click **Enable**.
@@ -40,7 +43,7 @@ The Extension Manager handles updates from then on.
 
 ```bash
 touch config.json && sudo chown 1000 config.json && chmod 600 config.json
-docker run -d --name party-mode --network host --restart unless-stopped \
+docker run -d --name roon-extension-party-mode --network host --restart unless-stopped \
   --log-opt max-size=10m --log-opt max-file=3 \
   -v "$PWD/config.json:/usr/src/app/config.json" \
   stubaggs/roon-extension-party-mode:latest
@@ -54,12 +57,31 @@ it. Without `sudo`, use `chmod 666 config.json` instead, which lets every accoun
 computer read and change it. The `--log-opt` settings keep the log from growing without
 limit.
 
-### Running more than one party
+#### With Docker Compose
 
-To run two parties against one Roon Core, in different rooms, say, give each extra copy a
-name: add `-e ROON_EXTENSION_PARTY_MODE_INSTANCE=Garden` to its `docker run`, with its own
-container name, its own `config.json` and its own party zone. It shows in Roon as
-**Party Mode (Garden)**, a separate extension to enable and set up.
+The repository includes a `docker-compose.yml` file that does the same as the `docker run`
+command above. Put it in a folder of its own, next to the `config.json` it saves to:
+
+```bash
+mkdir party-mode && cd party-mode
+curl -O https://raw.githubusercontent.com/stubaggs/roon-extension-party-mode/main/docker-compose.yml
+touch config.json && sudo chown 1000 config.json && chmod 600 config.json
+docker compose up -d
+```
+
+Then enable **Party Mode** under **Settings → Extensions** in Roon.
+
+To update to a new version, run this in the same folder:
+
+```bash
+docker compose pull && docker compose up -d
+```
+
+Your settings and Roon's pairing stay in `config.json`. To see the log, run
+`docker compose logs -f`. To stop Party Mode, run `docker compose down`.
+
+To change the first port or turn on the detailed log, edit the `environment` lines in
+`docker-compose.yml`, then run `docker compose up -d` again.
 
 ## Starting a party
 
@@ -194,9 +216,46 @@ choose one yourself, change **Web port** under **Advanced** in the settings.
 
 **Something else isn't working.** Start the extension with
 `ROON_EXTENSION_PARTY_MODE_DEBUG=1` (with Docker, add
-`-e ROON_EXTENSION_PARTY_MODE_DEBUG=1`) for a detailed log, including every message to
-and from Roon, and include it in an issue. Turn it off again afterwards: it's large and
-records what guests search for.
+`-e ROON_EXTENSION_PARTY_MODE_DEBUG=1`; with Docker Compose, remove the `#` in front of
+that line in `docker-compose.yml` and run `docker compose up -d`) for a detailed log,
+including every message to and from Roon, and include it in an issue. Turn it off again
+afterwards: it's large and records what guests search for.
+
+## Running more than one party
+
+Most people need only one copy. To hold parties in different rooms on one Roon Core, run
+another copy of Party Mode with a name of its own. Give it its own folder, so it has its
+own `config.json`, and its own container name. For example, a second copy named Garden
+(replace Garden with whatever you choose):
+
+**With Docker**
+
+```bash
+mkdir party-mode-garden && cd party-mode-garden
+touch config.json && sudo chown 1000 config.json && chmod 600 config.json
+docker run -d --name roon-extension-party-mode-garden --network host --restart unless-stopped \
+  --log-opt max-size=10m --log-opt max-file=3 \
+  -e ROON_EXTENSION_PARTY_MODE_INSTANCE=Garden \
+  -v "$PWD/config.json:/usr/src/app/config.json" \
+  stubaggs/roon-extension-party-mode:latest
+```
+
+**With Docker Compose**
+
+Set up a new folder as in [With Docker Compose](#with-docker-compose). In its
+`docker-compose.yml`, change `container_name` and uncomment the
+`ROON_EXTENSION_PARTY_MODE_INSTANCE` line, with your name in it. Leave the other lines as
+they are:
+
+```yaml
+    container_name: roon-extension-party-mode-garden
+    environment:
+      - ROON_EXTENSION_PARTY_MODE_INSTANCE=Garden
+```
+
+It shows in Roon as **Party Mode (Garden)**, a separate extension. Enable it and choose
+its own party zone. With the first copy on port 8338, it takes the next free port by
+itself.
 
 ## For developers
 

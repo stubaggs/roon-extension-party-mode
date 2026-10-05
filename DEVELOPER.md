@@ -53,11 +53,16 @@ Roon Core  ──(node-roon-api over the local network)──  app.js
 | `lib/env.js`, `lib/log.js` | Environment variables, and the debug log switch |
 | `test/` | Identity, attribution, settings and web server tests, `npm test` |
 
-## Running it during development
+## Running it with Node.js
+
+You need Node.js 18 or newer (the Docker image uses Node 22) and git, since the Roon API
+packages come straight from GitHub:
 
 ```bash
-npm install
-node app.js
+git clone https://github.com/stubaggs/roon-extension-party-mode.git
+cd roon-extension-party-mode
+npm ci
+npm start
 ```
 
 1. In Roon, open Settings → Extensions and enable Party Mode.
@@ -65,6 +70,23 @@ node app.js
 3. The console prints the guest link and the Party Hub's address.
 
 The extension writes `config.json` in the folder you start it from.
+
+`npm ci` installs the dependencies as `package-lock.json` pins them:
+
+| Package | What it's for |
+| --- | --- |
+| `node-roon-api` | Finding and pairing with the Roon Core |
+| `node-roon-api-transport` | Zones, the queue, playback and skip |
+| `node-roon-api-browse` | Searching, queuing and choosing the Roon profile |
+| `node-roon-api-image` | Album art for the pages |
+| `node-roon-api-settings` | The settings in Roon |
+| `node-roon-api-status` | The status line in Roon |
+| `express` | The web server for the guest pages and the Party Hub |
+| `cookie-parser` | Guest sessions, and the language a guest picks |
+| `qrcode` | The join and playlist QR codes |
+
+The `node-roon-api*` packages are Roon Labs' own, from `github:roonlabs/…`, not npm.
+There are no development dependencies: the tests use Node's built-in `assert`.
 
 ## Tests
 
@@ -812,7 +834,7 @@ once a new image is published. To update by hand, change both `FROM` lines toget
 ### Running the image by hand
 
 ```bash
-docker run -d --name party-mode --network host --restart unless-stopped \
+docker run -d --name roon-extension-party-mode --network host --restart unless-stopped \
   --log-opt max-size=10m --log-opt max-file=3 \
   -v "$PWD/config.json:/usr/src/app/config.json" \
   stubaggs/roon-extension-party-mode:latest
