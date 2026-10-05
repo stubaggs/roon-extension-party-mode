@@ -739,6 +739,12 @@ changing them:
   first.
 - **Session cookies stay private.** A guest's tracks are linked to them by a separate
   `ref`, never the session `id` (see [Names](#names)).
+- **Other sites can't act for a guest.** The `party_sid` cookie is `SameSite=lax`, so a
+  browser doesn't send it with a POST another site starts, and the API takes only JSON,
+  which a plain form can't send. As a second lock, a POST whose `Origin` names another
+  site, or `null`, gets 403 `cross_origin` before its body is read (`sameOrigin()`). One
+  with no `Origin` (not a browser) passes; it still needs the cookie. `SameSite=strict`
+  isn't used: a guest arriving from the camera app would land without their new cookie.
 - **Sessions last 12 hours from last use** (`SESSION_TTL_MS`, `lib/guests.js`). Every
   guest API call renews the `party_sid` cookie for the same 12 hours, so a guest who keeps
   using the page stays in. One idle that long gets "Scan the code again" on their next

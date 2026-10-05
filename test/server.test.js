@@ -509,6 +509,25 @@ const set = (values) => Object.assign(roon.settings, values);
     assert.match(res.headers.get('content-security-policy'), /default-src 'self'/);
   });
 
+  await check('a guest action sent from another site is refused, before anything happens', async () => {
+    const cookie = await newGuest();
+    const send = (origin) =>
+      fetch(`${base}/api/name`, {
+        method: 'POST',
+        headers: Object.assign({ 'Content-Type': 'application/json', Cookie: cookie }, origin && { Origin: origin }),
+        body: JSON.stringify({ name: 'Mallory' })
+      });
+    for (const origin of ['http://192.0.2.66:8338', 'null', 'not a url']) {
+      const res = await send(origin);
+      assert.strictEqual(res.status, 403, origin);
+      assert.deepStrictEqual(await res.json(), { error: 'cross_origin' }, origin);
+    }
+    assert.strictEqual((await get('/api/party', { Cookie: cookie }).then((r) => r.json())).guest_name, '', 'name unchanged');
+    // The page's own origin, and no Origin at all (not a browser), still work.
+    assert.strictEqual((await send(base)).status, 200);
+    assert.strictEqual((await send(null)).status, 200);
+  });
+
   await check('album art Roon never answers for gives up instead of hanging', async () => {
     const silent = { imageSvc: { get_image() {} } };
     const started = Date.now();
