@@ -53,6 +53,8 @@ function usedKeys() {
   // The server's own pages: messagePage(res, lang, 'title.key', 'text.key').
   const server = fs.readFileSync(path.join(__dirname, '..', 'lib', 'server.js'), 'utf8');
   for (const m of server.matchAll(/messagePage\(res, lang, '([a-z_.]+)', '([a-z_.]+)'\)/g)) keys.add(m[1]).add(m[2]);
+  // What an empty Up next says, chosen by the server (emptyMessage) and shown with t().
+  for (const m of server.matchAll(/'(queue\.empty[a-z_]*)'/g)) keys.add(m[1]);
   return keys;
 }
 

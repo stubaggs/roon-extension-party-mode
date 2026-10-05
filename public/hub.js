@@ -81,7 +81,7 @@
     if (!data.upcoming.length) {
       const empty = document.createElement('li');
       empty.className = 'empty muted';
-      empty.textContent = t('queue.empty');
+      empty.textContent = t(data.empty || 'queue.empty');
       list.appendChild(empty);
     }
     data.upcoming.forEach((item, index) => {

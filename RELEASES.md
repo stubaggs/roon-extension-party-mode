@@ -18,6 +18,13 @@ Not released yet. You can try it on the `experimental` branch (see
   Radio; Roon Radio's tag now goes only on the tracks it picks.
 - With **Loop** on, the playlist download no longer lists a track again each time it
   comes round.
+- With **Let guests add tracks** on No, guests can't play a track next either, since that
+  adds a track too. Skipping still follows its own setting.
+- Skip is hidden when there's nothing to skip to, on the last track with Roon Radio off,
+  instead of failing when pressed.
+- An empty Up next invites guests to add a track, and with Roon Radio on offers it as the
+  alternative: "Nothing lined up. Add a track, or leave it to Roon Radio." On the guest
+  page and the Party Hub.
 - New **Party Hub language** setting in Roon: choose the Party Hub's language for every
   screen showing it, handy for a TV whose browser is hard to set. **Automatic** (the
   default) follows the screen's browser, as before. Guests' phones still follow their own.

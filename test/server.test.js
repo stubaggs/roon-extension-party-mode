@@ -332,6 +332,72 @@ const set = (values) => Object.assign(roon.settings, values);
     }
   });
 
+  await check('an empty Up next invites guests to add a track, and says when Roon Radio picks one', async () => {
+    const zone = (state, extra) =>
+      Object.assign(
+        { zone_id: 'z1', state, is_seek_allowed: true, settings: { auto_radio: true }, now_playing: { length: 200, two_line: { line1: 'Seasons', line2: 'Bebe Rexha' } } },
+        extra
+      );
+    const empty = async () => (await (await get('/api/hub')).json()).empty;
+    try {
+      roon.zone = zone('playing');
+      assert.strictEqual(await empty(), 'queue.empty_add_radio');
+      roon.zone = zone('paused');
+      assert.strictEqual(await empty(), 'queue.empty_add', 'Roon Radio does not start a stopped zone');
+      roon.zone = zone('playing', { settings: { auto_radio: false } });
+      assert.strictEqual(await empty(), 'queue.empty_add', 'Roon Radio off');
+      roon.zone = zone('playing', { is_seek_allowed: false, now_playing: { two_line: { line1: 'ABC Triple J Shift' } } });
+      assert.strictEqual(await empty(), 'queue.empty_add', 'a radio station');
+      roon.zone = zone('playing');
+      set({ allow_add: false });
+      assert.strictEqual(await empty(), 'queue.empty_radio', 'guests can\'t add');
+      roon.zone = zone('paused');
+      assert.strictEqual(await empty(), 'queue.empty');
+      set({ allow_add: true, allow_next: true, enabled: 'paused' });
+      roon.zone = zone('playing');
+      assert.strictEqual(await empty(), 'queue.empty', 'party paused');
+    } finally {
+      roon.zone = null;
+      set({ allow_add: true, allow_next: true, enabled: true });
+    }
+  });
+
+  await check('with adding off, play next is off too, whatever its own setting', async () => {
+    const cookie = await newGuest();
+    try {
+      set({ allow_add: false, allow_next: true });
+      const party = await (await get('/api/party', { Cookie: cookie })).json();
+      assert.deepStrictEqual([party.capabilities.add, party.capabilities.next], [false, false]);
+      await get('/api/search?q=abba', { Cookie: cookie });
+      roon.actions = [];
+      const res = await post('/api/request', cookie, { key: '10:0', mode: 'next' });
+      assert.strictEqual((await res.json()).error, 'disabled');
+      assert.deepStrictEqual(roon.actions, [], 'nothing reached Roon');
+    } finally {
+      set({ allow_add: true, allow_next: true });
+    }
+  });
+
+  await check('Skip is offered only when Roon will skip: not on the last track with Roon Radio off', async () => {
+    const cookie = await newGuest();
+    const zone = (next) => ({ zone_id: 'z1', state: 'playing', is_seek_allowed: true, is_next_allowed: next, settings: { auto_radio: false }, now_playing: { length: 200, two_line: { line1: 'The Green Manalishi', line2: 'Fleetwood Mac' } } });
+    try {
+      roon.zone = zone(true);
+      assert.strictEqual((await (await get('/api/hub')).json()).can_skip, true);
+      roon.zone = zone(false);
+      assert.strictEqual((await (await get('/api/hub')).json()).can_skip, false);
+      roon.skips = 0;
+      const res = await post('/api/skip', cookie, {});
+      assert.strictEqual(res.status, 409);
+      assert.strictEqual((await res.json()).error, 'cant_skip');
+      assert.strictEqual(roon.skips, 0);
+      const party = await (await get('/api/party', { Cookie: cookie })).json();
+      assert.strictEqual(party.allowances.skip.remaining, 1, 'the skip is not used up');
+    } finally {
+      roon.zone = null;
+    }
+  });
+
   await check('a radio station shows as a station, credited to nobody, and can\'t be skipped', async () => {
     const cookie = await newGuest();
     roon.zone = {
@@ -351,7 +417,7 @@ const set = (values) => Object.assign(roon.settings, values);
       roon.skips = 0;
       const res = await post('/api/skip', cookie, {});
       assert.strictEqual(res.status, 409);
-      assert.strictEqual((await res.json()).error, 'station');
+      assert.strictEqual((await res.json()).error, 'cant_skip');
       assert.strictEqual(roon.skips, 0);
       const party = await (await get('/api/party', { Cookie: cookie })).json();
       assert.strictEqual(party.allowances.skip.remaining, 1, 'the skip is not used up');

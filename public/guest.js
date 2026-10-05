@@ -28,6 +28,8 @@
   let party = null;
   // Whether a radio station is playing, for the line under the search box.
   let onStation = false;
+  // Whether Roon allows a skip now (can_skip in the queue data). Hidden until known.
+  let canSkip = false;
   let started = false;
   let expandedKey = null;
   let searchTimer = null;
@@ -366,9 +368,12 @@
     return playing.station ? t('playing.station') : t('playing.now');
   }
 
-  /** Skip shows when the host allows it, except while a radio station plays (Roon can't skip one). */
+  /**
+   * Skip shows when the host allows it and Roon will skip now: not on a radio
+   * station, or on the last track with Roon Radio off.
+   */
   function showSkip() {
-    el('skip').hidden = !(party && party.capabilities.skip) || onStation;
+    el('skip').hidden = !(party && party.capabilities.skip) || !canSkip;
   }
 
   function renderQueue(snapshot) {
@@ -387,16 +392,19 @@
     who.classList.toggle('host', !who.hidden && playing.kind === 'host');
     el('playing-label').textContent = playingLabel(playing);
     setArt(el('playing-art'), playing && playing.image_key, 144);
-    // While a radio station plays, Skip is hidden and the line under the search
-    // box says requests wait for the host.
+    if (Boolean(snapshot.can_skip) !== canSkip) {
+      canSkip = Boolean(snapshot.can_skip);
+      showSkip();
+    }
+    // While a radio station plays, the line under the search box says requests
+    // wait for the host.
     const station = Boolean(playing && playing.station);
     if (station !== onStation) {
       onStation = station;
-      showSkip();
       renderAllowances();
     }
 
-    renderList(queueList, snapshot.upcoming, t('queue.empty'), (item, index) => {
+    renderList(queueList, snapshot.upcoming, t(snapshot.empty || 'queue.empty'), (item, index) => {
       const position = document.createElement('span');
       position.className = 'queue-position';
       position.textContent = String(index + 1);

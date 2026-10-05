@@ -227,6 +227,10 @@ token-bucket model: they start with N goes and earn one back every M minutes.
 - 0 goes per guest means no limit.
 - 0 minutes means a used go never comes back.
 - To stop guests doing something at all, set its "Let guests …" to No.
+- Playing next is a way of adding, so it needs adding on: with "Let guests add tracks"
+  on No, play next is off whatever its own setting says (`GuestStore.check`, and the
+  `capabilities` `/api/party` sends). Its hint in Roon says so. Skipping stays
+  independent: a host can let guests only skip, as a veto.
 
 Adding and playing next are on by default; skipping is off. The defaults:
 
@@ -275,6 +279,12 @@ redirected, so an old bookmark needs a fresh scan.
   relabelled in place from `party.allowances` (`labelButton` in `public/guest.js`), and the
   page fetches the allowances again when a used go is due back.
 - **A line under the search box** appears only when requests are closed or paused.
+- **Skip shows only when Roon will skip.** The queue data carries `can_skip`, Roon's
+  `is_next_allowed`: false on a radio station, and on the last track with Roon Radio off,
+  when there's nothing to skip to. The guest page shows Skip only when the host allows
+  skipping and that's true (`showSkip()`, which also runs when Party mode changes and
+  the page reloads its settings). `POST /api/skip` answers 409 `cant_skip` without using
+  the guest's skip, and `RoonService.skip()` refuses one too.
 - **The name tag**, top right, opens the name dialog. The 🌐 button beside it chooses the
   language (see [Translating the pages](#translating-the-pages)).
 
@@ -347,6 +357,22 @@ the host's.
 "Host" is only what's left when no guest is found, and Roon can report a guest's insert
 before the request finishes. So the playlist looks again at its Host entries while they're
 still queued, and once more when the file is made.
+
+Because Roon Radio adds its next pick only as the playing track ends, Up next is usually
+empty while it runs. What an empty Up next says is chosen by the server
+(`emptyMessage()`, sent as `empty` with the queue data, so both pages agree), checked in
+this order:
+
+| Situation | Says |
+| --- | --- |
+| Party paused | Nothing lined up. (`queue.empty`) |
+| Guests can't add tracks, Roon Radio on and a track playing | Roon Radio picks what's next. (`queue.empty_radio`) |
+| Guests can't add tracks | Nothing lined up. |
+| Roon Radio on and a track playing (not a station) | Nothing lined up. Add a track, or leave it to Roon Radio. (`queue.empty_add_radio`) |
+| Anything else | Nothing lined up. Add a track. (`queue.empty_add`) |
+
+Roon Radio doesn't count for a paused or stopped zone, which it doesn't start, or for a
+radio station. A settings change sends the queue data again, so the message follows it.
 
 The console logs each request, each queue insert with its length and hash, and each
 track start, with its credit. Look there when a badge is wrong.
@@ -440,14 +466,12 @@ Taking over automatically was tried and dropped as too clunky. What the Core did
 **Elsewhere:**
 
 - The pages get `now_playing.station`. They label it "Radio station" (`playing.station`)
-  while it plays, and "Paused" like a track when it doesn't. The guest page hides Skip
-  (`showSkip()`, which also runs when Party mode changes and the page reloads its
-  settings). Both say requests wait for the host (`queue.waiting_for_host`, worded to
-  suit anything else that holds requests for the host): the guest page in the line under
-  the search box, the Party Hub under the station. While the party is paused, the paused
-  message takes that place on both.
-  `POST /api/skip` answers 409 `station` without using the guest's skip, and
-  `RoonService.skip()` refuses one too, since Roon would.
+  while it plays, and "Paused" like a track when it doesn't. Both say requests wait for
+  the host (`queue.waiting_for_host`, worded to suit anything else that holds requests
+  for the host): the guest page in the line under the search box, the Party Hub under
+  the station. While the party is paused, the paused message takes that place on both.
+- Skip is hidden, because Roon doesn't allow next on a station (see
+  [The guest page](#the-guest-page)).
 - `requester()` credits a station to nobody: it isn't Roon Radio, and no guest asked for it.
 - Played never lists a station. The track it replaced moves into Played as it starts
   (`PlayHistory.update`), as "Skipped in Roon" if it was cut short.
