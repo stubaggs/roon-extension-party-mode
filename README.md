@@ -29,6 +29,8 @@ What's changed in each version is in [RELEASES.md](RELEASES.md).
 
 ### With the Extension Manager
 
+This method is awaiting inclusion in extension manager, until then user Docker.
+
 1. In Roon, open **Settings → Extensions → Extension Manager → Settings**.
 2. Pick the **Playback** category, then **Party Mode**, and choose **Install**.
 3. Back in **Settings → Extensions**, find **Party Mode** and click **Enable**.
