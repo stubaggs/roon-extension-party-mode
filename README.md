@@ -29,7 +29,7 @@ What's changed in each version is in [RELEASES.md](RELEASES.md).
 
 ### With the Extension Manager
 
-This method is awaiting inclusion in extension manager, until then user Docker.
+This method is awaiting inclusion in extension manager, until then use Docker.
 
 1. In Roon, open **Settings → Extensions → Extension Manager → Settings**.
 2. Pick the **Playback** category, then **Party Mode**, and choose **Install**.
