@@ -781,6 +781,16 @@ with the [Extension Manager](https://github.com/TheAppgineer/roon-extension-mana
 The Manager runs it with host networking, since Roon discovery uses UDP broadcast on
 port 9003. It bind-mounts `config.json`, so settings survive updates.
 
+## Code scanning
+
+`.github/workflows/codeql.yml` runs GitHub's CodeQL on pushes and pull requests to `main`
+and `experimental`, and weekly. It analyses the JavaScript, with the security-extended
+queries, and the workflows themselves (`.github/codeql/codeql-config.yml` leaves out
+`node_modules` and `test`). It only reads the code. Results are under the repository's
+Security tab → Code scanning. Two JavaScript alerts are known and accepted:
+`js/missing-token-validation`, which doesn't see the `SameSite` cookie and Origin check
+(see [Security](#security)), and `js/missing-rate-limiting` on static files.
+
 ## Publishing the image
 
 `.github/workflows/docker-publish.yml` builds `linux/amd64`, `linux/arm/v6`,
@@ -804,6 +814,10 @@ triggers are commented out:
 - `push` would publish on every merge to `main`;
 - a weekly `schedule` would rebuild and republish every Monday, so installs pick up
   base-image security fixes.
+
+Its GitHub token can only read the code, and Docker's actions are pinned to commits rather
+than tags that could be moved, since the job holds the Docker Hub token. Dependabot
+updates the pins.
 
 It needs two repository secrets, under Settings → Secrets and variables → Actions:
 

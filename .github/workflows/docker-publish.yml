@@ -24,6 +24,11 @@ name: Publish Docker image
 on:
   workflow_dispatch:
 
+# The GitHub token only needs to read the code: the image goes to Docker Hub
+# with the Docker Hub secrets, not to GitHub.
+permissions:
+  contents: read
+
 jobs:
   publish:
     runs-on: ubuntu-latest
@@ -47,17 +52,20 @@ jobs:
           esac
           echo "version=$version" >> "$GITHUB_OUTPUT"
 
-      - uses: docker/setup-qemu-action@v4
+      # Docker's actions are pinned to a commit, not a tag that could be moved,
+      # since this job holds the Docker Hub token. Dependabot updates the pins
+      # and the version comments together.
+      - uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
 
-      - uses: docker/setup-buildx-action@v4
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
 
-      - uses: docker/login-action@v4
+      - uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - id: meta
-        uses: docker/metadata-action@v6
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
         with:
           images: ${{ secrets.DOCKERHUB_USERNAME }}/roon-extension-party-mode
           tags: |
@@ -67,7 +75,7 @@ jobs:
 
       # arm/v6 and arm/v7 both install under the repository entry's "arm" key:
       # Docker reports every 32-bit ARM host (Pi Zero and Pi 1 are v6) as "arm".
-      - uses: docker/build-push-action@v7
+      - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
           context: .
           platforms: linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
