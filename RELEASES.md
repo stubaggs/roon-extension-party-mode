@@ -8,30 +8,31 @@ running in its Extensions list.
 Not released yet. You can try it on the `experimental` branch (see
 [DEVELOPER.md](DEVELOPER.md#running-the-experimental-version)).
 
-- A radio station playing on the party zone shows as one: the pages say "Radio station"
-  instead of showing it as a track, it's no longer labelled Roon Radio or listed in
-  Played, and Skip is hidden, since Roon can't skip a station. Guests' tracks wait in
-  the queue until you play it from Roon.
+### New
+
+- **Party Hub language** setting in Roon: choose the Party Hub's language for every
+  screen showing it, handy for a TV whose browser is hard to set. **Automatic** (the
+  default) follows the screen's browser, as before. Guests' phones still follow their own.
+- **Hide names in downloadable playlist** setting, under **Advanced**: the playlist
+  download credits every guest's track to Anon instead of their name. Roon Radio and Host
+  stay.
+
+### Improvements
+- A radio station playing on the party zone shows "Radio station"
+  instead of showing it as a track. Skip is hidden, since Roon can't skip a station.
+  Guests' tracks wait in the queue until you start queue from Roon.
 - Tracks you queue in Roon get a **Host** tag, in sky blue, on the Party Hub, the guest
   page and in the playlist download. Before, with Roon Radio on, they were labelled Roon
   Radio; Roon Radio's tag now goes only on the tracks it picks.
-- A track cut short in Roon shows in Played as **Skipped by Host**, like the **Host** tag
-  on tracks you queue in Roon, instead of "Skipped in Roon".
-- New **Hide names in downloadable playlist** setting, under **Advanced**: the playlist
-  download credits every guest's track to Anon instead of their name. Roon Radio and Host
-  stay.
-- The README explains how to run Party Mode with Docker Compose, and how to update, stop
-  and uninstall it. Its `docker run` example
-  now names the container `roon-extension-party-mode`, as the Compose file does. A
-  container you already run as `party-mode` keeps working under that name.
-- With **Loop** on, the playlist download no longer lists a track again each time it
+- A track cut short in Roon shows in Played as **Skipped by Host**.
+- With **Roon Loop** on, the playlist download no longer lists a track again each time it
   comes round.
 - Clearer setting names in Roon: **Display playlist download** is now **Playlist on the
   Party Hub**, the limits are named after the guest page's buttons ("Add to queue",
-  "Play it next" and "Skip" per guest), and their hints are shorter.
+  "Play it next" and "Skip" per guest).
 - **Roon profile for guest requests** is now **Party profile**, next to **Party zone**. Its
   first choice names the profile guests' tracks play under when you don't choose one,
-  normally Roon's **Guest** profile, instead of "Leave as it is".
+  normally Roon's **Guest** profile.
 - With **Let guests add tracks** on No, guests can't play a track next either, since that
   adds a track too, so the play next settings have moved into **Adding tracks**.
   Skipping still follows its own setting.
@@ -40,9 +41,6 @@ Not released yet. You can try it on the `experimental` branch (see
 - An empty Up next invites guests to add a track, and with Roon Radio on offers it as the
   alternative: "Nothing lined up. Add a track, or leave it to Roon Radio." On the guest
   page and the Party Hub.
-- New **Party Hub language** setting in Roon: choose the Party Hub's language for every
-  screen showing it, handy for a TV whose browser is hard to set. **Automatic** (the
-  default) follows the screen's browser, as before. Guests' phones still follow their own.
 
 ### Fixes
 - Guests can't call themselves **Host**, **Roon Radio**, **Radio** or **Anon** (in any
@@ -56,6 +54,7 @@ Not released yet. You can try it on the `experimental` branch (see
 - Various security enhancements.
 - Hardened the docker container: the image no longer ships package managers, and the example
   docker-compose.yml runs it read-only with no Linux capabilities or privilege escalation.
+  Re-download the new docker-compose to get the chnages.
 - Rate limiting for requests.
 
 ## 1.2.0

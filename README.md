@@ -232,7 +232,7 @@ off again afterwards: it's large and records what guests search for.
 
 ## Running more than one party
 
-Most people need only one copy. To hold parties in different rooms on one Roon Core, run
+Most people need only one copy. To hold parties simultaneously in different rooms on one Roon Core, run
 another copy of Party Mode with a name of its own. Give it its own folder, so it has its
 own `config.json`, and its own container name. For example, a second copy named Garden
 (replace Garden with whatever you choose):
