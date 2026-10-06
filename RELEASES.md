@@ -18,9 +18,6 @@ Not released yet. You can try it on the `experimental` branch (see
 - New **Hide names in downloadable playlist** setting, under **Advanced**: the playlist
   download credits every guest's track to Anon instead of their name. Roon Radio and Host
   stay.
-- Guests can't call themselves **Host**, **Roon Radio**, **Radio** or **Anon** (in any
-  language), so those tags always mean what they say. A guest who picks a name someone
-  else at the party already uses is asked whether to use it anyway.
 - The README explains how to run Party Mode with Docker Compose, and how to update, stop
   and uninstall it. Its `docker run` example
   now names the container `roon-extension-party-mode`, as the Compose file does. A
@@ -45,6 +42,11 @@ Not released yet. You can try it on the `experimental` branch (see
   screen showing it, handy for a TV whose browser is hard to set. **Automatic** (the
   default) follows the screen's browser, as before. Guests' phones still follow their own.
 
+### Fixes
+- Guests can't call themselves **Host**, **Roon Radio**, **Radio** or **Anon** (in any
+  language), so those tags always mean what they say. A guest who picks a name someone
+  else at the party already uses is asked whether to use it anyway.
+  
 ### Security
 - Various security enhancements.
 - Rate limiting for requests.
