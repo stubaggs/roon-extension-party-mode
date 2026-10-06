@@ -57,6 +57,7 @@
   "toast.no_skips_wait": "남은 건너뛰기 횟수가 없습니다. {wait} 후에 다시 시도하세요.",
   "toast.failed": "실패했습니다.",
   "toast.name_not_saved": "이름을 저장하지 못했습니다.",
+  "toast.too_many_requests": "요청이 너무 많아요. 1분 후에 다시 시도해 주세요.",
   "skip.button": "건너뛰기",
   "name.adding_as": "{name}(으)로 추가 중",
   "name.change": "변경",

@@ -60,6 +60,7 @@
   "toast.no_skips_wait": "Você não pode mais pular faixas. Tente de novo em {wait}.",
   "toast.failed": "Não deu certo.",
   "toast.name_not_saved": "Não foi possível salvar seu nome.",
+  "toast.too_many_requests": "Muitas solicitações. Espere um minuto e tente de novo.",
   "skip.button": "Pular",
   "name.adding_as": "Adicionando como {name}",
   "name.change": "Alterar",

@@ -60,6 +60,7 @@
   "toast.no_skips_wait": "No skips left. Try again in {wait}.",
   "toast.failed": "That did not work.",
   "toast.name_not_saved": "Could not save your name.",
+  "toast.too_many_requests": "Too many requests. Wait a minute and try again.",
   "skip.button": "Skip",
   "name.adding_as": "Adding as {name}",
   "name.change": "Change",

@@ -66,6 +66,7 @@
   "toast.no_skips_wait": "לא נותרו לך דילוגים. נסו שוב בעוד {wait}.",
   "toast.failed": "זה לא הצליח.",
   "toast.name_not_saved": "לא ניתן היה לשמור את השם שלך.",
+  "toast.too_many_requests": "יותר מדי בקשות. נא להמתין דקה ולנסות שוב.",
   "skip.button": "דילוג",
   "name.adding_as": "מוסיפים בתור {name}",
   "name.change": "שינוי",

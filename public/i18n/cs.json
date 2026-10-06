@@ -66,6 +66,7 @@
   "toast.no_skips_wait": "Už nemůžete nic přeskočit. Zkuste to znovu za {wait}.",
   "toast.failed": "Nepovedlo se to.",
   "toast.name_not_saved": "Vaše jméno se nepodařilo uložit.",
+  "toast.too_many_requests": "Příliš mnoho požadavků. Počkejte minutu a zkuste to znovu.",
   "skip.button": "Přeskočit",
   "name.adding_as": "Přidáváte jako {name}",
   "name.change": "Změnit",

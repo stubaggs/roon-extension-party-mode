@@ -60,6 +60,7 @@
   "toast.no_skips_wait": "Vous ne pouvez plus passer de morceau. Réessayez dans {wait}.",
   "toast.failed": "Ça n'a pas marché.",
   "toast.name_not_saved": "Impossible d'enregistrer votre nom.",
+  "toast.too_many_requests": "Trop de requêtes. Patientez une minute, puis réessayez.",
   "skip.button": "Passer",
   "name.adding_as": "Vous ajoutez en tant que {name}",
   "name.change": "Modifier",

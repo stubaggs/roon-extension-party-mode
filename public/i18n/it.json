@@ -60,6 +60,7 @@
   "toast.no_skips_wait": "Non puoi più saltare brani. Riprova tra {wait}.",
   "toast.failed": "Non ha funzionato.",
   "toast.name_not_saved": "Impossibile salvare il tuo nome.",
+  "toast.too_many_requests": "Troppe richieste. Aspetta un minuto e riprova.",
   "skip.button": "Salta",
   "name.adding_as": "Aggiungi come {name}",
   "name.change": "Cambia",

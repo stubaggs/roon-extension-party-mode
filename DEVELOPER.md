@@ -82,6 +82,7 @@ The extension writes `config.json` in the folder you start it from.
 | `node-roon-api-settings` | The settings in Roon |
 | `node-roon-api-status` | The status line in Roon |
 | `express` | The web server for the guest pages and the Party Hub |
+| `express-rate-limit` | The per-minute request limits (see [Security](#security)) |
 | `cookie-parser` | Guest sessions, and the language a guest picks |
 | `qrcode` | The join and playlist QR codes |
 
@@ -785,6 +786,16 @@ changing them:
   plain `Bad request`, both with the headers above, instead of Express's own error page,
   which names Express and drops them. Anything else is logged and answered `Something
   went wrong`.
+- **Requests a minute are limited, per device** (by IP address, `perMinute()` in
+  `lib/server.js`, with `express-rate-limit`): 600 of any kind, and 60 searches, since
+  each search runs in the Roon Core. That's far above what a phone or the Party Hub
+  sends; the limits are there for a misbehaving or rogue device on the Wi-Fi, which could
+  otherwise swamp a Pi Zero or the Core. Past one, the answer is 429 `too_many_requests`
+  (with `Retry-After`) until the minute is up, and the guest page says to wait a minute.
+  `rate_limited` is a different thing: a guest's allowance used up. Set them with
+  `ROON_EXTENSION_PARTY_MODE_RATE_LIMIT` and `…_SEARCH_LIMIT` (see [Environment
+  variables](#environment-variables)); 0 turns one off. Some guest Wi-Fi networks put
+  every phone behind one address, which then shares the limits: raise them there.
 - **Album art gives up.** `/api/image/:key` needs no session, and Roon never answers for
   an image key it doesn't know. So `getImage()` stops waiting after 5 seconds
   (`IMAGE_TIMEOUT_MS`) and answers 404, rather than holding the connection open.
@@ -1014,6 +1025,8 @@ set it. A renamed variable keeps its old name working, checked after the new one
 | --- | --- |
 | `ROON_EXTENSION_PARTY_MODE_PORT` | The first port, before settings are first saved in Roon; after that, use Web port in Roon (default 8338; was `PARTY_PORT`). |
 | `ROON_EXTENSION_PARTY_MODE_INSTANCE` | A name for this copy, so it runs as a separate extension alongside others against one Core (see Running several copies). Unset for normal use. |
+| `ROON_EXTENSION_PARTY_MODE_RATE_LIMIT` | Requests a minute from one device, of any kind (default 600; 0 for no limit). See Security. |
+| `ROON_EXTENSION_PARTY_MODE_SEARCH_LIMIT` | Searches a minute from one device (default 60; 0 for no limit). |
 | `ROON_EXTENSION_PARTY_MODE_DEBUG` | `1`, `true`, `yes` or `on` turns on the detailed log (see Logging). |
 
 ## Logging

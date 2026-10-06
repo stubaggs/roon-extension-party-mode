@@ -57,6 +57,7 @@
   "toast.no_skips_wait": "スキップの残りがありません。{wait}後にもう一度お試しください。",
   "toast.failed": "うまくいきませんでした。",
   "toast.name_not_saved": "名前を保存できませんでした。",
+  "toast.too_many_requests": "リクエストが多すぎます。1分ほど待ってからもう一度お試しください。",
   "skip.button": "スキップ",
   "name.adding_as": "{name} として追加",
   "name.change": "変更",

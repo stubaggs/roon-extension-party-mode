@@ -67,6 +67,7 @@
   "toast.no_skips_wait": "لم تتبقَّ لك مرات تخطٍّ. حاول مجددًا بعد {wait}.",
   "toast.failed": "لم ينجح ذلك.",
   "toast.name_not_saved": "تعذّر حفظ اسمك.",
+  "toast.too_many_requests": "طلبات كثيرة جدًا. انتظر دقيقة ثم حاول مجددًا.",
   "skip.button": "تخطٍّ",
   "name.adding_as": "تضيف باسم {name}",
   "name.change": "تغيير",

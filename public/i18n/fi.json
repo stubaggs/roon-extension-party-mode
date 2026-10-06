@@ -60,6 +60,7 @@
   "toast.no_skips_wait": "Ohituksia ei ole jäljellä. Yritä uudelleen {wait} päästä.",
   "toast.failed": "Se ei onnistunut.",
   "toast.name_not_saved": "Nimeäsi ei voitu tallentaa.",
+  "toast.too_many_requests": "Liikaa pyyntöjä. Odota hetki ja yritä uudelleen.",
   "skip.button": "Ohita",
   "name.adding_as": "Lisäät nimellä {name}",
   "name.change": "Vaihda",

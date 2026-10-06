@@ -60,6 +60,7 @@
   "toast.no_skips_wait": "Je kunt niet meer overslaan. Probeer het over {wait} opnieuw.",
   "toast.failed": "Dat lukte niet.",
   "toast.name_not_saved": "Je naam kon niet worden opgeslagen.",
+  "toast.too_many_requests": "Te veel verzoeken. Wacht een minuut en probeer het opnieuw.",
   "skip.button": "Overslaan",
   "name.adding_as": "Je voegt toe als {name}",
   "name.change": "Wijzigen",

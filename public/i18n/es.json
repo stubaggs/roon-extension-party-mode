@@ -60,6 +60,7 @@
   "toast.no_skips_wait": "Ya no puedes saltar más pistas. Inténtalo de nuevo en {wait}.",
   "toast.failed": "No ha funcionado.",
   "toast.name_not_saved": "No se ha podido guardar tu nombre.",
+  "toast.too_many_requests": "Demasiadas solicitudes. Espera un minuto y vuelve a intentarlo.",
   "skip.button": "Saltar",
   "name.adding_as": "Añadiendo como {name}",
   "name.change": "Cambiar",

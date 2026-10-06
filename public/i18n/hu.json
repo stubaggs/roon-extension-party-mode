@@ -60,6 +60,7 @@
   "toast.no_skips_wait": "Nincs több átugrásod. Próbáld újra {wait} múlva.",
   "toast.failed": "Ez nem sikerült.",
   "toast.name_not_saved": "Nem sikerült menteni a neved.",
+  "toast.too_many_requests": "Túl sok kérés. Várj egy percet, és próbáld újra.",
   "skip.button": "Átugrás",
   "name.adding_as": "Hozzáadás ezen a néven: {name}",
   "name.change": "Módosítás",

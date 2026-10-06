@@ -66,6 +66,7 @@
   "toast.no_skips_wait": "Пропусков больше нет. Попробуйте снова через {wait}.",
   "toast.failed": "Не получилось.",
   "toast.name_not_saved": "Не удалось сохранить ваше имя.",
+  "toast.too_many_requests": "Слишком много запросов. Подождите минуту и попробуйте снова.",
   "skip.button": "Пропустить",
   "name.adding_as": "Вы добавляете как {name}",
   "name.change": "Изменить",

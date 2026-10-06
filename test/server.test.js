@@ -71,7 +71,9 @@ const roon = Object.assign(new EventEmitter(), {
   }
 });
 const guests = new GuestStore();
-const server = createServer(roon, guests);
+// No rate limits here, so the checks below can't run into them; they're
+// checked on a server of their own.
+const server = createServer(roon, guests, { limits: { all: 0, search: 0 } });
 
 let base;
 const get = (path, headers = {}) => fetch(base + path, { headers, redirect: 'manual' });
@@ -633,6 +635,32 @@ const set = (values) => Object.assign(roon.settings, values);
     const old = await get('/api/roonparty');
     assert.strictEqual(old.status, 200);
     assert.ok('party_mode' in (await old.json()));
+  });
+
+  console.log('\nrate limits');
+
+  await check('one device past the per-minute limit is told to wait, with the usual headers', async () => {
+    const limited = createServer(roon, new GuestStore(), { limits: { all: 5, search: 0 } });
+    await limited.listen(0);
+    const url = `http://127.0.0.1:${limited.port}/api/hub`;
+    const codes = [];
+    for (let i = 0; i < 7; i += 1) codes.push((await fetch(url)).status);
+    assert.deepStrictEqual(codes, [200, 200, 200, 200, 200, 429, 429]);
+    const res = await fetch(url);
+    assert.deepStrictEqual(await res.json(), { error: 'too_many_requests' });
+    assert.match(res.headers.get('content-security-policy'), /default-src 'self'/);
+    assert.ok(res.headers.get('retry-after'), 'says when to try again');
+  });
+
+  await check('searches have a lower limit of their own', async () => {
+    const store = new GuestStore();
+    const limited = createServer(roon, store, { limits: { all: 0, search: 2 } });
+    await limited.listen(0);
+    const at = `http://127.0.0.1:${limited.port}`;
+    const cookie = (await fetch(`${at}/j/${store.joinCode}`, { redirect: 'manual' })).headers.get('set-cookie').split(';')[0];
+    const search = () => fetch(`${at}/api/search?q=abba`, { headers: { Cookie: cookie } }).then((r) => r.status);
+    assert.deepStrictEqual([await search(), await search(), await search()], [200, 200, 429]);
+    assert.strictEqual((await fetch(`${at}/api/party`, { headers: { Cookie: cookie } })).status, 200, 'the rest still work');
   });
 
   console.log(failures ? `\n${failures} failed` : '\nall passed');

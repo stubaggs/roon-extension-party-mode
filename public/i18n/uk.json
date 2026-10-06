@@ -66,6 +66,7 @@
   "toast.no_skips_wait": "Пропусків більше немає. Спробуйте знову через {wait}.",
   "toast.failed": "Не вдалося.",
   "toast.name_not_saved": "Не вдалося зберегти ваше ім'я.",
+  "toast.too_many_requests": "Забагато запитів. Зачекайте хвилину й спробуйте знову.",
   "skip.button": "Пропустити",
   "name.adding_as": "Ви додаєте як {name}",
   "name.change": "Змінити",

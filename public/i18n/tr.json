@@ -60,6 +60,7 @@
   "toast.no_skips_wait": "Atlama hakkın kalmadı. {wait} sonra tekrar dene.",
   "toast.failed": "Olmadı.",
   "toast.name_not_saved": "Adın kaydedilemedi.",
+  "toast.too_many_requests": "Çok fazla istek. Bir dakika bekleyip yeniden dene.",
   "skip.button": "Atla",
   "name.adding_as": "{name} olarak ekliyorsun",
   "name.change": "Değiştir",

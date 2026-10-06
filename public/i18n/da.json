@@ -60,6 +60,7 @@
   "toast.no_skips_wait": "Du kan ikke springe flere over. Prøv igen om {wait}.",
   "toast.failed": "Det virkede ikke.",
   "toast.name_not_saved": "Dit navn kunne ikke gemmes.",
+  "toast.too_many_requests": "For mange forespørgsler. Vent et minut, og prøv igen.",
   "skip.button": "Spring over",
   "name.adding_as": "Tilføjer som {name}",
   "name.change": "Skift",

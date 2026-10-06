@@ -57,6 +57,7 @@
   "toast.no_skips_wait": "没有剩余的跳过次数。请在 {wait}后重试。",
   "toast.failed": "操作未成功。",
   "toast.name_not_saved": "无法保存你的名字。",
+  "toast.too_many_requests": "请求过多，请等一分钟后再试。",
   "skip.button": "跳过",
   "name.adding_as": "以 {name} 的身份添加",
   "name.change": "更改",

@@ -57,6 +57,7 @@
   "toast.no_skips_wait": "Bạn đã hết lượt bỏ qua. Thử lại sau {wait}.",
   "toast.failed": "Không thành công.",
   "toast.name_not_saved": "Không lưu được tên của bạn.",
+  "toast.too_many_requests": "Quá nhiều yêu cầu. Hãy đợi một phút rồi thử lại.",
   "skip.button": "Bỏ qua",
   "name.adding_as": "Đang thêm với tên {name}",
   "name.change": "Đổi",

@@ -22,6 +22,8 @@ services:
       - ROON_EXTENSION_PARTY_MODE_PORT=8338
       # - ROON_EXTENSION_PARTY_MODE_DEBUG=1   # detailed log, including every message to and from Roon
       # - ROON_EXTENSION_PARTY_MODE_INSTANCE=Garden   # a name, to run more than one copy (see the README)
+      # - ROON_EXTENSION_PARTY_MODE_RATE_LIMIT=600    # requests a minute per device (0 = no limit)
+      # - ROON_EXTENSION_PARTY_MODE_SEARCH_LIMIT=60   # searches a minute per device (0 = no limit)
     volumes:
       - ./config.json:/usr/src/app/config.json
     # Keep the log from growing without limit.

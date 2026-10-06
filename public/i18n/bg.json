@@ -60,6 +60,7 @@
   "toast.no_skips_wait": "Нямаш повече прескачания. Опитай пак след {wait}.",
   "toast.failed": "Не се получи.",
   "toast.name_not_saved": "Името ти не можа да се запази.",
+  "toast.too_many_requests": "Твърде много заявки. Изчакай минута и опитай пак.",
   "skip.button": "Прескочи",
   "name.adding_as": "Добавяш като {name}",
   "name.change": "Промени",

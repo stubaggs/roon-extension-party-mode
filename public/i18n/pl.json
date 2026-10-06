@@ -66,6 +66,7 @@
   "toast.no_skips_wait": "Nie możesz już pomijać. Spróbuj ponownie za {wait}.",
   "toast.failed": "Nie udało się.",
   "toast.name_not_saved": "Nie udało się zapisać imienia.",
+  "toast.too_many_requests": "Zbyt wiele żądań. Odczekaj minutę i spróbuj ponownie.",
   "skip.button": "Pomiń",
   "name.adding_as": "Dodajesz jako {name}",
   "name.change": "Zmień",

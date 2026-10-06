@@ -60,6 +60,7 @@
   "toast.no_skips_wait": "Du kan inte hoppa över fler. Försök igen om {wait}.",
   "toast.failed": "Det fungerade inte.",
   "toast.name_not_saved": "Kunde inte spara ditt namn.",
+  "toast.too_many_requests": "För många förfrågningar. Vänta en minut och försök igen.",
   "skip.button": "Hoppa över",
   "name.adding_as": "Lägger till som {name}",
   "name.change": "Ändra",

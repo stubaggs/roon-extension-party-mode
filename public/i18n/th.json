@@ -57,6 +57,7 @@
   "toast.no_skips_wait": "สิทธิ์ข้ามหมดแล้ว ลองใหม่อีก {wait}",
   "toast.failed": "ไม่สำเร็จ",
   "toast.name_not_saved": "บันทึกชื่อของคุณไม่ได้",
+  "toast.too_many_requests": "คำขอมากเกินไป รอสักนาทีแล้วลองอีกครั้ง",
   "skip.button": "ข้าม",
   "name.adding_as": "กำลังเพิ่มในชื่อ {name}",
   "name.change": "เปลี่ยน",

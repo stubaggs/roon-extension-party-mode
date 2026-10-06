@@ -50,9 +50,15 @@
       showLocked(body.error === 'closed' ? 'closed' : 'locked');
       throw new Error('no_session');
     }
+    // Past the per-minute limit (lib/server.js): one note here, so callers stay
+    // quiet about it rather than each saying something failed.
+    if (res.status === 429 && body.error === 'too_many_requests') toast(t('toast.too_many_requests'));
     if (!res.ok) throw Object.assign(new Error(body.error || 'error'), { body });
     return body;
   }
+
+  /** Errors already explained: the page is closed, or the limit note is up. */
+  const explained = (err) => err.message === 'no_session' || err.message === 'too_many_requests';
 
   /** In place of the page: 'locked' (scan again) or 'closed' (requests are over). */
   function showLocked(which) {
@@ -275,7 +281,7 @@
       renderResults();
       announceResults(query);
     } catch (err) {
-      if (mine === searchSeq && err.message !== 'no_session') toast(t('search.unavailable'));
+      if (mine === searchSeq && !explained(err)) toast(t('search.unavailable'));
     }
   }
 
@@ -331,7 +337,7 @@
         refreshParty(); // the counts were out of date; grey the button out
         toast(detail.next_in ? t('toast.nothing_left_wait', { wait: minutes(detail.next_in) }) : t('toast.nothing_left'));
       } else if (err.message === 'disabled') toast(t('toast.disabled'));
-      else if (err.message !== 'no_session') toast(t('toast.roon_refused'));
+      else if (!explained(err)) toast(t('toast.roon_refused'));
     }
   }
 
@@ -357,7 +363,7 @@
       else if (err.message === 'rate_limited') {
         refreshParty();
         toast(detail.next_in ? t('toast.no_skips_wait', { wait: minutes(detail.next_in) }) : t('toast.no_skips'));
-      } else if (err.message !== 'no_session') toast(t('toast.failed'));
+      } else if (!explained(err)) toast(t('toast.failed'));
     }
   });
 
@@ -576,7 +582,7 @@
         nicknameInput.focus();
         return;
       }
-      if (err.message !== 'no_session') toast(t('toast.name_not_saved'));
+      if (!explained(err)) toast(t('toast.name_not_saved'));
     }
     // Skipping stores an empty name, so "Skip" isn't asked again on this phone.
     remembered.set(name);
