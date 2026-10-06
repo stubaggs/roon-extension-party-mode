@@ -439,6 +439,25 @@ check('0 minutes means a used allowance never comes back', () => {
   assert.strictEqual(status.nextIn, null);
 });
 
+check('a limit changed mid-party counts what each guest has already used', () => {
+  const guests = new GuestStore();
+  const session = guests.create();
+  const at = (limit) => layout({ allow_add: true, add_limit: limit, add_refill: 10 }).values;
+  const left = (limit) => guests.check(session, 'add', at(limit)).remaining;
+  assert.strictEqual(left(5), 5);
+  guests.consume(session, 'add', at(5));
+  assert.strictEqual(left(10), 9, 'raised: one used of ten');
+  assert.strictEqual(left(3), 2, 'lowered: one used of three');
+  guests.consume(session, 'add', at(3));
+  guests.consume(session, 'add', at(3));
+  assert.strictEqual(guests.check(session, 'add', at(1)).allowed, false, 'lowered below what was used: none left');
+  // Nothing is owed beyond none left: raised again, one used of five.
+  assert.strictEqual(left(5), 4);
+  // No limit in between leaves the count where it was.
+  assert.strictEqual(guests.check(session, 'add', at(0)).remaining, null);
+  assert.strictEqual(left(5), 4);
+});
+
 check('switched off wins over any limit', () => {
   const guests = new GuestStore();
   const settings = layout({ allow_skip: false, skip_limit: 0 }).values;

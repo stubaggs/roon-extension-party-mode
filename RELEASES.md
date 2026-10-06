@@ -46,6 +46,9 @@ Not released yet. You can try it on the `experimental` branch (see
 - Guests can't call themselves **Host**, **Roon Radio**, **Radio** or **Anon** (in any
   language), so those tags always mean what they say. A guest who picks a name someone
   else at the party already uses is asked whether to use it anyway.
+- Changing how many tracks, plays next or skips each guest gets now applies straight away
+  to guests already at the party, counting what they've used. Before, raising a limit
+  didn't give them any more.
   
 ### Security
 - Various security enhancements.

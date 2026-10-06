@@ -259,6 +259,9 @@ token-bucket model: they start with N goes and earn one back every M minutes.
 
 - 0 goes per guest means no limit.
 - 0 minutes means a used go never comes back.
+- Changing the number mid-party applies to guests already there, counting what they've
+  used (`GuestStore._refill`): 5 with one used becomes 9 of 10, or 2 of 3. Lowered below
+  what a guest has used, they have none left, with nothing owed if it goes up again.
 - To stop guests doing something at all, set its "Let guests …" to No.
 - Playing next is a way of adding, so it needs adding on: with "Let guests add tracks" on
   No, play next is off whatever its own setting says (`GuestStore.check`, and the
