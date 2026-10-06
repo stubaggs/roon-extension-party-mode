@@ -12,7 +12,7 @@
   "credit.requested_by": "Ζητήθηκε από {name}",
   "credit.guest": "Ανώνυμος",
   "credit.radio": "Roon Radio",
-  "credit.host": "Οικοδεσπότης",
+  "credit.host": "Οικοδεσπότες",
   "search.placeholder": "Αναζήτηση κομματιού ή καλλιτέχνη",
   "search.clear": "Καθαρισμός αναζήτησης",
   "search.no_results": "Δεν βρέθηκαν κομμάτια. Δοκιμάστε το όνομα του καλλιτέχνη.",
@@ -33,7 +33,7 @@
   "played.title": "Έπαιξαν",
   "played.empty": "Δεν έχει παίξει τίποτα ακόμα.",
   "played.skipped_by": "Παραλείφθηκε από {name}",
-  "played.skipped_by_host": "Παραλείφθηκε από τον οικοδεσπότη",
+  "played.skipped_by_host": "Παραλείφθηκε από τους οικοδεσπότες",
   "allowance.closed": "Τα αιτήματα είναι κλειστά αυτή τη στιγμή.",
   "allowance.paused": "Τα αιτήματα είναι σε παύση για λίγο.",
   "button.left": {

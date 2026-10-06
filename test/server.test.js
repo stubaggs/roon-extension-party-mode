@@ -513,7 +513,7 @@ const set = (values) => Object.assign(roon.settings, values);
 
   await check("Party Mode's own labels can't be a guest's name, in any language or spelling", async () => {
     const cookie = await newGuest();
-    for (const name of ['Host', ' roon  RADIO ', 'anon!', 'Gastgeber', 'Hote', 'Ev sahibi', '主人', 'Radio', 'radio station', 'Radiosender', 'Rádio', 'Радио', 'ラジオ', '라디오']) {
+    for (const name of ['Host', ' roon  RADIO ', 'anon!', 'Gastgeber', 'Hote', 'Ev sahibi', '主人', 'Radio', 'radio station', 'Radiosender', 'Rádio', 'Радио', 'ラジオ', '라디오', 'Gastgebende', 'Хозяева', 'Хозяин', '主催者', 'ホスト']) {
       const res = await post('/api/name', cookie, { name, confirm: true });
       assert.strictEqual(res.status, 400, name);
       assert.strictEqual((await res.json()).error, 'name_reserved', name);
@@ -522,6 +522,21 @@ const set = (values) => Object.assign(roon.settings, values);
     // A name that only contains one is fine.
     assert.strictEqual((await post('/api/name', cookie, { name: 'Hostess Jo' })).status, 200);
     assert.strictEqual((await post('/api/name', cookie, { name: 'Radio Ga Ga' })).status, 200);
+  });
+
+  await check("the host's name reaches the pages, and guests can't take it", async () => {
+    assert.strictEqual((await (await get('/api/hub')).json()).host_name, null, 'unset');
+    set({ host_name: '  DJ  Stu ' });
+    assert.strictEqual((await (await get('/api/hub')).json()).host_name, 'DJ Stu');
+    const cookie = await newGuest();
+    assert.strictEqual((await (await get('/api/queue', { Cookie: cookie })).json()).host_name, 'DJ Stu');
+    for (const name of ['DJ Stu', 'dj stu!']) {
+      const res = await post('/api/name', cookie, { name, confirm: true });
+      assert.strictEqual(res.status, 400, name);
+    }
+    set({ host_name: '' });
+    assert.strictEqual((await post('/api/name', cookie, { name: 'DJ Stu', confirm: true })).status, 200, 'free again once unset');
+    await post('/api/name', cookie, { name: '' });
   });
 
   await check('a name another guest uses is asked about first, then allowed', async () => {

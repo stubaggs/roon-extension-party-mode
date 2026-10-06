@@ -12,7 +12,7 @@
   "credit.requested_by": "{name} さんのリクエスト",
   "credit.guest": "匿名",
   "credit.radio": "Roon Radio",
-  "credit.host": "ホスト",
+  "credit.host": "主催者",
   "search.placeholder": "トラックやアーティストを検索",
   "search.clear": "検索をクリア",
   "search.no_results": "トラックが見つかりません。アーティスト名で試してください。",
@@ -32,7 +32,7 @@
   "played.title": "再生済み",
   "played.empty": "まだ何も再生されていません。",
   "played.skipped_by": "{name} さんがスキップ",
-  "played.skipped_by_host": "ホストがスキップ",
+  "played.skipped_by_host": "主催者がスキップ",
   "allowance.closed": "現在、リクエストは受け付けていません。",
   "allowance.paused": "リクエストは一時停止中です。",
   "button.left": {

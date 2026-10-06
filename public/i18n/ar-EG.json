@@ -12,7 +12,7 @@
   "credit.requested_by": "طلب {name}",
   "credit.guest": "مجهول",
   "credit.radio": "Roon Radio",
-  "credit.host": "صاحب الحفلة",
+  "credit.host": "أصحاب الحفلة",
   "search.placeholder": "دوّر على تراك أو فنان",
   "search.clear": "امسح البحث",
   "search.no_results": "ملقيناش أي تراك. جرّب اسم الفنان.",
@@ -37,7 +37,7 @@
   "played.title": "اتشغّلوا",
   "played.empty": "لسه ما اتشغّلش حاجة.",
   "played.skipped_by": "{name} عدّاه",
-  "played.skipped_by_host": "عدّاه صاحب الحفلة",
+  "played.skipped_by_host": "عدّاه أصحاب الحفلة",
   "allowance.closed": "الطلبات مقفولة دلوقتي.",
   "allowance.paused": "الطلبات واقفة شوية.",
   "button.left": {

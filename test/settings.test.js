@@ -268,6 +268,15 @@ check('a saved on/off from "Guest access" carries over, and junk reads as on', (
   assert.strictEqual(layout({ enabled: 'maybe' }).values.enabled, true);
 });
 
+check('host name: a text field after Party name, blank unless set', () => {
+  const result = layout({});
+  const names = result.layout.map((entry) => entry.setting);
+  assert.strictEqual(names.indexOf('host_name'), names.indexOf('party_name') + 1);
+  assert.strictEqual(item(result, 'host_name').type, 'string');
+  assert.strictEqual(result.values.host_name, '');
+  assert.strictEqual(layout({ host_name: 'DJ Stu' }).values.host_name, 'DJ Stu');
+});
+
 check('display playlist download: QR code, link or off, QR code unless chosen', () => {
   const entry = item(layout({}), 'playlist_download');
   assert.strictEqual(entry.title, 'Playlist on the Party Hub');

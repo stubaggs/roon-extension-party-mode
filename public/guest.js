@@ -383,6 +383,7 @@
   }
 
   function renderQueue(snapshot) {
+    window.I18N.setHostName(snapshot.host_name);
     const playing = snapshot.now_playing;
     el('playing-title').textContent = playing ? playing.title : t('playing.nothing');
     el('playing-artist').textContent = playing ? playing.artist : '';

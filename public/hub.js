@@ -29,6 +29,7 @@
       window.location.reload();
       return;
     }
+    window.I18N.setHostName(data.host_name);
     const name = data.party_name || t('party.default_name');
     el('party-name').textContent = name;
     // "EX5 Test-o-rama Hub" in the tab, a bookmark or on a tablet's home screen.

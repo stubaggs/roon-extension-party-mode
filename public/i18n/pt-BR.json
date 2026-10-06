@@ -12,7 +12,7 @@
   "credit.requested_by": "Pedido por {name}",
   "credit.guest": "Anônimo",
   "credit.radio": "Roon Radio",
-  "credit.host": "Anfitrião",
+  "credit.host": "Anfitriões",
   "search.placeholder": "Buscar uma faixa ou artista",
   "search.clear": "Limpar a busca",
   "search.no_results": "Nenhuma faixa encontrada. Tente o nome do artista.",
@@ -33,7 +33,7 @@
   "played.title": "Já tocadas",
   "played.empty": "Nada tocou ainda.",
   "played.skipped_by": "Pulada por {name}",
-  "played.skipped_by_host": "Pulada pelo anfitrião",
+  "played.skipped_by_host": "Pulada pelos anfitriões",
   "allowance.closed": "Os pedidos estão fechados no momento.",
   "allowance.paused": "Os pedidos estão pausados por um instante.",
   "button.left": {

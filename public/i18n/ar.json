@@ -12,7 +12,7 @@
   "credit.requested_by": "بطلب من {name}",
   "credit.guest": "مجهول",
   "credit.radio": "Roon Radio",
-  "credit.host": "المضيف",
+  "credit.host": "المضيفون",
   "search.placeholder": "ابحث عن مقطع أو فنان",
   "search.clear": "مسح البحث",
   "search.no_results": "لم يُعثر على أي مقطع. جرّب اسم الفنان.",
@@ -37,7 +37,7 @@
   "played.title": "تم تشغيلها",
   "played.empty": "لم يُشغَّل شيء بعد.",
   "played.skipped_by": "تخطّاه {name}",
-  "played.skipped_by_host": "تخطّاه المضيف",
+  "played.skipped_by_host": "تخطّاه المضيفون",
   "allowance.closed": "الطلبات مغلقة الآن.",
   "allowance.paused": "الطلبات متوقفة لبعض الوقت.",
   "button.left": {

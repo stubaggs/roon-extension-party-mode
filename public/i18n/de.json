@@ -12,7 +12,7 @@
   "credit.requested_by": "Gewünscht von {name}",
   "credit.guest": "Anonym",
   "credit.radio": "Roon Radio",
-  "credit.host": "Gastgeber",
+  "credit.host": "Gastgebende",
   "search.placeholder": "Titel oder Künstler suchen",
   "search.clear": "Suche löschen",
   "search.no_results": "Keine passenden Titel. Versuch es mit dem Namen des Künstlers.",
@@ -33,7 +33,7 @@
   "played.title": "Bereits gespielt",
   "played.empty": "Noch nichts gespielt.",
   "played.skipped_by": "Übersprungen von {name}",
-  "played.skipped_by_host": "Vom Gastgeber übersprungen",
+  "played.skipped_by_host": "Von den Gastgebenden übersprungen",
   "allowance.closed": "Gerade sind keine Wünsche möglich.",
   "allowance.paused": "Wünsche sind gerade kurz pausiert.",
   "button.left": {

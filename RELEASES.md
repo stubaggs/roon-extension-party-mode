@@ -16,6 +16,9 @@ Not released yet. You can try it on the `experimental` branch (see
 - **Hide names in downloadable playlist** setting, under **Advanced**: the playlist
   download credits every guest's track to Anon instead of their name. Roon Radio and Host
   stay.
+- **Host name** setting, after **Party name**: your name, or "DJ Stu", in place of
+  **Host** on the tracks you queue and skip in Roon, and in the playlist download. Left
+  blank, it's "Host" in each guest's language.
 
 ### Improvements
 - A radio station playing on the party zone shows "Radio station"
@@ -25,6 +28,8 @@ Not released yet. You can try it on the `experimental` branch (see
   page and in the playlist download. Before, with Roon Radio on, they were labelled Roon
   Radio; Roon Radio's tag now goes only on the tracks it picks.
 - A track cut short in Roon shows in Played as **Skipped by Host**.
+- The word for **Host** no longer assumes the host is a man: languages that had a
+  masculine word now use a neutral one, often "the hosts".
 - With **Roon Loop** on, the playlist download no longer lists a track again each time it
   comes round.
 - Clearer setting names in Roon: **Display playlist download** is now **Playlist on the
@@ -54,7 +59,7 @@ Not released yet. You can try it on the `experimental` branch (see
 - Various security enhancements.
 - Hardened the docker container: the image no longer ships package managers, and the example
   docker-compose.yml runs it read-only with no Linux capabilities or privilege escalation.
-  Re-download the new docker-compose to get the chnages.
+  Re-download the new docker-compose to get the changes.
 - Rate limiting for requests.
 
 ## 1.2.0

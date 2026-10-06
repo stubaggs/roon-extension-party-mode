@@ -111,11 +111,11 @@ test stops a build.
 ## Host settings (in Roon)
 
 Party mode comes first, as the switch hosts use most. Then, in order: the party zone and
-the Roon profile (how the party plays in Roon), the party name, Party Hub language (see
-[Choosing the language](#choosing-the-language)), Playlist on the Party Hub (see [The
-party playlist](#the-party-playlist)), the allowances (Adding tracks, which includes
-playing next, then Skipping), and the collapsed Advanced group: Hide names in downloadable
-playlist, the web port, then the browse titles.
+the Roon profile (how the party plays in Roon), the party name, the host name, Party Hub
+language (see [Choosing the language](#choosing-the-language)), Playlist on the Party Hub
+(see [The party playlist](#the-party-playlist)), the allowances (Adding tracks, which
+includes playing next, then Skipping), and the collapsed Advanced group: Hide names in
+downloadable playlist, the web port, then the browse titles.
 
 ### Party mode
 
@@ -210,6 +210,20 @@ with Roon's answer and the profile before and after.
 Left blank, the party name is the party zone's name. For a grouped zone, that's Roon's
 name for the group, such as "Kitchen + Living Room". It follows the zone if you change
 it, and the setting shows which name that is.
+
+### Host name
+
+Stored as `host_name`, blank by default. Set, it stands in for "Host" wherever the host's
+tracks and skips show: the tag on the guest page and the Party Hub, "Skipped by Stu" in
+Played (through `played.skipped_by`, as for a guest), the playlist file and the log. It's
+tidied like a guest's name (`cleanName()`), sent to the pages as `host_name` with the
+queue data, and reserved, so no guest can take it. Left blank, the pages say "Host" in
+each guest's language (`credit.host`, `played.skipped_by_host`).
+
+In the gendered languages those defaults are neutral: a plural ("the hosts", as in
+Spanish *Anfitriones*, Russian *Хозяева*) or a neutral form (German *Gastgebende*), so
+neither a man nor a woman is assumed. Japanese uses 主催者 ("organiser"), since ホスト
+also means host-club staff. The older masculine words stay reserved (`HOST_WORDS`).
 
 ### Party Hub language
 
@@ -357,10 +371,11 @@ ignored, so "Sam", "sam." and "S A M" are one name.
 
 - **Party Mode's own labels can't be taken.** `POST /api/name` refuses "Host", "Roon
   Radio", "Radio station" and "Anon" in all 30 languages (`credit.host`, `credit.radio`,
-  `playing.station`, `credit.guest`), and the word "radio" in each (`RADIO_WORDS`), with
-  400 `name_reserved`, so "Requested by Host" always means the host. They're gathered
-  into `RESERVED_NAMES` at startup. A name that only contains one ("Hostess", "Radio Ga
-  Ga") is fine.
+  `playing.station`, `credit.guest`), the word "radio" in each (`RADIO_WORDS`), the
+  older words for the host (`HOST_WORDS`), and the host name when one is set, with 400
+  `name_reserved`, so a Host tag always means the host. The fixed ones are gathered into
+  `RESERVED_NAMES` at startup. A name that only contains one ("Hostess", "Radio Ga Ga")
+  is fine.
 - **A name another guest uses is asked about, not refused.** Two guests can share a name,
   and a guest who rescans comes back under their old name while their old session still
   holds it. So `POST /api/name` answers 409 `name_taken` (`GuestStore.nameInUse`) until
@@ -574,7 +589,8 @@ before 1.2.0, still works) as CSV in the form Soundiiz imports:
 - commas between fields, and Roon's ` / ` between artists written as `, `;
 - UTF-8 without a byte order mark. A BOM hides the first header from an importer, at the
   cost of Excel's double-click guessing the encoding wrong;
-- column names and credits in English, which import services expect;
+- column names and credits in English, which import services expect, except that the
+  host name, when set, credits the host's tracks;
 - a guest name a spreadsheet would read as a formula gets a leading apostrophe. Track
   details are left as Roon gives them, so they still match;
 - with Hide names in downloadable playlist (`playlist_hide_names`, Advanced, off by

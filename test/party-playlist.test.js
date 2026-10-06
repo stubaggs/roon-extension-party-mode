@@ -155,6 +155,17 @@ check('a name given later reaches the playlist', () => {
   assert.ok(!playlist.toCsv().includes('g1'), 'no guest refs in the file');
 });
 
+check("the host's name, when set, credits the host's tracks in the file", () => {
+  const playlist = new PartyPlaylist();
+  const credit = (t) => ({ 1: { requested_by: 'Sam', kind: 'add', guest: 'g1' }, 2: { kind: 'host' }, 3: { kind: 'radio' } })[t.id];
+  playlist.update('o1', [track(1, 'Waterloo'), track(2, 'SOS'), track(3, 'Fernando')], credit);
+  const csv = playlist.toCsv(credit, { hostName: 'DJ Stu' }).trim().split('\r\n');
+  assert.ok(csv[1].includes(',Sam,'), csv[1]);
+  assert.ok(csv[2].includes(',DJ Stu,'), csv[2]);
+  assert.ok(csv[3].includes(',Roon Radio,'), csv[3]);
+  assert.ok(rows(playlist, credit)[2].includes(',Host,'), 'Host when no name is set');
+});
+
 check('hidden names credit every guest as Anon, and keep Roon Radio and Host', () => {
   const playlist = new PartyPlaylist();
   const credit = (t) =>

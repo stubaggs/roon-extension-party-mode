@@ -12,7 +12,7 @@
   "credit.requested_by": "Přání od: {name}",
   "credit.guest": "Anonym",
   "credit.radio": "Roon Radio",
-  "credit.host": "Hostitel",
+  "credit.host": "Hostitelé",
   "search.placeholder": "Hledat skladbu nebo interpreta",
   "search.clear": "Vymazat hledání",
   "search.no_results": "Žádné skladby nenalezeny. Zkuste jméno interpreta.",
@@ -35,7 +35,7 @@
   "played.title": "Přehráno",
   "played.empty": "Zatím se nic nepřehrálo.",
   "played.skipped_by": "Přeskočil(a): {name}",
-  "played.skipped_by_host": "Přeskočil hostitel",
+  "played.skipped_by_host": "Přeskočili hostitelé",
   "allowance.closed": "Přání jsou teď uzavřená.",
   "allowance.paused": "Přání jsou na chvíli pozastavená.",
   "button.left": {

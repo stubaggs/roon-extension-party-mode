@@ -12,7 +12,7 @@
   "credit.requested_by": "Zamówienie: {name}",
   "credit.guest": "Anonim",
   "credit.radio": "Roon Radio",
-  "credit.host": "Gospodarz",
+  "credit.host": "Gospodarze",
   "search.placeholder": "Szukaj utworu lub wykonawcy",
   "search.clear": "Wyczyść wyszukiwanie",
   "search.no_results": "Nie znaleziono utworów. Spróbuj nazwy wykonawcy.",
@@ -35,7 +35,7 @@
   "played.title": "Odtworzone",
   "played.empty": "Nic jeszcze nie zostało odtworzone.",
   "played.skipped_by": "Pominięte przez: {name}",
-  "played.skipped_by_host": "Pominięte przez gospodarza",
+  "played.skipped_by_host": "Pominięte przez gospodarzy",
   "allowance.closed": "Zamówienia są teraz zamknięte.",
   "allowance.paused": "Zamówienia są na chwilę wstrzymane.",
   "button.left": {

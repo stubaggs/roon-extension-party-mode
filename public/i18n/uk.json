@@ -12,7 +12,7 @@
   "credit.requested_by": "Замовлення від: {name}",
   "credit.guest": "Анонім",
   "credit.radio": "Roon Radio",
-  "credit.host": "Господар",
+  "credit.host": "Господарі",
   "search.placeholder": "Знайти трек або виконавця",
   "search.clear": "Очистити пошук",
   "search.no_results": "Треків не знайдено. Спробуйте ім'я виконавця.",
@@ -35,7 +35,7 @@
   "played.title": "Уже грали",
   "played.empty": "Поки нічого не грало.",
   "played.skipped_by": "Пропустив(ла): {name}",
-  "played.skipped_by_host": "Пропустив господар",
+  "played.skipped_by_host": "Пропустили господарі",
   "allowance.closed": "Замовлення зараз закриті.",
   "allowance.paused": "Замовлення ненадовго призупинено.",
   "button.left": {

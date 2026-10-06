@@ -12,7 +12,7 @@
   "credit.requested_by": "Поръчан от {name}",
   "credit.guest": "Анонимен",
   "credit.radio": "Roon Radio",
-  "credit.host": "Домакин",
+  "credit.host": "Домакини",
   "search.placeholder": "Търси запис или изпълнител",
   "search.clear": "Изчисти търсенето",
   "search.no_results": "Няма намерени записи. Опитай с името на изпълнителя.",
@@ -33,7 +33,7 @@
   "played.title": "Изсвирени",
   "played.empty": "Още нищо не е звучало.",
   "played.skipped_by": "Прескочен от {name}",
-  "played.skipped_by_host": "Прескочен от домакина",
+  "played.skipped_by_host": "Прескочен от домакините",
   "allowance.closed": "Поръчките са затворени в момента.",
   "allowance.paused": "Поръчките са на пауза за малко.",
   "button.left": {
