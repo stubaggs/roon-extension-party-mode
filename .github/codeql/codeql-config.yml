@@ -1,0 +1,8 @@
+# What CodeQL analyses: the extension's own code, with the broader
+# security-extended queries. Dependencies and tests are left out.
+name: Party Mode CodeQL config
+queries:
+  - uses: security-extended
+paths-ignore:
+  - node_modules
+  - test

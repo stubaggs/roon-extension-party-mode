@@ -159,6 +159,12 @@
   white-space: nowrap;
 }
 
+.current-note {
+  margin: 0.6rem 0 0;
+  font-size: clamp(0.9rem, 1.4vw, 1.2rem);
+  max-width: 40ch;
+}
+
 .current-who {
   display: inline-block;
   margin: 0.8rem 0 0;
@@ -266,11 +272,17 @@
 }
 
 /* Lavender for a track a guest added, amber for one they put straight
-   after the playing track, mint for Roon Radio. */
+   after the playing track, mint for Roon Radio, sky for one the host queued. */
 .current-who.next,
 .list .who.next {
   background: rgba(255, 194, 75, 0.16);
   color: var(--amber);
+}
+
+.current-who.host,
+.list .who.host {
+  background: rgba(140, 207, 255, 0.16);
+  color: var(--sky);
 }
 
 

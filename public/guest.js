@@ -26,6 +26,10 @@
   const toastEl = el('toast');
 
   let party = null;
+  // Whether a radio station is playing, for the line under the search box.
+  let onStation = false;
+  // Whether Roon allows a skip now (can_skip in the queue data). Hidden until known.
+  let canSkip = false;
   let started = false;
   let expandedKey = null;
   let searchTimer = null;
@@ -46,9 +50,15 @@
       showLocked(body.error === 'closed' ? 'closed' : 'locked');
       throw new Error('no_session');
     }
+    // Past the per-minute limit (lib/server.js): one note here, so callers stay
+    // quiet about it rather than each saying something failed.
+    if (res.status === 429 && body.error === 'too_many_requests') toast(t('toast.too_many_requests'));
     if (!res.ok) throw Object.assign(new Error(body.error || 'error'), { body });
     return body;
   }
+
+  /** Errors already explained: the page is closed, or the limit note is up. */
+  const explained = (err) => err.message === 'no_session' || err.message === 'too_many_requests';
 
   /** In place of the page: 'locked' (scan again) or 'closed' (requests are over). */
   function showLocked(which) {
@@ -116,6 +126,7 @@
     const notice = el('notice');
     if (party.party_mode === 'paused') notice.textContent = t('allowance.paused');
     else if (!party.capabilities.add && !party.capabilities.next) notice.textContent = t('allowance.closed');
+    else if (onStation) notice.textContent = t('queue.waiting_for_host');
     else notice.textContent = '';
     notice.hidden = !notice.textContent;
 
@@ -270,7 +281,7 @@
       renderResults();
       announceResults(query);
     } catch (err) {
-      if (mine === searchSeq && err.message !== 'no_session') toast(t('search.unavailable'));
+      if (mine === searchSeq && !explained(err)) toast(t('search.unavailable'));
     }
   }
 
@@ -326,7 +337,7 @@
         refreshParty(); // the counts were out of date; grey the button out
         toast(detail.next_in ? t('toast.nothing_left_wait', { wait: minutes(detail.next_in) }) : t('toast.nothing_left'));
       } else if (err.message === 'disabled') toast(t('toast.disabled'));
-      else if (err.message !== 'no_session') toast(t('toast.roon_refused'));
+      else if (!explained(err)) toast(t('toast.roon_refused'));
     }
   }
 
@@ -352,13 +363,27 @@
       else if (err.message === 'rate_limited') {
         refreshParty();
         toast(detail.next_in ? t('toast.no_skips_wait', { wait: minutes(detail.next_in) }) : t('toast.no_skips'));
-      } else if (err.message !== 'no_session') toast(t('toast.failed'));
+      } else if (!explained(err)) toast(t('toast.failed'));
     }
   });
 
   // ------------------------------------------------------------------- queue
 
+  function playingLabel(playing) {
+    if (!playing || playing.state !== 'playing') return t('playing.paused');
+    return playing.station ? t('playing.station') : t('playing.now');
+  }
+
+  /**
+   * Skip shows when the host allows it and Roon will skip now: not on a radio
+   * station, or on the last track with Roon Radio off.
+   */
+  function showSkip() {
+    el('skip').hidden = !(party && party.capabilities.skip) || !canSkip;
+  }
+
   function renderQueue(snapshot) {
+    window.I18N.setHostName(snapshot.host_name);
     const playing = snapshot.now_playing;
     el('playing-title').textContent = playing ? playing.title : t('playing.nothing');
     el('playing-artist').textContent = playing ? playing.artist : '';
@@ -371,11 +396,22 @@
     who.textContent = who.hidden ? '' : creditText(playing);
     who.classList.toggle('radio', !who.hidden && playing.kind === 'radio');
     who.classList.toggle('next', !who.hidden && playing.kind === 'next');
-    el('playing-label').textContent =
-      playing && playing.state === 'playing' ? t('playing.now') : t('playing.paused');
+    who.classList.toggle('host', !who.hidden && playing.kind === 'host');
+    el('playing-label').textContent = playingLabel(playing);
     setArt(el('playing-art'), playing && playing.image_key, 144);
+    if (Boolean(snapshot.can_skip) !== canSkip) {
+      canSkip = Boolean(snapshot.can_skip);
+      showSkip();
+    }
+    // While a radio station plays, the line under the search box says requests
+    // wait for the host.
+    const station = Boolean(playing && playing.station);
+    if (station !== onStation) {
+      onStation = station;
+      renderAllowances();
+    }
 
-    renderList(queueList, snapshot.upcoming, t('queue.empty'), (item, index) => {
+    renderList(queueList, snapshot.upcoming, t(snapshot.empty || 'queue.empty'), (item, index) => {
       const position = document.createElement('span');
       position.className = 'queue-position';
       position.textContent = String(index + 1);
@@ -437,7 +473,7 @@
     text.append(title, sub);
     if (item.kind) {
       const badge = document.createElement('span');
-      badge.className = item.kind === 'next' || item.kind === 'radio' ? `badge ${item.kind}` : 'badge';
+      badge.className = ['next', 'radio', 'host'].includes(item.kind) ? `badge ${item.kind}` : 'badge';
       badge.textContent = window.I18N.credit(item);
       text.appendChild(badge);
     }
@@ -480,14 +516,30 @@
     chip.setAttribute('aria-label', name ? `${t('name.adding_as', { name })}. ${t('name.change')}` : t('name.add'));
   }
 
-  async function saveName(name) {
-    const body = await api('/api/name', { method: 'POST', body: JSON.stringify({ name }) });
+  /**
+   * `confirm` says the guest knows another guest goes by this name; without it
+   * the server answers `name_taken` instead. A remembered name is sent with it:
+   * it's this phone's own, often still on its session from before a rescan.
+   */
+  async function saveName(name, confirm = false) {
+    const body = await api('/api/name', { method: 'POST', body: JSON.stringify({ name, confirm }) });
     party.guest_name = body.guest_name;
     renderNameChip();
   }
 
   let changingName = false;
   let nicknameOpener = null;
+  // The name the guest was just told someone else uses; sending it again confirms.
+  let takenName = null;
+  const nicknameNote = el('nickname-note');
+  const nicknameGo = el('nickname-go');
+
+  /** A line in the dialog, or none; "Use it anyway" only while it asks. */
+  function setNameNote(text, asking = false) {
+    nicknameNote.textContent = text || '';
+    nicknameNote.hidden = !text;
+    nicknameGo.textContent = asking ? t('name.use_anyway') : t('name.go');
+  }
 
   /**
    * First visit offers Skip; changing a name later offers Cancel instead.
@@ -497,6 +549,8 @@
     changingName = changing === true;
     el('nickname-skip').textContent = changingName ? t('name.cancel') : t('name.skip');
     nicknameInput.value = (party && party.guest_name) || remembered.get() || '';
+    takenName = null;
+    setNameNote(null);
     nicknameOpener = document.activeElement;
     app.inert = true;
     nickname.hidden = false;
@@ -517,13 +571,30 @@
   el('nickname-form').addEventListener('submit', async (event) => {
     event.preventDefault();
     const name = nicknameInput.value.trim();
+    try {
+      await saveName(name, name !== '' && name === takenName);
+    } catch (err) {
+      // Turned down, or someone else uses it: say so and leave the dialog open.
+      if (err.message === 'name_reserved' || err.message === 'name_taken') {
+        const asking = err.message === 'name_taken';
+        takenName = asking ? name : null;
+        const vars = { name: err.body.name };
+        setNameNote(asking ? t('name.taken', vars) : t('name.reserved', vars), asking);
+        nicknameInput.focus();
+        return;
+      }
+      if (!explained(err)) toast(t('toast.name_not_saved'));
+    }
     // Skipping stores an empty name, so "Skip" isn't asked again on this phone.
     remembered.set(name);
     closeName();
-    try {
-      await saveName(name);
-    } catch (err) {
-      if (err.message !== 'no_session') toast(t('toast.name_not_saved'));
+  });
+
+  // Typing something else clears the note about the old name.
+  nicknameInput.addEventListener('input', () => {
+    if (!nicknameNote.hidden && nicknameInput.value.trim() !== takenName) {
+      takenName = null;
+      setNameNote(null);
     }
   });
 
@@ -622,7 +693,7 @@
     if (party.guest_name) return;
     const name = remembered.get();
     if (name === null) return askName();
-    if (name) await saveName(name).catch(() => {});
+    if (name) await saveName(name, true).catch(() => {});
   }
 
   // -------------------------------------------------------------- lifecycle
@@ -638,7 +709,8 @@
     el('closed').hidden = true;
     document.title = party.party_name || t('page.title');
     const skip = el('skip');
-    skip.hidden = !party.capabilities.skip;
+    // Runs again when Party mode changes, with the station still playing.
+    showSkip();
     if (party.capabilities.skip) Object.assign(skip.dataset, { bucket: 'skip', label: 'skip.button', quiet: '' });
     else delete skip.dataset.bucket;
     renderAllowances();

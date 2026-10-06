@@ -86,7 +86,7 @@ check('a track left well before its end was skipped in Roon', () => {
   history.update('z1', playing('SOS'), null, ended('Waterloo', 42));
   const [played] = history.list();
   assert.strictEqual(played.skipped, true);
-  assert.strictEqual(played.skipped_in_roon, true);
+  assert.strictEqual(played.skipped_by_host, true);
   assert.strictEqual(played.skipped_by, null);
 });
 
@@ -102,7 +102,7 @@ check('the next track still loading: the early end is remembered', () => {
   history.update('z1', playing('Waterloo'), null);
   history.update('z1', Object.assign(playing('SOS'), { state: 'loading' }), null, ended('Waterloo', 42));
   history.update('z1', playing('SOS'), null);
-  assert.strictEqual(history.list()[0].skipped_in_roon, true);
+  assert.strictEqual(history.list()[0].skipped_by_host, true);
 });
 
 check('a guest skip keeps the guest\'s name', () => {
@@ -112,7 +112,7 @@ check('a guest skip keeps the guest\'s name', () => {
   history.update('z1', playing('SOS'), null, ended('Waterloo', 42));
   const [played] = history.list();
   assert.strictEqual(played.skipped_by, 'Stu');
-  assert.ok(!played.skipped_in_roon);
+  assert.ok(!played.skipped_by_host);
 });
 
 check('no position seen, or no length: not judged', () => {
@@ -172,6 +172,16 @@ check("guest refs never leave the server", () => {
     assert.notStrictEqual(stu.ref, stu.id, 'the ref is not the session cookie');
   });
 }
+
+check('a radio station never goes into Played, but the track before it does', () => {
+  const history = new PlayHistory();
+  history.update('z1', playing('Waterloo'), null);
+  assert.strictEqual(history.update('z1', { title: 'ABC Triple J Shift', artist: '', state: 'playing', station: true }, null), true);
+  assert.deepStrictEqual(history.list().map((t) => t.title), ['Waterloo']);
+  history.update('z1', playing('SOS'), null);
+  history.update('z1', playing('Fernando'), null);
+  assert.deepStrictEqual(history.list().map((t) => t.title), ['SOS', 'Waterloo']);
+});
 
 console.log(failures ? `\n${failures} failing` : '\nall passing');
 process.exit(failures ? 1 : 0);

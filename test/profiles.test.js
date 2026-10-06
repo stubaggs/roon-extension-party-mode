@@ -33,10 +33,11 @@ async function check(name, fn) {
  * A stand-in for Roon's "settings" browse hierarchy: a menu with a Profile
  * entry listing profiles. Records which item keys were selected.
  */
-function fakeRoon(profiles, menuTitle = 'Profile') {
+function fakeRoon(profiles, menuTitle = 'Profile', current = 'Guest') {
   const menu = [
     { title: 'General', item_key: 'general' },
-    { title: menuTitle, item_key: 'profile-menu' },
+    // Roon shows the session's profile next to the entry.
+    { title: menuTitle, subtitle: current, item_key: 'profile-menu' },
     { title: 'Library', item_key: 'library' }
   ];
   let level = 'root';
@@ -108,10 +109,20 @@ function fakeRoon(profiles, menuTitle = 'Profile') {
     RoonService.prototype._layout.call(Object.assign({ _resolveZone: () => null }, self), values);
   const dropdown = (result) => result.layout.find((item) => item.setting === 'guest_profile');
 
-  await check('offers "Leave as it is" plus the Core\'s profiles', async () => {
-    const item = dropdown(layout({ profiles: ['Stu', 'Guests'] }, {}));
-    assert.deepStrictEqual(item.values.map((v) => v.title), ['Leave as it is', 'Stu', 'Guests']);
+  await check("offers Roon's default, by name when known, plus the Core's profiles", async () => {
+    const item = dropdown(layout({ profiles: ['Stu', 'Guests'], defaultProfile: 'Guest' }, {}));
+    assert.deepStrictEqual(item.values.map((v) => v.title), ["Roon's default (Guest)", 'Stu', 'Guests']);
     assert.strictEqual(item.values[0].value, '');
+    assert.strictEqual(dropdown(layout({ profiles: ['Stu'] }, {})).values[0].title, "Roon's default profile", 'not read');
+    assert.strictEqual(item.title, 'Party profile');
+    assert.match(item.subtitle, /Roon profile guests' tracks play under/);
+  });
+
+  await check("Roon's default is read from a new session, selecting nothing", async () => {
+    const roon = fakeRoon(['Guest', 'Stu'], 'Profile', 'Guest');
+    const service = Object.assign(Object.create(RoonService.prototype), { _browse: roon.browse, _load: roon.load });
+    assert.strictEqual(await service._readDefaultProfile('Profile'), 'Guest');
+    assert.deepStrictEqual(roon.selected, []);
   });
 
   await check('keeps a saved profile the Core no longer has, marked not found', async () => {
@@ -177,7 +188,7 @@ function fakeRoon(profiles, menuTitle = 'Profile') {
     assert.ok(core.events.includes('guest-1:search abba'));
   });
 
-  await check('"Leave as it is" selects nothing', async () => {
+  await check("Roon's default selects nothing", async () => {
     const core = fakeBrowseCore({ categories: { Tracks: tracks } });
     const roon = serviceFor(core, { guest_profile: '' });
     await roon.search('guest-1', 'abba');

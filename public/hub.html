@@ -16,7 +16,7 @@
           <p class="join-copy"><a class="join-link" id="join-link" target="_blank" rel="noopener" data-i18n="screen.scan">Scan to add a track</a></p>
         </div>
         <!-- With party mode off: the playlist in place of the guest code, as a QR
-             code or a link as the Display playlist download setting says. -->
+             code or a link as the Playlist on the Party Hub setting says. -->
         <div id="join-closed" class="join-closed" hidden>
           <div id="playlist-qr-offer" hidden>
             <img id="playlist-qr" class="qr" alt="QR code for the playlist" data-i18n-alt="screen.playlist_qr_alt" />
@@ -40,6 +40,7 @@
             <p class="current-artist muted" id="current-artist"></p>
             <p class="current-album muted" id="current-album" hidden></p>
             <p class="current-who" id="current-who" hidden></p>
+            <p class="current-note muted" id="current-note" data-i18n="queue.waiting_for_host" hidden>Waiting for the host to start the queue.</p>
           </div>
         </div>
       </section>
@@ -49,7 +50,7 @@
         <ol class="list" id="list"></ol>
       </section>
     </div>
-    <script src="/i18n.js"></script>
+    <script src="/i18n.js?for=hub"></script>
     <script src="/hub.js"></script>
     <script src="/marquee.js" data-marquee=".current-title, .current-artist, .current-album, .list .t, .list .a"></script>
   </body>

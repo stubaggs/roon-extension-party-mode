@@ -78,21 +78,32 @@
   /** The name a guest goes by: theirs, or "Anon" (credit.guest) without one. */
   const guestName = (name) => name || t('credit.guest');
 
-  /** The credit line for a track: a guest's name, "Anon", or Roon Radio. */
+  // The host's name from the settings, set from each queue update; null shows
+  // "Host" in the page's language.
+  let hostName = null;
+  const setHostName = (name) => {
+    hostName = name || null;
+  };
+  const hostLabel = () => hostName || t('credit.host');
+
+  /** The credit line for a track: a guest's name, "Anon", Roon Radio or Host. */
   function credit(item) {
     if (item.kind === 'radio') return t('credit.radio');
+    if (item.kind === 'host') return hostLabel();
     return guestName(item.requested_by);
   }
 
-  /** The line under the playing track: "Requested by Sam", "Requested by Anon" or "Roon Radio". */
+  /** The line under the playing track: "Requested by Sam", "Requested by Anon", "Roon Radio" or "Host". */
   function requestedBy(item) {
     if (item.kind === 'radio') return t('credit.radio');
+    if (item.kind === 'host') return hostLabel();
     return t('credit.requested_by', { name: guestName(item.requested_by) });
   }
 
-  /** "Skipped by Sam", "Skipped by Anon" or "Skipped in Roon", for a skipped played track. */
+  /** "Skipped by Sam", "Skipped by Anon" or "Skipped by Host", for a skipped played track. */
   function skippedBy(item) {
-    if (item.skipped_in_roon) return t('played.skipped_in_roon');
+    // A name the host set is a name like a guest's; "Host" has its own wording.
+    if (item.skipped_by_host) return hostName ? t('played.skipped_by', { name: hostName }) : t('played.skipped_by_host');
     return t('played.skipped_by', { name: guestName(item.skipped_by) });
   }
 
@@ -116,6 +127,7 @@
     apply,
     credit,
     requestedBy,
+    setHostName,
     skippedBy,
     minutes
   };

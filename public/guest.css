@@ -78,11 +78,18 @@ main {
 }
 
 /* As on the Party Hub: lavender for a track a guest added, amber for one
-   they put straight after the playing track, mint for Roon Radio. */
+   they put straight after the playing track, mint for Roon Radio, sky for
+   one the host queued. */
 .playing-who.next,
 .badge.next {
   background: rgba(255, 194, 75, 0.16);
   color: var(--amber);
+}
+
+.playing-who.host,
+.badge.host {
+  background: rgba(140, 207, 255, 0.16);
+  color: var(--sky);
 }
 
 .playing-who[hidden] {
@@ -284,6 +291,17 @@ main {
   display: flex;
   gap: 0.5rem;
   margin-top: 1rem;
+}
+
+/* Why a name was turned down, or that someone already uses it. */
+.nickname .nickname-note {
+  margin: 0.75rem 0 0;
+  color: var(--amber);
+  font-weight: 600;
+}
+
+.nickname-note[hidden] {
+  display: none;
 }
 
 .rows {

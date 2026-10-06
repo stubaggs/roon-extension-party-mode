@@ -1,6 +1,7 @@
-# Keeps the Docker base image current. The Dockerfile pins node:22-alpine by
-# digest; when the official image is rebuilt (Alpine or Node security fixes),
-# Dependabot opens a pull request moving the pin to the new digest.
+# Keeps the Docker base image, the npm dependencies and the workflow's actions
+# current. The Dockerfile pins node:22-alpine by digest; when the official image
+# is rebuilt (Alpine or Node security fixes), Dependabot opens a pull request
+# moving the pin to the new digest.
 version: 2
 updates:
   - package-ecosystem: docker
@@ -14,3 +15,23 @@ updates:
       # Moving to it is a deliberate change (see DEVELOPER.md), not an automatic bump.
       - dependency-name: node
         update-types: ["version-update:semver-major"]
+
+  # Express, qrcode, cookie-parser and the Roon API packages (from GitHub), as
+  # package-lock.json pins them. Minor and patch updates come as one pull request.
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: "npm"
+    groups:
+      minor-and-patch:
+        update-types: ["minor", "patch"]
+
+  # The actions docker-publish.yml uses.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: "GitHub Actions"

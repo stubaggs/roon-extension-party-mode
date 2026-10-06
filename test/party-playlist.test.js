@@ -155,6 +155,32 @@ check('a name given later reaches the playlist', () => {
   assert.ok(!playlist.toCsv().includes('g1'), 'no guest refs in the file');
 });
 
+check("the host's name, when set, credits the host's tracks in the file", () => {
+  const playlist = new PartyPlaylist();
+  const credit = (t) => ({ 1: { requested_by: 'Sam', kind: 'add', guest: 'g1' }, 2: { kind: 'host' }, 3: { kind: 'radio' } })[t.id];
+  playlist.update('o1', [track(1, 'Waterloo'), track(2, 'SOS'), track(3, 'Fernando')], credit);
+  const csv = playlist.toCsv(credit, { hostName: 'DJ Stu' }).trim().split('\r\n');
+  assert.ok(csv[1].includes(',Sam,'), csv[1]);
+  assert.ok(csv[2].includes(',DJ Stu,'), csv[2]);
+  assert.ok(csv[3].includes(',Roon Radio,'), csv[3]);
+  assert.ok(rows(playlist, credit)[2].includes(',Host,'), 'Host when no name is set');
+});
+
+check('hidden names credit every guest as Anon, and keep Roon Radio and Host', () => {
+  const playlist = new PartyPlaylist();
+  const credit = (t) =>
+    ({ 1: { requested_by: 'Sam', kind: 'add', guest: 'g1' }, 2: { requested_by: 'Jo', kind: 'next', guest: 'g2' }, 3: { kind: 'radio' }, 4: { kind: 'host' } })[t.id];
+  playlist.update('o1', [track(1, 'Waterloo'), track(2, 'SOS'), track(3, 'Fernando'), track(4, 'Chiquitita')], credit);
+  const hidden = playlist.toCsv(credit, { hideNames: true });
+  assert.ok(!hidden.includes('Sam') && !hidden.includes('Jo'), hidden);
+  const csv = hidden.trim().split('\r\n');
+  assert.ok(csv[1].includes(',Anon,'), csv[1]);
+  assert.ok(csv[2].includes(',Anon,'), csv[2]);
+  assert.ok(csv[3].includes(',Roon Radio,'), csv[3]);
+  assert.ok(csv[4].includes(',Host,'), csv[4]);
+  assert.ok(rows(playlist, credit)[1].includes(',Sam,'), 'names show by default');
+});
+
 check('a full list drops the host\'s and Roon Radio\'s oldest entries before any guest\'s', () => {
   const playlist = new PartyPlaylist();
   // A guest's request first, then entries no guest asked for, past the limit.
@@ -176,6 +202,47 @@ check('guests\' requests alone past the limit drop the oldest of them', () => {
   assert.strictEqual(playlist.tracks.length, MAX_TRACKS);
   assert.strictEqual(playlist.tracks[0].title, 'Track 4');
   assert.strictEqual(playlist.seen.size, MAX_TRACKS);
+});
+
+check('with Loop on, a track that goes round again is listed once', () => {
+  const playlist = new PartyPlaylist();
+  const credit = (t) => (t.title === 'Waterloo' ? { requested_by: 'Sam', kind: 'add', guest: 'g1' } : null);
+  playlist.update('o1', [track(1, 'Waterloo'), track(2, 'SOS')], credit);
+  // Waterloo has played: Roon moves it to the back under a new id.
+  playlist.update('o1', [track(2, 'SOS'), track(3, 'Waterloo')], nobody);
+  playlist.update('o1', [track(3, 'Waterloo'), track(4, 'SOS')], nobody);
+  assert.deepStrictEqual(titles(playlist), ['Waterloo', 'SOS']);
+  assert.ok(rows(playlist)[1].includes(',Sam,'), 'keeps its credit');
+  assert.strictEqual(playlist.seen.size, 2);
+});
+
+check('playing the queue from a later entry doesn\'t list the ones before it again', () => {
+  const playlist = new PartyPlaylist();
+  playlist.update('o1', [track(1, 'SOS'), track(2, 'Fernando'), track(3, 'Waterloo')], nobody);
+  playlist.update('o1', [track(3, 'Waterloo'), track(4, 'SOS'), track(5, 'Fernando')], nobody);
+  assert.deepStrictEqual(titles(playlist), ['SOS', 'Fernando', 'Waterloo']);
+});
+
+check('the same track queued again later is listed again', () => {
+  const playlist = new PartyPlaylist();
+  playlist.update('o1', [track(1, 'Waterloo')], nobody);
+  playlist.update('o1', [], nobody);
+  playlist.update('o1', [track(2, 'Waterloo')], nobody);
+  assert.deepStrictEqual(titles(playlist), ['Waterloo', 'Waterloo']);
+});
+
+check('the host\'s tracks say Host; one Roon reported before the guest\'s request finished moves to the guest', () => {
+  const playlist = new PartyPlaylist();
+  const host = () => ({ requested_by: null, kind: 'host' });
+  playlist.update('o1', [track(1, 'Waterloo'), track(2, 'SOS')], host);
+  // The guest's request for SOS finishes: it's credited from then on.
+  const claimed = (t) => (t.id === 2 ? { requested_by: 'Sam', kind: 'add', guest: 'g1' } : host());
+  playlist.update('o1', [track(1, 'Waterloo'), track(2, 'SOS')], claimed);
+  const csv = rows(playlist);
+  assert.ok(csv[1].includes(',Host,'), csv[1]);
+  assert.ok(csv[2].includes(',Sam,'), csv[2]);
+  playlist.rename('g1', 'Stu');
+  assert.ok(rows(playlist)[2].includes(',Stu,'), 'and renaming reaches it');
 });
 
 check('very long titles, artists and albums are cut short', () => {

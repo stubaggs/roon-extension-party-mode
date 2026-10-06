@@ -24,6 +24,12 @@
   }
 
   function render(data) {
+    // The host chose another language for the Hub in Roon's settings.
+    if (data.language && data.language !== window.I18N.lang) {
+      window.location.reload();
+      return;
+    }
+    window.I18N.setHostName(data.host_name);
     const name = data.party_name || t('party.default_name');
     el('party-name').textContent = name;
     // "EX5 Test-o-rama Hub" in the tab, a bookmark or on a tablet's home screen.
@@ -58,8 +64,16 @@
     who.textContent = who.hidden ? '' : window.I18N.requestedBy(playing);
     who.classList.toggle('radio', radio);
     who.classList.toggle('next', !who.hidden && playing.kind === 'next');
+    who.classList.toggle('host', !who.hidden && playing.kind === 'host');
     el('current-label').textContent =
-      playing && playing.state === 'playing' ? t('playing.now') : t('playing.paused');
+      !playing || playing.state !== 'playing'
+        ? t('playing.paused')
+        : playing.station
+          ? t('playing.station')
+          : t('playing.now');
+    // Requests wait while a radio station plays; the room should know. Paused,
+    // the caption under the QR code already says requests are on hold.
+    el('current-note').hidden = !(playing && playing.station) || data.party_mode === 'paused';
     const image = el('current-art');
     if (playing && playing.image_key) image.src = art(playing.image_key, 400);
     else image.removeAttribute('src');
@@ -68,7 +82,7 @@
     if (!data.upcoming.length) {
       const empty = document.createElement('li');
       empty.className = 'empty muted';
-      empty.textContent = t('queue.empty');
+      empty.textContent = t(data.empty || 'queue.empty');
       list.appendChild(empty);
     }
     data.upcoming.forEach((item, index) => {
@@ -97,7 +111,7 @@
       wrap.append(title, a);
       if (item.kind) {
         const who = document.createElement('span');
-        who.className = item.kind === 'next' || item.kind === 'radio' ? `who ${item.kind}` : 'who';
+        who.className = ['next', 'radio', 'host'].includes(item.kind) ? `who ${item.kind}` : 'who';
         who.textContent = window.I18N.credit(item);
         wrap.appendChild(who);
       }

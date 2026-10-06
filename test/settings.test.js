@@ -103,6 +103,8 @@ check('zone not available yet: the endpoint picked', () => {
 
 check('nothing chosen at all: "Party"', () => {
   assert.strictEqual(partyName({ party_name: '', zone: null }, null), 'Party');
+  // The pages get nothing, and say "Party" in the guest's language.
+  assert.strictEqual(partyName({ party_name: '', zone: null }, null, ''), '');
 });
 
 check('the settings say what a blank name will use', () => {
@@ -146,6 +148,16 @@ const item = (result, setting) => {
   return all.find((entry) => entry.setting === setting);
 };
 
+check('a radio station is told apart from a track, playing, paused or loading', () => {
+  const { isStation } = require('../lib/roon-service');
+  const station = { is_seek_allowed: false, now_playing: { two_line: { line1: 'ABC Triple J Shift' } } };
+  assert.strictEqual(isStation(station), true);
+  assert.strictEqual(isStation({ is_seek_allowed: true, now_playing: { length: 210 } }), false, 'a track');
+  assert.strictEqual(isStation({ is_seek_allowed: false, now_playing: { length: 210 } }), false, 'a track loading');
+  assert.strictEqual(isStation({ is_seek_allowed: false }), false, 'nothing playing');
+  assert.strictEqual(isStation(null), false);
+});
+
 check('guest defaults: 5 adds every 10 min, play next hourly, skipping off', () => {
   const { values } = layout({});
   assert.deepStrictEqual(
@@ -158,6 +170,17 @@ check('guest defaults: 5 adds every 10 min, play next hourly, skipping off', () 
 check('saved allowances are kept over the defaults', () => {
   const { values } = layout({ add_limit: 10, add_refill: 2, next_refill: 20 });
   assert.deepStrictEqual([values.add_limit, values.add_refill, values.next_refill], [10, 2, 20]);
+});
+
+check('Party Hub language: Automatic first, then every language by its own name; unknown reads as Automatic', () => {
+  const result = layout({ hub_language: 'de' });
+  const setting = item(result, 'hub_language');
+  assert.deepStrictEqual(setting.values[0], { title: 'Automatic', value: '' });
+  assert.strictEqual(setting.values.length, 31);
+  assert.ok(setting.values.some((v) => v.value === 'de' && v.title === 'Deutsch'));
+  assert.strictEqual(result.values.hub_language, 'de');
+  assert.strictEqual(layout({ hub_language: 'xx' }).values.hub_language, '');
+  assert.strictEqual(layout({}).values.hub_language, '');
 });
 
 check('party mode is first, with on, paused and off', () => {
@@ -247,9 +270,19 @@ check('a saved on/off from "Guest access" carries over, and junk reads as on', (
   assert.strictEqual(layout({ enabled: 'maybe' }).values.enabled, true);
 });
 
+check('party host name: a text field after Party name, blank unless set', () => {
+  const result = layout({});
+  assert.strictEqual(item(result, 'host_name').title, 'Party host name');
+  const names = result.layout.map((entry) => entry.setting);
+  assert.strictEqual(names.indexOf('host_name'), names.indexOf('party_name') + 1);
+  assert.strictEqual(item(result, 'host_name').type, 'string');
+  assert.strictEqual(result.values.host_name, '');
+  assert.strictEqual(layout({ host_name: 'DJ Stu' }).values.host_name, 'DJ Stu');
+});
+
 check('display playlist download: QR code, link or off, QR code unless chosen', () => {
   const entry = item(layout({}), 'playlist_download');
-  assert.strictEqual(entry.title, 'Display playlist download');
+  assert.strictEqual(entry.title, 'Playlist on the Party Hub');
   assert.deepStrictEqual(entry.values.map((v) => v.value), ['qr', 'link', 'off']);
   assert.strictEqual(layout({}).values.playlist_download, 'qr');
   assert.strictEqual(layout({ playlist_download: 'link' }).values.playlist_download, 'link');
@@ -269,6 +302,15 @@ check('the hint names the download address once it is known', () => {
     hint({ _resolveZone: () => null, playlistUrl: 'http://192.0.2.10:8338/Download/playlist.csv' }),
     'On the Party Hub when Party mode is Off\nAlways downloadable at http://192.0.2.10:8338/Download/playlist.csv'
   );
+});
+
+check('hide names in playlist: a Yes/No in Advanced, off unless chosen', () => {
+  const advanced = layout({}).layout.find((entry) => entry.title === 'Advanced');
+  const entry = advanced.items.find((i) => i.setting === 'playlist_hide_names');
+  assert.strictEqual(entry.title, 'Hide names in downloadable playlist');
+  assert.strictEqual(entry.subtitle, 'Replace guest names with Anon');
+  assert.deepStrictEqual(entry.values.map((v) => v.value), [true, false]);
+  assert.strictEqual(layout({}).values.playlist_hide_names, false);
 });
 
 check('numbers in range pass through', () => {
@@ -319,9 +361,22 @@ check('the hints under the settings say what 0 means', () => {
     assert.doesNotMatch(item(result, setting).title, /0 =/, setting);
   }
   for (const setting of ['add_refill', 'next_refill', 'skip_refill']) {
-    assert.strictEqual(item(result, setting).subtitle, '0 = a used one never comes back', setting);
+    assert.strictEqual(item(result, setting).subtitle, '0 = never', setting);
+  }
+  for (const setting of ['add_refill', 'next_refill', 'skip_refill']) {
     assert.strictEqual(item(result, setting).title, 'Minutes to earn one back', setting);
   }
+  assert.strictEqual(item(result, 'add_limit').title, '"Add to queue" per guest', 'named after the button');
+  assert.strictEqual(item(result, 'next_limit').title, '"Play it next" per guest', 'named after the button');
+  assert.strictEqual(item(result, 'skip_limit').title, '"Skip" per guest', 'named after the button');
+});
+
+check('playing next sits in the Adding tracks group, with no heading of its own', () => {
+  const groups = layout({}).layout.filter((entry) => entry.type === 'group');
+  assert.deepStrictEqual(groups.map((g) => g.title), ['Adding tracks', 'Skipping', 'Advanced']);
+  assert.deepStrictEqual(groups[0].items.map((i) => i.setting), [
+    'allow_add', 'prevent_duplicates', 'add_limit', 'add_refill', 'allow_next', 'next_limit', 'next_refill'
+  ]);
 });
 
 check('an out-of-range value keeps its hint alongside the error', () => {
@@ -335,7 +390,7 @@ check('browse titles explain themselves in a hint', () => {
   const group = result.layout.find((entry) => entry.type === 'group' && entry.title === 'Advanced');
   assert.ok(group, 'an "Advanced" group');
   assert.strictEqual(group.collapsable, true, 'starts closed');
-  assert.deepStrictEqual(group.items.map((i) => i.setting), ['port', 'title_tracks', 'title_add', 'title_next', 'title_profile']);
+  assert.deepStrictEqual(group.items.map((i) => i.setting), ['playlist_hide_names', 'port', 'title_tracks', 'title_add', 'title_next', 'title_profile']);
   assert.strictEqual(
     item(result, 'title_add').subtitle,
     '"Queue" in English. Usually found automatically on a Core in another language.'
@@ -394,6 +449,25 @@ check('0 minutes means a used allowance never comes back', () => {
   const status = guests.check(session, 'skip', settings);
   assert.strictEqual(status.allowed, false);
   assert.strictEqual(status.nextIn, null);
+});
+
+check('a limit changed mid-party counts what each guest has already used', () => {
+  const guests = new GuestStore();
+  const session = guests.create();
+  const at = (limit) => layout({ allow_add: true, add_limit: limit, add_refill: 10 }).values;
+  const left = (limit) => guests.check(session, 'add', at(limit)).remaining;
+  assert.strictEqual(left(5), 5);
+  guests.consume(session, 'add', at(5));
+  assert.strictEqual(left(10), 9, 'raised: one used of ten');
+  assert.strictEqual(left(3), 2, 'lowered: one used of three');
+  guests.consume(session, 'add', at(3));
+  guests.consume(session, 'add', at(3));
+  assert.strictEqual(guests.check(session, 'add', at(1)).allowed, false, 'lowered below what was used: none left');
+  // Nothing is owed beyond none left: raised again, one used of five.
+  assert.strictEqual(left(5), 4);
+  // No limit in between leaves the count where it was.
+  assert.strictEqual(guests.check(session, 'add', at(0)).remaining, null);
+  assert.strictEqual(left(5), 4);
 });
 
 check('switched off wins over any limit', () => {
