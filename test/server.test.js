@@ -46,7 +46,7 @@ const roon = Object.assign(new EventEmitter(), {
   queue: [],
   zone: null,
   ready: false,
-  partyName: 'Test Party',
+  pageName: 'Test Party',
   searches: [],
   actions: [],
   skips: 0,
@@ -619,17 +619,17 @@ const set = (values) => Object.assign(roon.settings, values);
   });
 
   await check("the Hub's title is the party's name, before any script runs", async () => {
-    roon.partyName = 'Kate & Sam <3 $& Co';
+    roon.pageName = 'Kate & Sam <3 $& Co';
     const en = await (await get('/PartyHub')).text();
     assert.match(en, /<title>Kate &#38; Sam &#60;3 \$&#38; Co Hub<\/title>/);
     const fr = await (await get('/partyhub', { 'Accept-Language': 'fr' })).text();
     assert.match(fr, /<html lang="fr" dir="ltr">/);
     const he = await (await get('/PartyHub', { 'Accept-Language': 'he-IL' })).text();
     assert.match(he, /<html lang="he" dir="rtl">/);
-    roon.partyName = '';
+    roon.pageName = '';
     const unnamed = await (await get('/PartyHub', { 'Accept-Language': 'nl' })).text();
     assert.match(unnamed, /<title>Feest Hub<\/title>/);
-    roon.partyName = 'Test Party';
+    roon.pageName = 'Test Party';
   });
 
   await check("the page's text follows a language the guest chose", async () => {

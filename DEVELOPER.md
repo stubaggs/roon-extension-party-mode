@@ -211,6 +211,10 @@ Left blank, the party name is the party zone's name. For a grouped zone, that's 
 name for the group, such as "Kitchen + Living Room". It follows the zone if you change
 it, and the setting shows which name that is.
 
+With neither a name nor a zone, the pages say "Party" in the guest's language
+(`party.default_name`): the server sends them an empty name (`RoonService.pageName`).
+Roon's status line says "Party", in English like the rest of the settings.
+
 ### Host name
 
 Stored as `host_name`, blank by default. Set, it stands in for "Host" wherever the host's

@@ -103,6 +103,8 @@ check('zone not available yet: the endpoint picked', () => {
 
 check('nothing chosen at all: "Party"', () => {
   assert.strictEqual(partyName({ party_name: '', zone: null }, null), 'Party');
+  // The pages get nothing, and say "Party" in the guest's language.
+  assert.strictEqual(partyName({ party_name: '', zone: null }, null, ''), '');
 });
 
 check('the settings say what a blank name will use', () => {
