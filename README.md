@@ -89,18 +89,15 @@ docker compose pull && docker compose up -d
 Your settings and Roon's pairing stay in `config.json`. To stop Party Mode, run
 `docker compose down`.
 
-To change the first port or turn on the detailed log, edit the `environment` lines in
-`docker-compose.yml`, then run `docker compose up -d` again.
-
 ## Starting a party
 
 1. In Roon, open **Settings → Extensions → Party Mode → Settings** and pick the **Party
    zone**: where the music plays. Give the party a name if you like; otherwise it's
-   named after the zone. Choose a **Party profile** if you want a record of the party,
-   and a **Party Hub language** if the Hub's screen is hard to set.
-2. Click **Party Mode**'s link in the Extensions list to open the **Party Hub**. Put it
+   named after the zone. Choose a **Party profile** if you want to change from the default. Press
+   Save to close settings window and apply your choices.
+3. Click **Party Mode**'s link in the Extensions list to open the **Party Hub**. Put it
    on a TV, a tablet or a laptop where guests can see it.
-3. Guests scan the QR code on the Party Hub with their phone camera. That's it.
+4. Guests scan the QR code on the Party Hub with their phone camera. That's it.
 
 **Party mode**, at the top of the settings, runs the party:
 
@@ -120,8 +117,8 @@ party's name and the Party Hub's address, for example:
 ## The party's playlist
 
 Once **Party mode** is **Off**, the Party Hub shows the playlist to download (see
-**Playlist on the Party Hub** below). It's always at the address in that setting's hint,
-such as `http://192.0.2.10:8338/Download/playlist.csv`, which you can open in any browser on
+**Playlist on the Party Hub** below). It's always at the address in that setting's hint, 
+e.g. `http://192.0.2.10:8338/Download/playlist.csv`, which you can open in any browser on
 your network.
 
 It's a CSV file of every track queued in the party zone: title, artist, album, length, who
@@ -143,7 +140,7 @@ file; Google Sheets, Numbers and Excel's **Data → From Text/CSV** read it corr
 | Playlist on the Party Hub | What the Party Hub shows once **Party mode** is **Off**: a **QR code** guests can scan (the default), a **Link only** to click on the Hub itself, or **Off** for nothing. |
 | Adding tracks | Whether guests can add tracks, and whether a track already in the queue can be added again (covers, live takes, remasters and the same track on another album count as different tracks). **Also let guests play a track next** lets them put a track straight after the current one (only while adding is on). |
 | Skipping | Whether guests can skip the currently playing track. Off unless you turn it on. |
-| Advanced | **Hide names in downloadable playlist**: the playlist download says **Anon** instead of each guest's name. Tracks Roon Radio picked or you queued still say **Roon Radio** or **Host**. Off by default.<br>**Web port**: the port the guest pages and the Party Hub use (8338). If it's busy when Party Mode starts, it uses the next free one and the status line says so. Only change it if something else on the computer uses 8338.<br>**Browse titles**: Party Mode usually finds them by itself; only fill them in if search or queuing doesn't work on a Core that isn't in English. |
+| Advanced | **Hide names in downloadable playlist**: the playlist download says **Anon** instead of each guest's name. Tracks Roon Radio picked or you queued still say **Roon Radio** or **Host**. Off by default.<br>**Web port**: the port the guest pages and the Party Hub use (8338). If it's busy when Party Mode starts, it uses the next free one. Only change it if something else on the computer uses 8338.<br>**Browse titles**: Party Mode usually finds them by itself; only fill them in if search or queuing doesn't work on a Core that isn't in English. |
 
 **"Add to queue" per guest**, **"Play it next" per guest** and **"Skip" per guest** set
 how many of each a guest gets (**0 means no limit**), and **Minutes to earn one back**
@@ -220,16 +217,18 @@ run `sudo chown 1000 config.json && chmod 600 config.json` on the file you mount
 Mode picks the next free one and the QR code follows it, so this is fine to leave. To
 choose one yourself, change **Web port** under **Advanced** in the settings.
 
-**Search finds nothing, or adding fails, on a Core in another language.** Open the
+**Search finds nothing, or adding fails, on a Core in a non english language.** Open the
 **Advanced** section of the settings and fill in the titles your Core uses.
 
 **Something else isn't working.** Start the extension with
 `ROON_EXTENSION_PARTY_MODE_DEBUG=1` (with Docker, add
 `-e ROON_EXTENSION_PARTY_MODE_DEBUG=1`; with Docker Compose, remove the `#` in front of
 that line in `docker-compose.yml` and run `docker compose up -d`) for a detailed log,
-including every message to and from Roon, and include it in an issue. See it with
+including every message to and from Roon. See it with
 `docker logs roon-extension-party-mode`, or `docker compose logs` in its folder. Turn it
 off again afterwards: it's large and records what guests search for.
+
+**Need some help troubleshooting ?** or have some suggestions, mosey on over to the [Roon forums](https://community.roonlabs.com/t/party-mode-extension)
 
 ## Running more than one party
 
