@@ -1,5 +1,7 @@
 {
   "_language": "Svenska",
+  "_reserved_host_words": "Värd, Värdinna",
+  "_reserved_radio_words": "Radio",
   "page.title": "Lägg till ett spår",
   "page.hub_title": "{name} Hub",
   "party.default_name": "Fest",

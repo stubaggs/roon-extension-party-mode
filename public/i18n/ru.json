@@ -1,5 +1,7 @@
 {
   "_language": "Русский",
+  "_reserved_host_words": "Хозяин, Хозяйка",
+  "_reserved_radio_words": "Радио",
   "page.title": "Добавить трек",
   "page.hub_title": "{name} Hub",
   "party.default_name": "Вечеринка",

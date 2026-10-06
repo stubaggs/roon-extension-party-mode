@@ -1,5 +1,7 @@
 {
   "_language": "العربية",
+  "_reserved_host_words": "المضيف, المضيفة",
+  "_reserved_radio_words": "راديو",
   "page.title": "إضافة مقطع",
   "page.hub_title": "{name} Hub",
   "party.default_name": "حفلة",

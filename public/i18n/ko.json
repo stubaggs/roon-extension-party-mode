@@ -1,5 +1,7 @@
 {
   "_language": "한국어",
+  "_reserved_host_words": "호스트",
+  "_reserved_radio_words": "라디오",
   "page.title": "트랙 추가",
   "page.hub_title": "{name} Hub",
   "party.default_name": "파티",

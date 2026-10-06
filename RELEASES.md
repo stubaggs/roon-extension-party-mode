@@ -10,15 +10,14 @@ Not released yet. You can try it on the `experimental` branch (see
 
 ### New
 
+- **Party host name** setting, your name, in place of **Host** on the tracks you queue
+- and skip in Roon, and in the playlist download. Left blank, it's "Host" in each guest's language.
 - **Party Hub language** setting in Roon: choose the Party Hub's language for every
   screen showing it, handy for a TV whose browser is hard to set. **Automatic** (the
   default) follows the screen's browser, as before. Guests' phones still follow their own.
 - **Hide names in downloadable playlist** setting, under **Advanced**: the playlist
   download credits every guest's track to Anon instead of their name. Roon Radio and Host
   stay.
-- **Host name** setting, after **Party name**: your name, or "DJ Stu", in place of
-  **Host** on the tracks you queue and skip in Roon, and in the playlist download. Left
-  blank, it's "Host" in each guest's language.
 
 ### Improvements
 - A radio station playing on the party zone shows "Radio station"

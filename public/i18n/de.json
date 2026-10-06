@@ -1,5 +1,7 @@
 {
   "_language": "Deutsch",
+  "_reserved_host_words": "Gastgeber, Gastgeberin",
+  "_reserved_radio_words": "Radio",
   "page.title": "Titel hinzufügen",
   "page.hub_title": "{name} Hub",
   "party.default_name": "Party",

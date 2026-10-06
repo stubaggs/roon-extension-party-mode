@@ -136,16 +136,19 @@ file; Google Sheets, Numbers and Excel's **Data → From Text/CSV** read it corr
 | Party zone | Where the music plays. If you pick a speaker that's grouped with others, the whole group plays. |
 | Party profile | The Roon profile guests' tracks play under, so they count toward its play history and recommendations. Unless you choose one, that's Roon's default profile (normally **Guest**). To keep a record of the party, create a profile such as "Party" in Roon first, then choose it here. |
 | Party name | Shown on the Party Hub. Leave blank to use the zone's name. |
+| Party host name | Your name, shown instead of **Host** on the tracks you queue or skip in Roon and in the playlist download. Leave blank for **Host** in each guest's language. Guests can't use it as their name. |
 | Party Hub language | The language of the Party Hub, for every screen showing it. Automatic (the default) follows the screen's browser. Guests' phones always follow their own. |
 | Playlist on the Party Hub | What the Party Hub shows once **Party mode** is **Off**: a **QR code** guests can scan (the default), a **Link only** to click on the Hub itself, or **Off** for nothing. |
 | Adding tracks | Whether guests can add tracks, and whether a track already in the queue can be added again (covers, live takes, remasters and the same track on another album count as different tracks). **Also let guests play a track next** lets them put a track straight after the current one (only while adding is on). |
 | Skipping | Whether guests can skip the currently playing track. Off unless you turn it on. |
-| Advanced | **Hide names in downloadable playlist**: the playlist download says **Anon** instead of each guest's name. Tracks Roon Radio picked or you queued still say **Roon Radio** or **Host**. Off by default.<br>**Web port**: the port the guest pages and the Party Hub use (8338). If it's busy when Party Mode starts, it uses the next free one. Only change it if something else on the computer uses 8338.<br>**Browse titles**: Party Mode usually finds them by itself; only fill them in if search or queuing doesn't work on a Core that isn't in English. |
+| Advanced | **Hide names in downloadable playlist**: the playlist download says **Anon** instead of each guest's name. Tracks Roon Radio picked or you queued still say **Roon Radio** or **Host** (or your **Party host name**). Off by default.<br>**Web port**: the port the guest pages and the Party Hub use (8338). If it's busy when Party Mode starts, it uses the next free one. Only change it if something else on the computer uses 8338.<br>**Browse titles**: Party Mode usually finds them by itself; only fill them in if search or queuing doesn't work on a Core that isn't in English. |
 
 **"Add to queue" per guest**, **"Play it next" per guest** and **"Skip" per guest** set
 how many of each a guest gets (**0 means no limit**), and **Minutes to earn one back**
 how long until they get another (**0 means never**). By default, skipping is off; each
 guest can add 5 tracks, earning one back every 10 minutes, and play next once an hour.
+Changing these during a party applies straight away to guests already there, counting
+what they've used.
 
 ## Good to know
 
@@ -161,8 +164,12 @@ guest can add 5 tracks, earning one back every 10 minutes, and play next once an
   choose how the party begins. Guests can't skip a station.
 - **Tag colours** on the Party Hub and guests' phones show how a track got into the
   queue: **lavender** when a guest added it, **amber** when a guest chose **Play it
-  next**, **mint** for Roon Radio, and **sky blue** for **Host**, anything you queued in
-  Roon.
+  next**, **mint** for Roon Radio, and **sky blue** for **Host** (or your **Party host
+  name**), anything you queued in Roon. A track you cut short in Roon shows in Played as
+  **Skipped by Host**.
+- **Guests' names:** guests can't call themselves Host, Roon Radio, Radio or Anon, in any
+  language, or your **Party host name**. A guest who picks a name someone else at the
+  party already uses is asked whether to use it anyway.
 - **The Roon Radio tag is a good guess.** A track you add just as the last one ends may
   be tagged Roon Radio, and after a restart, Roon Radio's picks already queued show as
   Host.
@@ -219,6 +226,12 @@ choose one yourself, change **Web port** under **Advanced** in the settings.
 
 **Search finds nothing, or adding fails, on a Core in a non english language.** Open the
 **Advanced** section of the settings and fill in the titles your Core uses.
+
+**A guest sees "Too many requests".** Each phone may make 600 requests and 60 searches a
+minute, far more than normal use. If your guest Wi-Fi puts every phone behind one
+address, they share that limit: raise it with `ROON_EXTENSION_PARTY_MODE_RATE_LIMIT` and
+`ROON_EXTENSION_PARTY_MODE_SEARCH_LIMIT` (0 turns a limit off). With Docker, add `-e` and
+the variable to `docker run`, or uncomment its line in `docker-compose.yml`.
 
 **Something else isn't working.** Start the extension with
 `ROON_EXTENSION_PARTY_MODE_DEBUG=1` (with Docker, add

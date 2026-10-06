@@ -1,5 +1,7 @@
 {
   "_language": "Português (Brasil)",
+  "_reserved_host_words": "Anfitrião, Anfitriã",
+  "_reserved_radio_words": "Rádio",
   "page.title": "Adicionar uma faixa",
   "page.hub_title": "{name} Hub",
   "party.default_name": "Festa",

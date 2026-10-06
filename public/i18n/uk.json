@@ -1,5 +1,7 @@
 {
   "_language": "Українська",
+  "_reserved_host_words": "Господар, Господарка",
+  "_reserved_radio_words": "Радіо",
   "page.title": "Додати трек",
   "page.hub_title": "{name} Hub",
   "party.default_name": "Вечірка",

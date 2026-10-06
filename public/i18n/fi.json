@@ -1,5 +1,7 @@
 {
   "_language": "Suomi",
+  "_reserved_host_words": "Isäntä, Emäntä",
+  "_reserved_radio_words": "Radio",
   "page.title": "Lisää kappale",
   "page.hub_title": "{name} Hub",
   "party.default_name": "Juhlat",

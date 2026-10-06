@@ -1,5 +1,7 @@
 {
   "_language": "Français",
+  "_reserved_host_words": "Hôte, Hôtesse",
+  "_reserved_radio_words": "Radio",
   "page.title": "Ajouter un morceau",
   "page.hub_title": "{name} Hub",
   "party.default_name": "Soirée",

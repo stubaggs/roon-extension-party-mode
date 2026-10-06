@@ -1,5 +1,7 @@
 {
   "_language": "Čeština",
+  "_reserved_host_words": "Hostitel, Hostitelka",
+  "_reserved_radio_words": "Rádio",
   "page.title": "Přidat skladbu",
   "page.hub_title": "{name} Hub",
   "party.default_name": "Večírek",

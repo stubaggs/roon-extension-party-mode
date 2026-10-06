@@ -257,6 +257,15 @@ check('every language file has a name, and every page key', () => {
   }
 });
 
+check('reserved host and radio words are read from every language, and never sent to the pages', () => {
+  const words = i18n.wordLists('_reserved_host_words');
+  for (const word of ['Hostess', 'Gastgeber', 'Gastgeberin', 'Хозяйка', 'ホスト']) assert.ok(words.includes(word), word);
+  const radio = i18n.wordLists('_reserved_radio_words');
+  for (const word of ['Radio', 'Радио', 'ラジオ', '电台']) assert.ok(radio.includes(word), word);
+  assert.ok(!words.includes(''), 'empty lists add nothing');
+  for (const lang of ['en', 'de', 'ja']) assert.ok(!i18n.script(lang).includes('_reserved'), lang);
+});
+
 check('Hebrew and Arabic read right to left; the page is told so', () => {
   for (const lang of ['he', 'ar', 'ar-EG']) assert.strictEqual(i18n.dir(lang), 'rtl', lang);
   for (const lang of ['en', 'ru', 'zh-Hant', 'ja']) assert.strictEqual(i18n.dir(lang), 'ltr', lang);

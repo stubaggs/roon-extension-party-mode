@@ -1,5 +1,7 @@
 {
   "_language": "Ελληνικά",
+  "_reserved_host_words": "Οικοδεσπότης, Οικοδέσποινα",
+  "_reserved_radio_words": "Ραδιόφωνο",
   "page.title": "Προσθήκη κομματιού",
   "page.hub_title": "{name} Hub",
   "party.default_name": "Πάρτι",

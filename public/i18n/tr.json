@@ -1,5 +1,7 @@
 {
   "_language": "Türkçe",
+  "_reserved_host_words": "Ev sahibi, Ev sahibesi",
+  "_reserved_radio_words": "Radyo",
   "page.title": "Parça ekle",
   "page.hub_title": "{name} Hub",
   "party.default_name": "Parti",

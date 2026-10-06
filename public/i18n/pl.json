@@ -1,5 +1,7 @@
 {
   "_language": "Polski",
+  "_reserved_host_words": "Gospodarz, Gospodyni",
+  "_reserved_radio_words": "Radio",
   "page.title": "Dodaj utwór",
   "page.hub_title": "{name} Hub",
   "party.default_name": "Impreza",

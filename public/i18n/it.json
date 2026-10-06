@@ -1,5 +1,7 @@
 {
   "_language": "Italiano",
+  "_reserved_host_words": "Host",
+  "_reserved_radio_words": "Radio",
   "page.title": "Aggiungi un brano",
   "page.hub_title": "{name} Hub",
   "party.default_name": "Festa",

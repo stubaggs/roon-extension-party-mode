@@ -1,5 +1,7 @@
 {
   "_language": "ไทย",
+  "_reserved_host_words": "เจ้าภาพ",
+  "_reserved_radio_words": "วิทยุ",
   "page.title": "เพิ่มแทร็ก",
   "page.hub_title": "{name} Hub",
   "party.default_name": "ปาร์ตี้",

@@ -1,5 +1,7 @@
 {
   "_language": "English",
+  "_reserved_host_words": "Host, Hostess",
+  "_reserved_radio_words": "Radio",
   "page.title": "Add a track",
   "page.hub_title": "{name} Hub",
   "party.default_name": "Party",

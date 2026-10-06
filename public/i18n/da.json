@@ -1,5 +1,7 @@
 {
   "_language": "Dansk",
+  "_reserved_host_words": "Vært, Værtinde",
+  "_reserved_radio_words": "Radio",
   "page.title": "Tilføj et nummer",
   "page.hub_title": "{name} Hub",
   "party.default_name": "Fest",

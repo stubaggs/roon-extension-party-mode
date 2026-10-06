@@ -1,5 +1,7 @@
 {
   "_language": "Български",
+  "_reserved_host_words": "Домакин, Домакиня",
+  "_reserved_radio_words": "Радио",
   "page.title": "Добави запис",
   "page.hub_title": "{name} Hub",
   "party.default_name": "Парти",

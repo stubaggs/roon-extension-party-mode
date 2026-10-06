@@ -1,5 +1,7 @@
 {
   "_language": "Nederlands",
+  "_reserved_host_words": "Host",
+  "_reserved_radio_words": "Radio",
   "page.title": "Nummer toevoegen",
   "page.hub_title": "{name} Hub",
   "party.default_name": "Feest",

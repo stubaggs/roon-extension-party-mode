@@ -270,8 +270,9 @@ check('a saved on/off from "Guest access" carries over, and junk reads as on', (
   assert.strictEqual(layout({ enabled: 'maybe' }).values.enabled, true);
 });
 
-check('host name: a text field after Party name, blank unless set', () => {
+check('party host name: a text field after Party name, blank unless set', () => {
   const result = layout({});
+  assert.strictEqual(item(result, 'host_name').title, 'Party host name');
   const names = result.layout.map((entry) => entry.setting);
   assert.strictEqual(names.indexOf('host_name'), names.indexOf('party_name') + 1);
   assert.strictEqual(item(result, 'host_name').type, 'string');

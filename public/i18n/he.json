@@ -1,5 +1,7 @@
 {
   "_language": "עברית",
+  "_reserved_host_words": "המארח, המארחת",
+  "_reserved_radio_words": "רדיו",
   "page.title": "הוספת רצועה",
   "page.hub_title": "{name} Hub",
   "party.default_name": "מסיבה",

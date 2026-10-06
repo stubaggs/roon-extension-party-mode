@@ -513,7 +513,7 @@ const set = (values) => Object.assign(roon.settings, values);
 
   await check("Party Mode's own labels can't be a guest's name, in any language or spelling", async () => {
     const cookie = await newGuest();
-    for (const name of ['Host', ' roon  RADIO ', 'anon!', 'Gastgeber', 'Hote', 'Ev sahibi', '主人', 'Radio', 'radio station', 'Radiosender', 'Rádio', 'Радио', 'ラジオ', '라디오', 'Gastgebende', 'Хозяева', 'Хозяин', '主催者', 'ホスト']) {
+    for (const name of ['Host', ' roon  RADIO ', 'anon!', 'Gastgeber', 'Hote', 'Ev sahibi', '主人', 'Radio', 'radio station', 'Radiosender', 'Rádio', 'Радио', 'ラジオ', '라디오', 'Gastgebende', 'Хозяева', 'Хозяин', '主催者', 'ホスト', 'Hostess', 'Gastgeberin', 'Hôtesse', 'Хозяйка', 'المضيفة']) {
       const res = await post('/api/name', cookie, { name, confirm: true });
       assert.strictEqual(res.status, 400, name);
       assert.strictEqual((await res.json()).error, 'name_reserved', name);

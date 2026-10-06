@@ -1,5 +1,7 @@
 {
   "_language": "繁體中文",
+  "_reserved_host_words": "主人, 女主人",
+  "_reserved_radio_words": "電台, 收音機",
   "page.title": "新增曲目",
   "page.hub_title": "{name} Hub",
   "party.default_name": "派對",

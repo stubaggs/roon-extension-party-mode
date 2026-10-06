@@ -1,5 +1,7 @@
 {
   "_language": "Español",
+  "_reserved_host_words": "Anfitrión, Anfitriona",
+  "_reserved_radio_words": "Radio",
   "page.title": "Añadir una pista",
   "page.hub_title": "{name} Hub",
   "party.default_name": "Fiesta",

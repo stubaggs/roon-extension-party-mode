@@ -1,5 +1,7 @@
 {
   "_language": "العربية المصرية",
+  "_reserved_host_words": "صاحب الحفلة, صاحبة الحفلة",
+  "_reserved_radio_words": "راديو",
   "page.title": "ضيف تراك",
   "page.hub_title": "{name} Hub",
   "party.default_name": "حفلة",
