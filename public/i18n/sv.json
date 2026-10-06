@@ -33,7 +33,7 @@
   "played.title": "Spelade",
   "played.empty": "Inget har spelats än.",
   "played.skipped_by": "Överhoppad av {name}",
-  "played.skipped_in_roon": "Överhoppad i Roon",
+  "played.skipped_by_host": "Överhoppad av värden",
   "allowance.closed": "Önskemålen är stängda just nu.",
   "allowance.paused": "Önskemålen är pausade en stund.",
   "button.left": {

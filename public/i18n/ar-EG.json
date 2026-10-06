@@ -37,7 +37,7 @@
   "played.title": "اتشغّلوا",
   "played.empty": "لسه ما اتشغّلش حاجة.",
   "played.skipped_by": "{name} عدّاه",
-  "played.skipped_in_roon": "اتعدّى في Roon",
+  "played.skipped_by_host": "عدّاه صاحب الحفلة",
   "allowance.closed": "الطلبات مقفولة دلوقتي.",
   "allowance.paused": "الطلبات واقفة شوية.",
   "button.left": {

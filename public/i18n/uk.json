@@ -35,7 +35,7 @@
   "played.title": "Уже грали",
   "played.empty": "Поки нічого не грало.",
   "played.skipped_by": "Пропустив(ла): {name}",
-  "played.skipped_in_roon": "Пропущено в Roon",
+  "played.skipped_by_host": "Пропустив господар",
   "allowance.closed": "Замовлення зараз закриті.",
   "allowance.paused": "Замовлення ненадовго призупинено.",
   "button.left": {

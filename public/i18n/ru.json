@@ -35,7 +35,7 @@
   "played.title": "Уже играли",
   "played.empty": "Пока ничего не играло.",
   "played.skipped_by": "Пропустил(а): {name}",
-  "played.skipped_in_roon": "Пропущен в Roon",
+  "played.skipped_by_host": "Пропустил хозяин",
   "allowance.closed": "Заказы сейчас закрыты.",
   "allowance.paused": "Заказы ненадолго приостановлены.",
   "button.left": {

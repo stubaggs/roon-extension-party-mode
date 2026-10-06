@@ -33,7 +33,7 @@
   "played.title": "Изсвирени",
   "played.empty": "Още нищо не е звучало.",
   "played.skipped_by": "Прескочен от {name}",
-  "played.skipped_in_roon": "Прескочен в Roon",
+  "played.skipped_by_host": "Прескочен от домакина",
   "allowance.closed": "Поръчките са затворени в момента.",
   "allowance.paused": "Поръчките са на пауза за малко.",
   "button.left": {

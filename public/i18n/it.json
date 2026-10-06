@@ -33,7 +33,7 @@
   "played.title": "Già riprodotti",
   "played.empty": "Non è stato ancora riprodotto niente.",
   "played.skipped_by": "Saltato da {name}",
-  "played.skipped_in_roon": "Saltato in Roon",
+  "played.skipped_by_host": "Saltato dall'host",
   "allowance.closed": "Le richieste sono chiuse al momento.",
   "allowance.paused": "Le richieste sono in pausa per un momento.",
   "button.left": {

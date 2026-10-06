@@ -33,7 +33,7 @@
   "played.title": "Afspillet",
   "played.empty": "Intet afspillet endnu.",
   "played.skipped_by": "Sprunget over af {name}",
-  "played.skipped_in_roon": "Sprunget over i Roon",
+  "played.skipped_by_host": "Sprunget over af værten",
   "allowance.closed": "Der er lukket for ønsker lige nu.",
   "allowance.paused": "Ønsker er sat på pause et øjeblik.",
   "button.left": {

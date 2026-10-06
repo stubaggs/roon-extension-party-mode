@@ -32,7 +32,7 @@
   "played.title": "再生済み",
   "played.empty": "まだ何も再生されていません。",
   "played.skipped_by": "{name} さんがスキップ",
-  "played.skipped_in_roon": "Roon でスキップ",
+  "played.skipped_by_host": "ホストがスキップ",
   "allowance.closed": "現在、リクエストは受け付けていません。",
   "allowance.paused": "リクエストは一時停止中です。",
   "button.left": {

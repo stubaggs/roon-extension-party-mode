@@ -35,7 +35,7 @@
   "played.title": "נוגנו",
   "played.empty": "עדיין לא נוגן כלום.",
   "played.skipped_by": "דולגה על ידי {name}",
-  "played.skipped_in_roon": "דולגה ב-Roon",
+  "played.skipped_by_host": "דולגה על ידי המארח",
   "allowance.closed": "הבקשות סגורות כרגע.",
   "allowance.paused": "הבקשות מושהות לרגע.",
   "button.left": {

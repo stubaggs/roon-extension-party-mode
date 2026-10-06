@@ -33,7 +33,7 @@
   "played.title": "Soitetut",
   "played.empty": "Mitään ei ole vielä soitettu.",
   "played.skipped_by": "Ohitti: {name}",
-  "played.skipped_in_roon": "Ohitettu Roonissa",
+  "played.skipped_by_host": "Isäntä ohitti",
   "allowance.closed": "Toiveet ovat juuri nyt suljettu.",
   "allowance.paused": "Toiveet ovat hetken tauolla.",
   "button.left": {

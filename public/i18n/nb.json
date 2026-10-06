@@ -33,7 +33,7 @@
   "played.title": "Spilt",
   "played.empty": "Ingenting spilt ennå.",
   "played.skipped_by": "Hoppet over av {name}",
-  "played.skipped_in_roon": "Hoppet over i Roon",
+  "played.skipped_by_host": "Hoppet over av verten",
   "allowance.closed": "Det er stengt for ønsker akkurat nå.",
   "allowance.paused": "Ønsker er satt på pause en liten stund.",
   "button.left": {

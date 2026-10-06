@@ -32,7 +32,7 @@
   "played.title": "已播放",
   "played.empty": "还没有播放任何内容。",
   "played.skipped_by": "{name} 跳过了",
-  "played.skipped_in_roon": "在 Roon 中跳过",
+  "played.skipped_by_host": "主人跳过了",
   "allowance.closed": "暂不接受点播。",
   "allowance.paused": "点播暂停片刻。",
   "button.left": {

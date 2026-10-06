@@ -37,7 +37,7 @@
   "played.title": "تم تشغيلها",
   "played.empty": "لم يُشغَّل شيء بعد.",
   "played.skipped_by": "تخطّاه {name}",
-  "played.skipped_in_roon": "تم تخطيه في Roon",
+  "played.skipped_by_host": "تخطّاه المضيف",
   "allowance.closed": "الطلبات مغلقة الآن.",
   "allowance.paused": "الطلبات متوقفة لبعض الوقت.",
   "button.left": {

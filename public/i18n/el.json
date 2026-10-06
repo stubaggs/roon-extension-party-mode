@@ -33,7 +33,7 @@
   "played.title": "Έπαιξαν",
   "played.empty": "Δεν έχει παίξει τίποτα ακόμα.",
   "played.skipped_by": "Παραλείφθηκε από {name}",
-  "played.skipped_in_roon": "Παραλείφθηκε στο Roon",
+  "played.skipped_by_host": "Παραλείφθηκε από τον οικοδεσπότη",
   "allowance.closed": "Τα αιτήματα είναι κλειστά αυτή τη στιγμή.",
   "allowance.paused": "Τα αιτήματα είναι σε παύση για λίγο.",
   "button.left": {

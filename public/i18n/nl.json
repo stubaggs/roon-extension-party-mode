@@ -33,7 +33,7 @@
   "played.title": "Al gespeeld",
   "played.empty": "Er is nog niets gespeeld.",
   "played.skipped_by": "Overgeslagen door {name}",
-  "played.skipped_in_roon": "Overgeslagen in Roon",
+  "played.skipped_by_host": "Overgeslagen door de host",
   "allowance.closed": "Verzoekjes zijn nu gesloten.",
   "allowance.paused": "Verzoeken staan even op pauze.",
   "button.left": {

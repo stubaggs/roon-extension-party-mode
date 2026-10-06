@@ -33,7 +33,7 @@
   "played.title": "Já tocadas",
   "played.empty": "Ainda não tocou nada.",
   "played.skipped_by": "Saltada por {name}",
-  "played.skipped_in_roon": "Saltada no Roon",
+  "played.skipped_by_host": "Saltada pelo anfitrião",
   "allowance.closed": "Os pedidos estão fechados de momento.",
   "allowance.paused": "Os pedidos estão em pausa por um momento.",
   "button.left": {

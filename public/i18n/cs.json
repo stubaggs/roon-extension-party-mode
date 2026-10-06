@@ -35,7 +35,7 @@
   "played.title": "Přehráno",
   "played.empty": "Zatím se nic nepřehrálo.",
   "played.skipped_by": "Přeskočil(a): {name}",
-  "played.skipped_in_roon": "Přeskočeno v Roonu",
+  "played.skipped_by_host": "Přeskočil hostitel",
   "allowance.closed": "Přání jsou teď uzavřená.",
   "allowance.paused": "Přání jsou na chvíli pozastavená.",
   "button.left": {

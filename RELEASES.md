@@ -15,6 +15,8 @@ Not released yet. You can try it on the `experimental` branch (see
 - Tracks you queue in Roon get a **Host** tag, in sky blue, on the Party Hub, the guest
   page and in the playlist download. Before, with Roon Radio on, they were labelled Roon
   Radio; Roon Radio's tag now goes only on the tracks it picks.
+- A track cut short in Roon shows in Played as **Skipped by Host**, like the **Host** tag
+  on tracks you queue in Roon, instead of "Skipped in Roon".
 - New **Hide names in downloadable playlist** setting, under **Advanced**: the playlist
   download credits every guest's track to Anon instead of their name. Roon Radio and Host
   stay.

@@ -33,7 +33,7 @@
   "played.title": "Lejátszva",
   "played.empty": "Még semmi sem szólt.",
   "played.skipped_by": "Átugrotta: {name}",
-  "played.skipped_in_roon": "Átugorva a Roonban",
+  "played.skipped_by_host": "A házigazda átugrotta",
   "allowance.closed": "A kérések most le vannak zárva.",
   "allowance.paused": "A kérések egy kis időre szünetelnek.",
   "button.left": {

@@ -32,7 +32,7 @@
   "played.title": "เล่นไปแล้ว",
   "played.empty": "ยังไม่ได้เล่นอะไร",
   "played.skipped_by": "{name} ข้ามไป",
-  "played.skipped_in_roon": "ข้ามใน Roon",
+  "played.skipped_by_host": "เจ้าภาพข้ามไป",
   "allowance.closed": "ขณะนี้ปิดรับคำขอ",
   "allowance.paused": "พักรับคำขอสักครู่",
   "button.left": {

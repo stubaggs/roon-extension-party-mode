@@ -34,7 +34,7 @@
   "played.title": "Redate",
   "played.empty": "Încă nu s-a redat nimic.",
   "played.skipped_by": "Sărită de {name}",
-  "played.skipped_in_roon": "Sărită în Roon",
+  "played.skipped_by_host": "Sărită de gazdă",
   "allowance.closed": "Cererile sunt închise acum.",
   "allowance.paused": "Cererile sunt în pauză pentru moment.",
   "button.left": {

@@ -32,7 +32,7 @@
   "played.title": "재생됨",
   "played.empty": "아직 재생된 항목이 없습니다.",
   "played.skipped_by": "{name} 님이 건너뜀",
-  "played.skipped_in_roon": "Roon에서 건너뜀",
+  "played.skipped_by_host": "호스트가 건너뜀",
   "allowance.closed": "지금은 신청을 받지 않습니다.",
   "allowance.paused": "신청이 잠시 중단되었습니다.",
   "button.left": {

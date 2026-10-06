@@ -35,7 +35,7 @@
   "played.title": "Odtworzone",
   "played.empty": "Nic jeszcze nie zostało odtworzone.",
   "played.skipped_by": "Pominięte przez: {name}",
-  "played.skipped_in_roon": "Pominięte w Roon",
+  "played.skipped_by_host": "Pominięte przez gospodarza",
   "allowance.closed": "Zamówienia są teraz zamknięte.",
   "allowance.paused": "Zamówienia są na chwilę wstrzymane.",
   "button.left": {

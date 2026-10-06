@@ -32,7 +32,7 @@
   "played.title": "Đã phát",
   "played.empty": "Chưa phát gì cả.",
   "played.skipped_by": "{name} đã bỏ qua",
-  "played.skipped_in_roon": "Đã bỏ qua trong Roon",
+  "played.skipped_by_host": "Chủ tiệc đã bỏ qua",
   "allowance.closed": "Hiện đã ngừng nhận yêu cầu.",
   "allowance.paused": "Yêu cầu đang tạm dừng một lát.",
   "button.left": {

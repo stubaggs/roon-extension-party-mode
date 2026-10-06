@@ -33,7 +33,7 @@
   "played.title": "Çalınanlar",
   "played.empty": "Henüz hiçbir şey çalınmadı.",
   "played.skipped_by": "Atlayan: {name}",
-  "played.skipped_in_roon": "Roon'da atlandı",
+  "played.skipped_by_host": "Ev sahibi atladı",
   "allowance.closed": "İstekler şu anda kapalı.",
   "allowance.paused": "İstekler kısa bir süre için duraklatıldı.",
   "button.left": {

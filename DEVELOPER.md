@@ -484,8 +484,9 @@ itself, as tracks start (last 200 tracks).
 - **A skip made in Roon** is inferred. `RoonService._notePosition` keeps the furthest
   position Roon reported for the playing track; zone updates can carry a reset one. A
   track left 10 seconds or more before its end (`SKIP_MARGIN` in `lib/history.js`), with
-  no guest skip, shows "Skipped in Roon". Anything that cuts a track short counts, such as
-  Play Now on another track in Roon.
+  no guest skip, shows "Skipped by Host" (`skipped_by_host`), like the Host tag on tracks
+  queued in Roon. Anything that cuts a track short counts, such as Play Now on another
+  track in Roon.
 - **No judgement without data:** a track with no length or no reported position is never
   marked, so radio streams and zones that report no position never show it.
 
@@ -529,7 +530,7 @@ Taking over automatically was tried and dropped as too clunky. What the Core did
   [The guest page](#the-guest-page)).
 - `requester()` credits a station to nobody: it isn't Roon Radio, and no guest asked for it.
 - Played never lists a station. The track it replaced moves into Played as it starts
-  (`PlayHistory.update`), as "Skipped in Roon" if it was cut short.
+  (`PlayHistory.update`), as "Skipped by Host" if it was cut short.
 
 ## The party playlist
 

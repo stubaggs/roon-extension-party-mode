@@ -92,9 +92,9 @@
     return t('credit.requested_by', { name: guestName(item.requested_by) });
   }
 
-  /** "Skipped by Sam", "Skipped by Anon" or "Skipped in Roon", for a skipped played track. */
+  /** "Skipped by Sam", "Skipped by Anon" or "Skipped by Host", for a skipped played track. */
   function skippedBy(item) {
-    if (item.skipped_in_roon) return t('played.skipped_in_roon');
+    if (item.skipped_by_host) return t('played.skipped_by_host');
     return t('played.skipped_by', { name: guestName(item.skipped_by) });
   }
 
