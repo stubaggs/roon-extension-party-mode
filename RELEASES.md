@@ -21,7 +21,6 @@ Not released yet. You can try it on the `experimental` branch (see
 - Guests can't call themselves **Host**, **Roon Radio**, **Radio** or **Anon** (in any
   language), so those tags always mean what they say. A guest who picks a name someone
   else at the party already uses is asked whether to use it anyway.
-- Various security enhancements.
 - The README explains how to run Party Mode with Docker Compose, and how to update, stop
   and uninstall it. Its `docker run` example
   now names the container `roon-extension-party-mode`, as the Compose file does. A
@@ -45,6 +44,10 @@ Not released yet. You can try it on the `experimental` branch (see
 - New **Party Hub language** setting in Roon: choose the Party Hub's language for every
   screen showing it, handy for a TV whose browser is hard to set. **Automatic** (the
   default) follows the screen's browser, as before. Guests' phones still follow their own.
+
+### Security
+- Various security enhancements.
+- Rate limiting for requests.
 
 ## 1.2.0
 
