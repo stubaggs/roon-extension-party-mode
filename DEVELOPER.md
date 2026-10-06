@@ -138,25 +138,6 @@ mode (`partyModeChoices()`): "Pause" while on, "Unpause" while paused, and "star
 party" while off. The layout sent back after a save is rebuilt from the new mode, so
 the wording swaps over at once.
 
-### Status line
-
-Once the zone is up, Roon's status line reads the same way in every mode
-(`statusText()`): the mode and the party's name, then the Party Hub's address on its own
-line.
-
-```
-Paused: House Party
-Party Hub at http://…/PartyHub
-```
-
-Before that, it says what's missing: no Core, no zone, or the zone is unavailable.
-
-### Party name
-
-Left blank, the party name is the party zone's name. For a grouped zone, that's Roon's
-name for the group, such as "Kitchen + Living Room". It follows the zone if you change
-it, and the setting shows which name that is.
-
 ### Party zone
 
 Roon's zone picker lists **endpoints**, not zones, so a zone made by grouping three
@@ -173,34 +154,6 @@ means "whichever zone holds this endpoint right now". Ungroup the speakers mid-p
 the extension quietly follows that one endpoint: guests keep adding tracks, but only
 that speaker plays. Nothing errors, since the endpoint still exists. Regroup and it
 follows the group again. The label is the place to check what it's pointing at.
-
-### Web port (Advanced)
-
-The default, 8338, has to be free on the machine itself, since the container shares the
-host's network. It stays clear of:
-
-- common defaults: 8080, 3000, 5000, 8000, 8443 and 9000;
-- Roon's own ports: UDP 9003, TCP 9100–9200 and 9330–9339;
-- the other Extension Manager extensions: 8088, 9010 and 3000.
-
-If you change it, stay between 1024 and 49151. The OS hands out higher ports for
-outgoing connections.
-
-- **Saving a new port** moves the guest pages and the Party Hub there straight away. The
-  extension then reconnects to the Core so the link Roon shows is updated; it drops out of
-  Roon's list for up to ten seconds. Open pages and phones on the old port need the new
-  link or a fresh scan.
-- **Busy at startup:** the extension uses the next free one of the following nine ports,
-  and the status line says so ("port 8338 was busy"). The QR code and links follow. If all
-  ten are taken, it still connects to Roon and asks for another port in the settings.
-- **Busy when chosen in the settings:** the extension stays on its current port and says
-  so.
-- **`ROON_EXTENSION_PARTY_MODE_PORT`** only sets the first run's port. Roon saves every
-  field on the first Save, the port included, even when only the zone was chosen. From
-  then on the saved port wins and the variable is ignored, so change the port with Web
-  port in Roon.
-
-Links and QR codes use the machine's first non-internal IPv4 address.
 
 ### Party profile
 
@@ -252,6 +205,22 @@ Settings". If something doesn't match, the setting shows what Roon offered and t
 console logs it. The console also logs `Profile "Party" selected for guest session …`,
 with Roon's answer and the profile before and after.
 
+### Party name
+
+Left blank, the party name is the party zone's name. For a grouped zone, that's Roon's
+name for the group, such as "Kitchen + Living Room". It follows the zone if you change
+it, and the setting shows which name that is.
+
+### Party Hub language
+
+Stored as `hub_language`, `''` for Automatic. See [Choosing the
+language](#choosing-the-language).
+
+### Playlist on the Party Hub
+
+Stored as `playlist_download`: `'qr'`, `'link'` or `'off'`. See [The party
+playlist](#the-party-playlist).
+
 ### Allowances
 
 Each guest has separate allowances for adding, playing next and skipping, on a
@@ -287,6 +256,39 @@ apply until the host saves the settings in Roon, which stores every value; a gue
 rescans gets a new session with full allowances, so they keep things polite rather than
 enforce anything.
 
+### Hide names in downloadable playlist (Advanced)
+
+Stored as `playlist_hide_names`, off by default. See [The party
+playlist](#the-party-playlist).
+
+### Web port (Advanced)
+
+The default, 8338, has to be free on the machine itself, since the container shares the
+host's network. It stays clear of:
+
+- common defaults: 8080, 3000, 5000, 8000, 8443 and 9000;
+- Roon's own ports: UDP 9003, TCP 9100–9200 and 9330–9339;
+- the other Extension Manager extensions: 8088, 9010 and 3000.
+
+If you change it, stay between 1024 and 49151. The OS hands out higher ports for
+outgoing connections.
+
+- **Saving a new port** moves the guest pages and the Party Hub there straight away. The
+  extension then reconnects to the Core so the link Roon shows is updated; it drops out of
+  Roon's list for up to ten seconds. Open pages and phones on the old port need the new
+  link or a fresh scan.
+- **Busy at startup:** the extension uses the next free one of the following nine ports,
+  and the status line says so ("port 8338 was busy"). The QR code and links follow. If all
+  ten are taken, it still connects to Roon and asks for another port in the settings.
+- **Busy when chosen in the settings:** the extension stays on its current port and says
+  so.
+- **`ROON_EXTENSION_PARTY_MODE_PORT`** only sets the first run's port. Roon saves every
+  field on the first Save, the port included, even when only the zone was chosen. From
+  then on the saved port wins and the variable is ignored, so change the port with Web
+  port in Roon.
+
+Links and QR codes use the machine's first non-internal IPv4 address.
+
 ### Browse titles (Advanced)
 
 Roon translates its menus, and the API doesn't say which language the Core uses. The
@@ -306,6 +308,19 @@ What it found shows in each setting's hint and in the console (`Browse titles: u
 "Titel" as the Track category`). Typing the Core's own title into a setting overrides the
 detection. The first search's result categories are logged too (`Search (Library →
 Search) result categories: …`), to check what the search covers.
+
+### Status line
+
+Once the zone is up, Roon's status line reads the same way in every mode
+(`statusText()`): the mode and the party's name, then the Party Hub's address on its own
+line.
+
+```
+Paused: House Party
+Party Hub at http://…/PartyHub
+```
+
+Before that, it says what's missing: no Core, no zone, or the zone is unavailable.
 
 ## The guest page
 
