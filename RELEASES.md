@@ -49,6 +49,8 @@ Not released yet. You can try it on the `experimental` branch (see
   
 ### Security
 - Various security enhancements.
+- Hardened the docker container: the image no longer ships package managers, and the example
+  docker-compose.yml runs it read-only with no Linux capabilities or privilege escalation.
 - Rate limiting for requests.
 
 ## 1.2.0
