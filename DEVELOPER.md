@@ -891,9 +891,14 @@ triggers are commented out:
 - a weekly `schedule` would rebuild and republish every Monday, so installs pick up
   base-image security fixes.
 
-Its GitHub token can only read the code, and Docker's actions are pinned to commits rather
-than tags that could be moved, since the job holds the Docker Hub token. Dependabot
-updates the pins.
+Its GitHub token can read the code and sign the image's provenance (`id-token` and
+`attestations`), nothing else. Docker's actions and `actions/attest` are pinned to commits
+rather than tags that could be moved, since the job holds the Docker Hub token and can
+sign. Dependabot updates the pins.
+
+From `main`, it refuses to publish a version that's already on Docker Hub: a release
+number names one image for good, so people can pin it, and its digest in RELEASES.md stays
+true. To publish again, bump the version. `experimental` versions can be republished.
 
 It needs two repository secrets, under Settings → Secrets and variables → Actions:
 
@@ -913,6 +918,48 @@ is how an update reaches people who have it installed.
 4. Tag the merge commit `v<version>` (an annotated tag, from `v1.1.0` on).
 5. Run the workflow by hand. Its `tags: ['v*']` trigger is commented out with `push`, so
    tagging doesn't publish.
+6. Copy the digest from the run's summary into RELEASES.md, under the version's heading:
+   ``Docker image: `stubaggs/roon-extension-party-mode:<version>@sha256:…` ``.
+7. Create the GitHub release for the tag, with that version's section of RELEASES.md as
+   its notes.
+
+### Checking an image against the code
+
+Every image the workflow publishes carries, for each platform:
+
+- BuildKit's **provenance** (`provenance: mode=max`): the commit
+  (`org.opencontainers.image.revision`), the Dockerfile and the build's inputs. It's
+  unsigned, so it says what the publisher claims rather than proving it.
+- An **SBOM** (`sbom: true`) listing every package in the image.
+- A **signed attestation** from `actions/attest`, made with a Sigstore certificate that
+  only this workflow in this repository can get. It's pushed to Docker Hub beside the
+  image and stored on GitHub. This is the one that proves the image came from the
+  workflow, at the commit it names.
+
+To check a published image:
+
+```sh
+# the commit, Dockerfile and inputs it was built from
+docker buildx imagetools inspect stubaggs/roon-extension-party-mode:1.3.1 \
+  --format '{{json .Provenance}}'
+# the packages inside
+docker buildx imagetools inspect stubaggs/roon-extension-party-mode:1.3.1 \
+  --format '{{json .SBOM}}'
+# the signature: built by this repository's workflow, and from which commit
+gh attestation verify oci://stubaggs/roon-extension-party-mode:1.3.1 \
+  --repo stubaggs/roon-extension-party-mode
+```
+
+`gh attestation` needs a recent GitHub CLI (Ubuntu's 2.46 package doesn't have it).
+It checks the image's digest against the signed record, so it fails
+for any image the workflow didn't build. Add `--source-ref refs/heads/main` to require a
+release built from `main`, or `--format json` to see the commit (`sourceRepositoryDigest`).
+Images up to 1.3.0 have the unsigned provenance only (1.2.0 and 1.3.0 name the commits of
+`v1.2.0` and `v1.3.0`); the signed attestation and SBOM start with the next release.
+
+Pinning a digest (`stubaggs/roon-extension-party-mode:1.3.0@sha256:…`, as RELEASES.md lists
+them) gets exactly that image, whatever happens to the tags later. The Extension Manager
+always installs `latest`.
 
 ### The Dockerfile
 

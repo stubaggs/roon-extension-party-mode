@@ -18,16 +18,21 @@ name: Publish Docker image
 # pick up Alpine and Node security fixes without anyone publishing by hand. A
 # rebuild only gets newer base layers if the Dockerfile's FROM lines allow it:
 # either drop the @sha256 digest so each build uses the current node:22-alpine,
-# or keep the digest and merge Dependabot's update pull requests.
+# or keep the digest and merge Dependabot's update pull requests. It would also
+# need its own tags: main refuses to replace a published version (see below).
 #   schedule:
 #     - cron: '17 4 * * 1'
 on:
   workflow_dispatch:
 
-# The GitHub token only needs to read the code: the image goes to Docker Hub
-# with the Docker Hub secrets, not to GitHub.
+# The GitHub token reads the code, and signs the provenance: id-token lets the
+# job prove to Sigstore that this workflow, in this repository, built the image,
+# and attestations stores the signed record on GitHub. The image itself goes to
+# Docker Hub with the Docker Hub secrets, not to GitHub.
 permissions:
   contents: read
+  id-token: write
+  attestations: write
 
 jobs:
   publish:
@@ -64,6 +69,19 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      # A release number names one image for good: people pin it, and its digest
+      # is in RELEASES.md. So main never replaces a version already on Docker Hub;
+      # bump the version instead. Experimental versions are rebuilt freely.
+      - name: Refuse to replace a published release
+        if: github.ref == 'refs/heads/main'
+        env:
+          IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/roon-extension-party-mode:${{ steps.version.outputs.version }}
+        run: |
+          if docker buildx imagetools inspect "$IMAGE" > /dev/null 2>&1; then
+            echo "::error::$IMAGE is already published; bump the version in package.json to publish again"
+            exit 1
+          fi
+
       - id: meta
         uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
         with:
@@ -75,10 +93,40 @@ jobs:
 
       # arm/v6 and arm/v7 both install under the repository entry's "arm" key:
       # Docker reports every 32-bit ARM host (Pi Zero and Pi 1 are v6) as "arm".
-      - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+      # Each platform's image carries BuildKit's provenance (the commit, the
+      # Dockerfile and the build's inputs; mode=max records them all, and the
+      # build has no secrets to leak) and an SBOM listing every package inside.
+      - id: build
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
           context: .
           platforms: linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
           push: true
+          provenance: mode=max
+          sbom: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
+      # BuildKit's provenance is unsigned: whoever holds the Docker Hub token
+      # could push an image claiming any commit. This adds a signed one, which
+      # only this workflow can make, pushed to Docker Hub beside the image and
+      # stored on GitHub; `gh attestation verify` checks it. Storage records are
+      # for organisation-owned repositories only, so they're off.
+      - uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-name: index.docker.io/${{ secrets.DOCKERHUB_USERNAME }}/roon-extension-party-mode
+          subject-digest: ${{ steps.build.outputs.digest }}
+          push-to-registry: true
+          create-storage-record: false
+
+      # The digest to pin and to put under the version in RELEASES.md.
+      - name: Show the digest
+        env:
+          IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/roon-extension-party-mode:${{ steps.version.outputs.version }}
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: |
+          {
+            echo "### Published"
+            echo
+            echo "\`$IMAGE@$DIGEST\`"
+          } >> "$GITHUB_STEP_SUMMARY"
