@@ -5,11 +5,13 @@ running in its Extensions list.
 
 ## 1.3.1
 
-### Improvements
+Docker image: `stubaggs/roon-extension-party-mode:1.3.1@sha256:4479bb446d6774e3f461510755979c3042320bf9106d39cbd15237da6f87567b`
+
+### Security
 
 - You can check that a Docker image was built from the code here on GitHub: each image
   now carries a signed record of the commit it came from, and a list of everything inside
-  it. Each release's image is listed below with its digest, so you can pin that exact
+  it. Each release's image is listed here with its digest, so you can pin that exact
   image instead of `latest`, and a release number on Docker Hub is never replaced.
 
 ## 1.3.0
