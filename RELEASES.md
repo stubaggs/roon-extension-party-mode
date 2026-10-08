@@ -3,12 +3,23 @@
 What's new in each version of Party Mode, newest first. Roon shows the version you're
 running in its Extensions list.
 
+## 1.3.1
+
+### Improvements
+
+- You can check that a Docker image was built from the code here on GitHub: each image
+  now carries a signed record of the commit it came from, and a list of everything inside
+  it. Each release's image is listed below with its digest, so you can pin that exact
+  image instead of `latest`, and a release number on Docker Hub is never replaced.
+
 ## 1.3.0
+
+Docker image: `stubaggs/roon-extension-party-mode:1.3.0@sha256:b2a1339e64544fca2265d09190015024eb4a2209a0ddfa39ff7607096c9687bd`
 
 ### New
 
 - **Party host name** setting, your name, in place of **Host** on the tracks you queue
-- and skip in Roon, and in the playlist download. Left blank, it's "Host" in each guest's language.
+  and skip in Roon, and in the playlist download. Left blank, it's "Host" in each guest's language.
 - **Party Hub language** setting in Roon: choose the Party Hub's language for every
   screen showing it, handy for a TV whose browser is hard to set. **Automatic** (the
   default) follows the screen's browser, as before. Guests' phones still follow their own.
@@ -59,6 +70,8 @@ running in its Extensions list.
 - Rate limiting for requests.
 
 ## 1.2.0
+
+Docker image: `stubaggs/roon-extension-party-mode:1.2.0@sha256:082b9c61ad9e05a462c39e05a524b8cf0ab7cdb05614bcc943cc2a1245ab2e4d`
 
 ### Party Hub
 
