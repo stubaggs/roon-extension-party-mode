@@ -3,10 +3,7 @@
 What's new in each version of Party Mode, newest first. Roon shows the version you're
 running in its Extensions list.
 
-## 1.3.1 (in progress)
-
-Not released yet. You can try it on the `experimental` branch (see
-[DEVELOPER.md](DEVELOPER.md#running-the-experimental-version)).
+## 1.3.1
 
 ### Improvements
 
