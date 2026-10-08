@@ -1,3 +1,7 @@
+<p align="center">
+  <img width="640" height="320" alt="ronn-extension-paty-mode" src="https://github.com/user-attachments/assets/06c484dd-e7bd-4689-9a43-aae12b3b7891" />
+</p>
+
 # Party Mode for Roon
 
 Let your guests pick the music. They scan a QR code with their phone, search your Roon
