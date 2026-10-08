@@ -899,6 +899,9 @@ sign. Dependabot updates the pins.
 From `main`, it refuses to publish a version that's already on Docker Hub: a release
 number names one image for good, so people can pin it, and its digest in RELEASES.md stays
 true. To publish again, bump the version. `experimental` versions can be republished.
+Docker Hub enforces the same: the repository's immutable tags setting covers tags matching
+`^[0-9]+\.[0-9]+\.[0-9]+$`, so a release number can't be pushed twice even outside the
+workflow, while `latest`, `experimental` and `-experimental` versions keep moving.
 
 It needs two repository secrets, under Settings → Secrets and variables → Actions:
 
@@ -953,7 +956,10 @@ gh attestation verify oci://stubaggs/roon-extension-party-mode:1.3.1 \
 `gh attestation` needs a recent GitHub CLI (Ubuntu's 2.46 package doesn't have it).
 It checks the image's digest against the signed record, so it fails
 for any image the workflow didn't build. Add `--source-ref refs/heads/main` to require a
-release built from `main`, or `--format json` to see the commit (`sourceRepositoryDigest`).
+release built from `main`, `--bundle-from-oci` to check the copy of the signed record
+stored on Docker Hub instead of GitHub's, or `--format json` to see the commit
+(`sourceRepositoryDigest`). On success it prints nothing unless it's in a terminal; the
+exit code is 0.
 Images up to 1.3.0 have the unsigned provenance only (1.2.0 and 1.3.0 name the commits of
 `v1.2.0` and `v1.3.0`); the signed attestation and SBOM start with the next release.
 
