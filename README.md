@@ -1,5 +1,5 @@
 <p align="center">
-  <img width="640" height="320" alt="ronn-extension-paty-mode" src="https://github.com/user-attachments/assets/06c484dd-e7bd-4689-9a43-aae12b3b7891" />
+  <img width="640" height="320" alt="Party Mode for Roon" src="https://github.com/user-attachments/assets/06c484dd-e7bd-4689-9a43-aae12b3b7891" />
 </p>
 
 # Party Mode for Roon
