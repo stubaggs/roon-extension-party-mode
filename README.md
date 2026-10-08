@@ -66,6 +66,18 @@ Your settings and Roon's pairing stay in `config.json`. If you started Party Mod
 To stop Party Mode, run `docker stop roon-extension-party-mode`. It stays stopped, even
 after a restart of the computer, until you run `docker start roon-extension-party-mode`.
 
+#### Staying on one version
+
+`latest` always moves to the newest release. To stay on one, use its number instead
+(`stubaggs/roon-extension-party-mode:1.3.0`): a release's number is never reused for a
+different image. To be sure of getting exactly the image that was released, use the digest
+[RELEASES.md](RELEASES.md) lists under each version, in place of `latest` in the commands
+above (`stubaggs/roon-extension-party-mode:1.3.0@sha256:…`).
+
+Every image is built on GitHub from the code here, and records the commit it was built
+from. [DEVELOPER.md](DEVELOPER.md#checking-an-image-against-the-code) shows how to check
+that for yourself.
+
 #### With Docker Compose
 
 The repository includes a `docker-compose.yml` file that does the same as the `docker run`
