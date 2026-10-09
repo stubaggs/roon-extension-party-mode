@@ -3,6 +3,11 @@
 What's new in each version of Party Mode, newest first. Roon shows the version you're
 running in its Extensions list.
 
+## 1.4.0 (in progress)
+
+Not released yet. You can try it on the `experimental` branch (see
+[DEVELOPER.md](DEVELOPER.md#running-the-experimental-version)).
+
 ## 1.3.1
 
 Docker image: `stubaggs/roon-extension-party-mode:1.3.1@sha256:4479bb446d6774e3f461510755979c3042320bf9106d39cbd15237da6f87567b`
