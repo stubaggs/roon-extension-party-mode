@@ -186,6 +186,19 @@ const set = (values) => Object.assign(roon.settings, values);
     assert.match(renewed, /Max-Age=43200/);
   });
 
+  await check('scanning again keeps the session and its name; an unknown one starts afresh', async () => {
+    set({ enabled: true });
+    const cookie = (await get(`/j/${guests.joinCode}`)).headers.get('set-cookie').split(';')[0];
+    await post('/api/name', cookie, { name: 'Rescan Ronnie', confirm: true });
+    const again = (await get(`/j/${guests.joinCode}`, { Cookie: cookie })).headers.get('set-cookie').split(';')[0];
+    assert.strictEqual(again, cookie, 'the same session');
+    const party = await (await get('/api/party', { Cookie: again })).json();
+    assert.strictEqual(party.guest_name, 'Rescan Ronnie');
+    const stranger = (await get(`/j/${guests.joinCode}`, { Cookie: 'party_sid=not-a-session' })).headers.get('set-cookie').split(';')[0];
+    assert.notStrictEqual(stranger, 'party_sid=not-a-session', 'a new session');
+    assert.notStrictEqual(stranger, cookie);
+  });
+
   await check('the guest page is at /GuestHub, in any case, and no longer at the root', async () => {
     for (const path of ['/GuestHub', '/guesthub']) assert.strictEqual((await get(path)).status, 200, path);
     const html = await (await get('/', { 'Accept-Language': 'fr' })).text();
@@ -290,6 +303,17 @@ const set = (values) => Object.assign(roon.settings, values);
     const codes = answers.map((res) => res.status).sort();
     assert.deepStrictEqual(codes, [200, 200, 429, 429, 429, 429]);
     assert.strictEqual(roon.actions.length, 2);
+    set({ add_limit: 10 });
+  });
+
+  await check('scanning again does not give back allowances already used', async () => {
+    set({ add_limit: 2, add_refill: 0 });
+    const cookie = await newGuest();
+    assert.strictEqual((await post('/api/request', cookie, { key: '10:0', mode: 'add' })).status, 200);
+    // The phone takes whichever cookie the scan sets.
+    const after = (await get(`/j/${guests.joinCode}`, { Cookie: cookie })).headers.get('set-cookie').split(';')[0];
+    const party = await (await get('/api/party', { Cookie: after })).json();
+    assert.strictEqual(party.allowances.add.remaining, 1);
     set({ add_limit: 10 });
   });
 
