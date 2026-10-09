@@ -8,6 +8,21 @@ running in its Extensions list.
 Not released yet. You can try it on the `experimental` branch (see
 [DEVELOPER.md](DEVELOPER.md#running-the-experimental-version)).
 
+## 1.3.2 (in progress)
+
+Not released yet: fixes for 1.3.1.
+
+### Fixes
+
+- After the Roon Core restarts, **Up next** shows the queue again and keeps up with it.
+  Before, it stayed empty until you chose the party zone again.
+- Scanning the QR code again no longer gives a guest a fresh set of adds, play-nexts and
+  skips: they carry on with what they had left, under the same name.
+
+### Security
+
+- Various security enhancements.
+
 ## 1.3.1
 
 Docker image: `stubaggs/roon-extension-party-mode:1.3.1@sha256:4479bb446d6774e3f461510755979c3042320bf9106d39cbd15237da6f87567b`
