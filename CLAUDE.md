@@ -27,7 +27,12 @@ Every change that affects them updates the docs in the same commit, except the R
 
 ## Conventions the owner has asked for
 
-- Work on a branch and merge into `main` through a pull request, only when asked.
+- Branches follow DEVELOPER.md's [Branches](DEVELOPER.md#branches): `main` is released,
+  `experimental` is the next version, big work gets a branch off `experimental`, fixes to
+  the release a branch off `main` (`fix-<version>`). Merge into `main` only through a
+  pull request, and only when asked. Never merge Dependabot's pull requests on `main`;
+  take the update into `experimental`. Whenever something lands on `main`, merge `main`
+  into `experimental` before the next change there.
 - **Never publish the Docker image, and never set it to publish automatically.** The
   owner publishes it by hand (Actions → Publish Docker image). Don't run that workflow,
   keep its push, tags and schedule triggers commented out, and put `[skip ci]` in merge
