@@ -1200,6 +1200,11 @@ node-roon-api's own log of every message to and from the Core (its `log_level`,
 otherwise `"none"`). That last part is large and includes guests' searches and Roon's
 full replies, so it's for troubleshooting only.
 
+Lines carry no time of their own: the container runtime records one for each, shown with
+`-t` (`docker logs -t roon-extension-party-mode`, `docker compose logs -t`, `podman logs
+-t`). Docker shows it in UTC; Podman in the host's local time. Run with Node.js, the log
+has no times.
+
 `docker-compose.yml` and the README's `docker run` cap the container log at 3 × 10 MB.
 
 ## Known limitations
