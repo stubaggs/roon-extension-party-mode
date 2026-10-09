@@ -8,6 +8,10 @@ running in its Extensions list.
 Not released yet. You can try it on the `experimental` branch (see
 [DEVELOPER.md](DEVELOPER.md#running-the-experimental-version)).
 
+### Security
+
+- Various security enhancements.
+
 ## 1.3.2 (in progress)
 
 Not released yet: fixes for 1.3.1.

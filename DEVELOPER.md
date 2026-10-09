@@ -838,7 +838,10 @@ changing them:
 - **Plain errors.** An unknown address gets a plain `Not found`, and a malformed request a
   plain `Bad request`, both with the headers above, instead of Express's own error page,
   which names Express and drops them. Anything else is logged and answered `Something
-  went wrong`.
+  went wrong`. A POST with no JSON body is read as `{}` (Express 5 leaves `req.body`
+  undefined), so it gets the same answer as an empty one rather than an error.
+  Query strings are parsed simply (Express 5's default): `q[]=` or `q[x]=` is just an
+  unknown parameter, never an array or object.
 - **Requests a minute are limited, per device** (by IP address, `perMinute()` in
   `lib/server.js`, with `express-rate-limit`): 600 of any kind, and 60 searches, since
   each search runs in the Roon Core. That's far above what a phone or the Party Hub
