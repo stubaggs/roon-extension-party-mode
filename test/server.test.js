@@ -511,6 +511,17 @@ const set = (values) => Object.assign(roon.settings, values);
     assert.match(res.headers.get('content-security-policy'), /default-src 'self'/);
   });
 
+  await check('a POST without a body is answered as one with an empty body', async () => {
+    const cookie = await newGuest();
+    for (const path of ['/api/name', '/api/request']) {
+      const bare = await fetch(base + path, { method: 'POST', headers: { Cookie: cookie } });
+      const empty = await post(path, cookie, {});
+      assert.notStrictEqual(bare.status, 500, path);
+      assert.strictEqual(bare.status, empty.status, path);
+      assert.deepStrictEqual(await bare.json(), await empty.json(), path);
+    }
+  });
+
   await check("Party Mode's own labels can't be a guest's name, in any language or spelling", async () => {
     const cookie = await newGuest();
     for (const name of ['Host', ' roon  RADIO ', 'anon!', 'Gastgeber', 'Hote', 'Ev sahibi', '主人', 'Radio', 'radio station', 'Radiosender', 'Rádio', 'Радио', 'ラジオ', '라디오', 'Gastgebende', 'Хозяева', 'Хозяин', '主催者', 'ホスト', 'Hostess', 'Gastgeberin', 'Hôtesse', 'Хозяйка', 'المضيفة']) {
