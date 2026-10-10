@@ -100,9 +100,6 @@ restart of the computer, until you run `docker start roon-extension-party-mode`.
 
 </details>
 
-To stay on one version, or check that an image was built from the code here, see
-[DEVELOPER.md](DEVELOPER.md#checking-an-image-against-the-code).
-
 ## Starting a party
 
 1. In Roon, open **Settings → Extensions → Party Mode → Settings** and pick the **Party
@@ -263,6 +260,9 @@ records what guests search for.
 it: the detailed log, the request limits, and a name for a second copy. To use one, remove
 its `#`, change the value if you need to, and run `docker compose up -d`. With
 `docker run`, add it as `-e NAME=value` instead.
+
+To stay on one version instead of always getting the newest, or to check that an image
+was built from the code here, see [DEVELOPER.md](DEVELOPER.md#checking-an-image-against-the-code).
 
 ## Running more than one party
 
