@@ -105,6 +105,8 @@ test stops a build.
   station, on a zone shaped like the one a Core reported.
 - `test/roon-radio.test.js` checks Roon Radio's picks are told from the host's, with the
   queue updates a Core sent as the queue ran out.
+- `test/core-restart.test.js` checks the queue comes back after the Core restarts and
+  refuses it at first, and isn't asked for again while it works.
 - `test/fixtures/` holds real search results from a Core for the duplicate check:
   "bad guy" (covers) and "pere ubu waiting for mary" (one band, five albums).
 
@@ -271,8 +273,9 @@ About 15 tracks play an hour. Adding is set so one guest can't queue far faster 
 (the queue only grows at the end, so an early burst holds everyone else back), while a few
 guests together still earn more than can play. Playing next jumps everyone already
 waiting, and Roon puts each one straight after the current track, so it stays rare. These
-apply until the host saves the settings in Roon, which stores every value; a guest who
-rescans gets a new session with full allowances, so they keep things polite rather than
+apply until the host saves the settings in Roon, which stores every value. A guest who
+scans again keeps their session and what they've used; one who clears cookies or opens a
+private tab starts a new one with full allowances, so they keep things polite rather than
 enforce anything.
 
 ### Hide names in downloadable playlist (Advanced)
@@ -383,8 +386,8 @@ ignored, so "Sam", "sam." and "S A M" are one name.
   each language file; the fixed ones are gathered into `RESERVED_NAMES` at startup. A
   name that only contains one ("Hostess Jo", "Radio Ga Ga") is fine.
 - **A name another guest uses is asked about, not refused.** Two guests can share a name,
-  and a guest who rescans comes back under their old name while their old session still
-  holds it. So `POST /api/name` answers 409 `name_taken` (`GuestStore.nameInUse`) until
+  and a guest whose session ended (12 hours idle, or a new browser) comes back under
+  their old name, which the phone remembers, while their old session may still hold it. So `POST /api/name` answers 409 `name_taken` (`GuestStore.nameInUse`) until
   it's sent again with `confirm: true`. The dialog stays open and asks ("Someone here is
   already called Sam. Use it anyway?"), and its button becomes "Use it anyway". The name
   the phone remembers is sent with `confirm`, so a returning guest isn't asked.
@@ -786,8 +789,9 @@ changing them:
   scanned the code can add tracks. The Party Hub and its endpoints need no session, and
   they include the join link, so the code proves someone opened the Hub, not that they're
   in the room. Don't expose the port to the internet.
-- **Allowances are per session.** A guest who scans the code again gets a new session
-  with full allowances.
+- **Allowances are per session.** Scanning the code again keeps the session (`/j/<code>`
+  reuses a valid `party_sid`), so it doesn't give back what was used; clearing cookies or a
+  private tab does, since there are no accounts.
 - **Guests can only queue what they were shown.** Browse item keys are short and numbered
   in sequence, so `POST /api/request` only takes a key this guest was sent in their search
   results (`GuestStore.offer`, the last 400 per guest). It uses the title and artist the
@@ -813,7 +817,8 @@ changing them:
 - **Sessions last 12 hours from last use** (`SESSION_TTL_MS`, `lib/guests.js`). Every
   guest API call renews the `party_sid` cookie for the same 12 hours, so a guest who keeps
   using the page stays in. One idle that long gets "Scan the code again" on their next
-  action, and a new session (name and allowances start over) when they scan.
+  action, and a new session (allowances start over; the phone sends the name it
+  remembers) when they scan.
 - **Nothing outlives a session.** When a session ends, `GuestStore.onDrop` tells
   `RoonService.forgetSession()`, which drops the guest's profile marker; a guest's
   latest-search ticket is kept only while a search waits.
@@ -856,10 +861,46 @@ with the [Extension Manager](https://github.com/TheAppgineer/roon-extension-mana
 The Manager runs it with host networking, since Roon discovery uses UDP broadcast on
 port 9003. It bind-mounts `config.json`, so settings survive updates.
 
+## Branches
+
+Two branches last; every other branch is short-lived.
+
+- **`main`** is what's released: the Docker image's `latest`, the README people read, and
+  the tags. Changes reach it through pull requests, apart from the owner's README edits.
+- **`experimental`** is the next version, with a suffix (`1.4.0-experimental`), published
+  by hand as `:experimental` (see [Running the experimental version](#running-the-experimental-version)).
+
+| Work | Branch from | Merges into |
+| --- | --- | --- |
+| Small changes for the next version | work on `experimental` directly | n/a |
+| Big or risky work (a major dependency, a new feature) | `experimental`, named after it (`express-5`) | `experimental`, by pull request; then delete it |
+| Fixes to the released version | `main`, named after the next patch (`fix-1.3.2`) | `main`, by pull request, as that release |
+| Dependabot's pull requests | Dependabot's own branch, against `main` | not merged on `main`: take the update into `experimental`, test it there, and it ships with the next release |
+| The owner's README edits on GitHub | `main` | n/a |
+
+**Whenever anything lands on `main`, merge `main` into `experimental`** straight away,
+before the next change there, so the two never drift. RELEASES.md is the usual conflict:
+keep the version in progress on `experimental` above the one just released.
+
+A fix branch starts by bumping the patch version (no suffix) and giving RELEASES.md a
+"(in progress)" section for it; its pull request into `main` is the release (see
+[Releasing](#releasing)). It can't publish by itself: the workflow only runs from `main`
+and `experimental`.
+
+Dependabot's pull requests target `main`. Security updates always do, whatever
+`.github/dependabot.yml` says, so version updates go there too, to keep them in one place.
+Once `main` has the update, Dependabot closes its pull request.
+
+To work on two branches at once without stashing, give the second its own folder:
+`git worktree add -b fix-1.3.2 ../roon-extension-party-mode-fix-1.3.2 origin/main`. It
+shares the repository but not the untracked files: run `npm ci` there, and copy
+`config.json` in to run it. `git worktree remove <folder>` once the branch is merged.
+
 ## Code scanning
 
 `.github/workflows/codeql.yml` runs GitHub's CodeQL when started by hand: Actions →
-CodeQL → Run workflow, on `experimental` before merging into `main`. Its push, pull
+CodeQL → Run workflow, on the branch about to be released (`experimental` or a fix
+branch) before merging into `main`. Its push, pull
 request and weekly triggers are commented out. It analyses the JavaScript, with the
 security-extended queries, and the workflows themselves (`.github/codeql/codeql-config.yml` leaves out
 `node_modules` and `test`). It only reads the code. Results are under the repository's
@@ -915,9 +956,13 @@ is how an update reaches people who have it installed.
 
 ### Releasing
 
-1. Bump `version` in `package.json` and give RELEASES.md its section.
-2. Run CodeQL on `experimental` (see [Code scanning](#code-scanning)) and check its results.
-3. Merge into `main` through a pull request.
+A release comes from `experimental` (the next minor or major version) or from a fix branch
+(a patch; see [Branches](#branches)).
+
+1. Set `version` in `package.json` without a suffix, and mark its RELEASES.md section
+   released.
+2. Run CodeQL on that branch (see [Code scanning](#code-scanning)) and check its results.
+3. Merge into `main` through a pull request titled `Release <version> [skip ci]`.
 4. Tag the merge commit `v<version>` (an annotated tag, from `v1.1.0` on).
 5. Run the workflow by hand. Its `tags: ['v*']` trigger is commented out with `push`, so
    tagging doesn't publish.
@@ -925,6 +970,9 @@ is how an update reaches people who have it installed.
    ``Docker image: `stubaggs/roon-extension-party-mode:<version>@sha256:…` ``.
 7. Create the GitHub release for the tag, with that version's section of RELEASES.md as
    its notes.
+8. Merge `main` into `experimental`. After a release from `experimental`, bump it to the
+   next version with a suffix and start that RELEASES.md section; after a fix release,
+   `experimental` keeps its version.
 
 ### Checking an image against the code
 
@@ -1010,8 +1058,10 @@ once a new image is published. To update by hand, change both `FROM` lines toget
 `docker buildx imagetools inspect node:22-alpine` prints the current digest.
 
 It also checks the npm dependencies and the workflow's actions weekly. Minor and patch
-npm updates come as one pull request; each needs `npm test` and the local Docker check
-before merging, like any change.
+npm updates come as one pull request. Its pull requests target `main`, but aren't merged
+there: the update goes into `experimental` (see [Branches](#branches)) and needs `npm test`
+and the local Docker check, like any change. An urgent security update can go through a
+fix branch instead.
 
 ### Running the image by hand
 
@@ -1147,6 +1197,11 @@ node-roon-api's own log of every message to and from the Core (its `log_level`,
 otherwise `"none"`). That last part is large and includes guests' searches and Roon's
 full replies, so it's for troubleshooting only.
 
+Lines carry no time of their own: the container runtime records one for each, shown with
+`-t` (`docker logs -t roon-extension-party-mode`, `docker compose logs -t`, `podman logs
+-t`). Docker shows it in UTC; Podman in the host's local time. Run with Node.js, the log
+has no times.
+
 `docker-compose.yml` and the README's `docker run` cap the container log at 3 × 10 MB.
 
 ## Known limitations
@@ -1177,14 +1232,18 @@ full replies, so it's for troubleshooting only.
     library and TIDAL copies, October 2026.)
 - **Credits can swap.** Two guests asking for the same recording are credited in the
   order they asked. If Roon reports those two inserts out of order, the badges swap.
-- **A rescan starts a new session**, and so does coming back after 12 hours without using
-  the page. Tracks added before it keep the name they had then.
+- **A new browser or cleared cookies start a new session**, and so does coming back after
+  12 hours without using the page. Scanning again doesn't. Tracks added before a new
+  session keep the name they had then.
 - **Everything is kept in memory.** Played (the last 200 tracks), the playlist (5000) and
   who asked for what start over when the extension restarts. Played and the playlist also
   start over when the party zone changes.
 - **The queue subscription is per zone.** Changing the party zone starts a new
   subscription. The old one is ignored rather than torn down, since the API has no
   convenient unsubscribe.
+  If the Core refuses or ends it (just after a Core restart, before it knows the zone
+  again), the queue is asked for again when the party zone reappears, or after 5 seconds
+  if it's already there (`RoonService._subscribeQueue`, `queueState`).
 
 ## Licence
 
