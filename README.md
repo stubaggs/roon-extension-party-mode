@@ -152,7 +152,7 @@ file; Google Sheets, Numbers and Excel's **Data → From Text/CSV** read it corr
 | Playlist on the Party Hub | What the Party Hub shows once **Party mode** is **Off**: a **QR code** guests can scan (the default), a **Link only** to click on the Hub itself, or **Off** for nothing. |
 | Adding tracks | Whether guests can add tracks, and whether a track already in the queue can be added again (covers, live takes, remasters and the same track on another album count as different tracks). **Also let guests play a track next** lets them put a track straight after the current one (only while adding is on). |
 | Skipping | Whether guests can skip the currently playing track. Off unless you turn it on. |
-| Advanced | Rarely needed; see below. |
+| Advanced | See below. |
 
 **"Add to queue" per guest**, **"Play it next" per guest** and **"Skip" per guest** set
 how many of each a guest gets (**0 means no limit**), and **Minutes to earn one back**
