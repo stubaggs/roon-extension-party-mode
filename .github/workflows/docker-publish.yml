@@ -97,6 +97,10 @@ jobs:
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
             type=raw,value=experimental,enable=${{ github.ref == 'refs/heads/experimental' }}
             type=raw,value=${{ steps.version.outputs.version }}
+          # The version label would otherwise come from the first tag above
+          # ("latest" or "experimental"); it names the version itself.
+          labels: |
+            org.opencontainers.image.version=${{ steps.version.outputs.version }}
 
       # arm/v6 and arm/v7 both install under the repository entry's "arm" key:
       # Docker reports every 32-bit ARM host (Pi Zero and Pi 1 are v6) as "arm".
