@@ -12,9 +12,7 @@ Not released yet. You can try it on the `experimental` branch (see
 
 - Various security enhancements.
 
-## 1.3.2 (in progress)
-
-Not released yet: fixes for 1.3.1.
+## 1.3.2
 
 ### Fixes
 
