@@ -15,7 +15,8 @@
 'use strict';
 
 const assert = require('assert');
-const { RoonService, describeZone, normaliseInteger, partyName, configWritable, extensionIdentity, statusText } = require('../lib/roon-service');
+const { RoonService, describeZone, normaliseInteger, partyName, configWritable, extensionIdentity, statusText, detailedLogAfterSave, DETAILED_LOG_WARNING, REQUEST_LIMIT_PRESETS, requestLimits, requestLimitSettings } = require('../lib/roon-service');
+const { setDebug } = require('../lib/log');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
@@ -300,13 +301,12 @@ check('the hint names the download address once it is known', () => {
   assert.strictEqual(hint({ _resolveZone: () => null }), 'On the Party Hub when Party mode is Off');
   assert.strictEqual(
     hint({ _resolveZone: () => null, playlistUrl: 'http://192.0.2.10:8338/Download/playlist.csv' }),
-    'On the Party Hub when Party mode is Off\nAlways downloadable at http://192.0.2.10:8338/Download/playlist.csv'
+    'On the Party Hub when Party mode is Off\nAlways downloadable at\nhttp://192.0.2.10:8338/Download/playlist.csv'
   );
 });
 
-check('hide names in playlist: a Yes/No in Advanced, off unless chosen', () => {
-  const advanced = layout({}).layout.find((entry) => entry.title === 'Advanced');
-  const entry = advanced.items.find((i) => i.setting === 'playlist_hide_names');
+check('hide names in playlist: a Yes/No next to the playlist setting, off unless chosen', () => {
+  const entry = layout({}).layout.find((i) => i.setting === 'playlist_hide_names');
   assert.strictEqual(entry.title, 'Hide names in downloadable playlist');
   assert.strictEqual(entry.subtitle, 'Replace guest names with Anon');
   assert.deepStrictEqual(entry.values.map((v) => v.value), [true, false]);
@@ -385,24 +385,140 @@ check('an out-of-range value keeps its hint alongside the error', () => {
   assert.match(field.error, /0 to 999/);
 });
 
-check('browse titles explain themselves in a hint', () => {
+check('one Advanced group with sub-headings, and browse titles explain themselves in a hint', () => {
   const result = layout({});
-  const group = result.layout.find((entry) => entry.type === 'group' && entry.title === 'Advanced');
-  assert.ok(group, 'an "Advanced" group');
-  assert.strictEqual(group.collapsable, true, 'starts closed');
-  assert.deepStrictEqual(group.items.map((i) => i.setting), ['playlist_hide_names', 'port', 'title_tracks', 'title_add', 'title_next', 'title_profile']);
+  const groups = result.layout.filter((entry) => entry.type === 'group').map((g) => g.title);
+  assert.deepStrictEqual(groups, ['Adding tracks', 'Skipping', 'Advanced']);
+  const advanced = result.layout.find((entry) => entry.title === 'Advanced');
+  assert.strictEqual(advanced.collapsable, true, 'starts closed');
+  // One group, with a label as the sub-heading for each kind of setting.
+  assert.deepStrictEqual(advanced.items.map((i) => i.setting || `[${i.title}]`), [
+    'detailed_log',
+    '[Network]', 'port', 'request_limits',
+    '[Roon menu names]', 'title_tracks', 'title_add', 'title_next', 'title_profile'
+  ]);
+  // Hiding names sits right after the playlist setting, outside any group.
+  const top = result.layout.map((entry) => entry.setting || entry.title);
+  assert.strictEqual(top[top.indexOf('playlist_download') + 1], 'playlist_hide_names');
   assert.strictEqual(
     item(result, 'title_add').subtitle,
-    '"Queue" in English. Usually found automatically on a Core in another language.'
+    '"Queue" in English'
   );
   assert.match(item(result, 'title_tracks').subtitle, /^"Tracks" in English/);
 });
 
-check('the web port sits under Advanced with a two-line hint', () => {
+check('the web port has a short, three-line hint', () => {
   const lines = item(layout({}), 'port').subtitle.split('\n');
-  assert.strictEqual(lines.length, 2);
+  assert.strictEqual(lines.length, 3);
   assert.strictEqual(lines[0], 'Custom port for Party Mode');
   assert.match(lines[1], /^Changing it moves/);
+});
+
+check('the detailed log is an On/Off switch, off by default, with a warning hint', () => {
+  const result = layout({});
+  const field = item(result, 'detailed_log');
+  assert.strictEqual(field.title, 'Detailed log');
+  assert.deepStrictEqual(field.values.map((v) => v.value), [true, false]);
+  assert.match(field.subtitle, /guests' searches/);
+  assert.strictEqual(result.values.detailed_log, false);
+});
+
+check('the detailed log: only a change to the switch is saved', () => {
+  // Saving other settings keeps it as it is.
+  assert.deepStrictEqual(detailedLogAfterSave(false, false, false), { on: false, saved: false });
+  assert.deepStrictEqual(detailedLogAfterSave(true, true, true), { on: true, saved: true });
+  // On from the environment: saving other settings doesn't save it as on.
+  assert.deepStrictEqual(detailedLogAfterSave(true, true, false), { on: true, saved: false });
+  // Turned on in Roon: saved, so it survives a restart.
+  assert.deepStrictEqual(detailedLogAfterSave(false, true, false), { on: true, saved: true });
+  // Turned off in Roon: off now and saved off (the environment turns it on again at a restart).
+  assert.deepStrictEqual(detailedLogAfterSave(true, false, false), { on: false, saved: false });
+  assert.deepStrictEqual(detailedLogAfterSave(true, false, true), { on: false, saved: false });
+});
+
+check('the status line starts with a warning while the detailed log is on', () => {
+  const said = [];
+  const self = {
+    svcStatus: { set_status: (message, isError) => said.push([message, isError]) },
+    configWritable: true,
+    core: {},
+    zone: { display_name: 'Kitchen', outputs: [{ output_id: 'o1' }] },
+    statusLine: '',
+    settings: { zone: { output_id: 'o1', name: 'Kitchen' }, enabled: true, party_name: '' },
+    get partyName() {
+      return partyName(this.settings, this.zone);
+    }
+  };
+  setDebug(true);
+  RoonService.prototype._updateStatus.call(self);
+  setDebug(false);
+  RoonService.prototype._updateStatus.call(self);
+  assert.deepStrictEqual(said, [
+    [`${DETAILED_LOG_WARNING}\nOn: Kitchen`, false],
+    ['On: Kitchen', false]
+  ]);
+});
+
+check('flood protection: Normal, Shared Wi-Fi (x10) or Custom, with the numbers in the hint', () => {
+  assert.deepStrictEqual(REQUEST_LIMIT_PRESETS, {
+    normal: { all: 600, search: 60 },
+    shared: { all: 6000, search: 600 }
+  });
+  const result = layout({});
+  const field = item(result, 'request_limits');
+  assert.deepStrictEqual(field.values.map((v) => v.value), ['normal', 'shared', 'custom']);
+  assert.match(field.subtitle, /^Up to 600 page loads and 60 searches\na minute from each phone/);
+  assert.match(item(layout({ request_limits: 'shared' }), 'request_limits').subtitle, /^Up to 6000 page loads and 600 searches\n/);
+  // An early build's "off" is Custom with no limits.
+  const off = layout({ request_limits: 'off' });
+  assert.strictEqual(off.values.request_limits, 'custom');
+  assert.deepStrictEqual(requestLimits(off.values), { all: 0, search: 0 });
+  // A preset shows no number fields.
+  assert.strictEqual(item(result, 'rate_limit'), undefined);
+});
+
+check('choosing Custom shows two number fields, starting from the preset that was in force', () => {
+  // Roon sends back the values it was shown, so the preset's numbers come with Custom.
+  const shown = layout({ request_limits: 'shared' }).values;
+  const result = layout(Object.assign({}, shown, { request_limits: 'custom' }));
+  assert.strictEqual(item(result, 'rate_limit').title, 'Page loads a minute per phone');
+  assert.strictEqual(item(layout({ request_limits: 'normal' }), 'request_limits').title, 'Flood protection');
+  assert.strictEqual(result.values.rate_limit, 6000);
+  assert.strictEqual(result.values.search_limit, 600);
+  assert.deepStrictEqual(requestLimits(result.values), { all: 6000, search: 600 });
+  // A bad number is an error, like the other number fields.
+  assert.strictEqual(layout({ request_limits: 'custom', rate_limit: -1 }).has_error, true);
+});
+
+check('request limits in force: the preset, or the custom numbers (0 = no limit)', () => {
+  assert.deepStrictEqual(requestLimits({ request_limits: 'normal', rate_limit: 5, search_limit: 5 }), { all: 600, search: 60 });
+  assert.deepStrictEqual(requestLimits({ request_limits: 'custom', rate_limit: 0, search_limit: 0 }), { all: 0, search: 0 });
+  assert.deepStrictEqual(requestLimits({ request_limits: 'custom', rate_limit: 2000, search_limit: 0 }), { all: 2000, search: 0 });
+});
+
+check('limits from the environment show as the matching preset, else Custom', () => {
+  assert.deepStrictEqual(requestLimitSettings({ all: 600, search: 60 }), { request_limits: 'normal', rate_limit: 600, search_limit: 60 });
+  assert.deepStrictEqual(requestLimitSettings({ all: 0, search: 0 }), { request_limits: 'custom', rate_limit: 0, search_limit: 0 });
+  assert.deepStrictEqual(requestLimitSettings({ all: 1200, search: 60 }), { request_limits: 'custom', rate_limit: 1200, search_limit: 60 });
+  // The hint says where they came from until the host changes them.
+  const self = { _resolveZone: () => null, limitsFromEnv: { all: 1200, search: 60 } };
+  const result = RoonService.prototype._layout.call(self, requestLimitSettings(self.limitsFromEnv));
+  assert.match(item(result, 'request_limits').subtitle, /Set by the environment/);
+});
+
+check('every title and hint line stays narrow, so the settings window does too', () => {
+  const lines = [];
+  const walk = (items) => items.forEach((i) => {
+    for (const text of [i.title, i.subtitle]) if (text) String(text).split('\n').forEach((l) => lines.push(l));
+    if (i.items) walk(i.items);
+  });
+  // With the playlist's address in its hint, as when running.
+  const self = { _resolveZone: () => null, playlistUrl: 'http://192.0.2.10:8338/Download/playlist.csv' };
+  for (const values of [{}, { request_limits: 'shared' }, { request_limits: 'custom' }]) {
+    walk(RoonService.prototype._layout.call(self, values).layout);
+  }
+  const wide = lines.filter((l) => l.length > 51);
+  assert.deepStrictEqual(wide, []);
 });
 
 check('a title found on the Core shows in its hint', () => {

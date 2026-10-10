@@ -115,9 +115,15 @@ test stops a build.
 Party mode comes first, as the switch hosts use most. Then, in order: the party zone and
 the Roon profile (how the party plays in Roon), the party name, the party host name,
 Party Hub language (see [Choosing the language](#choosing-the-language)), Playlist on the
-Party Hub (see [The party playlist](#the-party-playlist)), the allowances (Adding tracks,
-which includes playing next, then Skipping), and the collapsed Advanced group: Hide names
-in downloadable playlist, the web port, then the browse titles.
+Party Hub (see [The party playlist](#the-party-playlist)) with Hide names in downloadable
+playlist beside it, the allowances (Adding tracks, which includes playing next, then
+Skipping), and the collapsed Advanced group: the detailed log first, then a **Network**
+heading (web port, flood protection) and a **Roon menu names** heading (the browse
+titles). Roon has no group within a group, so the headings are `label` items, and a
+label's hint shows under it.
+
+Every title and hint line stays within 51 characters (a test checks it), so the settings
+window stays narrow.
 
 ### Party mode
 
@@ -278,7 +284,7 @@ scans again keeps their session and what they've used; one who clears cookies or
 private tab starts a new one with full allowances, so they keep things polite rather than
 enforce anything.
 
-### Hide names in downloadable playlist (Advanced)
+### Hide names in downloadable playlist
 
 Stored as `playlist_hide_names`, off by default. See [The party
 playlist](#the-party-playlist).
@@ -311,10 +317,56 @@ outgoing connections.
 
 Links and QR codes use the machine's first non-internal IPv4 address.
 
-### Browse titles (Advanced)
+### Detailed log (Advanced)
+
+On or Off, off by default. It turns on the extra logging described in
+[Logging](#logging) while the extension runs (`setDebug()` in `lib/log.js`, and
+node-roon-api's `log_level`, which it reads on every message), so there's no restart.
+While it's on, Roon's status line starts with "Detailed log is on (includes guests'
+searches): turn it off when done". It isn't red: Roon can only colour the whole status
+(`set_status`'s error flag), and red is kept for real problems.
+
+- **`ROON_EXTENSION_PARTY_MODE_DEBUG`** turns it on from the start, so a problem before
+  Roon connects is logged too, and the switch shows On.
+- **Turning it on in Roon** is saved, so it stays on after a restart.
+- **Turning it off in Roon** stops it at once and saves Off. If the variable is set, the
+  next restart turns it on again.
+- **Saving other settings** leaves it as it is. Only a change to the switch is saved
+  (`detailedLogAfterSave()`), so an On that came from the variable is never written into
+  `config.json`.
+
+With the Extension Manager, which offers no environment variables, this is the way to a
+detailed log; the Manager's **Collect Logs** downloads it.
+
+### Flood protection (Advanced, Network)
+
+How many requests a minute one device (IP address) may make, as presets
+(`REQUEST_LIMIT_PRESETS` in `lib/roon-service.js`), with the numbers in the hint. Hosts see
+"page loads", since "requests" means track requests everywhere else in Party Mode; the
+count covers every request, pages, album art and updates included.
+
+| Choice | Page loads | Searches |
+| --- | --- | --- |
+| Normal (default) | 600 | 60 |
+| Shared Wi-Fi | 6000 | 600 |
+| Custom | the host's | the host's |
+
+Custom shows two number fields; 0 is no limit, so there's no separate Off. An "off" saved
+by an early 1.4.0 build loads as Custom with 0 and 0. The settings are stored as
+`request_limits`, `rate_limit` and `search_limit`. A preset keeps them in step with its own
+numbers, so choosing Custom starts from the limits in force. A change applies at once:
+`perMinute()` reads the limit on each request (`roon.requestLimits`).
+
+`ROON_EXTENSION_PARTY_MODE_RATE_LIMIT` and `…_SEARCH_LIMIT` apply until the host changes
+Flood protection in Roon. The setting then holds them, as the preset they match or Custom.
+Once a change to Flood protection is saved, the
+setting wins from then on, restarts included (`request_limits_set` in `config.json`).
+Saving other settings doesn't count as a change.
+
+### Browse titles (Advanced, Roon menu names)
 
 Roon translates its menus, and the API doesn't say which language the Core uses. The
-extension first tries the titles in the Advanced group, or the English ones (`Tracks`,
+extension first tries the titles under Roon menu names, or the English ones (`Tracks`,
 `Queue`, `Add Next`, `Profile`) when those are blank. When one isn't found, it works the
 menu out instead (`lib/titles.js`):
 
@@ -342,7 +394,8 @@ Paused: House Party
 Party Hub at http://…/PartyHub
 ```
 
-Before that, it says what's missing: no Core, no zone, or the zone is unavailable.
+Before that, it says what's missing: no Core, no zone, or the zone is unavailable. In
+every case a line about the detailed log goes first while it's on (`DETAILED_LOG_WARNING`).
 
 ## The guest page
 
@@ -602,8 +655,7 @@ before 1.2.0, still works) as CSV in the form Soundiiz imports:
   host name, when set, credits the host's tracks;
 - a guest name a spreadsheet would read as a formula gets a leading apostrophe. Track
   details are left as Roon gives them, so they still match;
-- with Hide names in downloadable playlist (`playlist_hide_names`, Advanced, off by
-  default) every guest's track is credited `Anon`; Roon Radio and Host stay. Only the
+- with Hide names in downloadable playlist (`playlist_hide_names`, off by default) every guest's track is credited `Anon`; Roon Radio and Host stay. Only the
   file changes: the names are still recorded, so turning it off shows them again, and
   the pages and log still show them.
 
@@ -848,10 +900,12 @@ changing them:
   sends; the limits are there for a misbehaving or rogue device on the Wi-Fi, which could
   otherwise swamp a Pi Zero or the Core. Past one, the answer is 429 `too_many_requests`
   (with `Retry-After`) until the minute is up, and the guest page says to wait a minute.
-  `rate_limited` is a different thing: a guest's allowance used up. Set them with
-  `ROON_EXTENSION_PARTY_MODE_RATE_LIMIT` and `…_SEARCH_LIMIT` (see [Environment
-  variables](#environment-variables)); 0 turns one off. Some guest Wi-Fi networks put
-  every phone behind one address, which then shares the limits: raise them there.
+  `rate_limited` is a different thing: a guest's allowance used up. The limits run before
+  anything else checks a request, so they count invalid ones too, and turn a flood away
+  cheaply. Hosts set them with [Flood protection](#flood-protection-advanced-network) under Advanced
+  (or the environment variables); 0 turns one off. Some guest Wi-Fi networks put every
+  phone behind one address, which then shares the limits: Shared Wi-Fi raises them ten
+  times.
 - **Album art gives up.** `/api/image/:key` needs no session, and Roon never answers for
   an image key it doesn't know. So `getImage()` stops waiting after 5 seconds
   (`IMAGE_TIMEOUT_MS`) and answers 404, rather than holding the connection open.
@@ -1209,9 +1263,9 @@ set it. A renamed variable keeps its old name working, checked after the new one
 | --- | --- |
 | `ROON_EXTENSION_PARTY_MODE_PORT` | The first port, before settings are first saved in Roon; after that, use Web port in Roon (default 8338; was `PARTY_PORT`). |
 | `ROON_EXTENSION_PARTY_MODE_INSTANCE` | A name for this copy, so it runs as a separate extension alongside others against one Core (see Running several copies). Unset for normal use. |
-| `ROON_EXTENSION_PARTY_MODE_RATE_LIMIT` | Requests a minute from one device, of any kind (default 600; 0 for no limit). See Security. |
-| `ROON_EXTENSION_PARTY_MODE_SEARCH_LIMIT` | Searches a minute from one device (default 60; 0 for no limit). |
-| `ROON_EXTENSION_PARTY_MODE_DEBUG` | `1`, `true`, `yes` or `on` turns on the detailed log (see Logging). |
+| `ROON_EXTENSION_PARTY_MODE_RATE_LIMIT` | Requests a minute from one device, of any kind (default 600; 0 for no limit), until Flood protection is changed in Roon. See Flood protection. |
+| `ROON_EXTENSION_PARTY_MODE_SEARCH_LIMIT` | Searches a minute from one device (default 60; 0 for no limit), likewise. |
+| `ROON_EXTENSION_PARTY_MODE_DEBUG` | `1`, `true`, `yes` or `on` turns on the detailed log from the start (see Detailed log and Logging). |
 
 ## Logging
 
@@ -1224,7 +1278,8 @@ The normal log is short:
 - one when each guest's session gets the profile;
 - warnings.
 
-`ROON_EXTENSION_PARTY_MODE_DEBUG=1` (`lib/log.js`) adds detail: the profile before and
+The **Detailed log** setting (or `ROON_EXTENSION_PARTY_MODE_DEBUG=1`, see
+[Detailed log](#detailed-log-advanced)) adds detail: the profile before and
 after each switch, the profiles on offer, the first search's result categories, and
 node-roon-api's own log of every message to and from the Core (its `log_level`,
 otherwise `"none"`). That last part is large and includes guests' searches and Roon's

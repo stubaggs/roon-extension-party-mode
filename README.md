@@ -131,7 +131,7 @@ your network.
 
 It's a CSV file of every track queued in the party zone: title, artist, album, length, who
 asked for it and when. To leave guests' names out, turn on **Hide names in downloadable
-playlist** under **Advanced**. Roon can't import it directly, but Soundiiz can: choose
+playlist**. Roon can't import it directly, but Soundiiz can: choose
 **Import playlist**, then the file, and pick TIDAL, Qobuz or Spotify. Roon then shows it
 with your playlists. Excel on Windows can garble accented names when you double-click the
 file; Google Sheets, Numbers and Excel's **Data → From Text/CSV** read it correctly.
@@ -147,6 +147,7 @@ file; Google Sheets, Numbers and Excel's **Data → From Text/CSV** read it corr
 | Party host name | Your name, shown instead of **Host** on the tracks you queue or skip in Roon and in the playlist download. Leave blank for **Host** in each guest's language. Guests can't use it as their name. |
 | Party Hub language | The language of the Party Hub, for every screen showing it. Automatic (the default) follows the screen's browser. Guests' phones always follow their own. |
 | Playlist on the Party Hub | What the Party Hub shows once **Party mode** is **Off**: a **QR code** guests can scan (the default), a **Link only** to click on the Hub itself, or **Off** for nothing. |
+| Hide names in downloadable playlist | The playlist download says **Anon** instead of each guest's name. Tracks Roon Radio picked or you queued still say **Roon Radio** or **Host** (or your **Party host name**). Off by default. |
 | Adding tracks | Whether guests can add tracks, and whether a track already in the queue can be added again (covers, live takes, remasters and the same track on another album count as different tracks). **Also let guests play a track next** lets them put a track straight after the current one (only while adding is on). |
 | Skipping | Whether guests can skip the currently playing track. Off unless you turn it on. |
 | Advanced | See below. |
@@ -161,14 +162,18 @@ what they've used.
 <details>
 <summary><strong>Advanced settings</strong></summary>
 
-- **Hide names in downloadable playlist**: the playlist download says **Anon** instead of
-  each guest's name. Tracks Roon Radio picked or you queued still say **Roon Radio** or
-  **Host** (or your **Party host name**). Off by default.
-- **Web port**: the port the guest pages and the Party Hub use (8338). If it's busy when
-  Party Mode starts, it uses the next free one. Only change it if something else on the
-  computer uses 8338.
-- **Browse titles**: Party Mode usually finds them by itself; only fill them in if search
-  or queuing doesn't work on a Core that isn't in English.
+- **Detailed log**: for troubleshooting. It logs every message to and from Roon, including
+  guests' searches, so turn it off when you're done.
+- **Network**
+  - **Web port**: the port the guest pages and the Party Hub use (8338). If it's busy when
+    Party Mode starts, it uses the next free one. Only change it if something else on the
+    computer uses 8338.
+  - **Flood protection**: how many page loads and searches a minute each phone may make,
+    so one misbehaving device can't overwhelm Party Mode or your Core. **Normal** suits
+    almost everyone; **Shared Wi-Fi** allows ten times as many, for guest Wi-Fi that puts
+    every phone behind one address; **Custom** lets you set the numbers (0 for no limit).
+- **Roon menu names**: Party Mode normally finds them by itself. Only fill them in if
+  search or adding tracks fails on a Core that isn't in English.
 
 </details>
 
@@ -239,16 +244,17 @@ Mode picks the next free one and the QR code follows it, so this is fine to leav
 choose one yourself, change **Web port** under **Advanced** in the settings.
 
 **Search finds nothing, or adding fails, on a Core in a language other than English.**
-Open the **Advanced** section of the settings and fill in the titles your Core uses.
+Under **Advanced** in the settings, fill in the **Roon menu names** your Core uses.
 
 **A guest sees "Too many requests".** Your guest Wi-Fi may put every phone behind one
-address, so they share one phone's limit. Raise it with the request-limit
-[options](#options), or set them to 0 to turn the limits off.
+address, so they share one phone's limit. Set **Flood protection** under **Advanced** to
+**Shared Wi-Fi**.
 
-**Something else isn't working.** Turn on the detailed-log [option](#options), then see
-the log with `docker compose logs -t` in its folder (or
-`docker logs -t roon-extension-party-mode`). Turn it off again afterwards: it's large and
-records what guests search for.
+**Something else isn't working.** Turn on **Detailed log** under **Advanced**, try again,
+then get the log: with Docker Compose, `docker compose logs -t` in its folder; with
+`docker run`, `docker logs -t roon-extension-party-mode`; with the Extension Manager, its
+**Collect Logs**. Turn it off again afterwards: it's large and records what guests search
+for.
 
 **Need some help troubleshooting, or have some suggestions?** Mosey on over to the
 [Roon forums](https://community.roonlabs.com/t/party-mode-extension).
@@ -256,9 +262,11 @@ records what guests search for.
 ## Options
 
 `docker-compose.yml` has a few optional lines, each starting with `#` and explained beside
-it: the detailed log, the request limits, and a name for a second copy. To use one, remove
-its `#`, change the value if you need to, and run `docker compose up -d`. With
-`docker run`, add it as `-e NAME=value` instead.
+it: mainly a name for a second copy (see below), and the detailed log and flood
+protection from the moment Party Mode starts (both are also settings in Roon). To use one, remove its
+`#`, change the value if you need to, and run `docker compose up -d`. With `docker run`,
+add it as `-e NAME=value` instead. These need Docker: the Extension Manager doesn't offer
+them.
 
 To stay on one version instead of always getting the newest, or to check that an image
 was built from the code here, see [DEVELOPER.md](DEVELOPER.md#checking-an-image-against-the-code).

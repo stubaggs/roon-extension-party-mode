@@ -8,6 +8,16 @@ running in its Extensions list.
 Not released yet. You can try it on the `experimental` branch (see
 [DEVELOPER.md](DEVELOPER.md#running-the-experimental-version)).
 
+### New
+
+- **Detailed log** setting, under **Advanced**: turn on a detailed log for troubleshooting
+  straight from Roon, with no restart, including with the Extension Manager (whose
+  **Collect Logs** downloads it). While it's on, Roon's status line opens with a
+  reminder to turn it off, since it records what guests search for.
+- **Flood protection** setting, under **Advanced**: if guests see "Too many requests" on
+  guest Wi-Fi that puts every phone behind one address, choose **Shared Wi-Fi**. You can
+  also set your own numbers, or none.
+
 ### Improvements
 
 - **No setup before installing with Docker:** Party Mode now keeps its settings in a
@@ -15,6 +25,9 @@ Not released yet. You can try it on the `experimental` branch (see
   command), with no `config.json` to create first, on a NAS too. Updating an existing
   install keeps its settings as before. If you install again with the new instructions
   instead, enable Party Mode in Roon once more and set it up again.
+- A tidier settings window: **Hide names in downloadable playlist** sits next to
+  **Playlist on the Party Hub**, and **Advanced** groups the rest under **Network** and
+  **Roon menu names**, with shorter hints so the window stays narrow.
 
 ### Security
 

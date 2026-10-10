@@ -713,6 +713,26 @@ const set = (values) => Object.assign(roon.settings, values);
     assert.strictEqual((await fetch(`${at}/api/party`, { headers: { Cookie: cookie } })).status, 200, 'the rest still work');
   });
 
+  await check('the Request limits setting applies at once, and 0 is no limit', async () => {
+    // No limits passed in, so the server follows the setting (roon.requestLimits).
+    const settingRoon = Object.create(roon);
+    settingRoon.requestLimits = { all: 3, search: 0 };
+    const limited = createServer(settingRoon, new GuestStore());
+    await limited.listen(0);
+    const url = `http://127.0.0.1:${limited.port}/api/hub`;
+    const codes = [];
+    for (let i = 0; i < 4; i += 1) codes.push((await fetch(url)).status);
+    assert.deepStrictEqual(codes, [200, 200, 200, 429]);
+    // Raised in Roon: the same device gets through straight away.
+    settingRoon.requestLimits = { all: 10, search: 0 };
+    assert.strictEqual((await fetch(url)).status, 200);
+    // Off: no limit at all.
+    settingRoon.requestLimits = { all: 0, search: 0 };
+    const more = [];
+    for (let i = 0; i < 15; i += 1) more.push((await fetch(url)).status);
+    assert.ok(more.every((code) => code === 200), more.join(','));
+  });
+
   console.log(failures ? `\n${failures} failed` : '\nall passed');
   process.exit(failures ? 1 : 0);
 })();
