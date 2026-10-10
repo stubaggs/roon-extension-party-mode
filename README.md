@@ -67,7 +67,8 @@ docker compose up -d
 
 Enable **Party Mode** under **Settings → Extensions** in Roon.
 
-- **Update** to a new version, in the same folder: `docker compose pull && docker compose up -d`
+- **Update** to a new version, in the same folder:
+  `docker compose pull && docker compose up -d`
 - **Stop** it: `docker compose down`. Start it again with `docker compose up -d`.
 
 Your settings and Roon's pairing stay in `config.json`.
@@ -182,7 +183,8 @@ what they've used.
 - **Keep it at home.** Anyone on your network who has scanned the code can add tracks, and
   the Party Hub needs no code at all. Don't open the port to the internet.
 - **For a speech, use Paused.** Set **Party mode** to **Paused** rather than pausing in
-  Roon: a guest's track presses play again on a paused zone, or when the queue has run out.
+  Roon: a track a guest adds starts playback again on a paused zone, or when the queue has
+  run out.
 - **Guests can't rearrange the queue.** They can add a track to the end, or play one next
   when they add it, but Roon doesn't yet let anyone move a queued track.
 - **A radio station waits for you.** While a live radio station plays on the party zone,
@@ -195,8 +197,8 @@ what they've used.
 - **Guests' names:** guests can't call themselves Host, Roon Radio, Radio or Anon, in any
   language, or your **Party host name**.
 - **Download the playlist before** restarting the extension, changing the party zone or
-  turning **Party mode** back on from **Off**: each of those starts it, and Played, fresh. It keeps up
-  to 5000 tracks, guests' requests longest.
+  turning **Party mode** back on from **Off**: each of those starts it, and Played, fresh.
+  It keeps up to 5000 tracks, guests' requests longest.
 - **The playlist has guests' names in it.** With **Playlist on the Party Hub** set to
   **QR code**, anyone at the party can keep a copy. If that's not what you want, turn on
   **Hide names in downloadable playlist**, or choose **Link only** or **Off**.
@@ -272,8 +274,9 @@ Give each copy its own folder, so it has its own `config.json`, and its own cont
 name. For example, a second copy named Garden (replace Garden with whatever you choose):
 
 **With Docker Compose:** set up a new folder as in [With Docker](#with-docker). In its
-`docker-compose.yml`, change `container_name`, and remove the `#` from the name line with
-your name in it. Leave the other lines as they are:
+`docker-compose.yml`, change `container_name`, and remove the `#` from the
+`ROON_EXTENSION_PARTY_MODE_INSTANCE` line, with your name in it. Leave the other lines as
+they are:
 
 ```yaml
     container_name: roon-extension-party-mode-garden
