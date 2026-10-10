@@ -8,7 +8,7 @@ to one zone's queue from their phone. They need no Roon account and no remote, a
 no access to anything else in your system.
 
 It's packaged the way the [Extension Manager](https://github.com/TheAppgineer/roon-extension-manager)
-expects: a Docker image with its settings in a bind-mounted `config.json`, and a
+expects: a Docker image whose settings survive updates in a bind-mounted `config.json`, and a
 [repository entry](https://github.com/TheAppgineer/roon-extension-repository) that makes
 it installable from inside Roon.
 
@@ -1028,7 +1028,8 @@ It builds in two stages:
 1. Install dependencies exactly as `package-lock.json` pins them (`npm ci`, which needs
    `git` for the Roon packages on GitHub), and run `npm test`, so a failing test stops the
    build.
-2. Copy only the app and its dependencies onto a clean base, with a health check that
+2. Copy only the app and its dependencies onto a clean base, with a `data/` folder for
+   the settings (see [Where settings are kept](#where-settings-are-kept)) and a health check that
    requests the Party Hub's data (`/api/hub`) on the configured port. npm, npx,
    corepack and yarn are removed from it: the extension needs only `node`, and they're
    most of what vulnerability scanners report in a Node image. So `npm` doesn't work
@@ -1075,8 +1076,9 @@ Install it as the README's [With Docker](README.md#with-docker) says; `docker-co
 does the same. Both lock the container down:
 
 - `--read-only` (`read_only: true`): the image's files can't change. node-roon-api
-  rewrites `config.json` in place, which works on the mounted file, and nothing else
-  writes to disk. A new feature that writes a file needs a mount or a `tmpfs` for it.
+  rewrites `config.json` in place, which works on the mounted volume (or file), and
+  nothing else writes to disk. A new feature that writes a file needs a mount or a
+  `tmpfs` for it.
 - `--cap-drop ALL`: no Linux capabilities. The extension runs as uid 1000, listens above
   port 1024 and finds the Core by UDP multicast and broadcast, none of which needs one.
 - `--security-opt no-new-privileges`: nothing in the container can gain privileges.
@@ -1084,10 +1086,35 @@ does the same. Both lock the container down:
 The Extension Manager starts the container its own way, so these don't apply there; it
 creates `config.json` writable itself.
 
-`config.json` must exist and be writable by uid 1000 before the container starts. Without
-it, Docker makes a directory in its place, and the extension can't save its settings or
-Roon's pairing; Roon's status line and the console say so. `chmod 666` works without
-`sudo`, but leaves the pairing token readable by every account on the host.
+#### Where settings are kept
+
+node-roon-api reads and writes `config.json` in the working folder, `/usr/src/app`. In
+the image that's a link to `data/config.json`, and `data/` is a folder owned by `node`
+(uid 1000) holding an empty `config.json`:
+
+- **A named volume on `/usr/src/app/data`** (`docker-compose.yml`'s `party-mode-data`,
+  or `-v roon-extension-party-mode-data:/usr/src/app/data`): Docker fills a new volume
+  from the image's folder, owner included, so it's writable by uid 1000 with nothing to
+  set up first. Rootless Podman does the same, with or without `--userns=keep-id`.
+  Compose names the volume after the project folder
+  (`roon-extension-party-mode_party-mode-data`), so a second copy in its own folder gets
+  its own. `docker compose down -v` removes it.
+- **A file bind-mounted at `/usr/src/app/config.json`**, as the Extension Manager and
+  installs before 1.4.0 do: Docker follows the link and mounts the file on
+  `data/config.json`, so it reads and saves as before, read-only container included. The
+  file must exist and be writable by uid 1000 before the container starts. Without it,
+  Docker makes a directory in its place. `chmod 666` works without `sudo`, but leaves the
+  pairing token readable by every account on the host.
+- **Neither:** with `--read-only` the settings can't be saved. Roon's status line and the
+  console say so.
+
+The empty `data/config.json` matters: without it, a new volume would leave the link
+pointing at nothing, and `configWritable()` would check the read-only app folder instead
+and warn for no reason. There's no `VOLUME` instruction for `data/`: it would give every
+Extension Manager install an anonymous volume it never uses.
+
+To read or back up the settings in a volume:
+`docker run --rm -v roon-extension-party-mode_party-mode-data:/data alpine cat /data/config.json`.
 
 ## Running the experimental version
 
@@ -1108,15 +1135,13 @@ October 2026). But two copies with the **same** id clash, even on separate machi
 at most one release and one experimental build per Core, unless the copies are named (see
 [Running several copies](#running-several-copies)).
 
-Give the experimental one its own folder, container name, `config.json` and party zone:
+Give the experimental one its own container name, settings volume and party zone:
 
 ```bash
-mkdir roon-extension-party-mode-experimental && cd roon-extension-party-mode-experimental
-touch config.json && sudo chown 1000 config.json && chmod 600 config.json
 docker run -d --name roon-extension-party-mode-experimental --network host --restart unless-stopped \
   --log-opt max-size=10m --log-opt max-file=3 \
   --read-only --cap-drop ALL --security-opt no-new-privileges \
-  -v "$PWD/config.json:/usr/src/app/config.json" \
+  -v roon-extension-party-mode-experimental-data:/usr/src/app/data \
   stubaggs/roon-extension-party-mode:experimental
 ```
 
@@ -1130,7 +1155,8 @@ and its status line in Roon says so.
 
 To stop trying it, remove the container
 (`docker rm -f roon-extension-party-mode-experimental`, or `party-mode-experimental` if
-you set it up before 1.3.0) and disable it in Roon. The Extension Manager always installs
+you set it up before 1.3.0) and its settings
+(`docker volume rm roon-extension-party-mode-experimental-data`), and disable it in Roon. The Extension Manager always installs
 the released version.
 
 ## Running several copies
@@ -1151,7 +1177,8 @@ first line says which name a copy registered as.
 
 Left unset, which is everyone else, nothing changes: same id, same name, same pairing. A
 named copy is new to Roon the first time: enable it and set it up, with its own
-`config.json` and party zone. Renaming it later makes it a new extension again.
+settings (its own volume or `config.json`) and party zone. Renaming it later makes it a
+new extension again.
 
 ### Names with spaces
 

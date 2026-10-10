@@ -8,6 +8,14 @@ running in its Extensions list.
 Not released yet. You can try it on the `experimental` branch (see
 [DEVELOPER.md](DEVELOPER.md#running-the-experimental-version)).
 
+### Improvements
+
+- **No setup before installing with Docker:** Party Mode now keeps its settings in a
+  Docker volume, so a new install is just `docker compose up -d` (or the `docker run`
+  command), with no `config.json` to create first, on a NAS too. Updating an existing
+  install keeps its settings as before. If you install again with the new instructions
+  instead, enable Party Mode in Roon once more and set it up again.
+
 ### Security
 
 - Various security enhancements.

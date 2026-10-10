@@ -1,8 +1,6 @@
 # Host networking is required: Roon discovery uses UDP broadcast on port 9003.
-# The extension runs as uid 1000 and saves its settings to ./config.json, so
-# create it writable by that user first (it holds Roon's pairing token):
-#   touch config.json && sudo chown 1000 config.json && chmod 600 config.json
-# or, without sudo, chmod 666 config.json (readable by every account).
+# Settings, including Roon's pairing token, are kept in the party-mode-data
+# volume, which Docker creates on the first `docker compose up -d`.
 services:
   party-mode:
     image: stubaggs/roon-extension-party-mode:latest
@@ -25,10 +23,13 @@ services:
       # - ROON_EXTENSION_PARTY_MODE_RATE_LIMIT=600    # requests a minute per device (0 = no limit)
       # - ROON_EXTENSION_PARTY_MODE_SEARCH_LIMIT=60   # searches a minute per device (0 = no limit)
     volumes:
-      - ./config.json:/usr/src/app/config.json
+      - party-mode-data:/usr/src/app/data
     # Keep the log from growing without limit.
     logging:
       driver: json-file
       options:
         max-size: "10m"
         max-file: "3"
+
+volumes:
+  party-mode-data:
