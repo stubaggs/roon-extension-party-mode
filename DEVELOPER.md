@@ -1011,6 +1011,9 @@ exit code is 0.
 Images up to 1.3.0 have the unsigned provenance only (1.2.0 and 1.3.0 name the commits of
 `v1.2.0` and `v1.3.0`); the signed attestation and SBOM start with the next release.
 
+To stay on one version, use its number in place of `latest` in the README's commands, or
+in `docker-compose.yml` (`stubaggs/roon-extension-party-mode:1.3.0`): `latest` always moves
+to the newest release, but a release's number is never reused for a different image.
 Pinning a digest (`stubaggs/roon-extension-party-mode:1.3.0@sha256:…`, as RELEASES.md lists
 them) gets exactly that image, whatever happens to the tags later. The Extension Manager
 always installs `latest`.
