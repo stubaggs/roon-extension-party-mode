@@ -1017,7 +1017,14 @@ A release comes from `experimental` (the next minor or major version) or from a 
 (a patch; see [Branches](#branches)).
 
 1. Set `version` in `package.json` without a suffix, and mark its RELEASES.md section
-   released.
+   released. From `experimental`, also point README.md and `docker-compose.yml` back at
+   the release. On `experimental` they install the `:experimental` image, so whoever
+   reads that branch tries what's on it, under names that keep it apart from a release
+   copy on the same machine: folder, container `roon-extension-party-mode-experimental`
+   and volume `roon-extension-party-mode-experimental-data`, and the compose file
+   downloaded from the `experimental` branch. Switching back is removing every
+   `-experimental` and `:experimental` (`:latest`), and `experimental/` in the download
+   link (`main/`). Publishing from `main` refuses while either file still has one.
 2. Run CodeQL on that branch (see [Code scanning](#code-scanning)) and check its results.
 3. Merge into `main` through a pull request titled `Release <version> [skip ci]`.
 4. Tag the merge commit `v<version>` (an annotated tag, from `v1.1.0` on).
@@ -1028,8 +1035,9 @@ A release comes from `experimental` (the next minor or major version) or from a 
 7. Create the GitHub release for the tag, with that version's section of RELEASES.md as
    its notes.
 8. Merge `main` into `experimental`. After a release from `experimental`, bump it to the
-   next version with a suffix and start that RELEASES.md section; after a fix release,
-   `experimental` keeps its version.
+   next version with a suffix and start that RELEASES.md section, and switch README.md and
+   `docker-compose.yml` to the experimental image and names again; after a
+   fix release, `experimental` keeps its version.
 
 ### Checking an image against the code
 

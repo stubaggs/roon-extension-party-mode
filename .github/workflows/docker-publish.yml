@@ -47,7 +47,14 @@ jobs:
         run: |
           version=$(node -p "require('./package.json').version")
           case "$GITHUB_REF" in
-            refs/heads/main) ;;
+            refs/heads/main)
+              # On experimental, the README and docker-compose.yml install the
+              # experimental image, under -experimental names so it can run beside
+              # the release. They must point back at the release before it's
+              # published from main.
+              if grep -nE 'roon-extension-party-mode(:|/|-)experimental' README.md docker-compose.yml; then
+                echo "::error::README.md or docker-compose.yml still names the experimental image or copy; switch them back before releasing"; exit 1
+              fi ;;
             refs/heads/experimental)
               case "$version" in
                 *-*) ;;

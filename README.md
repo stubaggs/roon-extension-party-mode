@@ -59,8 +59,8 @@ Then make a folder for Party Mode, download its `docker-compose.yml` into it, an
 it:
 
 ```bash
-mkdir roon-extension-party-mode && cd roon-extension-party-mode
-curl -O https://raw.githubusercontent.com/stubaggs/roon-extension-party-mode/main/docker-compose.yml
+mkdir roon-extension-party-mode-experimental && cd roon-extension-party-mode-experimental
+curl -O https://raw.githubusercontent.com/stubaggs/roon-extension-party-mode/experimental/docker-compose.yml
 docker compose up -d
 ```
 
@@ -78,22 +78,22 @@ Your settings and Roon's pairing are kept in a Docker volume, so updating keeps 
 This does the same as `docker-compose.yml`, and needs only Docker, not the Compose plugin:
 
 ```bash
-docker run -d --name roon-extension-party-mode --network host --restart unless-stopped \
+docker run -d --name roon-extension-party-mode-experimental --network host --restart unless-stopped \
   --log-opt max-size=10m --log-opt max-file=3 \
   --read-only --cap-drop ALL --security-opt no-new-privileges \
-  -v roon-extension-party-mode-data:/usr/src/app/data \
-  stubaggs/roon-extension-party-mode:latest
+  -v roon-extension-party-mode-experimental-data:/usr/src/app/data \
+  stubaggs/roon-extension-party-mode:experimental
 ```
 
 To update, run this, then the `docker run` command again:
 
 ```bash
-docker pull stubaggs/roon-extension-party-mode:latest
-docker rm -f roon-extension-party-mode
+docker pull stubaggs/roon-extension-party-mode:experimental
+docker rm -f roon-extension-party-mode-experimental
 ```
 
-To stop it, run `docker stop roon-extension-party-mode`. It stays stopped, even after a
-restart of the computer, until you run `docker start roon-extension-party-mode`.
+To stop it, run `docker stop roon-extension-party-mode-experimental`. It stays stopped, even after a
+restart of the computer, until you run `docker start roon-extension-party-mode-experimental`.
 
 </details>
 
@@ -225,7 +225,7 @@ Roon's status line (8338 unless it was busy).
 
 **Roon says settings can't be saved.** The extension has nowhere to keep them. Check that
 `docker-compose.yml` still has its `party-mode-data` volume line, or that your `docker run`
-command has `-v roon-extension-party-mode-data:/usr/src/app/data`. If you mount a
+command has `-v roon-extension-party-mode-experimental-data:/usr/src/app/data`. If you mount a
 `config.json` file instead, it must be writable:
 `sudo chown 1000 config.json && chmod 600 config.json`.
 
@@ -252,7 +252,7 @@ address, so they share one phone's limit. Set **Flood protection** under **Advan
 
 **Something else isn't working.** Turn on **Detailed log** under **Advanced**, try again,
 then get the log: with Docker Compose, `docker compose logs -t` in its folder; with
-`docker run`, `docker logs -t roon-extension-party-mode`; with the Extension Manager, its
+`docker run`, `docker logs -t roon-extension-party-mode-experimental`; with the Extension Manager, its
 **Collect Logs**. Turn it off again afterwards: it's large and records what guests search
 for.
 
@@ -300,7 +300,7 @@ docker run -d --name roon-extension-party-mode-garden --network host --restart u
   --read-only --cap-drop ALL --security-opt no-new-privileges \
   -e ROON_EXTENSION_PARTY_MODE_INSTANCE=Garden \
   -v roon-extension-party-mode-garden-data:/usr/src/app/data \
-  stubaggs/roon-extension-party-mode:latest
+  stubaggs/roon-extension-party-mode:experimental
 ```
 
 It shows in Roon as **Party Mode (Garden)**, a separate extension. Enable it and choose
@@ -324,9 +324,9 @@ pairing.
 **With `docker run`:** remove the container, its settings volume and the image:
 
 ```bash
-docker rm -f roon-extension-party-mode
-docker volume rm roon-extension-party-mode-data
-docker rmi stubaggs/roon-extension-party-mode:latest
+docker rm -f roon-extension-party-mode-experimental
+docker volume rm roon-extension-party-mode-experimental-data
+docker rmi stubaggs/roon-extension-party-mode:experimental
 ```
 
 A **Party profile** you created stays in Roon until you delete it. For a second copy, such

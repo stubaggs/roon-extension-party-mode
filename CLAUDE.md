@@ -40,6 +40,12 @@ Every change that affects them updates the docs in the same commit, except the R
   triggers commented out, and put `[skip ci]` in merge commit titles. After every
   release, ask the owner whether to publish it.
 - Bump `version` in `package.json` for a release; Roon shows it as the extension's version.
+- On `experimental`, README.md and `docker-compose.yml` install the `:experimental` image
+  under `-experimental` names (folder, container, volume), with the compose file from the
+  `experimental` branch, so it runs beside a release copy. A release from `experimental`
+  switches them back before merging, and the next version switches them to experimental
+  again (DEVELOPER.md's Releasing). Publishing from `main` refuses while either file still
+  names the experimental image or copy.
 - After merging a release into `main`, tag the merge commit with an annotated tag
   `v<version>` (e.g. `v1.1.0`) and push the tag. The workflow's `tags` trigger stays
   commented out, so a tag doesn't publish the Docker image either.

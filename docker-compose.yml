@@ -3,8 +3,8 @@
 # volume, which Docker creates on the first `docker compose up -d`.
 services:
   party-mode:
-    image: stubaggs/roon-extension-party-mode:latest
-    container_name: roon-extension-party-mode
+    image: stubaggs/roon-extension-party-mode:experimental
+    container_name: roon-extension-party-mode-experimental
     network_mode: host
     restart: unless-stopped
     # Locked down: nothing in the image can change (config.json is mounted, so
