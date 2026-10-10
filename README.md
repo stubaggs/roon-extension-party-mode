@@ -72,6 +72,11 @@ Enable **Party Mode** under **Settings → Extensions** in Roon.
 
 Your settings and Roon's pairing stay in `config.json`.
 
+**Options:** `docker-compose.yml` has a few optional lines, each starting with `#` and
+explained beside it: the detailed log, the request limits, and a name for a second copy.
+To use one, remove its `#`, change the value if you need to, and run `docker compose up -d`.
+With `docker run`, add it as `-e NAME=value` instead.
+
 <details>
 <summary><strong>Prefer <code>docker run</code>?</strong></summary>
 
@@ -244,14 +249,13 @@ choose one yourself, change **Web port** under **Advanced** in the settings.
 Open the **Advanced** section of the settings and fill in the titles your Core uses.
 
 **A guest sees "Too many requests".** Your guest Wi-Fi may put every phone behind one
-address, so they share one phone's limit. You can raise it: see
-[DEVELOPER.md](DEVELOPER.md#environment-variables).
+address, so they share one phone's limit. Raise it with the request-limit
+[options](#with-docker), or set them to 0 to turn the limits off.
 
-**Something else isn't working.** Turn on the detailed log: in `docker-compose.yml`, remove
-the `#` in front of `ROON_EXTENSION_PARTY_MODE_DEBUG=1` and run `docker compose up -d`
-(with `docker run`, add `-e ROON_EXTENSION_PARTY_MODE_DEBUG=1`). See it with
-`docker compose logs -t` in its folder, or `docker logs -t roon-extension-party-mode`.
-Turn it off again afterwards: it's large and records what guests search for.
+**Something else isn't working.** Turn on the detailed-log [option](#with-docker), then see
+the log with `docker compose logs -t` in its folder (or
+`docker logs -t roon-extension-party-mode`). Turn it off again afterwards: it's large and
+records what guests search for.
 
 **Need some help troubleshooting, or have some suggestions?** Mosey on over to the
 [Roon forums](https://community.roonlabs.com/t/party-mode-extension).
@@ -266,9 +270,8 @@ Give each copy its own folder, so it has its own `config.json`, and its own cont
 name. For example, a second copy named Garden (replace Garden with whatever you choose):
 
 **With Docker Compose:** set up a new folder as in [With Docker](#with-docker). In its
-`docker-compose.yml`, change `container_name` and uncomment the
-`ROON_EXTENSION_PARTY_MODE_INSTANCE` line, with your name in it. Leave the other lines as
-they are:
+`docker-compose.yml`, change `container_name`, and remove the `#` from the name line with
+your name in it. Leave the other lines as they are:
 
 ```yaml
     container_name: roon-extension-party-mode-garden
