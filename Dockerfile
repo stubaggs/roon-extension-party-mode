@@ -30,7 +30,7 @@ RUN npm test
 FROM node:22-alpine@sha256:0a7108bf6c7bf5de370ffb1a3ed6be93d405b43ff159f681a8d18c0e2bc2e402
 
 LABEL org.opencontainers.image.title="Roon Extension: Party Mode" \
-      org.opencontainers.image.description="Lets guests search your library and add tracks to a zone's queue from their phone" \
+      org.opencontainers.image.description="Roon Extension for parties: guests request music from their phone, no app needed" \
       org.opencontainers.image.source="https://github.com/stubaggs/roon-extension-party-mode" \
       org.opencontainers.image.licenses="Apache-2.0"
 
