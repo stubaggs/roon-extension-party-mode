@@ -81,6 +81,9 @@ Docker image: `stubaggs/roon-extension-party-mode:1.3.0@sha256:b2a1339e64544fca2
   
 ### Security
 - Various security enhancements.
+- The container is now called `roon-extension-party-mode` (it was `party-mode`). When
+  updating from an earlier version with `docker run`, remove the old one once with
+  `docker rm -f party-mode`.
 - Hardened the docker container: the image no longer ships package managers, and the example
   docker-compose.yml runs it read-only with no Linux capabilities or privilege escalation.
   Re-download the new docker-compose to get the changes.
