@@ -1101,12 +1101,67 @@ The health check runs every 60 seconds and allows 15 seconds, with a minute's gr
 startup. Each check starts Node, which takes seconds on a Pi Zero or Pi 1, so a tighter
 timeout would report a slow Pi as unhealthy, and more frequent checks would take CPU from
 serving guests. Nothing restarts an unhealthy container in a plain Docker or Compose
-setup; the status shows in `docker ps`. Even under QEMU emulation (testing `arm` images
-on another machine), where Node takes about 10 seconds to start, the check passes.
+setup; the status shows in `docker ps`. Even under QEMU emulation (see [Building every
+platform locally](#building-every-platform-locally)), where a 32-bit ARM image takes
+several seconds to start and the check about 5, it passes.
 
 The image covers both 32-bit ARM variants because Docker reports every 32-bit ARM host as
 `arm`, the key the repository entry uses: Pi Zero and Pi 1 need `arm/v6`, later Pis
 `arm/v7`.
+
+### Building every platform locally
+
+The workflow builds four platforms; all four can be built and tried on one machine
+before publishing, so a problem on one of them shows before it reaches Docker Hub. On a
+machine of another architecture, Docker runs the others under QEMU's user-mode emulation,
+registered with the kernel's binfmt handler. On Ubuntu:
+
+- **Another 64-bit platform** (amd64 on an ARM machine, or arm64 on an Intel one):
+  `sudo apt install qemu-user-binfmt`. It registers the emulators at every boot.
+- **32-bit ARM on an arm64 machine:** QEMU treats arm64 and 32-bit ARM as one family, so
+  the package doesn't register `qemu-arm` there, expecting the CPU to run 32-bit ARM
+  itself. Many recent ARM CPUs can't. Register it by hand, with QEMU's own pattern
+  (`arm_magic` and `arm_mask` in its `scripts/qemu-binfmt-conf.sh`), in
+  `/etc/binfmt.d/qemu-arm.conf`, as one line:
+
+  ```
+  :qemu-arm:M::\x7f\x45\x4c\x46\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x28\x00:\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff:/usr/bin/qemu-arm:OPF
+  ```
+
+  Its fields, separated by colons: the name (`qemu-arm`); `M`, match on the file's first
+  bytes; an empty offset (start of the file); those bytes, a 32-bit, little-endian ELF
+  executable for machine `0x28` (ARM); a mask saying which bits must match (`\x00`
+  ignores the OS/ABI byte, `\xfe` accepts both plain and position-independent
+  executables); the emulator; and flags `OPF` (`F` loads the
+  emulator now, so containers can use it). Then `sudo systemctl restart
+  systemd-binfmt`. One entry covers `arm/v6` and `arm/v7`.
+  Copy it from a file rather than a terminal: a wrapped line pasted from the screen can
+  pick up a border character and break the entry.
+
+Then, for each of `linux/amd64`, `linux/arm64`, `linux/arm/v7` and `linux/arm/v6`:
+
+```sh
+docker buildx build --platform linux/arm/v6 -t party-mode:local-arm-v6 --load .
+```
+
+The build stage runs `npm test`, so a passing build is the whole suite passing on that
+platform (add `--no-cache` if the test layer is cached). Then start each image locked down
+and off the host network, so it doesn't register with Roon, with a fresh settings volume:
+
+```sh
+docker run -d --name pm-smoke -p 127.0.0.1:18361:8338 --read-only --cap-drop ALL \
+  --security-opt no-new-privileges -v pm-smoke:/usr/src/app/data party-mode:local-arm-v6
+docker exec pm-smoke node healthcheck.js && echo healthy
+```
+
+and check that `/PartyHub` answers, settings save to `data/config.json`, and the log has
+no "not writable" warning. Checked on an arm64 machine in October 2026: amd64 builds in
+about 20 seconds, arm/v6 and arm/v7 in about 90; the 32-bit ARM images serve after
+about 7 seconds, and their health check takes about 5.
+
+Emulation shows whether an image builds, passes its tests and starts. It doesn't show
+speed: a fast machine emulates a Pi Zero faster than a Pi Zero runs, so a release is also
+worth trying on a real one.
 
 ### The base image
 
