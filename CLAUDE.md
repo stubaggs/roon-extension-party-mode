@@ -33,19 +33,21 @@ Every change that affects them updates the docs in the same commit, except the R
   pull request, and only when asked. Never merge Dependabot's pull requests on `main`;
   take the update into `experimental`. Whenever something lands on `main`, merge `main`
   into `experimental` before the next change there.
-- **Never publish the Docker image, and never set it to publish automatically.** The
-  owner publishes it by hand (Actions → Publish Docker image). Don't run that workflow,
-  keep its push, tags and schedule triggers commented out, and put `[skip ci]` in merge
-  commit titles. After every release, remind the owner to publish it.
+- **Never publish the Docker image without asking first, every time, and never set it to
+  publish automatically.** Claude may run the workflow (Actions → Publish Docker image,
+  or `gh workflow run docker-publish.yml --ref <branch>`) only after the owner says yes to
+  that specific publish; a yes never covers the next one. Keep its push, tags and schedule
+  triggers commented out, and put `[skip ci]` in merge commit titles. After every
+  release, ask the owner whether to publish it.
 - Bump `version` in `package.json` for a release; Roon shows it as the extension's version.
 - After merging a release into `main`, tag the merge commit with an annotated tag
   `v<version>` (e.g. `v1.1.0`) and push the tag. The workflow's `tags` trigger stays
   commented out, so a tag doesn't publish the Docker image either.
-- Once the owner has published the Docker image for a release, add its digest (from the
+- Once the Docker image for a release is published, add its digest (from the
   workflow run's summary, or `docker buildx imagetools inspect`) under the version's
   heading in RELEASES.md: ``Docker image: `stubaggs/roon-extension-party-mode:<version>@sha256:…` ``.
   Release numbers on Docker Hub are never republished; the workflow refuses to.
-- Once the owner has published the Docker image for a release, create a GitHub release for
+- Once the Docker image for a release is published, create a GitHub release for
   the tag (`gh release create v<version> --verify-tag --title "Party Mode <version>"
   --latest`). Its notes are that version's section of RELEASES.md, followed by a link to
   the full history in RELEASES.md.
