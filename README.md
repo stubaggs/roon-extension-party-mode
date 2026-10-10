@@ -4,6 +4,8 @@
 
 # Party Mode for Roon
 
+*A Roon Extension for parties: guests request music from their phone, no app needed.*
+
 Let your guests pick the music. They scan a QR code with their phone, search your Roon
 library and streaming services, and add tracks to the party's queue. No app to install, no
 Roon account, and no access to anything else in your Roon setup.
@@ -37,7 +39,7 @@ What's changed in each version is in [RELEASES.md](RELEASES.md).
 *This method is awaiting inclusion in the Extension Manager repository. Until then, please
 use one of the other install options.*
 
-Install **Party Mode** with the
+Install **Party Mode** from the **Playback** category of the
 [Extension Manager](https://github.com/TheAppgineer/roon-extension-manager), then enable it
 under **Settings → Extensions** in Roon. The Extension Manager handles updates from then
 on.
