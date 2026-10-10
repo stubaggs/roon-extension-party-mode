@@ -72,15 +72,10 @@ Enable **Party Mode** under **Settings → Extensions** in Roon.
 
 Your settings and Roon's pairing stay in `config.json`.
 
-**Options:** `docker-compose.yml` has a few optional lines, each starting with `#` and
-explained beside it: the detailed log, the request limits, and a name for a second copy.
-To use one, remove its `#`, change the value if you need to, and run `docker compose up -d`.
-With `docker run`, add it as `-e NAME=value` instead.
-
 <details>
 <summary><strong>Prefer <code>docker run</code>?</strong></summary>
 
-This does the same as `docker-compose.yml`:
+This does the same as `docker-compose.yml`, and needs only Docker, not the Compose plugin:
 
 ```bash
 mkdir roon-extension-party-mode && cd roon-extension-party-mode
@@ -250,15 +245,22 @@ Open the **Advanced** section of the settings and fill in the titles your Core u
 
 **A guest sees "Too many requests".** Your guest Wi-Fi may put every phone behind one
 address, so they share one phone's limit. Raise it with the request-limit
-[options](#with-docker), or set them to 0 to turn the limits off.
+[options](#options), or set them to 0 to turn the limits off.
 
-**Something else isn't working.** Turn on the detailed-log [option](#with-docker), then see
+**Something else isn't working.** Turn on the detailed-log [option](#options), then see
 the log with `docker compose logs -t` in its folder (or
 `docker logs -t roon-extension-party-mode`). Turn it off again afterwards: it's large and
 records what guests search for.
 
 **Need some help troubleshooting, or have some suggestions?** Mosey on over to the
 [Roon forums](https://community.roonlabs.com/t/party-mode-extension).
+
+## Options
+
+`docker-compose.yml` has a few optional lines, each starting with `#` and explained beside
+it: the detailed log, the request limits, and a name for a second copy. To use one, remove
+its `#`, change the value if you need to, and run `docker compose up -d`. With
+`docker run`, add it as `-e NAME=value` instead.
 
 ## Running more than one party
 
