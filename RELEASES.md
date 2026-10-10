@@ -14,6 +14,8 @@ Not released yet. You can try it on the `experimental` branch (see
 
 ## 1.3.2
 
+Docker image: `stubaggs/roon-extension-party-mode:1.3.2@sha256:d3a801fba58640ee1b856ebeea9b548dc8bccc964df328c011c0359b5160f07c`
+
 ### Fixes
 
 - After the Roon Core restarts, **Up next** shows the queue again and keeps up with it.
