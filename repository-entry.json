@@ -1,7 +1,7 @@
 {
   "author": "Stubaggs",
   "display_name": "Party Mode",
-  "description": "Lets guests search your library and add tracks to a zone's queue from their phone",
+  "description": "Roon Extension for parties: guests request music from their phone, no app needed",
   "image": {
     "repo": "stubaggs/roon-extension-party-mode",
     "tags": {
