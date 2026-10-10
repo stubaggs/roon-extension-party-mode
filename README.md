@@ -226,8 +226,8 @@ Roon's status line (8338 unless it was busy).
 
 **A guest's page says "Scan the code again".** Their session ended after 12 hours without
 using the page, or they opened an old bookmark (from 1.2.0 the guest page is at
-`/GuestHub`). Scanning the QR code again lets them back in; they'll need to enter their
-name again.
+`/GuestHub`). Scanning the QR code again lets them back in, under the name their phone
+remembers.
 
 **"That code has expired".** Party mode was set to Off and back to On, which makes a new
 code. Scan the code on the Party Hub again.
@@ -254,8 +254,9 @@ the variable to `docker run`, or uncomment its line in `docker-compose.yml`.
 `-e ROON_EXTENSION_PARTY_MODE_DEBUG=1`; with Docker Compose, remove the `#` in front of
 that line in `docker-compose.yml` and run `docker compose up -d`) for a detailed log,
 including every message to and from Roon. See it with
-`docker logs roon-extension-party-mode`, or `docker compose logs` in its folder. Turn it
-off again afterwards: it's large and records what guests search for.
+`docker logs -t roon-extension-party-mode`, or `docker compose logs -t` in its folder;
+`-t` puts the time (in UTC) on each line. Turn it off again afterwards: it's large and
+records what guests search for.
 
 **Need some help troubleshooting ?** or have some suggestions, mosey on over to the [Roon forums](https://community.roonlabs.com/t/party-mode-extension)
 
