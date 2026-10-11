@@ -863,34 +863,23 @@ port 9003. It bind-mounts `config.json`, so settings survive updates.
 
 ## Branches
 
-Three branches last; every other branch is short-lived.
+Two branches last; every other branch is short-lived.
 
 - **`main`** is what's released: the Docker image's `latest`, the README people read, and
   the tags. Changes reach it through pull requests, apart from the owner's README edits.
-- **`beta`** is the release candidate for the next version, with a suffix
-  (`1.4.0-beta.1`). It's on GitHub and published by hand as `:beta` for testers (see
-  [Running the beta](#running-the-beta)).
-- **`experimental`** is where the next version is worked on. It's **local only**: it isn't
-  pushed to GitHub or published to Docker Hub, and it's tested on the developer's own
-  machine (see [Running the image by hand](#running-the-image-by-hand)). It carries the
-  same version and install names as `beta`, which it feeds.
+- **`beta`** is the next version's release candidate, with a suffix (`1.4.0-beta.1`),
+  published by hand as `:beta` for testers (see [Running the beta](#running-the-beta)).
+  Each new candidate bumps the beta number (`-beta.2`).
 
 | Work | Branch from | Merges into |
 | --- | --- | --- |
-| Small changes for the next version | work on `experimental` directly | n/a |
-| Big or risky work (a major dependency, a new feature) | `experimental`, named after it (`express-5`), local too | `experimental`; then delete it |
-| A release candidate | `experimental`, once its changes are ready for testers | `beta`, then pushed; a new candidate bumps the beta number (`-beta.2`) |
 | Fixes to the released version | `main`, named after the next patch (`fix-1.3.2`) | `main`, by pull request, as that release |
-| Dependabot's pull requests | Dependabot's own branch, against `main` | not merged on `main`: take the update into `experimental`, test it there, and it ships with the next release |
+| Dependabot's pull requests | Dependabot's own branch, against `main` | not merged on `main`: the update is tested with the next version and ships with it |
 | The owner's README edits on GitHub | `main` | n/a |
 
-**Whenever anything lands on `main`, merge `main` into `experimental`** straight away,
-before the next change there, so the two never drift, and into `beta` too while it holds
-a candidate. RELEASES.md is the usual conflict: keep the version in progress above the
+**Whenever anything lands on `main`, merge `main` into `beta`** straight away, so the two
+never drift. RELEASES.md is the usual conflict: keep the version in progress above the
 one just released.
-
-With `experimental` local, it has no copy off the machine unless one is made: push it to
-a private remote of its own, never to the public repository.
 
 A fix branch starts by bumping the patch version (no suffix) and giving RELEASES.md a
 "(in progress)" section for it; its pull request into `main` is the release (see
@@ -929,9 +918,9 @@ Hub. Its tags depend on the branch chosen under **Use workflow from**:
 | `main` | `latest`, and the version (`1.1.1`) | The Extension Manager (`repository-entry.json` asks for `latest`), and Docker users on `latest`. The version tag lets anyone pin or roll back |
 | `beta` | `beta`, and the version (`1.4.0-beta.1`) | Only those who ask for `:beta` |
 
-The workflow refuses any other branch, `experimental` included. It refuses `beta` when its
-`package.json` version has no `-beta` suffix, so a beta can never take `latest` or a
-release's number, and `main` when its version has a suffix.
+The workflow refuses any other branch. It refuses `beta` when its `package.json` version
+has no `-beta` suffix, so a beta can never take `latest` or a release's number, and
+`main` when its version has a suffix.
 
 ### Running the workflow
 
@@ -953,8 +942,7 @@ true. To publish again, bump the version. Beta versions can be republished, but 
 number is clearer for testers.
 Docker Hub enforces the same: the repository's immutable tags setting covers tags matching
 `^[0-9]+\.[0-9]+\.[0-9]+$`, so a release number can't be pushed twice even outside the
-workflow, while `latest`, `beta` and `-beta` versions keep moving. The `:experimental` tags
-published before 1.4.0 were removed when `experimental` became local.
+workflow, while `latest`, `beta` and `-beta` versions keep moving.
 
 It needs two repository secrets, under Settings → Secrets and variables → Actions:
 
@@ -973,9 +961,9 @@ tested) or from a fix branch (a patch; see [Branches](#branches)).
 
 1. Set `version` in `package.json` without a suffix, and mark its RELEASES.md section
    released. From `beta`, also point README.md and `docker-compose.yml` back at the
-   release. On `beta` (and `experimental`) they install the `:beta` image, so whoever
-   reads that branch tries the candidate, under names that keep it apart from a release
-   copy on the same machine: folder, container `roon-extension-party-mode-beta` and
+   release. On `beta` they install the `:beta` image, so whoever reads that branch tries
+   the candidate, under names that keep it apart from a release copy on the same
+   machine: folder, container `roon-extension-party-mode-beta` and
    volume `roon-extension-party-mode-beta-data`, and the compose file downloaded from the
    `beta` branch. Switching back is removing every `-beta` and `:beta` (`:latest`), and
    `beta/` in the download link (`main/`). Publishing from `main` refuses while either
@@ -989,11 +977,10 @@ tested) or from a fix branch (a patch; see [Branches](#branches)).
    ``Docker image: `stubaggs/roon-extension-party-mode:<version>@sha256:…` ``.
 7. Create the GitHub release for the tag, with that version's section of RELEASES.md as
    its notes.
-8. Merge `main` into `experimental` (and `beta`). After a release from `beta`, bump
-   `experimental` to the next version with a `-beta.1` suffix, start that RELEASES.md
-   section, and switch README.md and `docker-compose.yml` to the beta image and names
-   again; `beta` takes them with the next candidate. After a fix release, both keep their
-   version.
+8. Merge `main` into `beta`. After a release from `beta`, the next version's first
+   candidate bumps it to `-beta.1`, starts that RELEASES.md section, and switches
+   README.md and `docker-compose.yml` to the beta image and names again. After a fix
+   release, `beta` keeps its version.
 
 ### Checking an image against the code
 
@@ -1083,7 +1070,7 @@ once a new image is published. To update by hand, change both `FROM` lines toget
 
 It also checks the npm dependencies and the workflow's actions weekly. Minor and patch
 npm updates come as one pull request. Its pull requests target `main`, but aren't merged
-there: the update goes into `experimental` (see [Branches](#branches)) and needs `npm test`
+there: the update goes into the next version (see [Branches](#branches)) and needs `npm test`
 and the local Docker check, like any change. An urgent security update can go through a
 fix branch instead.
 
@@ -1133,8 +1120,7 @@ It's a separate extension to Roon (`extensionIdentity()` in `lib/roon-service.js
 
 - a version with a suffix registers under the suffix's word: `1.4.0-beta.1` as
   `com.stubaggs.party-mode.beta`, named "Party Mode (beta)" (a suffix with no word counts
-  as beta). Builds from before 1.4.0, `-experimental`, keep
-  `com.stubaggs.party-mode.experimental`;
+  as beta);
 - a release keeps `com.stubaggs.party-mode`.
 
 Roon tells extensions apart by id, wherever they run. So the two run side by side against
@@ -1165,11 +1151,6 @@ To stop trying it, remove the container (`docker rm -f roon-extension-party-mode
 and its settings (`docker volume rm roon-extension-party-mode-beta-data`), and disable it
 in Roon. The Extension Manager always installs the released version.
 
-A copy of the old `:experimental` image no longer gets updates: the tag was removed when
-`experimental` became local. Remove it the same way
-(`docker rm -f roon-extension-party-mode-experimental`, or `party-mode-experimental` from
-before 1.3.0, then its `config.json` or `roon-extension-party-mode-experimental-data`
-volume), and disable "Party Mode (experimental)" in Roon.
 
 ## Running several copies
 
