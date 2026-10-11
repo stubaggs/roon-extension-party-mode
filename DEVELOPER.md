@@ -863,29 +863,39 @@ port 9003. It bind-mounts `config.json`, so settings survive updates.
 
 ## Branches
 
-Two branches last; every other branch is short-lived.
+Three branches last; every other branch is short-lived.
 
 - **`main`** is what's released: the Docker image's `latest`, the README people read, and
   the tags. Changes reach it through pull requests, apart from the owner's README edits.
-- **`experimental`** is the next version, with a suffix (`1.4.0-experimental`), published
-  by hand as `:experimental` (see [Running the experimental version](#running-the-experimental-version)).
+- **`beta`** is the release candidate for the next version, with a suffix
+  (`1.4.0-beta.1`). It's on GitHub and published by hand as `:beta` for testers (see
+  [Running the beta](#running-the-beta)).
+- **`experimental`** is where the next version is worked on. It's **local only**: it isn't
+  pushed to GitHub or published to Docker Hub, and it's tested on the developer's own
+  machine (see [Running the image by hand](#running-the-image-by-hand)). It carries the
+  same version and install names as `beta`, which it feeds.
 
 | Work | Branch from | Merges into |
 | --- | --- | --- |
 | Small changes for the next version | work on `experimental` directly | n/a |
-| Big or risky work (a major dependency, a new feature) | `experimental`, named after it (`express-5`) | `experimental`, by pull request; then delete it |
+| Big or risky work (a major dependency, a new feature) | `experimental`, named after it (`express-5`), local too | `experimental`; then delete it |
+| A release candidate | `experimental`, once its changes are ready for testers | `beta`, then pushed; a new candidate bumps the beta number (`-beta.2`) |
 | Fixes to the released version | `main`, named after the next patch (`fix-1.3.2`) | `main`, by pull request, as that release |
 | Dependabot's pull requests | Dependabot's own branch, against `main` | not merged on `main`: take the update into `experimental`, test it there, and it ships with the next release |
 | The owner's README edits on GitHub | `main` | n/a |
 
 **Whenever anything lands on `main`, merge `main` into `experimental`** straight away,
-before the next change there, so the two never drift. RELEASES.md is the usual conflict:
-keep the version in progress on `experimental` above the one just released.
+before the next change there, so the two never drift, and into `beta` too while it holds
+a candidate. RELEASES.md is the usual conflict: keep the version in progress above the
+one just released.
+
+With `experimental` local, it has no copy off the machine unless one is made: push it to
+a private remote of its own, never to the public repository.
 
 A fix branch starts by bumping the patch version (no suffix) and giving RELEASES.md a
 "(in progress)" section for it; its pull request into `main` is the release (see
 [Releasing](#releasing)). It can't publish by itself: the workflow only runs from `main`
-and `experimental`.
+and `beta`.
 
 Dependabot's pull requests target `main`. Security updates always do, whatever
 `.github/dependabot.yml` says, so version updates go there too, to keep them in one place.
@@ -899,8 +909,8 @@ shares the repository but not the untracked files: run `npm ci` there, and copy
 ## Code scanning
 
 `.github/workflows/codeql.yml` runs GitHub's CodeQL when started by hand: Actions →
-CodeQL → Run workflow, on the branch about to be released (`experimental` or a fix
-branch) before merging into `main`. Its push, pull
+CodeQL → Run workflow, on the branch about to be released (`beta` or a fix branch)
+before merging into `main`. Its push, pull
 request and weekly triggers are commented out. It analyses the JavaScript, with the
 security-extended queries, and the workflows themselves (`.github/codeql/codeql-config.yml` leaves out
 `node_modules` and `test`). It only reads the code. Results are under the repository's
@@ -917,11 +927,11 @@ Hub. Its tags depend on the branch chosen under **Use workflow from**:
 | Branch | Tags | Who gets it |
 | --- | --- | --- |
 | `main` | `latest`, and the version (`1.1.1`) | The Extension Manager (`repository-entry.json` asks for `latest`), and Docker users on `latest`. The version tag lets anyone pin or roll back |
-| `experimental` | `experimental`, and the version (`1.2.0-experimental`) | Only those who ask for `:experimental` |
+| `beta` | `beta`, and the version (`1.4.0-beta.1`) | Only those who ask for `:beta` |
 
-The workflow refuses any other branch. It also refuses `experimental` when its
-`package.json` version has no suffix, so an experimental build can never take `latest` or
-a release's number.
+The workflow refuses any other branch, `experimental` included. It refuses `beta` when its
+`package.json` version has no `-beta` suffix, so a beta can never take `latest` or a
+release's number, and `main` when its version has a suffix.
 
 ### Running the workflow
 
@@ -939,10 +949,12 @@ sign. Dependabot updates the pins.
 
 From `main`, it refuses to publish a version that's already on Docker Hub: a release
 number names one image for good, so people can pin it, and its digest in RELEASES.md stays
-true. To publish again, bump the version. `experimental` versions can be republished.
+true. To publish again, bump the version. Beta versions can be republished, but a new beta
+number is clearer for testers.
 Docker Hub enforces the same: the repository's immutable tags setting covers tags matching
 `^[0-9]+\.[0-9]+\.[0-9]+$`, so a release number can't be pushed twice even outside the
-workflow, while `latest`, `experimental` and `-experimental` versions keep moving.
+workflow, while `latest`, `beta` and `-beta` versions keep moving. The `:experimental` tags
+published before 1.4.0 were removed when `experimental` became local.
 
 It needs two repository secrets, under Settings → Secrets and variables → Actions:
 
@@ -956,11 +968,18 @@ is how an update reaches people who have it installed.
 
 ### Releasing
 
-A release comes from `experimental` (the next minor or major version) or from a fix branch
-(a patch; see [Branches](#branches)).
+A release comes from `beta` (the next minor or major version, once a candidate has been
+tested) or from a fix branch (a patch; see [Branches](#branches)).
 
 1. Set `version` in `package.json` without a suffix, and mark its RELEASES.md section
-   released.
+   released. From `beta`, also point README.md and `docker-compose.yml` back at the
+   release. On `beta` (and `experimental`) they install the `:beta` image, so whoever
+   reads that branch tries the candidate, under names that keep it apart from a release
+   copy on the same machine: folder, container `roon-extension-party-mode-beta` and
+   volume `roon-extension-party-mode-beta-data`, and the compose file downloaded from the
+   `beta` branch. Switching back is removing every `-beta` and `:beta` (`:latest`), and
+   `beta/` in the download link (`main/`). Publishing from `main` refuses while either
+   file still has one.
 2. Run CodeQL on that branch (see [Code scanning](#code-scanning)) and check its results.
 3. Merge into `main` through a pull request titled `Release <version> [skip ci]`.
 4. Tag the merge commit `v<version>` (an annotated tag, from `v1.1.0` on).
@@ -970,9 +989,11 @@ A release comes from `experimental` (the next minor or major version) or from a 
    ``Docker image: `stubaggs/roon-extension-party-mode:<version>@sha256:…` ``.
 7. Create the GitHub release for the tag, with that version's section of RELEASES.md as
    its notes.
-8. Merge `main` into `experimental`. After a release from `experimental`, bump it to the
-   next version with a suffix and start that RELEASES.md section; after a fix release,
-   `experimental` keeps its version.
+8. Merge `main` into `experimental` (and `beta`). After a release from `beta`, bump
+   `experimental` to the next version with a `-beta.1` suffix, start that RELEASES.md
+   section, and switch README.md and `docker-compose.yml` to the beta image and names
+   again; `beta` takes them with the next candidate. After a fix release, both keep their
+   version.
 
 ### Checking an image against the code
 
@@ -1101,49 +1122,54 @@ and nothing else writes to disk; a new feature that writes a file needs a mount 
 The Extension Manager starts the container its own way, so none of this applies there; it
 creates and mounts `config.json` writable itself.
 
-## Running the experimental version
+## Running the beta
 
-New features are tried out before each release in an **experimental** version. It's
-built from the `experimental` branch and published by hand as the `:experimental` Docker
-tag (see [Publishing the image](#publishing-the-image)). It may change or break between
-updates.
+Each release is tried out first as a **beta**: a release candidate built from the `beta`
+branch and published by hand as the `:beta` Docker tag (see
+[Publishing the image](#publishing-the-image)). A new candidate replaces it, so it may
+change between updates.
 
 It's a separate extension to Roon (`extensionIdentity()` in `lib/roon-service.js`):
 
-- a version with a suffix registers as `com.stubaggs.party-mode.experimental`, named
-  "Party Mode (experimental)";
+- a version with a suffix registers under the suffix's word: `1.4.0-beta.1` as
+  `com.stubaggs.party-mode.beta`, named "Party Mode (beta)" (a suffix with no word counts
+  as beta). Builds from before 1.4.0, `-experimental`, keep
+  `com.stubaggs.party-mode.experimental`;
 - a release keeps `com.stubaggs.party-mode`.
 
 Roon tells extensions apart by id, wherever they run. So the two run side by side against
 one Core, on one machine or two, each enabled, set up and paired on its own (checked
 October 2026). But two copies with the **same** id clash, even on separate machines: run
-at most one release and one experimental build per Core, unless the copies are named (see
+at most one release and one beta per Core, unless the copies are named (see
 [Running several copies](#running-several-copies)).
 
-Give the experimental one its own folder, container name, `config.json` and party zone:
+Give the beta its own container name, settings volume and party zone:
 
 ```bash
-mkdir roon-extension-party-mode-experimental && cd roon-extension-party-mode-experimental
-touch config.json && sudo chown 1000 config.json && chmod 600 config.json
-docker run -d --name roon-extension-party-mode-experimental --network host --restart unless-stopped \
+docker run -d --name roon-extension-party-mode-beta --network host --restart unless-stopped \
   --log-opt max-size=10m --log-opt max-file=3 \
-  --read-only --cap-drop ALL --security-opt no-new-privileges \
-  -v "$PWD/config.json:/usr/src/app/config.json" \
-  stubaggs/roon-extension-party-mode:experimental
+  --cap-drop ALL --security-opt no-new-privileges \
+  -v roon-extension-party-mode-beta-data:/usr/src/app/data \
+  stubaggs/roon-extension-party-mode:beta
 ```
 
-1. In Roon, enable **Party Mode (experimental)** under **Settings → Extensions** and
-   choose its settings.
+1. In Roon, enable **Party Mode (beta)** under **Settings → Extensions** and choose its
+   settings.
 2. Pick a different party zone from the released Party Mode's. Two on one zone would both
    pause and resume it, each with its own join code.
 
-If the released one already uses port 8338, the experimental one takes the next free port,
-and its status line in Roon says so.
+If the released one already uses port 8338, the beta takes the next free port, and its
+status line in Roon says so.
 
-To stop trying it, remove the container
-(`docker rm -f roon-extension-party-mode-experimental`, or `party-mode-experimental` if
-you set it up before 1.3.0) and disable it in Roon. The Extension Manager always installs
-the released version.
+To stop trying it, remove the container (`docker rm -f roon-extension-party-mode-beta`)
+and its settings (`docker volume rm roon-extension-party-mode-beta-data`), and disable it
+in Roon. The Extension Manager always installs the released version.
+
+A copy of the old `:experimental` image no longer gets updates: the tag was removed when
+`experimental` became local. Remove it the same way
+(`docker rm -f roon-extension-party-mode-experimental`, or `party-mode-experimental` from
+before 1.3.0, then its `config.json` or `roon-extension-party-mode-experimental-data`
+volume), and disable "Party Mode (experimental)" in Roon.
 
 ## Running several copies
 
@@ -1155,7 +1181,7 @@ Core, even on different computers. To run more, give each extra copy a name with
 A named copy registers as its own extension (`extensionIdentity()`):
 
 - `com.stubaggs.party-mode.garden`, shown in Roon as "Party Mode (Garden)";
-- "Party Mode (experimental, Dev)" for a named experimental build.
+- "Party Mode (beta, Dev)" for a named beta.
 
 The id uses the name's letters and digits, with accents dropped: "Kitchen & Bar" becomes
 `kitchen-bar`. A name with none of those ("厨房") gets a short hash instead. The console's
