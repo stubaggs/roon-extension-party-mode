@@ -28,8 +28,9 @@ Every change that affects them updates the docs in the same commit, except the R
 ## Conventions the owner has asked for
 
 - Branches follow DEVELOPER.md's [Branches](DEVELOPER.md#branches): `main` is released;
-  `experimental` is the next version and stays **local: never push it**, and test it
-  locally with Docker; `beta` is the release candidate, pushed to GitHub and published as
+  `experimental` is the next version and stays **off the public repository**: push it
+  only to the private remote `private` (its upstream), and test it locally with Docker;
+  `beta` is the release candidate, pushed to the public repository and published as
   `:beta` for testers. Big work gets a local branch off `experimental`, fixes to the
   release a branch off `main` (`fix-<version>`). `experimental` goes into `beta` when the
   owner says a candidate is ready, and `beta` into `main` only through a pull request, and

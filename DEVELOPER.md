@@ -889,8 +889,12 @@ before the next change there, so the two never drift, and into `beta` too while 
 a candidate. RELEASES.md is the usual conflict: keep the version in progress above the
 one just released.
 
-With `experimental` local, it has no copy off the machine unless one is made: push it to
-a private remote of its own, never to the public repository.
+`experimental` and other local branches are backed up to a private GitHub repository,
+the remote `private`, which is also their upstream, so a plain `git push` goes there.
+Actions are off in that repository, so nothing there can build or publish. A local
+`pre-push` hook (in `.git/hooks`, not in the repository) refuses to push `experimental`
+anywhere else. When `beta` first goes to the public repository, push it with
+`git push -u origin beta`, so it follows `origin` from then on.
 
 A fix branch starts by bumping the patch version (no suffix) and giving RELEASES.md a
 "(in progress)" section for it; its pull request into `main` is the release (see
