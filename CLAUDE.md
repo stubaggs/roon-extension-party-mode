@@ -17,9 +17,9 @@ Every change that affects them updates the docs in the same commit, except the R
   changes (refactors, tests, workflows) don't go in. Security fixes are summed up as
   "Various security enhancements", with details only for what a host or guest would
   notice in normal use. A version bump in `package.json`
-  starts a new section; the version in progress says it isn't released yet. On `experimental`, `package.json`'s
-  version keeps a suffix (`1.2.0-experimental`) until the release bump: the publish
-  workflow refuses an experimental build without one.
+  starts a new section; the version in progress says it isn't released yet. On `experimental` and `beta`,
+  `package.json`'s version keeps a `-beta.N` suffix (`1.4.0-beta.1`) until the release
+  bump: the publish workflow refuses a beta without one.
 - If a change touches none of these, say so in the pull request rather than editing the docs.
 - Example addresses in the docs and tests use the TEST-NET-1 range `192.0.2.0/24` (e.g.
   `http://192.0.2.10:8338/PartyHub`), never a real private address. Tests that bind a
@@ -27,17 +27,26 @@ Every change that affects them updates the docs in the same commit, except the R
 
 ## Conventions the owner has asked for
 
-- Branches follow DEVELOPER.md's [Branches](DEVELOPER.md#branches): `main` is released,
-  `experimental` is the next version, big work gets a branch off `experimental`, fixes to
-  the release a branch off `main` (`fix-<version>`). Merge into `main` only through a
-  pull request, and only when asked. Never merge Dependabot's pull requests on `main`;
-  take the update into `experimental`. Whenever something lands on `main`, merge `main`
-  into `experimental` before the next change there.
+- Branches follow DEVELOPER.md's [Branches](DEVELOPER.md#branches): `main` is released;
+  `experimental` is the next version and stays **local: never push it**, and test it
+  locally with Docker; `beta` is the release candidate, pushed to GitHub and published as
+  `:beta` for testers. Big work gets a local branch off `experimental`, fixes to the
+  release a branch off `main` (`fix-<version>`). `experimental` goes into `beta` when the
+  owner says a candidate is ready, and `beta` into `main` only through a pull request, and
+  only when asked. Never merge Dependabot's pull requests on `main`; take the update into
+  `experimental`. Whenever something lands on `main`, merge `main` into `experimental`
+  (and `beta`, if it has a candidate) before the next change there.
 - **Never publish the Docker image, and never set it to publish automatically.** The
   owner publishes it by hand (Actions → Publish Docker image). Don't run that workflow,
   keep its push, tags and schedule triggers commented out, and put `[skip ci]` in merge
   commit titles. After every release, remind the owner to publish it.
 - Bump `version` in `package.json` for a release; Roon shows it as the extension's version.
+- On `experimental` and `beta`, README.md and `docker-compose.yml` install the `:beta`
+  image under `-beta` names (folder, container, volume), with the compose file from the
+  `beta` branch, so it runs beside a release copy. A release from `beta` switches them
+  back before merging, and the next version switches them to beta again (DEVELOPER.md's
+  Releasing). Publishing from `main` refuses while either file still names the beta image
+  or copy.
 - After merging a release into `main`, tag the merge commit with an annotated tag
   `v<version>` (e.g. `v1.1.0`) and push the tag. The workflow's `tags` trigger stays
   commented out, so a tag doesn't publish the Docker image either.
