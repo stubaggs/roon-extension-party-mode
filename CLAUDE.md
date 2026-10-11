@@ -38,8 +38,8 @@ Every change that affects them updates the docs in the same commit, except the R
   (and `beta`, if it has a candidate) before the next change there.
 - **Never publish the Docker image, and never set it to publish automatically.** The
   owner publishes it by hand (Actions → Publish Docker image). Don't run that workflow,
-  keep its push, tags and schedule triggers commented out, and put `[skip ci]` in merge
-  commit titles. After every release, remind the owner to publish it.
+  keep its push, tags and schedule triggers commented out. Merge commit and pull request
+  titles don't take `[skip ci]`. After every release, remind the owner to publish it.
 - Bump `version` in `package.json` for a release; Roon shows it as the extension's version.
 - On `experimental` and `beta`, README.md and `docker-compose.yml` install the `:beta`
   image under `-beta` names (folder, container, volume), with the compose file from the

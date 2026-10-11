@@ -981,7 +981,7 @@ tested) or from a fix branch (a patch; see [Branches](#branches)).
    `beta/` in the download link (`main/`). Publishing from `main` refuses while either
    file still has one.
 2. Run CodeQL on that branch (see [Code scanning](#code-scanning)) and check its results.
-3. Merge into `main` through a pull request titled `Release <version> [skip ci]`.
+3. Merge into `main` through a pull request titled `Release <version>`.
 4. Tag the merge commit `v<version>` (an annotated tag, from `v1.1.0` on).
 5. Run the workflow by hand. Its `tags: ['v*']` trigger is commented out with `push`, so
    tagging doesn't publish.
