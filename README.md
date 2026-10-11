@@ -27,14 +27,9 @@ What's changed in each version is in [RELEASES.md](RELEASES.md).
 ## What you need
 
 - A Roon Core.
-- A computer on the same network to run the extension, usually the same machine as the
-  [Extension Manager](https://github.com/TheAppgineer/roon-extension-manager): a 64-bit
-  PC or NAS, or any Raspberry Pi, including Pi Zero and Pi 1.
+- A computer on the same network to run the extension: a 64-bit PC or NAS, or any
+  Raspberry Pi, including Pi Zero and Pi 1.
 - Guests' phones on the same Wi-Fi as that computer.
-
-Party Mode runs in Docker on Linux, a Raspberry Pi or a NAS. It needs Docker's host
-network to find Roon, which works fully only on Linux: on Docker Desktop for Windows or
-Mac, Roon may not find it.
 
 ## Installing
 
@@ -46,32 +41,50 @@ use Docker below.*
 Install **Party Mode** from the **Playback** category of the
 [Extension Manager](https://github.com/TheAppgineer/roon-extension-manager) (its
 [wiki](https://github.com/TheAppgineer/roon-extension-manager/wiki) explains how to set it
-up), then enable it under **Settings → Extensions** in Roon. The Extension Manager handles
-updates from then on.
+up). The Extension Manager handles updates from then on.
+
+Then see [Starting a party](#starting-a-party).
+
+### On a NAS with Docker support
+
+Use your NAS's Docker app (Container Manager on Synology). Search its registry for
+`stubaggs/roon-extension-party-mode`, download the **latest** tag, and create a container
+from it. Set the network to **host** (with **bridge**, Roon can't find Party Mode) and
+tick **Enable auto-restart**.
+
+Party Mode keeps its settings inside the container, so recreating it, for example to
+update, means enabling it in Roon and choosing its settings again.
+
+Then see [Starting a party](#starting-a-party).
 
 ### With Docker
 
-You need Docker with its Compose plugin. For Linux and Raspberry Pi, see
-[Install Docker Engine](https://docs.docker.com/engine/install/); on a NAS, use its Docker
-or container app.
+On Linux, including a Raspberry Pi, install Docker with its Compose plugin (see
+[Install Docker Engine](https://docs.docker.com/engine/install/)).
 
-Then make a folder for Party Mode, with its `docker-compose.yml` and the `config.json` it
-saves its settings to, and start it:
+Then make a folder for Party Mode, download its `docker-compose.yml` into it, and start
+it:
 
 ```bash
 mkdir roon-extension-party-mode && cd roon-extension-party-mode
 curl -O https://raw.githubusercontent.com/stubaggs/roon-extension-party-mode/main/docker-compose.yml
-touch config.json && sudo chown 1000 config.json && chmod 600 config.json
 docker compose up -d
 ```
 
-Enable **Party Mode** under **Settings → Extensions** in Roon.
+Then see [Starting a party](#starting-a-party).
 
-- **Update** to a new version, in the same folder:
-  `docker compose pull && docker compose up -d`
-- **Stop** it: `docker compose down`. Start it again with `docker compose up -d`.
+To update, stop or start it, run these in Party Mode's folder:
 
-Your settings and Roon's pairing stay in `config.json`.
+```bash
+docker compose pull && docker compose up -d   # update to a new version
+docker compose stop                           # stop
+docker compose start                          # start again
+```
+
+Your settings and Roon's pairing are kept inside Party Mode's container. They stay through
+restarts, but updating or reinstalling makes a new container, so you'll need to enable
+Party Mode in Roon and choose its settings again. To keep them, see
+[Keeping settings through updates](#keeping-settings-through-updates).
 
 <details>
 <summary><strong>Prefer <code>docker run</code>?</strong></summary>
@@ -79,16 +92,13 @@ Your settings and Roon's pairing stay in `config.json`.
 This does the same as `docker-compose.yml`, and needs only Docker, not the Compose plugin:
 
 ```bash
-mkdir roon-extension-party-mode && cd roon-extension-party-mode
-touch config.json && sudo chown 1000 config.json && chmod 600 config.json
 docker run -d --name roon-extension-party-mode --network host --restart unless-stopped \
   --log-opt max-size=10m --log-opt max-file=3 \
-  --read-only --cap-drop ALL --security-opt no-new-privileges \
-  -v "$PWD/config.json:/usr/src/app/config.json" \
+  --cap-drop ALL --security-opt no-new-privileges \
   stubaggs/roon-extension-party-mode:latest
 ```
 
-To update, run this in the same folder, then the `docker run` command again:
+To update, run this, then the `docker run` command again:
 
 ```bash
 docker pull stubaggs/roon-extension-party-mode:latest
@@ -100,12 +110,67 @@ restart of the computer, until you run `docker start roon-extension-party-mode`.
 
 </details>
 
+### Keeping settings through updates
+
+<details>
+<summary>Save the settings to a <code>config.json</code> file, so updating or
+reinstalling keeps them.</summary>
+
+Installed with `config.json` already? Keep your `docker-compose.yml` or `docker run`
+command as it is.
+
+Party Mode runs inside Docker as the user with id 1000, so the file must exist and be
+writable by that user before Party Mode starts. Otherwise Docker makes a folder in its
+place and the settings can't be saved.
+
+**With Docker Compose:** in Party Mode's folder, create the file:
+
+```bash
+touch config.json && sudo chown 1000 config.json && chmod 600 config.json
+```
+
+Without `sudo`, use `chmod 666 config.json` instead, but then every account on the
+computer can read it, including Roon's pairing.
+
+Then, in `docker-compose.yml`, remove the `# ` at the start of these two lines, so they
+line up with the lines around them:
+
+```yaml
+    volumes:
+      - ./config.json:/usr/src/app/config.json
+```
+
+Run `docker compose up -d`.
+
+**With `docker run`:** if Party Mode is already running, remove it first with
+`docker rm -f roon-extension-party-mode`. Then make a folder for Party Mode, create the
+file in it as above, and start Party Mode from that folder with the file added:
+
+```bash
+mkdir roon-extension-party-mode && cd roon-extension-party-mode
+touch config.json && sudo chown 1000 config.json && chmod 600 config.json
+docker run -d --name roon-extension-party-mode --network host --restart unless-stopped \
+  --log-opt max-size=10m --log-opt max-file=3 \
+  --cap-drop ALL --security-opt no-new-privileges \
+  -v "$PWD/config.json:/usr/src/app/config.json" \
+  stubaggs/roon-extension-party-mode:latest
+```
+
+To update, run the same `docker pull` and `docker rm -f` as above, then this command
+again from the same folder.
+
+The first time it uses the file, Party Mode starts with new settings: enable it in Roon
+and choose them once more. From then on, updates keep them.
+
+</details>
+
 ## Starting a party
 
-1. In Roon, open **Settings → Extensions → Party Mode → Settings** and pick the **Party
-   zone**: where the music plays. Give the party a name if you like; otherwise it's
-   named after the zone. Choose a **Party profile** if you want to change from the
-   default. Press **Save** to apply your choices.
+1. In Roon, open **Settings → Extensions**, press **Enable** next to **Party Mode** if it
+   isn't enabled yet, then press its **Settings** and pick the **Party zone**: where the
+   music plays. Give the party a name if you like; otherwise it's named after the zone.
+   Choose a **Party profile** if you want to change from the default. Press **Save** to
+   apply your choices.
 2. Click **Party Mode**'s link in the Extensions list to open the **Party Hub**. Put it
    on a TV, a tablet or a laptop where guests can see it.
 3. Guests scan the QR code on the Party Hub with their phone camera. That's it.
@@ -214,8 +279,9 @@ from native speakers are welcome.
 
 **Party Mode doesn't appear in Roon's Extensions list.** The computer running it must be on
 the same network as the Roon Core, and Docker must use the host network (`network_mode:
-host` in `docker-compose.yml`, `--network host` with `docker run`). On Docker Desktop for
-Windows or Mac, that may not work; use a Linux computer, a Raspberry Pi or a NAS.
+host` in `docker-compose.yml`, `--network host` with `docker run`). If your Docker doesn't
+support [host networking](https://docs.docker.com/engine/network/drivers/host/), use a
+Linux computer, a Raspberry Pi or a NAS.
 
 **Phones can't open the page after scanning.** Check that the phones are on the same Wi-Fi as
 the computer running Party Mode, and that the computer's firewall allows the port shown in
@@ -224,6 +290,10 @@ Roon's status line (8338 unless it was busy).
 **Roon says settings can't be saved.** The extension can't write `config.json`. Run
 `sudo chown 1000 config.json && chmod 600 config.json` in its folder, or
 `chmod 666 config.json` without `sudo`.
+
+**Party Mode is new in Roon again after an update.** Its settings were kept inside the
+old container. Enable it and choose its settings again; to keep them next time, see
+[Keeping settings through updates](#keeping-settings-through-updates).
 
 **There's no Skip button.** Skipping is off in the settings, a radio station is playing, or
 it's the last track with Roon Radio off, so there's nothing to skip to.
@@ -270,8 +340,8 @@ was built from the code here, see [DEVELOPER.md](DEVELOPER.md#checking-an-image-
 <summary>Most people need only one copy. To hold parties at the same time in different
 rooms on one Roon Core, run another copy with a name of its own.</summary>
 
-Give each copy its own folder, so it has its own `config.json`, and its own container
-name. For example, a second copy named Garden (replace Garden with whatever you choose):
+Give each copy its own container name and, with Docker Compose or a `config.json`, its own
+folder. For example, a second copy named Garden (replace Garden with whatever you choose):
 
 **With Docker Compose:** set up a new folder as in [With Docker](#with-docker). In its
 `docker-compose.yml`, change `container_name`, and remove the `#` from the
@@ -287,15 +357,15 @@ they are:
 **With `docker run`:**
 
 ```bash
-mkdir roon-extension-party-mode-garden && cd roon-extension-party-mode-garden
-touch config.json && sudo chown 1000 config.json && chmod 600 config.json
 docker run -d --name roon-extension-party-mode-garden --network host --restart unless-stopped \
   --log-opt max-size=10m --log-opt max-file=3 \
-  --read-only --cap-drop ALL --security-opt no-new-privileges \
+  --cap-drop ALL --security-opt no-new-privileges \
   -e ROON_EXTENSION_PARTY_MODE_INSTANCE=Garden \
-  -v "$PWD/config.json:/usr/src/app/config.json" \
   stubaggs/roon-extension-party-mode:latest
 ```
+
+To keep its settings in a `config.json`, make it a folder of its own and add the file as in
+[Keeping settings through updates](#keeping-settings-through-updates).
 
 It shows in Roon as **Party Mode (Garden)**, a separate extension. Enable it and choose
 its own party zone. With the first copy on port 8338, it takes the next free port by
@@ -311,20 +381,23 @@ itself.
 **With the Extension Manager:** uninstall it with the
 [Extension Manager](https://github.com/TheAppgineer/roon-extension-manager).
 
+**On a NAS:** in its Docker app, delete the container, then the image.
+
 **With Docker Compose:** in its folder, run `docker compose down --rmi all`, then delete
 the folder.
 
-**With `docker run`:** remove the container and the image, then delete the folder you
-made for it:
+**With `docker run`:** remove the container and the image, then delete the folder if you
+made one for `config.json`:
 
 ```bash
 docker rm -f roon-extension-party-mode
 docker rmi stubaggs/roon-extension-party-mode:latest
 ```
 
-Deleting the folder removes `config.json`, and with it your settings and Roon's pairing.
-A **Party profile** you created stays in Roon until you delete it. For a second copy, such
-as Garden, do the same with its own container name and folder.
+Removing the container removes your settings and Roon's pairing, and so does deleting
+`config.json` if you kept them there. A **Party profile** you created stays in Roon until
+you delete it. For a second copy, such as Garden, do the same with its own container name
+(and folder).
 
 </details>
 

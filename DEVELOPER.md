@@ -549,8 +549,8 @@ can't be seeked. A track always has a length, even while it loads.
 afterwards: play would only resume the station. The host plays the queue from Roon (the
 README says how).
 
-Taking over automatically was tried and dropped as too clunky. What the Core did
-(October 2026), for whoever tries again:
+Party Mode doesn't switch from the station to the queue itself. What the Core did when
+that was tried (October 2026):
 
 - The transport's `play_from_here` stops the station and plays from that entry, but the
   Core never answers it, so it can't be waited for.
@@ -1069,22 +1069,37 @@ fix branch instead.
 ### Running the image by hand
 
 Install it as the README's [With Docker](README.md#with-docker) says; `docker-compose.yml`
-does the same. Both lock the container down:
+does the same. By default there's no mount: node-roon-api saves `config.json` in the
+working folder, `/usr/src/app`, where the image has an empty one owned by `node` (uid
+1000), so it lands in the container's writable layer. It survives restarts, but not
+recreating the container (an update, `docker rm`, `docker compose down`), after which
+Roon sees a new, unpaired extension. Both methods drop privileges:
 
-- `--read-only` (`read_only: true`): the image's files can't change. node-roon-api
-  rewrites `config.json` in place, which works on the mounted file, and nothing else
-  writes to disk. A new feature that writes a file needs a mount or a `tmpfs` for it.
 - `--cap-drop ALL`: no Linux capabilities. The extension runs as uid 1000, listens above
   port 1024 and finds the Core by UDP multicast and broadcast, none of which needs one.
 - `--security-opt no-new-privileges`: nothing in the container can gain privileges.
 
-The Extension Manager starts the container its own way, so these don't apply there; it
-creates `config.json` writable itself.
+The README's NAS install creates the container in the NAS's Docker app, without these
+options or a mount.
 
-`config.json` must exist and be writable by uid 1000 before the container starts. Without
-it, Docker makes a directory in its place, and the extension can't save its settings or
-Roon's pairing; Roon's status line and the console say so. `chmod 666` works without
-`sudo`, but leaves the pairing token readable by every account on the host.
+The README's [Keeping settings through updates](README.md#keeping-settings-through-updates)
+bind-mounts a `config.json` file at `/usr/src/app/config.json` instead. The file must
+exist and be writable by uid 1000 before the container starts. Without it, Docker makes a
+directory in its place, and the extension can't save its settings or Roon's pairing.
+`chmod 666` works without `sudo`, but leaves the pairing token readable by every account
+on the host.
+
+#### Read-only
+
+With the `config.json` mount, the container can also be made read-only, so the image's
+files can't change: add `--read-only` to `docker run`, or `read_only: true` under
+`party-mode:` in `docker-compose.yml`. The README leaves it out to keep installing
+simple. node-roon-api rewrites `config.json` in place, which works on the mounted file,
+and nothing else writes to disk; a new feature that writes a file needs a mount or a
+`tmpfs` for it. Read-only without the mount leaves nowhere to save the settings.
+
+The Extension Manager starts the container its own way, so none of this applies there; it
+creates and mounts `config.json` writable itself.
 
 ## Running the experimental version
 
