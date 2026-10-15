@@ -115,6 +115,7 @@ function fakeBrowseCore(options = {}) {
 /** A RoonService wired to a fake Core, without a real connection. */
 function serviceFor(core, settings = {}) {
   const { RoonService } = require('../lib/roon-service');
+  const { KnownKeys } = require('../lib/art-cache');
   const roon = Object.create(RoonService.prototype);
   roon.settings = Object.assign(
     {
@@ -129,6 +130,8 @@ function serviceFor(core, settings = {}) {
   );
   roon.detected = {};
   roon.profileSessions = new Map();
+  // Search results' album art, as the constructor sets it up.
+  roon.artKeys = new KnownKeys();
   roon.browseTitles = {};
   roon.loggedCategories = true;
   roon.core = { services: { RoonApiBrowse: {} } };

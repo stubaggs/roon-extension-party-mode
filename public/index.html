@@ -5,13 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#170f2b" />
     <title data-i18n="page.title">Add a track</title>
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="stylesheet" href="/party.css" />
     <link rel="stylesheet" href="/guest.css" />
   </head>
   <body>
     <main id="app" hidden>
-      <!-- Top right: the page's language (a globe) and who the guest's tracks are credited to; tap to change. -->
+      <!-- Top left: the party's name. With Party invites on, it's a button, with a QR
+           symbol, that shows the join code so a guest can pass the party on; off, just
+           the name. Top right: the page's language (a globe) and who the guest's
+           tracks are credited to; tap to change. -->
       <div class="topbar">
+        <button class="name-chip party-chip" id="party-chip" type="button" hidden>
+          <svg class="qr-glyph" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+            <path d="M1.75 1.75h4.5v4.5h-4.5zM9.75 1.75h4.5v4.5h-4.5zM1.75 9.75h4.5v4.5h-4.5z" fill="none" stroke="currentColor" stroke-width="1.5" />
+            <path d="M3.5 3.5h1v1h-1zM11.5 3.5h1v1h-1zM3.5 11.5h1v1h-1zM9 9h2.5v2.5H9zM12.5 12.5H15V15h-2.5zM12.5 9H15v2h-2.5zM9 13h2v2H9z" fill="currentColor" />
+          </svg>
+          <span class="party-chip-name" id="party-chip-name" dir="auto"></span>
+        </button>
+        <span class="name-chip party-chip" id="party-label" hidden><span class="party-chip-name" id="party-label-name" dir="auto"></span></span>
         <button class="name-chip lang-chip" id="lang-chip" type="button"></button>
         <button class="name-chip" id="name-chip" type="button"></button>
       </div>
@@ -41,7 +56,9 @@
           data-i18n-aria-label="search.placeholder"
         />
         <button class="search-clear" id="search-clear" type="button" aria-label="Clear search" data-i18n-aria-label="search.clear" hidden>
-          &times;
+          <svg class="clear-glyph" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+            <path d="M4.5 4.5l7 7M11.5 4.5l-7 7" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" />
+          </svg>
         </button>
       </div>
 
@@ -78,28 +95,30 @@
     </div>
 
     <div class="nickname-backdrop" id="nickname" hidden>
-      <form class="nickname" id="nickname-form" role="dialog" aria-modal="true" aria-labelledby="nickname-title">
-        <h2 id="nickname-title" data-i18n="name.prompt">What should we call you?</h2>
-        <p class="muted" data-i18n="name.explain">Your name shows next to the tracks you add, so everyone knows who to thank.</p>
-        <input
-          id="nickname-input"
-          dir="auto"
-          type="text"
-          maxlength="24"
-          autocomplete="nickname"
-          autocapitalize="words"
-          enterkeyhint="go"
-          placeholder="Your name"
-          aria-label="Your name"
-          data-i18n-placeholder="name.placeholder"
-          data-i18n-aria-label="name.placeholder"
-        />
-        <p class="nickname-note" id="nickname-note" role="status" hidden></p>
-        <div class="nickname-actions">
-          <button class="pill pill-primary" id="nickname-go" type="submit" data-i18n="name.go">Let's go</button>
-          <button class="pill pill-ghost" id="nickname-skip" type="button" data-i18n="name.skip">Skip</button>
-        </div>
-      </form>
+      <div class="nickname" role="dialog" aria-modal="true" aria-labelledby="nickname-title">
+        <form id="nickname-form">
+          <h2 id="nickname-title" data-i18n="name.prompt">What should we call you?</h2>
+          <p class="muted" data-i18n="name.explain">Your name shows next to the tracks you add, so everyone knows who to thank.</p>
+          <input
+            id="nickname-input"
+            dir="auto"
+            type="text"
+            maxlength="24"
+            autocomplete="nickname"
+            autocapitalize="words"
+            enterkeyhint="go"
+            placeholder="Your name"
+            aria-label="Your name"
+            data-i18n-placeholder="name.placeholder"
+            data-i18n-aria-label="name.placeholder"
+          />
+          <p class="nickname-note" id="nickname-note" role="status" hidden></p>
+          <div class="nickname-actions">
+            <button class="pill pill-primary" id="nickname-go" type="submit" data-i18n="name.go">Let's go</button>
+            <button class="pill pill-ghost" id="nickname-skip" type="button" data-i18n="name.skip">Skip</button>
+          </div>
+        </form>
+      </div>
     </div>
 
     <div class="nickname-backdrop" id="language" hidden>
@@ -108,6 +127,17 @@
         <div class="language-list" id="language-list"></div>
         <div class="nickname-actions">
           <button class="pill pill-ghost" id="language-cancel" type="button" data-i18n="name.cancel">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- The join code, for someone else to scan from this phone. -->
+    <div class="nickname-backdrop" id="invite" hidden>
+      <div class="nickname invite" role="dialog" aria-modal="true" aria-labelledby="invite-title">
+        <h2 id="invite-title" dir="auto"></h2>
+        <img class="invite-qr" id="invite-qr" alt="QR code for the guest page" data-i18n-alt="screen.qr_alt" />
+        <div class="nickname-actions">
+          <button class="pill pill-ghost" id="invite-close" type="button" data-i18n="invite.close">Close</button>
         </div>
       </div>
     </div>

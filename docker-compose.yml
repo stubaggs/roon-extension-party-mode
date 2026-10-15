@@ -1,11 +1,10 @@
 # Host networking is required: Roon discovery uses UDP broadcast on port 9003.
-# Settings, including Roon's pairing token, are kept inside the container, so
-# they're lost when it's recreated (an update, or `docker compose down`). To keep
-# them in ./config.json instead, see the README's "Keeping settings through updates".
+# Settings, including Roon's pairing token, are kept in the party-mode-data
+# volume, which Docker creates on the first `docker compose up -d`.
 services:
   party-mode:
-    image: stubaggs/roon-extension-party-mode:latest
-    container_name: roon-extension-party-mode
+    image: stubaggs/roon-extension-party-mode:beta
+    container_name: roon-extension-party-mode-beta
     network_mode: host
     restart: unless-stopped
     # No Linux capabilities, and no gaining privileges.
@@ -19,14 +18,16 @@ services:
       - ROON_EXTENSION_PARTY_MODE_PORT=8338
       # - ROON_EXTENSION_PARTY_MODE_DEBUG=1   # detailed log, including every message to and from Roon
       # - ROON_EXTENSION_PARTY_MODE_INSTANCE=Garden   # a name, to run more than one copy (see the README)
-      # - ROON_EXTENSION_PARTY_MODE_RATE_LIMIT=600    # requests a minute per device (0 = no limit)
-      # - ROON_EXTENSION_PARTY_MODE_SEARCH_LIMIT=60   # searches a minute per device (0 = no limit)
-    # With config.json: settings saved outside the container, so updates keep them.
-    # volumes:
-    #   - ./config.json:/usr/src/app/config.json
+      # - ROON_EXTENSION_PARTY_MODE_RATE_LIMIT=1200   # requests a minute per device (0 = no limit)
+      # - ROON_EXTENSION_PARTY_MODE_SEARCH_LIMIT=200  # searches a minute per device (0 = no limit)
+    volumes:
+      - party-mode-data:/data
     # Keep the log from growing without limit.
     logging:
       driver: json-file
       options:
         max-size: "10m"
         max-file: "3"
+
+volumes:
+  party-mode-data:

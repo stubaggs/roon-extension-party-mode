@@ -20,8 +20,9 @@
 const assert = require('assert');
 const EventEmitter = require('events');
 const { createServer } = require('../lib/server');
-const { GuestStore, cleanName, MAX_SESSIONS } = require('../lib/guests');
+const { GuestStore, cleanName, MAX_SESSIONS, OFFERED_SEARCHES } = require('../lib/guests');
 const { DEFAULT_SETTINGS, RoonService } = require('../lib/roon-service');
+const { ArtCache, KnownKeys } = require('../lib/art-cache');
 
 let failures = 0;
 async function check(name, fn) {
@@ -216,12 +217,63 @@ const set = (values) => Object.assign(roon.settings, values);
     assert.strictEqual((await res.json()).error, 'no_session');
   });
 
+  await check('the guest page offers the join code unless the host turned it off', async () => {
+    const cookie = await newGuest();
+    const party = async () => (await get('/api/party', { Cookie: cookie })).json();
+    try {
+      assert.strictEqual((await party()).invite, true);
+      set({ guest_invite: false });
+      assert.strictEqual((await party()).invite, false);
+    } finally {
+      set({ guest_invite: true });
+    }
+    const page = await (await get('/GuestHub')).text();
+    assert.match(page, /id="party-chip"/);
+    assert.match(page, /id="party-label"/);
+    assert.match(page, /id="invite-qr"/);
+  });
+
   await check('Party mode Off: the guest API says closed, for "Requests are closed"', async () => {
     const cookie = (await get(`/j/${guests.joinCode}`)).headers.get('set-cookie').split(';')[0];
     set({ enabled: false });
     const res = await get('/api/party', { Cookie: cookie });
     assert.strictEqual(res.status, 403);
     assert.strictEqual((await res.json()).error, 'closed');
+  });
+
+  await check('while the party has paused itself (its zone gone), guests are told paused', async () => {
+    set({ enabled: true });
+    const cookie = await newGuest();
+    roon.currentMode = 'paused';
+    try {
+      assert.strictEqual((await (await get('/api/party', { Cookie: cookie })).json()).party_mode, 'paused');
+      assert.strictEqual((await (await get('/api/hub')).json()).party_mode, 'paused');
+      const res = await post('/api/request', cookie, { key: '10:0' });
+      assert.strictEqual(res.status, 409);
+      assert.strictEqual((await res.json()).error, 'paused');
+    } finally {
+      delete roon.currentMode;
+    }
+  });
+
+  await check('a change of party mode sends the pages the queue too, so a gone track goes', async () => {
+    const controller = new AbortController();
+    const res = await fetch(`${base}/api/events`, { signal: controller.signal });
+    const reader = res.body.getReader();
+    let text = '';
+    const until = async (pattern) => {
+      while (!pattern.test(text)) text += new TextDecoder().decode((await reader.read()).value);
+    };
+    try {
+      await until(/event: queue/); // the snapshot sent on connecting
+      text = '';
+      roon.emit('party_mode_changed', 'paused', 'on');
+      await until(/event: party[\s\S]*event: queue/);
+      assert.match(text, /"party_mode":"paused"/);
+      assert.match(text, /"now_playing":null/);
+    } finally {
+      controller.abort();
+    }
   });
 
   await check('the guest page shows nothing until it knows which message is right', async () => {
@@ -280,6 +332,33 @@ const set = (values) => Object.assign(roon.settings, values);
       assert.strictEqual((await res.json()).error, 'unknown_track');
     }
     assert.deepStrictEqual(roon.actions, []);
+  });
+
+  await check('the results of the last two searches are remembered: on screen, and on their way', () => {
+    assert.strictEqual(OFFERED_SEARCHES, 2);
+    const store = new GuestStore();
+    const guest = store.create();
+    const search = (n) => Array.from({ length: 40 }, (_, i) => ({ item_key: `${n}:${i}`, title: `Track ${n}.${i}` }));
+    store.offer(guest, search(1));
+    store.offer(guest, search(2));
+    // A tap on the first search's results while the second is on its way.
+    assert.strictEqual(store.offered(guest, '1:39').title, 'Track 1.39');
+    store.offer(guest, search(3));
+    assert.strictEqual(store.offered(guest, '1:0'), null);
+    assert.strictEqual(store.offered(guest, '2:0').title, 'Track 2.0');
+    assert.strictEqual(store.offered(guest, '3:0').title, 'Track 3.0');
+  });
+
+  await check('a rerun of the search on screen adds to it, replacing any earlier rerun', () => {
+    const store = new GuestStore();
+    const guest = store.create();
+    store.offer(guest, [{ item_key: 'a1', title: 'On screen' }]);
+    store.offer(guest, [{ item_key: 'b1', title: 'Latest' }]);
+    store.offer(guest, [{ item_key: 'b2', title: 'Rerun' }], { rerun: true });
+    store.offer(guest, [{ item_key: 'b3', title: 'Rerun again' }], { rerun: true });
+    // Still two searches: the rerun didn't push the one before out.
+    assert.deepStrictEqual(['a1', 'b1', 'b2', 'b3'].map((key) => (store.offered(guest, key) || {}).title),
+      ['On screen', 'Latest', undefined, 'Rerun again']);
   });
 
   await check('a request is credited with the title the server sent, not what the phone says', async () => {
@@ -376,6 +455,8 @@ const set = (values) => Object.assign(roon.settings, values);
       assert.strictEqual(await empty(), 'queue.empty_add', 'a radio station');
       roon.zone = zone('playing');
       set({ allow_add: false });
+      assert.strictEqual(await empty(), 'queue.empty_add_radio', 'guests can still play a track next');
+      set({ allow_add: false, allow_next: false });
       assert.strictEqual(await empty(), 'queue.empty_radio', 'guests can\'t add');
       roon.zone = zone('paused');
       assert.strictEqual(await empty(), 'queue.empty');
@@ -388,12 +469,15 @@ const set = (values) => Object.assign(roon.settings, values);
     }
   });
 
-  await check('with adding off, play next is off too, whatever its own setting', async () => {
+  await check('adding and playing next are separate choices: with adding off, play next still works', async () => {
     const cookie = await newGuest();
     try {
       set({ allow_add: false, allow_next: true });
       const party = await (await get('/api/party', { Cookie: cookie })).json();
-      assert.deepStrictEqual([party.capabilities.add, party.capabilities.next], [false, false]);
+      assert.deepStrictEqual([party.capabilities.add, party.capabilities.next], [false, true]);
+      set({ allow_add: true, allow_next: false });
+      const other = await (await get('/api/party', { Cookie: cookie })).json();
+      assert.deepStrictEqual([other.capabilities.add, other.capabilities.next], [true, false]);
       await get('/api/search?q=abba', { Cookie: cookie });
       roon.actions = [];
       const res = await post('/api/request', cookie, { key: '10:0', mode: 'next' });
@@ -449,6 +533,58 @@ const set = (values) => Object.assign(roon.settings, values);
       assert.strictEqual(party.allowances.skip.remaining, 1, 'the skip is not used up');
     } finally {
       roon.zone = null;
+    }
+  });
+
+  await check('while the party zone is gone, its last track stays, paused, until another zone is chosen', async () => {
+    const before = roon.settings.zone;
+    roon.settings.zone = { output_id: 'o1', name: 'D90' };
+    roon.zone = {
+      zone_id: 'z1',
+      display_name: 'D90',
+      state: 'playing',
+      settings: { auto_radio: false },
+      now_playing: { length: 200, two_line: { line1: 'Seasons', line2: 'Bebe Rexha' }, image_key: 'seasons' }
+    };
+    try {
+      assert.strictEqual((await (await get('/api/hub')).json()).now_playing.state, 'playing');
+      roon.zone = null; // the device switched off
+      const held = (await (await get('/api/hub')).json()).now_playing;
+      assert.strictEqual(held.title, 'Seasons');
+      assert.strictEqual(held.image_key, 'seasons', 'the album art stays');
+      assert.strictEqual(held.state, 'paused');
+      roon.settings.zone = { output_id: 'o2', name: 'Kitchen' }; // the host picks another zone
+      assert.strictEqual((await (await get('/api/hub')).json()).now_playing, null);
+    } finally {
+      roon.zone = null;
+      roon.settings.zone = before;
+    }
+  });
+
+  await check('while the Core is gone, Up next stays too; with only the zone away, it is as Roon has it', async () => {
+    const before = roon.settings.zone;
+    const entry = (id, title) => ({ queue_item_id: id, length: 200, two_line: { line1: title, line2: 'ABBA' } });
+    roon.settings.zone = { output_id: 'o1', name: 'D90' };
+    roon.zone = { zone_id: 'z1', display_name: 'D90', state: 'playing', settings: {}, now_playing: entry(1, 'Waterloo') };
+    roon.queue = [entry(1, 'Waterloo'), entry(2, 'SOS'), entry(3, 'Fernando')];
+    roon.core = {};
+    try {
+      const titles = async () => (await (await get('/api/hub')).json()).upcoming.map((u) => u.title);
+      assert.deepStrictEqual(await titles(), ['SOS', 'Fernando']);
+      roon.zone = null; // the device switched off: Roon keeps the queue
+      roon.queue = [entry(2, 'SOS')];
+      assert.deepStrictEqual(await titles(), ['SOS'], "Roon's queue, as it is");
+      roon.queue = [];
+      assert.deepStrictEqual(await titles(), [], 'emptied in Roon: empty');
+      roon.core = null; // the Core gone: no queue at all
+      assert.deepStrictEqual(await titles(), ['SOS', 'Fernando'], 'the last one seen with the zone');
+      roon.settings.zone = { output_id: 'o2', name: 'Kitchen' }; // the host picks another zone
+      assert.deepStrictEqual(await titles(), []);
+    } finally {
+      roon.zone = null;
+      roon.queue = [];
+      delete roon.core;
+      roon.settings.zone = before;
     }
   });
 
@@ -535,6 +671,17 @@ const set = (values) => Object.assign(roon.settings, values);
     assert.match(res.headers.get('content-security-policy'), /default-src 'self'/);
   });
 
+  await check('a POST without a body is answered as one with an empty body', async () => {
+    const cookie = await newGuest();
+    for (const path of ['/api/name', '/api/request']) {
+      const bare = await fetch(base + path, { method: 'POST', headers: { Cookie: cookie } });
+      const empty = await post(path, cookie, {});
+      assert.notStrictEqual(bare.status, 500, path);
+      assert.strictEqual(bare.status, empty.status, path);
+      assert.deepStrictEqual(await bare.json(), await empty.json(), path);
+    }
+  });
+
   await check("Party Mode's own labels can't be a guest's name, in any language or spelling", async () => {
     const cookie = await newGuest();
     for (const name of ['Host', ' roon  RADIO ', 'anon!', 'Gastgeber', 'Hote', 'Ev sahibi', '主人', 'Radio', 'radio station', 'Radiosender', 'Rádio', 'Радио', 'ラジオ', '라디오', 'Gastgebende', 'Хозяева', 'Хозяин', '主催者', 'ホスト', 'Hostess', 'Gastgeberin', 'Hôtesse', 'Хозяйка', 'المضيفة']) {
@@ -602,10 +749,84 @@ const set = (values) => Object.assign(roon.settings, values);
   });
 
   await check('album art Roon never answers for gives up instead of hanging', async () => {
-    const silent = { imageSvc: { get_image() {} } };
+    let asked = 0;
+    const silent = { imageSvc: { get_image() { asked++; } }, artCache: new ArtCache(), artKeys: new KnownKeys() };
+    silent.artKeys.note([{ image_key: 'unknown' }]);
     const started = Date.now();
     await assert.rejects(RoonService.prototype.getImage.call(silent, 'unknown', 200, 50), /did not answer/);
     assert.ok(Date.now() - started < 1000);
+    // Not kept: the next request asks the Core again.
+    await assert.rejects(RoonService.prototype.getImage.call(silent, 'unknown', 200, 50), /did not answer/);
+    assert.strictEqual(asked, 2);
+  });
+
+  await check('album art comes from the Core once per image and size, then from memory', async () => {
+    const asked = [];
+    const core = {
+      imageSvc: { get_image: (key, opts, cb) => { asked.push(`${key}@${opts.width}`); setTimeout(() => cb(false, 'image/jpeg', Buffer.from(key)), 10); } },
+      artCache: new ArtCache(),
+      artKeys: new KnownKeys()
+    };
+    core.artKeys.note([{ image_key: 'cover' }]);
+    const get = (key, size) => RoonService.prototype.getImage.call(core, key, size);
+    // Phones asking at the same moment share one fetch.
+    const together = await Promise.all([get('cover', 200), get('cover', 200), get('cover', 200)]);
+    assert.ok(together.every((image) => image.body.toString() === 'cover'));
+    await get('cover', 200);
+    await get('cover', 400);
+    assert.deepStrictEqual(asked, ['cover@200', 'cover@400']);
+  });
+
+  await check('album art is fetched only for image keys the Core has sent', async () => {
+    let asked = 0;
+    const core = Object.assign(Object.create(RoonService.prototype), {
+      core: { services: { RoonApiImage: { get_image: (key, opts, cb) => { asked++; cb(false, 'image/jpeg', Buffer.from(key)); } } } },
+      artCache: new ArtCache(),
+      artKeys: new KnownKeys(),
+      _inSession: (sessionKey, fn) => Promise.resolve().then(fn),
+      _search: async () => [{ item_key: 'k1', title: 'Waterloo', image_key: 'found' }]
+    });
+    // A made-up key is refused at once, without asking the Core, which would
+    // never answer it.
+    await assert.rejects(core.getImage('made-up', 200), /unknown_image/);
+    assert.strictEqual(asked, 0);
+    // A search result's art is fetched once the results have gone to the page.
+    await core.search('guest', 'waterloo');
+    assert.strictEqual((await core.getImage('found', 200)).body.toString(), 'found');
+    assert.strictEqual(asked, 1);
+  });
+
+  await check("the pages' own files, after the routes, still come with the security headers", async () => {
+    for (const [file, type] of [['/guest.js', /javascript/], ['/party.css', /css/], ['/i18n/de.json', /json/], ['/hub.html', /html/]]) {
+      const res = await get(file);
+      assert.strictEqual(res.status, 200, file);
+      assert.match(res.headers.get('content-type'), type, file);
+      assert.strictEqual(res.headers.get('x-content-type-options'), 'nosniff', file);
+    }
+    // Routes still answer first, and anything else is Not found.
+    assert.strictEqual((await get('/api/hub')).status, 200);
+    assert.strictEqual((await get('/GuestHub')).status, 200);
+    const missing = await get('/no-such-file.js');
+    assert.strictEqual(missing.status, 404);
+    assert.strictEqual(await missing.text(), 'Not found');
+  });
+
+  await check('every page has the icon, for tabs, bookmarks and home screens', async () => {
+    for (const page of ['/GuestHub', '/PartyHub', '/']) {
+      const html = await (await get(page)).text();
+      for (const link of ['rel="icon" href="/favicon.ico"', 'rel="icon" href="/icon.svg"',
+        'rel="apple-touch-icon" href="/apple-touch-icon.png"', 'rel="manifest" href="/manifest.webmanifest"']) {
+        assert.ok(html.includes(link), `${page}: ${link}`);
+      }
+    }
+    for (const [file, type] of [['/favicon.ico', /icon/], ['/icon.svg', /svg/], ['/apple-touch-icon.png', /png/],
+      ['/icon-192.png', /png/], ['/icon-512.png', /png/], ['/manifest.webmanifest', /manifest\+json/]]) {
+      const res = await get(file);
+      assert.strictEqual(res.status, 200, file);
+      assert.match(res.headers.get('content-type'), type, file);
+    }
+    const manifest = await (await get('/manifest.webmanifest')).json();
+    for (const icon of manifest.icons) assert.strictEqual((await get(icon.src)).status, 200, icon.src);
   });
 
   await check('the Party Hub can be shown inside a dashboard', async () => {
@@ -700,6 +921,60 @@ const set = (values) => Object.assign(roon.settings, values);
     const search = () => fetch(`${at}/api/search?q=abba`, { headers: { Cookie: cookie } }).then((r) => r.status);
     assert.deepStrictEqual([await search(), await search(), await search()], [200, 200, 429]);
     assert.strictEqual((await fetch(`${at}/api/party`, { headers: { Cookie: cookie } })).status, 200, 'the rest still work');
+  });
+
+  await check('live-update streams are capped per device, in step with Flood protection', async () => {
+    const open = async (at, n) => {
+      const streams = [];
+      for (let i = 0; i < n; i += 1) {
+        const controller = new AbortController();
+        const res = await fetch(`${at}/api/events`, { signal: controller.signal });
+        streams.push({ status: res.status, res, close: () => controller.abort() });
+      }
+      return streams;
+    };
+    const closeAll = (streams) => streams.forEach((s) => s.close());
+
+    // 600 a minute: 10 per device; the next is refused, not an older one closed.
+    const normal = createServer(roon, new GuestStore(), { limits: { all: 600, search: 0 } });
+    await normal.listen(0);
+    const at = `http://127.0.0.1:${normal.port}`;
+    const streams = await open(at, 11);
+    assert.deepStrictEqual(streams.map((s) => s.status), [...Array(10).fill(200), 429]);
+    assert.deepStrictEqual(await streams[10].res.json(), { error: 'too_many_streams' });
+    // One closes: there's room for another.
+    streams[0].close();
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    const [again] = await open(at, 1);
+    assert.strictEqual(again.status, 200);
+    closeAll([...streams, again]);
+
+    // No limit (0): no cap per device.
+    const off = createServer(roon, new GuestStore(), { limits: { all: 0, search: 0 } });
+    await off.listen(0);
+    const many = await open(`http://127.0.0.1:${off.port}`, 15);
+    assert.ok(many.every((s) => s.status === 200));
+    closeAll(many);
+  });
+
+  await check('the Request limits setting applies at once, and 0 is no limit', async () => {
+    // No limits passed in, so the server follows the setting (roon.requestLimits).
+    const settingRoon = Object.create(roon);
+    settingRoon.requestLimits = { all: 3, search: 0 };
+    const limited = createServer(settingRoon, new GuestStore());
+    await limited.listen(0);
+    const url = `http://127.0.0.1:${limited.port}/api/hub`;
+    const codes = [];
+    for (let i = 0; i < 4; i += 1) codes.push((await fetch(url)).status);
+    assert.deepStrictEqual(codes, [200, 200, 200, 429]);
+    // Raised in Roon: the same device gets through straight away.
+    settingRoon.requestLimits = { all: 10, search: 0 };
+    assert.strictEqual((await fetch(url)).status, 200);
+    // Off: no limit at all.
+    settingRoon.requestLimits = { all: 0, search: 0 };
+    const more = [];
+    for (let i = 0; i < 15; i += 1) more.push((await fetch(url)).status);
+    assert.ok(more.every((code) => code === 200), more.join(','));
   });
 
   console.log(failures ? `\n${failures} failed` : '\nall passed');

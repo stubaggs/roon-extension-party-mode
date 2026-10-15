@@ -20,6 +20,7 @@
 const assert = require('assert');
 const { EventEmitter } = require('events');
 const { RoonService } = require('../lib/roon-service');
+const { KnownKeys } = require('../lib/art-cache');
 
 let failures = 0;
 function check(name, fn) {
@@ -42,6 +43,7 @@ function subscribed(radio, items) {
   roon.queue = [];
   roon.queueGeneration = 0;
   roon.radioPicks = new Set();
+  roon.artKeys = new KnownKeys();
   let send = null;
   roon.core = { services: { RoonApiTransport: { subscribe_queue: (output, count, cb) => (send = cb) } } };
   roon._subscribeQueue();

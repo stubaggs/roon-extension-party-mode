@@ -187,9 +187,11 @@ const artists = [{ title: 'ABBA', item_key: 'x2', hint: 'list' }];
     return { first: await first, second: await second, fake };
   };
 
-  await check('a search started during another waits its turn', async () => {
+  await check('a search started during another waits its turn, and the overtaken one isn\'t shown', async () => {
     const { first, second } = await overlapping(true);
-    assert.deepStrictEqual(first.map((t) => t.title), ['Dancing Queen', 'Waterloo']);
+    // The page shows only its latest search's results, so the one that was
+    // running when the guest typed on comes back as superseded.
+    assert.strictEqual(first, null);
     assert.deepStrictEqual(second.map((t) => t.title), ['Dancing Queen', 'Waterloo']);
   });
 
@@ -230,6 +232,9 @@ const artists = [{ title: 'ABBA', item_key: 'x2', hint: 'list' }];
     Object.assign(roon.zone, { is_play_allowed: true }, extra);
     const events = [];
     roon.on('party_mode_changed', (...args) => events.push(args));
+    // As a save does: the new mode is set before the change is acted on.
+    roon.announcedMode = from;
+    roon.settings = Object.assign({}, roon.settings, { enabled: { on: true, paused: 'paused', off: false }[to] });
     await roon._partyModeChanged(from, to);
     return { controls, events };
   };

@@ -125,21 +125,36 @@ main {
   display: none;
 }
 
+/* Round on every browser: older Safari (iOS 15) gives buttons its own padding and
+   doesn't lay out a button as a grid, which made it an oval with the × off centre.
+   So no padding, a fixed size each way, and the × drawn, centred by position. */
 .search-clear {
   position: absolute;
   top: 50%;
   inset-inline-end: 0.55rem;
   width: 2.2rem;
+  min-width: 2.2rem;
+  max-width: 2.2rem;
   height: 2.2rem;
+  min-height: 2.2rem;
+  max-height: 2.2rem;
   margin-top: -1.1rem;
-  display: grid;
-  place-items: center;
-  font-size: 1.4rem;
-  line-height: 1;
+  padding: 0;
+  -webkit-appearance: none;
+  appearance: none;
   color: var(--muted);
   background: var(--edge);
   border-radius: 50%;
   cursor: pointer;
+}
+
+.clear-glyph {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 1rem;
+  height: 1rem;
+  margin: -0.5rem 0 0 -0.5rem;
 }
 
 .search-clear[hidden] {
@@ -184,6 +199,63 @@ main {
 
 .name-chip.named::before {
   content: "✎ ";
+}
+
+/* The party's name, top left: a button that shows the join code, or just the
+   name with Party invites off. It takes only what the guest's name tag and the
+   globe leave, so they look as they would without it. */
+.party-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+  margin-inline-end: auto;
+  flex: 0 1 auto;
+}
+
+/* Never squeezed by the party's name: only its own limit (60%) cuts it short. */
+#name-chip {
+  flex-shrink: 0;
+}
+
+.party-chip[hidden] {
+  display: none;
+}
+
+.party-chip-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.qr-glyph {
+  flex: none;
+  width: 1em;
+  height: 1em;
+}
+
+/* The join code, as large as the card allows, on white like the Party Hub's,
+   for another phone to scan. Someone is holding it out, so it needs no caption. */
+.invite {
+  text-align: center;
+}
+
+.invite h2 {
+  overflow-wrap: anywhere;
+}
+
+.invite-qr {
+  display: block;
+  width: min(100%, 50vh);
+  aspect-ratio: 1;
+  margin: 0.75rem auto 0;
+  padding: 0.6rem;
+  background: #fff;
+  border-radius: 14px;
+}
+
+.invite .nickname-actions {
+  justify-content: center;
 }
 
 /* The page's language: just the globe, beside the name tag. */

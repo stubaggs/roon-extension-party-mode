@@ -14,7 +14,7 @@
 
 'use strict';
 const assert = require('assert');
-const { envValue, startPort, DEFAULT_PORT, instanceName, rateLimits } = require('../lib/env');
+const { envValue, startPort, DEFAULT_PORT, instanceName, rateLimits, rateLimitsFromEnv } = require('../lib/env');
 const { debugOn } = require('../lib/log');
 
 let failures = 0;
@@ -52,8 +52,8 @@ check('instance name: trimmed, at most 40 characters, empty when unset', () => {
 });
 check('envValue trims and skips unset names', () =>
   assert.strictEqual(envValue('X', ['OLD_X'], { OLD_X: ' y ' }), 'y'));
-check('rate limits default to 600 a minute, and 60 searches', () =>
-  assert.deepStrictEqual(rateLimits({}), { all: 600, search: 60 }));
+check('rate limits default to 1200 a minute, and 200 searches', () =>
+  assert.deepStrictEqual(rateLimits({}), { all: 1200, search: 200 }));
 check('rate limits from the environment, either spelling, 0 for none', () => {
   assert.deepStrictEqual(
     rateLimits({ ROON_EXTENSION_PARTY_MODE_RATE_LIMIT: '1200', 'ROON-EXTENSION-PARTY-MODE_SEARCH_LIMIT': '0' }),
@@ -62,9 +62,14 @@ check('rate limits from the environment, either spelling, 0 for none', () => {
 });
 check('a rate limit that is not a whole number keeps the default', () => {
   for (const v of ['-1', '1.5', 'lots', '']) {
-    assert.deepStrictEqual(rateLimits({ ROON_EXTENSION_PARTY_MODE_RATE_LIMIT: v, ROON_EXTENSION_PARTY_MODE_SEARCH_LIMIT: v }), { all: 600, search: 60 }, v);
+    assert.deepStrictEqual(rateLimits({ ROON_EXTENSION_PARTY_MODE_RATE_LIMIT: v, ROON_EXTENSION_PARTY_MODE_SEARCH_LIMIT: v }), { all: 1200, search: 200 }, v);
   }
 });
+check('limits from the environment only when one of the variables is set', () => {
+  assert.strictEqual(rateLimitsFromEnv({}), null);
+  assert.deepStrictEqual(rateLimitsFromEnv({ ROON_EXTENSION_PARTY_MODE_SEARCH_LIMIT: '0' }), { all: 1200, search: 0 });
+});
+
 check('debug on for 1/true/yes/on, either spelling', () => {
   for (const v of ['1', 'true', 'YES', ' on ']) assert.ok(debugOn({ ROON_EXTENSION_PARTY_MODE_DEBUG: v }), v);
   assert.ok(debugOn({ 'ROON-EXTENSION-PARTY-MODE_DEBUG': '1' }));

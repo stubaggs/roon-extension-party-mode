@@ -2,10 +2,10 @@
 # Needs two repository secrets: DOCKERHUB_USERNAME and DOCKERHUB_TOKEN.
 #
 # Which tags depends on the branch picked under "Use workflow from":
-#   main          latest, and the version (e.g. 1.1.1)
-#   experimental  experimental, and the version (e.g. 1.2.0-experimental)
-# Any other branch is refused, and experimental never pushes latest or a plain
-# release number, so the Extension Manager (which installs latest) never gets it.
+#   main   latest, and the version (e.g. 1.1.1)
+#   beta   beta, and the version (e.g. 1.4.0-beta.1)
+# Any other branch is refused, and beta never pushes latest or a plain release
+# number, so the Extension Manager (which installs latest) never gets it.
 name: Publish Docker image
 
 # Manual only for now, while the extension is still being tested: run it from the
@@ -40,20 +40,30 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      # The version Roon shows, from package.json, as an image tag. On the
-      # experimental branch it must carry a suffix ("1.2.0-experimental"), so an
-      # experimental build can't take a release's number.
+      # The version Roon shows, from package.json, as an image tag. On the beta
+      # branch it must carry a -beta suffix ("1.4.0-beta.1"), so a beta can't
+      # take a release's number.
       - id: version
         run: |
           version=$(node -p "require('./package.json').version")
           case "$GITHUB_REF" in
-            refs/heads/main) ;;
-            refs/heads/experimental)
+            refs/heads/main)
+              # On beta, the README and docker-compose.yml install the beta
+              # image, under -beta names so it can run beside the release. They
+              # must point back at the release before it's published from main,
+              # the NAS steps' "**beta** tag" included.
+              if grep -nE 'roon-extension-party-mode(:|/|-)beta|\*\*beta\*\* tag' README.md docker-compose.yml; then
+                echo "::error::README.md or docker-compose.yml still names the beta image or copy; switch them back before releasing"; exit 1
+              fi
               case "$version" in
-                *-*) ;;
-                *) echo "::error::package.json on experimental says $version; use a suffix such as $version-experimental"; exit 1 ;;
+                *-*) echo "::error::package.json on main says $version; a release has no suffix"; exit 1 ;;
               esac ;;
-            *) echo "::error::Publish from main or experimental, not $GITHUB_REF"; exit 1 ;;
+            refs/heads/beta)
+              case "$version" in
+                *-beta*) ;;
+                *) echo "::error::package.json on beta says $version; use a suffix such as ${version%%-*}-beta.1"; exit 1 ;;
+              esac ;;
+            *) echo "::error::Publish from main or beta, not $GITHUB_REF"; exit 1 ;;
           esac
           echo "version=$version" >> "$GITHUB_OUTPUT"
 
@@ -71,7 +81,7 @@ jobs:
 
       # A release number names one image for good: people pin it, and its digest
       # is in RELEASES.md. So main never replaces a version already on Docker Hub;
-      # bump the version instead. Experimental versions are rebuilt freely.
+      # bump the version instead. Betas can be rebuilt, but a new beta number is clearer.
       - name: Refuse to replace a published release
         if: github.ref == 'refs/heads/main'
         env:
@@ -88,8 +98,12 @@ jobs:
           images: ${{ secrets.DOCKERHUB_USERNAME }}/roon-extension-party-mode
           tags: |
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
-            type=raw,value=experimental,enable=${{ github.ref == 'refs/heads/experimental' }}
+            type=raw,value=beta,enable=${{ github.ref == 'refs/heads/beta' }}
             type=raw,value=${{ steps.version.outputs.version }}
+          # The version label would otherwise come from the first tag above
+          # ("latest" or "beta"); it names the version itself.
+          labels: |
+            org.opencontainers.image.version=${{ steps.version.outputs.version }}
 
       # arm/v6 and arm/v7 both install under the repository entry's "arm" key:
       # Docker reports every 32-bit ARM host (Pi Zero and Pi 1 are v6) as "arm".

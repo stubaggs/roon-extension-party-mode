@@ -220,7 +220,7 @@ check('German: a name after "von", and the wait', () => {
   const I18N = runtimeFor('de', JSON.parse(read('i18n/de.json')));
   assert.strictEqual(I18N.credit({ kind: 'add', requested_by: null }), 'Anonym');
   assert.strictEqual(I18N.requestedBy({ kind: 'add', requested_by: 'Lena' }), 'Gewünscht von Lena');
-  assert.strictEqual(I18N.t('toast.nothing_left_wait', { wait: I18N.minutes(5 * 60 * 1000) }), 'Gerade nichts mehr übrig. Versuch es in 5 Minuten wieder.');
+  assert.strictEqual(I18N.t('toast.none_left_wait', { wait: I18N.minutes(5 * 60 * 1000) }), 'Du hast alle aufgebraucht. Mehr in 5 Minuten.');
 });
 
 console.log(failures ? `\n${failures} failing` : '\nall passing');

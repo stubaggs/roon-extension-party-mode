@@ -4,11 +4,15 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Party Hub</title>
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="stylesheet" href="/party.css" />
     <link rel="stylesheet" href="/hub.css" />
   </head>
   <body class="hub">
-    <div class="stage">
+    <main class="stage">
       <section class="join">
         <h1 id="party-name" data-i18n="party.default_name">Party</h1>
         <div id="join-open">
@@ -16,7 +20,7 @@
           <p class="join-copy"><a class="join-link" id="join-link" target="_blank" rel="noopener" data-i18n="screen.scan">Scan to add a track</a></p>
         </div>
         <!-- With party mode off: the playlist in place of the guest code, as a QR
-             code or a link as the Playlist on the Party Hub setting says. -->
+             code or a link as the Party playlist setting says. -->
         <div id="join-closed" class="join-closed" hidden>
           <div id="playlist-qr-offer" hidden>
             <img id="playlist-qr" class="qr" alt="QR code for the playlist" data-i18n-alt="screen.playlist_qr_alt" />
@@ -49,7 +53,7 @@
         <h2 class="upnext-title" data-i18n="queue.up_next">Up next</h2>
         <ol class="list" id="list"></ol>
       </section>
-    </div>
+    </main>
     <script src="/i18n.js?for=hub"></script>
     <script src="/hub.js"></script>
     <script src="/marquee.js" data-marquee=".current-title, .current-artist, .current-album, .list .t, .list .a"></script>
