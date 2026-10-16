@@ -48,12 +48,13 @@ jobs:
           version=$(node -p "require('./package.json').version")
           case "$GITHUB_REF" in
             refs/heads/main)
-              # On beta, the README and docker-compose.yml install the beta
-              # image, under -beta names so it can run beside the release. They
-              # must point back at the release before it's published from main,
-              # the NAS steps' "**beta** tag" included.
-              if grep -nE 'roon-extension-party-mode(:|/|-)beta|\*\*beta\*\* tag' README.md docker-compose.yml; then
-                echo "::error::README.md or docker-compose.yml still names the beta image or copy; switch them back before releasing"; exit 1
+              # On beta, the README, docker-compose.yml and the Extension Manager
+              # file install the beta image, under -beta names so it can run beside
+              # the release. They must point back at the release before it's
+              # published from main, the NAS steps' "**beta** tag" and the Manager
+              # file's "beta" tags included.
+              if grep -nE 'roon-extension-party-mode(:|/|-)beta|\*\*beta\*\* tag|"beta"' README.md docker-compose.yml extension-manager/roon-extension-party-mode.json; then
+                echo "::error::README.md, docker-compose.yml or extension-manager/roon-extension-party-mode.json still names the beta image or copy; switch them back before releasing"; exit 1
               fi
               case "$version" in
                 *-*) echo "::error::package.json on main says $version; a release has no suffix"; exit 1 ;;

@@ -1066,6 +1066,16 @@ with the [Extension Manager](https://github.com/TheAppgineer/roon-extension-mana
 The Manager runs it with host networking, since Roon discovery uses UDP broadcast on
 port 9003. It bind-mounts `config.json`, so settings survive updates.
 
+Until the entry is in the Extension Repository, `extension-manager/roon-extension-party-mode.json`
+is the same entry as a local repository file (the Manager wiki's Development page, "Using
+local repository files"), in a category of its own, **Local**. The README's Extension
+Manager steps copy it into the Manager's `/home/node/.rem/repos/`, which the Manager reads
+when it starts. The Manager names an extension after its image alone, so this file and the
+official entry clash if both are loaded: the README says to remove the file once Party
+Mode is listed. Keep it in step with `repository-entry.json`, except that on `beta` its
+tags are `beta`, like the rest of the beta README (see
+[Releasing](#releasing)).
+
 ## Branches
 
 Two branches last; every other branch is short-lived.
@@ -1172,7 +1182,8 @@ tested) or from a fix branch (a patch; see [Branches](#branches)).
    volume `roon-extension-party-mode-beta-data`, and the compose file downloaded from the
    `beta` branch. Switching back is removing every `-beta` and `:beta` (`:latest`),
    `beta/` in the download links (`main/`), and the NAS steps' **beta** tag (**latest**).
-   Publishing from `main` refuses while either file still has one.
+   In `extension-manager/roon-extension-party-mode.json`, the tags go back to `latest`.
+   Publishing from `main` refuses while any of them still has one.
 2. Run CodeQL on that branch (see [Code scanning](#code-scanning)) and check its results.
 3. Merge into `main` through a pull request titled `Release <version>`.
 4. Tag the merge commit `v<version>` (an annotated tag, from `v1.1.0` on).
@@ -1184,8 +1195,8 @@ tested) or from a fix branch (a patch; see [Branches](#branches)).
    its notes.
 8. Merge `main` into `beta`. After a release from `beta`, the next version's first
    candidate bumps it to `-beta.1`, starts that RELEASES.md section, and switches
-   README.md and `docker-compose.yml` to the beta image and names again. After a fix
-   release, `beta` keeps its version.
+   README.md, `docker-compose.yml` and the Extension Manager file to the beta image and
+   names again. After a fix release, `beta` keeps its version.
 
 ### Checking an image against the code
 

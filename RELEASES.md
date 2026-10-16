@@ -5,97 +5,81 @@ running in its Extensions list.
 
 ## 1.4.0 (in progress)
 
-Not released yet. Once its beta is published, you can try it as "Party Mode (beta)" (see
+Not released yet. Its beta is out: you can try it as "Party Mode (beta)" (see
 [DEVELOPER.md](DEVELOPER.md#running-the-beta)).
 
 ### New
 
-- **Detailed log** setting, under **Advanced**: turn on a detailed log for troubleshooting
-  straight from Roon, with no restart. It works with the Extension Manager too, whose
-  **Collect Logs** downloads it.
-- Guests can pass the party on: tapping the party's name at the top of the guest page
-  shows the QR code, so a friend can scan it from their phone. Turn it off with **Party
-  invites** in Party Mode's settings.
+- Guests can pass the party on: tapping the party's name on the guest page shows the QR
+  code for a friend to scan. Turn it off with **Invites**, under **Party**.
+- The guest page and the Party Hub have their own icon, a jukebox, in the browser tab,
+  bookmarks and on a phone's home screen.
+- **Detailed log**, under **Advanced**: a detailed log for troubleshooting, turned on and
+  off from Roon with no restart. The Extension Manager's **Collect Logs** includes it.
+- Install with the Extension Manager before Party Mode is in its list: the README shows
+  how to add it to the Manager yourself, and how to remove it again.
 
 ### Improvements
 
-- **No setup before installing with Docker:** Party Mode now keeps its settings in a
-  Docker volume, so a new install is just `docker compose up -d` (or the `docker run`
-  command), with no `config.json` to create first. Updating an existing install keeps
-  its settings as before. If you install again with the new instructions instead, enable
-  Party Mode in Roon once more and set it up again.
-- **Host name** says so when a name is longer than 24 characters, the most a guest's
-  name may be, rather than cutting it short on the pages.
-- If Party Mode can't save its settings (a NAS folder it isn't allowed to write to, say),
-  fixing the folder's permissions clears the warning the next time you save in Roon, with
-  no restart. Roon's pairing is saved then too, so Party Mode doesn't need enabling in
-  Roon again after its next restart. The warning names the folder to fix.
-- When Roon closes the settings window on a change that can't be saved, such as a name
-  that's too long, Party Mode's status line in Roon says what wasn't saved.
-- Clearer layout for the settings window. Only **Party mode** shows when you open it;
-  the rest is in groups you open when needed: **Party** (the zone, name and the like),
-  **Guest requests** and **Advanced**. While the party zone needs you
-  (before you pick one, or while it's not available), **Party** opens by itself,
-  with the zone marked in red. **Playlist on the Party Hub** is now
-  **Playlist**, and the settings under **Party** drop "Party" from their names: **Zone**,
-  **Roon profile**, **Name**, **Host name**, **Invites** and **Playlist**.
-- **Guest requests** brings adding and skipping together, named after the guest page's
-  buttons: **Add to queue**, **Play it next** and **Skip tracks**. Adding to the queue
-  and playing a track next are now separate choices, so you can let guests play tracks
-  next without adding to the end of the queue, or the other way round. **Block tracks
-  already in the queue** comes first, as it applies to both.
-- If the party zone goes away (its device switched off or unplugged, say), requests
-  pause by themselves after a few seconds, so guests see "Requests are paused for a
-  moment" rather than errors. They're back on as soon as the zone returns. Roon's status
-  line and the log say what happened. Meanwhile the pages keep showing the track that was
-  playing, paused, with its album art.
-- The same happens while your Roon Core restarts or can't be reached: after a few seconds
-  requests pause, and the pages keep the track and Up next instead of inviting requests
-  that can't work. They're back on once the Core and the zone are.
-- The log says when Party Mode loses the connection to your Core, and when it's back, and
-  when you change Party mode in Roon.
-- Party Mode's status in Roon is clearer, a line each: **Party mode** (On, Paused or Off),
-  **Party** (its name), **Party zone**, and the Party Hub's address.
-- The guest page and the Party Hub have their own icon, a jukebox, in the browser tab and
-  on bookmarks, and when added to a phone's home screen.
+- **No setup before installing with Docker:** settings now live in a Docker volume, so a
+  new install is just `docker compose up -d` (or `docker run`), with no `config.json` to
+  create. Updating keeps your settings; installing afresh with the new instructions
+  means enabling and setting up Party Mode in Roon again.
+- If Party Mode can't save its settings (a NAS folder it may not write to, say), the
+  warning names the folder. Once you fix its permissions, the next save in Roon clears
+  the warning and saves Roon's pairing too, with no restart.
+- When Roon closes the settings window on a change that can't be saved (a name that's
+  too long, say), the status line in Roon says what wasn't saved.
+- Simpler settings window: only **Party mode** shows at first; the rest is in groups you
+  open: **Party**, **Guest requests** and **Advanced**. **Party** opens by itself, with
+  the zone marked in red, until you pick a zone or while it's unavailable. Under
+  **Party**, **Party zone**, **Party profile**, **Party name**, **Party host name** and
+  **Playlist on the Party Hub** are now **Zone**, **Roon profile**, **Name**, **Host
+  name** and **Playlist**.
+- **Guest requests** replaces **Adding tracks** and **Skipping**, with settings named
+  after the guest page's buttons: **Add to queue**, **Play it next** and **Skip tracks**.
+  Adding to the queue and playing next are now separate, so you can allow either or both.
+- If the party zone goes away (its device switched off, say) or your Roon Core restarts
+  or can't be reached, requests pause by themselves after a few seconds (currently 10),
+  so guests see "Requests are paused for a moment" rather than errors. They're back on
+  when the zone or Core returns. The status line in Roon and the log say what happened.
+- Party Mode's status in Roon has a line each: **Party mode** (On, Paused or Off),
+  **Party** (its name), **Party zone** and the Party Hub's address.
 
 ### Performance improvements
 
-- Album art loads faster when lots of guests are on, especially on a small computer such
-  as a Raspberry Pi, and Party Mode asks your Core for each cover only once.
-- Search results can load album art as guests scroll to it, rather than all at once, so
-  results show sooner and use less data.
-- Party Mode answers the guest page and the Party Hub more quickly on a small computer
-  such as a Raspberry Pi.
+- Album art loads faster with lots of guests on, especially on a Raspberry Pi: Party Mode
+  asks your Core for each cover only once.
+- Search results load album art as guests scroll to it, so they show sooner and use less
+  data.
 
 ### Fixes
 
-- Joining the party is quicker in Firefox, which used to fetch the cover of the track
-  playing three times.
-- The guest page's dialogs (your name, the language, the party's QR code) always close
-  with Escape on a keyboard, and Tab stays inside them. Before, in Chrome and Safari,
-  Escape stopped working once Tab had moved past the last button.
-- The search box's clear button (×) is round with the × centred on older iPhones and
-  iPads (iOS 15), where it was an oval with the × off to one side.
-- After the Roon Core restarts, the log says when the party zone is back, and no longer
-  reports a problem reading profiles while the Core is still starting.
-- Screen readers find the Party Hub's content as the page's main part, and the name
-  prompt as a dialog.
-- When a request, a skip or saving a name fails, guests see one message, "Sorry, that did
-  not work.", rather than "Roon would not take that one." even when Roon wasn't asked. When
-  a guest has used up adding, playing next or skipping, the page says "You've used them
-  all.", with when more come back if they do ("Nothing left for now." suggested more
-  would come even when none did). Skip
-  disappears straight away when Roon can't skip (a radio station starts, say), and a skip
-  turned down because the host has just turned skips off hides the button too.
+- Joining the party is quicker in Firefox, which fetched the playing track's cover three
+  times.
+- **Host name** shows an error past 24 characters, the most a guest's name may be,
+  rather than being cut short on the pages.
+- The guest page's dialogs always close with Escape, and Tab stays inside them. In Chrome
+  and Safari, Escape stopped working once Tab passed the last button.
+- The search box's clear button (×) is round, with the × centred, on older iPhones and
+  iPads (iOS 15).
+- Screen readers find the Party Hub's main content, and the name prompt as a dialog.
+- Simpler error messages: when a request, a skip or saving a name fails, guests see one
+  message, "Sorry, that did not work.", rather than two that told them little more.
+- When a guest has used up adding, playing next or skipping, the page says "You've used
+  them all." and when more come back, if they do. "Nothing left for now." suggested more
+  would come even when none did.
+- Skip disappears straight away when Roon can't skip (a radio station starts, say) or
+  the host turns skips off.
 
 ### Security
 
-- **Flood protection** setting, under **Advanced**: how many page loads and searches each
-  IP address may make a minute, so one misbehaving device can't overwhelm Party Mode or
-  your Core. The default now allows twice as many page loads and more than three times as
-  many searches as before. If guests still see "Too many requests", choose **Custom** and
-  raise the numbers.
+- **Flood protection**, under **Advanced**: how many page loads and searches each IP
+  address may make a minute, so one misbehaving device can't overwhelm Party Mode or your
+  Core. The defaults are higher than before: 1,200 page loads (was 600) and 200 searches
+  (was 60). If guests still see "Too many requests", choose **Custom** and raise them.
+- Party Mode's web server moves from Express 4 to Express 5, the library's current
+  version.
 - Various security enhancements.
 
 ## 1.3.2
