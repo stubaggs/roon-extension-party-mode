@@ -86,5 +86,6 @@
   "screen.playlist_qr_alt": "QR-kode til playlisten",
   "screen.closed_title": "Der er lukket for ønsker",
   "screen.closed_text": "Tak for alle numrene.",
+  "screen.menu": "Menu",
   "join.expired": "Koden er udløbet. Scan koden på Party Hub igen."
 }

@@ -4,8 +4,7 @@ config.json
 .git
 .github
 docker-compose.yml
-repository-entry.json
+extension-manager
 .claude
-Dockerfile
 .dockerignore
 *.md

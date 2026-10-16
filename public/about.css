@@ -1,0 +1,145 @@
+/* The About page: one column of text, readable on a phone or a TV. */
+
+.about main {
+  width: min(44rem, 100%);
+  margin: 0 auto;
+  padding: 2rem 1rem 3rem;
+}
+
+.about h1 {
+  margin: 0 0 0.3rem;
+  font-size: 1.9rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.about h2 {
+  margin: 2rem 0 0.6rem;
+  font-size: 1.2rem;
+}
+
+.about h3 {
+  margin: 1.5rem 0 0.5rem;
+  font-size: 1rem;
+}
+
+.about p {
+  margin: 0 0 0.7rem;
+}
+
+.about a {
+  color: var(--lavender);
+}
+
+.tagline {
+  color: var(--muted);
+}
+
+/* The same label column in every section, so the values line up. */
+.facts {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.facts th {
+  width: 40%;
+}
+
+.facts th,
+.facts td {
+  padding: 0.25rem 1.5rem 0.25rem 0;
+  text-align: start;
+  vertical-align: top;
+}
+
+.facts th {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.libs {
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--edge);
+}
+
+.libs li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0 1rem;
+  padding: 0.45rem 0;
+  border-bottom: 1px solid var(--edge);
+  font-size: 0.95rem;
+}
+
+.lib {
+  overflow-wrap: anywhere;
+}
+
+.ver,
+.who {
+  color: var(--muted);
+}
+
+.who {
+  grid-column: 1 / -1;
+  font-size: 0.85rem;
+}
+
+/* A licence's text, as its authors laid it out, wrapping on a phone. */
+.license {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+/* The details "Copy details" copies, in a box with the button at its top right. */
+.help {
+  margin: 2rem 0 0.6rem;
+}
+
+.details {
+  padding: 0.75rem 1rem 1rem;
+  border: 1px solid var(--edge);
+  border-radius: 10px;
+}
+
+.details h2 {
+  margin-top: 1.5rem;
+}
+
+.details section:first-of-type h2 {
+  margin-top: 0;
+}
+
+.copy-bar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+#copy-details {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.9rem;
+  border: 1px solid var(--lavender);
+  border-radius: 999px;
+  color: var(--lavender);
+  font-weight: 600;
+}
+
+#copy-details[hidden] {
+  display: none;
+}
+
+#copy-details svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}

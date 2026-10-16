@@ -12,6 +12,19 @@
     <link rel="stylesheet" href="/hub.css" />
   </head>
   <body class="hub">
+    <!-- A small menu in the corner, for the host: nothing a guest needs. -->
+    <nav class="hub-menu">
+      <button type="button" id="menu-button" class="menu-button" aria-expanded="false" aria-controls="menu" aria-label="Menu" data-i18n-aria-label="screen.menu">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+          <path d="M4 7h16M4 12h16M4 17h16" />
+        </svg>
+      </button>
+      <ul id="menu" class="menu" hidden>
+        <!-- In English, as the About page is. In a new tab: it can't be shown in a
+             frame, as the Hub can. -->
+        <li><a href="/About" target="_blank" rel="noopener" lang="en" dir="ltr">About Party Mode</a></li>
+      </ul>
+    </nav>
     <main class="stage">
       <section class="join">
         <h1 id="party-name" data-i18n="party.default_name">Party</h1>

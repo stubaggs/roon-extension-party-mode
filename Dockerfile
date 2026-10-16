@@ -20,11 +20,15 @@ RUN apk add --no-cache git
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev --no-audit --no-fund
 
-COPY app.js ./
+COPY app.js LICENSE ./
 COPY lib ./lib
 COPY public ./public
 COPY test ./test
 RUN npm test
+
+# The base image, from the FROM line above, for the About page.
+COPY Dockerfile ./
+RUN grep -m1 -E '^FROM ' Dockerfile | cut -d' ' -f2 > base-image
 
 # -------------------------------------------------------------- final image
 FROM node:22-alpine@sha256:0a7108bf6c7bf5de370ffb1a3ed6be93d405b43ff159f681a8d18c0e2bc2e402
@@ -35,10 +39,15 @@ LABEL org.opencontainers.image.title="Roon Extension: Party Mode" \
       org.opencontainers.image.licenses="Apache-2.0"
 
 ENV NODE_ENV=production
+# When and from which commit this image was built, for the About page. The
+# publish workflow passes it; a local build leaves it empty.
+ARG BUILD=""
+ENV ROON_EXTENSION_PARTY_MODE_BUILD=$BUILD
 WORKDIR /usr/src/app
 
 COPY --from=build /usr/src/app/node_modules ./node_modules
-COPY package.json app.js healthcheck.js ./
+COPY package.json app.js healthcheck.js LICENSE ./
+COPY --from=build /usr/src/app/base-image ./
 COPY lib ./lib
 COPY public ./public
 

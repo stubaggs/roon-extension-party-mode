@@ -67,6 +67,8 @@ jobs:
             *) echo "::error::Publish from main or beta, not $GITHUB_REF"; exit 1 ;;
           esac
           echo "version=$version" >> "$GITHUB_OUTPUT"
+          # For the About page: when and from which commit this image was built.
+          echo "build=$(date -u +%Y-%m-%d) ${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
 
       # Docker's actions are pinned to a commit, not a tag that could be moved,
       # since this job holds the Docker Hub token. Dependabot updates the pins
@@ -121,6 +123,8 @@ jobs:
           sbom: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            BUILD=${{ steps.version.outputs.build }}
 
       # BuildKit's provenance is unsigned: whoever holds the Docker Hub token
       # could push an image claiming any commit. This adds a signed one, which

@@ -18,6 +18,12 @@ Not released yet. Its beta is out: you can try it as "Party Mode (beta)" (see
   off from Roon with no restart. The Extension Manager's **Collect Logs** includes it.
 - Install with the Extension Manager before Party Mode is in its list: the README shows
   how to add it to the Manager yourself, and how to remove it again.
+- **About page**, from the menu at the top left of the Party Hub (or `/About` on its
+  address): Party Mode's version and licence, the state of the running copy (a good start
+  when asking for help: "Copy details" copies it, ready to paste into a forum post), and
+  the open-source libraries it uses, each with its licence. It also shows a **code
+  fingerprint**: from this version on, each release here lists its own, so you can check
+  that a copy's code is unchanged.
 
 ### Improvements
 
@@ -25,9 +31,16 @@ Not released yet. Its beta is out: you can try it as "Party Mode (beta)" (see
   new install is just `docker compose up -d` (or `docker run`), with no `config.json` to
   create. Updating keeps your settings; installing afresh with the new instructions
   means enabling and setting up Party Mode in Roon again.
+- Docker Compose and `docker run` keep the settings in the same volume,
+  `roon-extension-party-mode-data`, so you can switch from one to the other and keep
+  them. If you tried an earlier beta with Docker Compose, its settings stay in the old
+  volume: after downloading the new `docker-compose.yml`, enable and set up Party Mode in
+  Roon again.
 - If Party Mode can't save its settings (a NAS folder it may not write to, say), the
   warning names the folder. Once you fix its permissions, the next save in Roon clears
   the warning and saves Roon's pairing too, with no restart.
+- Roon's **Settings → Authorizations** shows a contact address for Party Mode,
+  partymode@stubaggs.com.
 - When Roon closes the settings window on a change that can't be saved (a name that's
   too long, say), the status line in Roon says what wasn't saved.
 - Simpler settings window: only **Party mode** shows at first; the rest is in groups you

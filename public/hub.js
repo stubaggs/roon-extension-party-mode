@@ -136,4 +136,26 @@
   });
 
   setInterval(refresh, 30000);
+
+  // The corner menu: opened by its button, closed by Escape, a click elsewhere
+  // or choosing an item.
+  const menuButton = el('menu-button');
+  const menu = el('menu');
+  function showMenu(open) {
+    menu.hidden = !open;
+    menuButton.setAttribute('aria-expanded', String(open));
+  }
+  menuButton.addEventListener('click', () => showMenu(menu.hidden));
+  menu.addEventListener('click', (event) => {
+    if (event.target.closest('a')) showMenu(false);
+  });
+  document.addEventListener('click', (event) => {
+    if (!menu.hidden && !event.target.closest('.hub-menu')) showMenu(false);
+  });
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && !menu.hidden) {
+      showMenu(false);
+      menuButton.focus();
+    }
+  });
 })();

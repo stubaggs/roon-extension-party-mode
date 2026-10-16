@@ -86,5 +86,6 @@
   "screen.playlist_qr_alt": "QR-Code für die Playlist",
   "screen.closed_title": "Keine Wünsche mehr",
   "screen.closed_text": "Danke für all die Titel.",
+  "screen.menu": "Menü",
   "join.expired": "Dieser Code ist abgelaufen. Scanne den Code auf dem Party Hub noch einmal."
 }

@@ -32,6 +32,7 @@ Roon Core  ──(node-roon-api over the local network)──  app.js
                                      /GuestHub     guest page (phones)
                                      /PartyHub     QR code + queue (TV)
                                      /Download/…   the party playlist
+                                     /About        version, this copy, licences
 ```
 
 | File | What it does |
@@ -45,12 +46,14 @@ Roon Core  ──(node-roon-api over the local network)──  app.js
 | `lib/history.js` | Played-tracks list for the guest page |
 | `lib/party-playlist.js` | Everything queued during the party, as the downloadable CSV |
 | `lib/server.js` | REST API, server-sent events, QR code, image proxy |
+| `lib/about.js` | The About page (`/About`): version, run-time details, and the libraries in `node_modules` with their licences |
 | `lib/art-cache.js` | Recently used album art, kept in memory, and the image keys it may fetch |
 | `lib/ports.js` | Opening the web port, and the next free one when it's busy |
 | `healthcheck.js` | Docker's health check: is the web server answering? |
 | `public/` | Guest page (`index.html`, `guest.js`) and the Party Hub (`hub.html`, `hub.js`), no build step |
 | `public/icon.svg` and the other icon files | The pages' icon (see [Icon](#icon)) |
 | `public/marquee.js` | Scrolling long names |
+| `public/about.js` | The About page's "Copy details" button |
 | `public/i18n/`, `lib/i18n.js`, `public/i18n-runtime.js` | Page text per language, picking the language per browser, and applying it in the page |
 | `lib/env.js`, `lib/log.js` | Environment variables, and the debug log switch |
 | `test/` | Identity, attribution, settings and web server tests, `npm test` |
@@ -102,7 +105,7 @@ test stops a build.
   Settings → Profile), with its own position and profile per session.
 - `test/server.test.js` runs the real web server against a stand-in for Roon. It checks
   the Party Hub's answers, the join-link pages, the guest API's `no_session` and `closed`
-  errors, and the security headers.
+  errors, the security headers, and the About page and its licence pages.
 - `test/station.test.js` checks requests waiting and skips refused during a radio
   station, on a zone shaped like the one a Core reported.
 - `test/roon-radio.test.js` checks Roon Radio's picks are told from the host's, with the
@@ -787,6 +790,73 @@ party. The Playlist setting decides how:
   comes back on from Off (a new party). What is still queued at that moment is recorded
   again.
 
+## The About page
+
+`/About` shows Party Mode's version, copyright and licence, the state of the running copy,
+and every library it runs on. The Party Hub links to it from a small menu at the start of
+its top line (top left; top right in Arabic and Hebrew), in a new tab, since the About
+page can't be shown in a frame as the Hub can. The state is a starting point for troubleshooting, before
+asking for a log, in four groups:
+
+- **Installation:** how it was installed (guessed from where settings are kept: a volume or
+  folder on `/data`, a file mounted on `config.json` as the Extension Manager does, or
+  only inside the container), when and from which commit the image was built, a code
+  fingerprint, the base image (`node:22-alpine` and its digest) and Alpine Linux
+  release, Node.js, platform, kernel, the hardware's CPUs and memory, the container's
+  memory limit, the user it runs as, how locked down the container is (read-only, no
+  capabilities, no new privileges, from `/proc/self`), uptime and memory in use.
+- **Roon:** whether the Core is connected (never its name) and for how long, its version,
+  how often the connection was lost, when it was last lost and for how long (or that it's
+  not back yet), whether the Roon profile works, and Roon's menu names: "English", or a
+  line for each one that isn't, under its English name, with the name used and whether
+  it was found on the Core or set in the settings (and, when one set in the settings
+  wasn't found, that one too: it's often a typo).
+  Then the party zone, never by name: chosen or not, available in Roon or not, how many
+  outputs are grouped, playback (and whether it's a radio station), the queue (its
+  length, or whether Roon is still to answer or refused it), Roon Radio, shuffle, repeat,
+  and whether Roon allows a skip now ("Roon skip").
+- **Party:** Party mode (and why, if it paused itself), when the party started, how many
+  guests joined and how many have the page open now, how many Party Hubs are open (both
+  from the pages' live-update connections), how many tracks guests requested, how many
+  searches and skips, how many searches, requests and skips Roon couldn't do, and the
+  Guest requests settings (what guests may do, how many each, and how soon one comes
+  back).
+- **Health:** whether settings can be saved (and a change Roon refused), the detailed
+  log, the album art cache, how often a device was told "Too many requests", and the web
+  port (and whether the one set was busy).
+
+A "Copy details" button (`public/about.js`) copies the four groups as plain text, to
+paste into a forum post. Pages are usually opened over plain http, where browsers have
+no `navigator.clipboard`, so it falls back to copying from a hidden text box; without
+JavaScript the button stays hidden.
+
+Never the party zone's name: it could be a speaker a guest could play to directly, going
+round the party. Nor the Roon Core's name, addresses, profile names, paths or the Flood
+protection numbers.
+The publish workflow stamps the build into the image as
+`ROON_EXTENSION_PARTY_MODE_BUILD` ("2026-10-16 b51496d", from the `BUILD` build argument);
+a local build leaves it empty, and the page says "Custom build, <date>", the date
+being when the build wrote `base-image`. Outside Docker the line isn't shown. The **code
+fingerprint** is the first 12 characters of a SHA-256 over the paths and contents of
+Party Mode's own files (`app.js`, `healthcheck.js`, `package.json`, `LICENSE`, `lib/`,
+`public/`), worked out on the first visit: copies of a version from unchanged code show
+the same one, in Docker or not, so a different one means the code was changed. Text files
+are hashed with LF line endings, so a Windows checkout (CRLF) gives the same one; images
+are hashed as they are. The library list is read from
+`node_modules` on the first visit (name, version, licence, and the copyright lines from
+each licence file, else the package's author), so it's always what's installed, with no
+list to keep up to date. Each licence's full text is at `/About/license/<name>@<version>`,
+and Party Mode's own at `/About/license/party-mode`; the image carries `LICENSE` for it.
+Only files found that way are served, never a path from the address. Each library's
+name links to its repository, from its `package.json` (`repository`, in any form npm
+accepts, else `homepage`; only `https` addresses), or for Roon's packages, which name
+none, from Party Mode's own dependency (`github:roonlabs/…`). The Roon Extension
+Manager is listed with them though Party Mode doesn't include it (`ALONGSIDE` in
+`lib/about.js`): no version, and its licence linking to its repository.
+
+It needs no login, like the Party Hub, so it shows nothing private. It's in English only, unlike the other pages (owner's choice: licence texts
+and library names aren't translated anyway). No page links to it yet.
+
 ## Translating the pages
 
 The guest page and the Party Hub take their text from `public/i18n/<code>.json`, one file
@@ -1072,9 +1142,9 @@ local repository files"), in a category of its own, **Local**. The README's Exte
 Manager steps copy it into the Manager's `/home/node/.rem/repos/`, which the Manager reads
 when it starts. The Manager names an extension after its image alone, so this file and the
 official entry clash if both are loaded: the README says to remove the file once Party
-Mode is listed. Keep it in step with `repository-entry.json`, except that on `beta` its
-tags are `beta`, like the rest of the beta README (see
-[Releasing](#releasing)).
+Mode is listed. Keep it in step with `extension-manager/repository-entry.json`, the
+entry in the Extension Repository, except that on `beta` its tags are `beta`, like the
+rest of the beta README (see [Releasing](#releasing)).
 
 ## Branches
 
@@ -1130,7 +1200,7 @@ Hub. Its tags depend on the branch chosen under **Use workflow from**:
 
 | Branch | Tags | Who gets it |
 | --- | --- | --- |
-| `main` | `latest`, and the version (`1.1.1`) | The Extension Manager (`repository-entry.json` asks for `latest`), and Docker users on `latest`. The version tag lets anyone pin or roll back |
+| `main` | `latest`, and the version (`1.1.1`) | The Extension Manager (`extension-manager/repository-entry.json` asks for `latest`), and Docker users on `latest`. The version tag lets anyone pin or roll back |
 | `beta` | `beta`, and the version (`1.4.0-beta.1`) | Only those who ask for `:beta` |
 
 The workflow refuses any other branch. It refuses `beta` when its `package.json` version
@@ -1190,7 +1260,12 @@ tested) or from a fix branch (a patch; see [Branches](#branches)).
 5. Run the workflow by hand. Its `tags: ['v*']` trigger is commented out with `push`, so
    tagging doesn't publish.
 6. Copy the digest from the run's summary into RELEASES.md, under the version's heading:
-   ``Docker image: `stubaggs/roon-extension-party-mode:<version>@sha256:…` ``.
+   ``Docker image: `stubaggs/roon-extension-party-mode:<version>@sha256:…` ``, and on
+   the next line the code fingerprint, read from the published image so it's the
+   released code's:
+   ``Code fingerprint: `…` `` from
+   `docker run --rm --entrypoint node stubaggs/roon-extension-party-mode:<version> -p "require('./lib/about').fingerprint()"`.
+   It must match `node -p "require('./lib/about').fingerprint()"` on the tag.
 7. Create the GitHub release for the tag, with that version's section of RELEASES.md as
    its notes.
 8. Merge `main` into `beta`. After a release from `beta`, the next version's first
@@ -1251,7 +1326,9 @@ It builds in two stages:
    build.
 2. Copy only the app and its dependencies onto a clean base, with a `data/` folder for
    the settings (see [Where settings are kept](#where-settings-are-kept)) and a health check that
-   requests the Party Hub's data (`/api/hub`) on the configured port. npm, npx,
+   requests the Party Hub's data (`/api/hub`) on the configured port, and `base-image`,
+   the image named in the `FROM` lines (taken from the Dockerfile in the first stage),
+   for the About page. npm, npx,
    corepack and yarn are removed from it: the extension needs only `node`, and they're
    most of what vulnerability scanners report in a Node image. So `npm` doesn't work
    inside the container; build a new image instead.
@@ -1366,13 +1443,14 @@ the image that's a link to `/data/config.json`, and `/data` is a folder owned by
 (uid 1000) holding an empty `config.json`. One short path, so a named volume and a NAS
 folder are both mounted on `/data`:
 
-- **A named volume on `/data`** (`docker-compose.yml`'s `party-mode-data`, or
-  `-v roon-extension-party-mode-data:/data`): Docker fills a new volume
-  from the image's folder, owner included, so it's writable by uid 1000 with nothing to
-  set up first. Rootless Podman does the same, with or without `--userns=keep-id`.
-  Compose names the volume after the project folder
-  (`roon-extension-party-mode_party-mode-data`), so a second copy in its own folder gets
-  its own. `docker compose down -v` removes it.
+- **A named volume on `/data`**, `roon-extension-party-mode-data` both in
+  `docker-compose.yml` (its `party-mode-data` volume, with `name:` set) and with
+  `-v roon-extension-party-mode-data:/data`, so the two ways share one volume: Docker fills
+  a new volume from the image's folder, owner included, so it's writable by uid 1000 with
+  nothing to set up first. Rootless Podman does the same, with or without
+  `--userns=keep-id`. Its fixed `name:` replaces the one Compose would make from the
+  project folder (`<folder>_party-mode-data`), so a second copy sets a name of its own
+  there (the README's Running more than one party). `docker compose down -v` removes it.
 - **A folder bind-mounted on `/data`** (a NAS app's folder mapping): it isn't
   filled from the image and keeps its owner on the host, so it must be writable by uid
   1000. The first save creates `config.json` in it.
@@ -1402,7 +1480,7 @@ instruction for `/data`: it would give every Extension Manager install an anonym
 it never uses.
 
 To read or back up the settings in a volume:
-`docker run --rm -v roon-extension-party-mode_party-mode-data:/data alpine cat /data/config.json`.
+`docker run --rm -v roon-extension-party-mode-data:/data alpine cat /data/config.json`.
 
 #### Read-only
 
@@ -1512,6 +1590,7 @@ set it. A renamed variable keeps its old name working, checked after the new one
 | `ROON_EXTENSION_PARTY_MODE_RATE_LIMIT` | Requests a minute from one device, of any kind (default 1200; 0 for no limit), until Flood protection is changed in Roon. See Flood protection. |
 | `ROON_EXTENSION_PARTY_MODE_SEARCH_LIMIT` | Searches a minute from one device (default 200; 0 for no limit), likewise. |
 | `ROON_EXTENSION_PARTY_MODE_DEBUG` | `1`, `true`, `yes` or `on` turns on the detailed log from the start (see Detailed log and Logging). |
+| `ROON_EXTENSION_PARTY_MODE_BUILD` | Set in the image by the publish workflow: when and from which commit it was built, for the About page. Not for setting by hand. |
 
 ## Logging
 

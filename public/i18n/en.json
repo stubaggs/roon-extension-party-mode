@@ -86,5 +86,6 @@
   "screen.playlist_qr_alt": "QR code for the playlist",
   "screen.closed_title": "Requests are closed",
   "screen.closed_text": "Thanks for all the tracks.",
+  "screen.menu": "Menu",
   "join.expired": "That code has expired. Scan the code on the Party Hub again."
 }

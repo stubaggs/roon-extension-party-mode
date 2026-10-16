@@ -838,6 +838,11 @@ const set = (values) => Object.assign(roon.settings, values);
 
   console.log('\nParty Hub');
 
+  await check("the Party Hub's menu links to the About page, in a new tab", async () => {
+    const html = await (await get('/PartyHub')).text();
+    assert.ok(html.includes('<a href="/About" target="_blank" rel="noopener" lang="en" dir="ltr">About Party Mode</a>'));
+  });
+
   await check('the Party Hub is at /PartyHub, in any case', async () => {
     for (const path of ['/PartyHub', '/partyhub']) {
       const res = await get(path);
@@ -975,6 +980,285 @@ const set = (values) => Object.assign(roon.settings, values);
     const more = [];
     for (let i = 0; i < 15; i += 1) more.push((await fetch(url)).status);
     assert.ok(more.every((code) => code === 200), more.join(','));
+  });
+
+  console.log('about');
+
+  await check('the About page shows the version, this copy and the libraries', async () => {
+    const res = await get('/About');
+    assert.strictEqual(res.status, 200);
+    assert.match(res.headers.get('content-type'), /text\/html/);
+    assert.strictEqual(res.headers.get('x-frame-options'), 'DENY');
+    const html = await res.text();
+    assert.ok(html.includes(`Version ${require('../package.json').version}.`));
+    assert.ok(html.includes('Copyright © 2026 Stubaggs.'));
+    // The forum first: it's where people go for help.
+    assert.ok(html.indexOf('>Roon forum</a>') < html.indexOf('>Instructions and releases</a>'));
+    assert.ok(!html.includes("What's new"));
+    assert.ok(html.includes('<a href="https://github.com/stubaggs/roon-extension-party-mode/blob/main/README.md" target="_blank" rel="noopener">Instructions and releases</a>'));
+    assert.ok(html.includes('/325638" target="_blank" rel="noopener">Roon forum</a>'));
+    assert.ok(html.includes('Not connected'));
+    assert.match(html, /<span class="lib"><a [^>]+>express<\/a> <span class="ver">\d/);
+    assert.ok(html.includes('href="/About/license/party-mode"'));
+    // Listed though not included: it installs Party Mode. Its licence links to its repository.
+    assert.ok(html.includes('<span class="lib"><a href="https://github.com/TheAppgineer/roon-extension-manager" target="_blank" rel="noopener">roon-extension-manager</a> <span class="ver"></span></span>' +
+      '<span class="lic"><a href="https://github.com/TheAppgineer/roon-extension-manager" target="_blank" rel="noopener">Apache-2.0</a></span>' +
+      '<span class="who">By TheAppgineer</span>'));
+    assert.ok(html.includes('<h2>Installation</h2>'));
+    assert.ok(html.includes('<button type="button" id="copy-details" hidden>'));
+    assert.ok(html.includes('<script src="/about.js"></script>'));
+    assert.strictEqual((await get('/about.js')).status, 200);
+  });
+
+  await check("the About page says the Core is connected, never its name", async () => {
+    roon.core = { display_name: 'Okiba' };
+    try {
+      const html = await (await get('/About')).text();
+      assert.ok(html.includes('<td>Connected for '));
+      assert.ok(!html.includes('Okiba'));
+    } finally {
+      delete roon.core;
+    }
+  });
+
+  await check('About: the base image, and how locked down the container is', async () => {
+    const fs = require('fs');
+    const os = require('os');
+    const { baseImage, lockdown, memoryLimit } = require('../lib/about');
+    const dir = fs.mkdtempSync(require('path').join(os.tmpdir(), 'about-'));
+    const file = (name, text) => {
+      const p = require('path').join(dir, name);
+      fs.writeFileSync(p, text);
+      return p;
+    };
+    try {
+      assert.strictEqual(baseImage(file('base', 'node:22-alpine@sha256:0a7108bf6c7bf5de370ffb1a3ed6be93d405b43ff159f681a8d18c0e2bc2e402\n')),
+        'node:22-alpine (sha256:0a7108bf6c7b)');
+      assert.strictEqual(baseImage(require('path').join(dir, 'missing')), '');
+
+      const root = (opts) => file('mountinfo', `20 1 0:30 / / ${opts} - overlay overlay rw\n21 20 0:31 / /data rw - ext4 /dev/sda1 rw\n`);
+      const status = (cap, nnp) => file('status', `Name:\tnode\nNoNewPrivs:\t${nnp}\nCapEff:\t0000000000000000\nCapBnd:\t${cap}\n`);
+      assert.strictEqual(lockdown(root('ro,relatime'), status('0000000000000000', 1), true), 'read-only, no capabilities, no new privileges');
+      assert.strictEqual(lockdown(root('rw,relatime'), status('00000000a80425fb', 0), true), "Docker's defaults");
+      assert.strictEqual(lockdown(root('ro'), status('0', 1), false), '');
+
+      assert.strictEqual(memoryLimit(file('max', 'max\n')), 'None');
+      assert.strictEqual(memoryLimit(file('limit', '268435456\n')), '256 MB');
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  await check("licence texts: Party Mode's and each library's, nothing else", async () => {
+    const own = await get('/About/license/party-mode');
+    assert.strictEqual(own.status, 200);
+    assert.match(await own.text(), /Apache License\s+Version 2\.0/);
+    const express = require('express/package.json');
+    const lib = await get(`/About/license/${encodeURIComponent(`express@${express.version}`)}`);
+    assert.strictEqual(lib.status, 200);
+    assert.match(lib.headers.get('content-type'), /text\/html/);
+    const text = await lib.text();
+    assert.match(text, /Permission is hereby granted/);
+    // The text is escaped: the licence's "<tj@vision-media.ca>" is no tag.
+    assert.ok(!text.includes('<tj@') && text.includes('&#60;tj@'));
+    for (const id of ['express@0.0.0', 'nothing', '..%2F..%2Fpackage.json', '%2E%2E%2Fconfig.json']) {
+      assert.strictEqual((await get(`/About/license/${id}`)).status, 404, id);
+    }
+  });
+
+  await check("About: never the party zone's name; the pause it took by itself, explained", async () => {
+    roon.zone = { display_name: 'Kitchen AirPlay' };
+    roon.currentMode = 'paused';
+    roon.zoneHold = true;
+    try {
+      const html = await (await get('/About')).text();
+      assert.ok(!html.includes('Kitchen AirPlay'));
+      assert.ok(html.includes('Paused by itself: the party zone isn&#39;t available'));
+    } finally {
+      roon.zone = null;
+      delete roon.currentMode;
+      delete roon.zoneHold;
+    }
+  });
+
+  await check('About: the party zone, by its state and never its name; failures counted', async () => {
+    const { runtime } = require('../lib/about');
+    const rows = (ctx) => Object.fromEntries(runtime(ctx).flatMap(([, r]) => r));
+    const fake = {
+      core: { display_name: 'Okiba', display_version: '2.0 (build 1500) production' },
+      settings: { zone: { output_id: 'o1' } },
+      queue: [{}, {}, {}],
+      queueState: 'subscribed',
+      zone: {
+        display_name: 'Kitchen AirPlay',
+        state: 'playing',
+        outputs: [{}, {}],
+        settings: { auto_radio: true, shuffle: false, loop: 'loop_one' },
+        now_playing: { length: 200 },
+        is_next_allowed: true
+      }
+    };
+    const shown = rows({ roon: fake, stats: { searches: 9, searchesFailed: 2, requestsFailed: 1, skips: 0, skipsFailed: 0 } });
+    assert.ok(!JSON.stringify(shown).includes('Kitchen'));
+    assert.ok(!JSON.stringify(shown).includes('Okiba'));
+    assert.strictEqual(shown['Roon Core version'], '2.0 (build 1500) production');
+    assert.strictEqual(shown['Party zone'], 'Available, 2 grouped outputs');
+    assert.strictEqual(shown.Playback, 'Playing');
+    assert.strictEqual(shown.Queue, '3 tracks in the queue');
+    assert.strictEqual(shown['Roon Radio'], 'On');
+    assert.strictEqual(shown.Repeat, 'One track');
+    assert.strictEqual(shown.Searches, '9, 2 failed');
+    assert.strictEqual(shown['Tracks requested'], "0, and 1 Roon couldn't add");
+    assert.strictEqual(shown.Skips, '0');
+    assert.strictEqual(shown['Roon skip'], 'Yes');
+
+    // The zone with Roon's side, the guests and their settings with the party's.
+    const sections = Object.fromEntries(runtime({ roon: fake }).map(([title, r]) => [title, r.map(([label]) => label)]));
+    assert.deepStrictEqual(Object.keys(sections), ['Installation', 'Roon', 'Party', 'Health']);
+    assert.ok(sections.Roon.includes('Queue'));
+    assert.ok(sections.Party.includes('Play it next'));
+
+    const requests = rows({ roon: Object.assign({}, fake, { settings: {
+      zone: { output_id: 'o1' }, prevent_duplicates: true,
+      allow_add: true, add_limit: 5, add_refill: 10,
+      allow_next: true, next_limit: 1, next_refill: 0,
+      allow_skip: false, skip_limit: 1, skip_refill: 60,
+      rate_limit: 123, search_limit: 45
+    } }) });
+    assert.strictEqual(requests['Block duplicates'], 'Yes');
+    assert.strictEqual(requests['Add to queue'], 'On, 5 per guest, one back every 10 minutes');
+    assert.strictEqual(requests['Play it next'], 'On, 1 per guest, none back');
+    assert.strictEqual(requests['Skip tracks'], 'Off');
+    const requestLines = ['Block duplicates', 'Add to queue', 'Play it next', 'Skip tracks'].map((label) => requests[label]);
+    assert.ok(!requestLines.some((value) => /123|45/.test(value)), 'never the Flood protection numbers');
+    assert.strictEqual(rows({ roon: Object.assign({}, fake, { settings: { allow_add: true, add_limit: 0 } }) })['Add to queue'], 'On, no limit');
+    assert.strictEqual(rows({ roon: Object.assign({}, fake, { settings: { allow_add: true, add_limit: 2, add_refill: 1 } }) })['Add to queue'],
+      'On, 2 per guest, one back every minute');
+
+    const hour = 3600 * 1000;
+    const lost = (lastOutage) => rows({ roon: Object.assign({}, fake, { lastOutage }) })['Last lost'];
+    assert.strictEqual(lost({ at: Date.now() - 2 * hour, back: Date.now() - 2 * hour + 5 * 60000 }), '2 hours ago, for 5 minutes');
+    assert.strictEqual(lost({ at: Date.now() - 3 * 60000, back: null }), '3 minutes ago, not back yet');
+    assert.strictEqual(lost(null), undefined);
+
+    const open = rows({ roon: fake, guests: { sessions: new Map([['a', {}], ['b', {}], ['c', {}]]) },
+      streams: new Set([{ guestId: 'a' }, { guestId: 'a' }, { guestId: 'b' }, { guestId: null }]) });
+    assert.strictEqual(open.Guests, '3 joined, 2 on the page now');
+    assert.strictEqual(open['Party Hub'], '1 open');
+    assert.strictEqual(rows({ roon: Object.assign({}, fake, { zone: null }) })['Party zone'],
+      'Not available in Roon (switched off, unplugged or removed?)');
+    assert.strictEqual(rows({ roon: Object.assign({}, fake, { settings: {} }) })['Party zone'], 'Not chosen yet');
+  });
+
+  await check("About: each library's name links to its repository, in any form npm accepts", async () => {
+    const { repositoryUrl } = require('../lib/about');
+    const github = 'https://github.com/user/repo';
+    for (const repository of ['user/repo', 'github:user/repo', 'git+https://github.com/user/repo.git',
+      'git://github.com/user/repo.git', 'git@github.com:user/repo', 'git+ssh://git@github.com/user/repo.git',
+      'http://github.com/user/repo', { type: 'git', url: 'git+https://github.com/user/repo.git' },
+      'git+ssh://git@github.com/user/repo.git#055dae6c']) {
+      assert.strictEqual(repositoryUrl({ repository }), github, JSON.stringify(repository));
+    }
+    assert.strictEqual(repositoryUrl({ repository: 'gitlab:user/repo' }), 'https://gitlab.com/user/repo');
+    assert.strictEqual(repositoryUrl({ homepage: 'https://example.org/lib#readme' }), 'https://example.org/lib#readme');
+    // Nothing usable: no link, rather than a wrong or unsafe one.
+    assert.strictEqual(repositoryUrl({ repository: 'javascript:alert(1)' }), '');
+    assert.strictEqual(repositoryUrl({ repository: '^5.0.0' }), '');
+    assert.strictEqual(repositoryUrl({}), '');
+
+    const html = await (await get('/About')).text();
+    assert.ok(html.includes('<a href="https://github.com/roonlabs/node-roon-api" target="_blank" rel="noopener">node-roon-api</a>'));
+    assert.ok(html.includes('<a href="https://github.com/expressjs/express" target="_blank" rel="noopener">express</a>'));
+  });
+
+  await check("About: Roon's menu names, each with where it came from", async () => {
+    const { menuNames } = require('../lib/about');
+    const english = { title_tracks: 'Tracks', title_add: 'Queue', title_next: 'Add Next', title_profile: 'Profile' };
+    assert.deepStrictEqual(menuNames(english, {}), [['Roon menu names', 'English']]);
+    // Typed with different case or spaces is still English.
+    assert.deepStrictEqual(menuNames({ title_tracks: ' tracks ' }, {}), [['Roon menu names', 'English']]);
+    assert.deepStrictEqual(menuNames(english, { tracks: 'Titel', profile: 'Profil' }), [
+      ['Roon menu "Tracks"', '"Titel", found'],
+      ['Roon menu "Profile"', '"Profil", found']
+    ]);
+    assert.deepStrictEqual(menuNames(Object.assign({}, english, { title_add: 'Zur Warteschlange hinzufügen', title_tracks: 'Titl' }), { tracks: 'Titel' }), [
+      ['Roon menu "Tracks"', '"Titel", found\n(set as "Titl")'],
+      ['Roon menu "Queue"', '"Zur Warteschlange hinzufügen", set']
+    ]);
+    // Typed and found the same: found, with nothing beside it.
+    assert.deepStrictEqual(menuNames(Object.assign({}, english, { title_next: 'Als Nächstes' }), { next: 'als nächstes' }),
+      [['Roon menu "Add Next"', '"als nächstes", found']]);
+  });
+
+  await check('About: the code fingerprint, the same for the same code, wherever it is, Windows too', async () => {
+    const fs = require('fs');
+    const os = require('os');
+    const path = require('path');
+    const { fingerprint } = require('../lib/about');
+    const copy = (files) => {
+      const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'code-'));
+      for (const [name, text] of Object.entries(files)) {
+        fs.mkdirSync(path.dirname(path.join(dir, name)), { recursive: true });
+        fs.writeFileSync(path.join(dir, name), text);
+      }
+      return dir;
+    };
+    const code = { 'app.js': 'a', 'lib/server.js': 'b', 'public/hub.js': 'c', 'test/x.js': 'not counted' };
+    code['lib/server.js'] = 'b\nc\n';
+    code['public/icon.png'] = Buffer.from([1, 13, 10, 2]);
+    const dirs = [copy(code), copy(Object.assign({}, code, { 'test/x.js': 'changed', 'base-image': 'node' })),
+      copy(Object.assign({}, code, { 'lib/server.js': 'b!\nc\n' })),
+      // Checked out by Git on Windows: CRLF in text files, images untouched.
+      copy(Object.assign({}, code, { 'lib/server.js': 'b\r\nc\r\n' })),
+      copy(Object.assign({}, code, { 'lib/server.js': 'b \nc\n' })),
+      copy(Object.assign({}, code, { 'public/icon.png': Buffer.from([1, 10, 2]) }))];
+    try {
+      const [one, same, changed, windows, space, image] = dirs.map((dir) => fingerprint(dir));
+      assert.match(one, /^[0-9a-f]{12}$/);
+      assert.strictEqual(same, one);
+      assert.notStrictEqual(changed, one);
+      assert.strictEqual(windows, one);
+      assert.notStrictEqual(space, one);
+      assert.notStrictEqual(image, one);
+    } finally {
+      for (const dir of dirs) fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  await check('About: the image build stamp, and how it was installed', async () => {
+    const fs = require('fs');
+    const os = require('os');
+    const { installKind, imageBuilt } = require('../lib/about');
+    // Published: the workflow's stamp. A custom build: the day, from
+    // the file the build wrote. Not in a container: no line at all.
+    const written = require('path').join(os.tmpdir(), `base-image-${process.pid}`);
+    fs.writeFileSync(written, 'node:22-alpine\n');
+    fs.utimesSync(written, new Date('2026-10-12T12:00:00Z'), new Date('2026-10-12T12:00:00Z'));
+    try {
+      assert.strictEqual(imageBuilt('2026-10-16 abc1234', written, true), '2026-10-16 abc1234');
+      assert.strictEqual(imageBuilt('', written, true), 'Custom build, 2026-10-12');
+      assert.strictEqual(imageBuilt('', `${written}-missing`, true), 'Custom build');
+      assert.strictEqual(imageBuilt('2026-10-16 abc1234', written, false), '');
+    } finally {
+      fs.unlinkSync(written);
+    }
+    const mounts = (points) => {
+      const file = require('path').join(os.tmpdir(), `mountinfo-${process.pid}`);
+      fs.writeFileSync(file, points.map((p, i) => `${i} 1 0:1 / ${p} rw - ext4 x rw`).join('\n'));
+      return file;
+    };
+    assert.strictEqual(installKind(mounts(['/']), false), 'Node.js');
+    assert.match(installKind(mounts(['/', '/data']), true), /volume or folder/);
+    assert.match(installKind(mounts(['/', '/data/config.json']), true), /Extension Manager/);
+    assert.match(installKind(mounts(['/']), true), /inside the container/);
+  });
+
+  await check('copyright lines: the holders, not the licence wording', async () => {
+    const { copyrightOf, duration } = require('../lib/about');
+    assert.strictEqual(copyrightOf('MIT\n\nCopyright (c) 2020 A Person\n\nThe above copyright notice', {}), 'Copyright (c) 2020 A Person');
+    assert.strictEqual(copyrightOf('(c) You must retain\nCopyright [yyyy] [name of copyright owner]', { author: 'Roon Labs, LLC' }), 'Copyright Roon Labs, LLC');
+    assert.strictEqual(duration(59), 'less than a minute');
+    assert.strictEqual(duration(3 * 86400 + 4 * 3600 + 5 * 60), '3 days, 4 hours');
   });
 
   console.log(failures ? `\n${failures} failed` : '\nall passed');

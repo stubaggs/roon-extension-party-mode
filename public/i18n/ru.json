@@ -92,5 +92,6 @@
   "screen.playlist_qr_alt": "QR-код плейлиста",
   "screen.closed_title": "Заказы закрыты",
   "screen.closed_text": "Спасибо за все треки.",
+  "screen.menu": "Меню",
   "join.expired": "Срок действия кода истёк. Отсканируйте код на Party Hub ещё раз."
 }

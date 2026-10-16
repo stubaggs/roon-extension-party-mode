@@ -12,6 +12,8 @@
   gap: clamp(1rem, 3vh, 2.5rem) clamp(1.5rem, 4vw, 4rem);
   height: 100vh;
   padding: clamp(1.5rem, 4vh, 3.5rem);
+  /* The party's name starts at the top, level with the corner menu. */
+  padding-top: 0.5rem;
   align-items: center;
 }
 
@@ -21,6 +23,9 @@
 
 .join h1 {
   margin: 0 0 1.2rem;
+  /* Room beside the name for the corner menu, on both sides so the name
+     stays centred: the menu then never takes a line of its own. */
+  padding-inline: 1.5rem;
   font-size: clamp(1.6rem, 3vw, 2.6rem);
   font-weight: 800;
   letter-spacing: -0.03em;
@@ -360,4 +365,66 @@
   .qr {
     width: min(60%, 16rem);
   }
+}
+
+/* The corner menu: small and faint, so it doesn't compete with the party.
+   At the start of the line: top left, or top right in Arabic and Hebrew. */
+.hub-menu {
+  position: absolute;
+  top: 0.5rem;
+  inset-inline-start: 0.5rem;
+  z-index: 10;
+}
+
+.menu-button {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 8px;
+  color: var(--muted);
+  opacity: 0.6;
+}
+
+.menu-button:hover,
+.menu-button:focus-visible,
+.menu-button[aria-expanded="true"] {
+  opacity: 1;
+  background: var(--raised);
+}
+
+.menu-button svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.menu {
+  margin: 0.25rem 0 0;
+  padding: 0.3rem;
+  min-width: 9rem;
+  list-style: none;
+  background: var(--raised);
+  border: 1px solid var(--edge);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.35);
+}
+
+.menu[hidden] {
+  display: none;
+}
+
+.menu a {
+  display: block;
+  padding: 0.45rem 0.75rem;
+  border-radius: 6px;
+  color: var(--text);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.menu a:hover,
+.menu a:focus-visible {
+  background: var(--edge);
 }
