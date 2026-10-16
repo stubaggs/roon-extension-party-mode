@@ -35,13 +35,45 @@ What's changed in each version is in [RELEASES.md](RELEASES.md).
 
 ### With the Extension Manager
 
-*This method is awaiting inclusion in the Extension Manager repository. Until then, please
-use Docker below.*
+If you use the [Extension Manager](https://github.com/TheAppgineer/roon-extension-manager)
+(its [wiki](https://github.com/TheAppgineer/roon-extension-manager/wiki) explains how to
+set it up), you can install Party Mode with it. Party Mode isn't in the Manager's list
+yet, so until it is, either install it [with Docker](#with-docker) instead, or add it to
+the Manager's list yourself, if the Manager runs on DietPi, Linux or Docker:
 
-Install **Party Mode** from the **Playback** category of the
-[Extension Manager](https://github.com/TheAppgineer/roon-extension-manager) (its
-[wiki](https://github.com/TheAppgineer/roon-extension-manager/wiki) explains how to set it
-up). The Extension Manager handles updates from then on.
+1. On the computer running the Manager, check that it's there:
+
+   ```bash
+   docker ps
+   ```
+
+   It should list `roon-extension-manager` (if it says "permission denied", see
+   [Troubleshooting](#troubleshooting)).
+
+   Then run these in any folder (the last one deletes the downloaded file):
+
+   ```bash
+   curl -O https://raw.githubusercontent.com/stubaggs/roon-extension-party-mode/main/extension-manager/roon-extension-party-mode.json
+   docker exec roon-extension-manager mkdir -p /home/node/.rem/repos
+   docker cp roon-extension-party-mode.json roon-extension-manager:/home/node/.rem/repos/
+   docker restart roon-extension-manager
+   rm roon-extension-party-mode.json
+   ```
+
+2. In Roon, open **Settings → Extensions**, press the Extension Manager's **Settings**,
+   and choose the **Local** category, then **Party Mode**, the **Install** action and
+   **Save**.
+
+The Extension Manager handles updates from then on. Once Party Mode is listed in the
+Manager itself (under **Playback**), remove the file, or the Manager lists it twice and
+mixes the two up:
+
+```bash
+docker exec roon-extension-manager rm /home/node/.rem/repos/roon-extension-party-mode.json
+docker restart roon-extension-manager
+```
+
+Party Mode keeps running, and updates from the Manager's own list from then on.
 
 Then see [Starting a party](#starting-a-party).
 
@@ -283,6 +315,9 @@ host` in `docker-compose.yml`, `--network host` with `docker run`). If your Dock
 support [host networking](https://docs.docker.com/engine/network/drivers/host/), use a
 Linux computer, a Raspberry Pi or a NAS.
 
+**Docker says "permission denied".** Your user isn't allowed to use Docker. Put `sudo` in
+front of each `docker` command.
+
 **Phones can't open the page after scanning.** Check that the phones are on the same Wi-Fi as
 the computer running Party Mode, and that the computer's firewall allows the port shown in
 Roon's status line (8338 unless it was busy).
@@ -378,8 +413,15 @@ itself.
 <details>
 <summary>Remove Party Mode and its settings.</summary>
 
-**With the Extension Manager:** uninstall it with the
-[Extension Manager](https://github.com/TheAppgineer/roon-extension-manager).
+**With the Extension Manager:** in the Extension Manager's **Settings**, choose **Party
+Mode**, the **Uninstall** action and **Save**. The Manager keeps Party Mode's settings, so
+they come back if you install it again. If you added Party Mode to the Manager yourself,
+also remove its file:
+
+```bash
+docker exec roon-extension-manager rm /home/node/.rem/repos/roon-extension-party-mode.json
+docker restart roon-extension-manager
+```
 
 **On a NAS:** in its Docker app, delete the container, then the image.
 
