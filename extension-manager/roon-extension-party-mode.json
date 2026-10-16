@@ -1,0 +1,23 @@
+[
+    {
+        "display_name": "Local",
+        "extensions": [
+            {
+                "author": "Stubaggs",
+                "display_name": "Party Mode",
+                "description": "Roon Extension for parties: guests request music from their phone, no app needed",
+                "image": {
+                    "repo": "stubaggs/roon-extension-party-mode",
+                    "tags": {
+                        "amd64": "latest",
+                        "arm": "latest",
+                        "arm64": "latest"
+                    },
+                    "binds": [
+                        "/usr/src/app/config.json"
+                    ]
+                }
+            }
+        ]
+    }
+]

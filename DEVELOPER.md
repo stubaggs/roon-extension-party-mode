@@ -861,6 +861,14 @@ with the [Extension Manager](https://github.com/TheAppgineer/roon-extension-mana
 The Manager runs it with host networking, since Roon discovery uses UDP broadcast on
 port 9003. It bind-mounts `config.json`, so settings survive updates.
 
+Until the entry is in the Extension Repository, `extension-manager/roon-extension-party-mode.json`
+is the same entry as a local repository file (the Manager wiki's Development page, "Using
+local repository files"), in a category of its own, **Local**. The README's Extension
+Manager steps copy it into the Manager's `/home/node/.rem/repos/`, which the Manager reads
+when it starts. The Manager names an extension after its image alone, so this file and the
+official entry clash if both are loaded: the README says to remove the file once Party
+Mode is listed. Keep it in step with `repository-entry.json`.
+
 ## Branches
 
 Two branches last; every other branch is short-lived.
