@@ -228,9 +228,9 @@ Once **Party mode** is **Off**, the Party Hub shows the playlist to download (se
 `http://192.0.2.10:8338/Download/playlist.csv`, which you can open in any browser on your
 network.
 
-It's a CSV file of every track queued in the party zone, numbered, with title, artist,
-album, length, who asked for it and when. To leave guests' names out, turn on **Hide
-names in downloadable playlist** under **Advanced**. Roon can't import it directly, but
+It's a CSV file of every track queued in the party zone: title, artist, album, length, who
+asked for it and when. To leave guests' names out, turn on **Hide names in downloadable
+playlist** under **Advanced**. Roon can't import it directly, but
 [Soundiiz](https://soundiiz.com) can: choose **Import playlist**, then the file, and pick
 the streaming service you use with Roon (TIDAL or Qobuz). Roon then shows it with your
 other streaming playlists.
