@@ -11,7 +11,7 @@ library and streaming services, and add tracks to the party's queue. No app to i
 Roon account, and no access to anything else in your Roon setup.
 
 - **Guests add, play next or skip tracks** from their phone.
-- **Fair shares:** limit how many of each a guest gets, with more earned back over time.
+- **Fair shares:** limit how many of each a guest gets, with more added back over time.
 - **Names on tracks:** guests can give a nickname, shown next to the tracks they add (or
   "Anon" if they'd rather not).
 - **The Party Hub** for a TV or tablet: QR code, what's playing and the whole queue.
@@ -20,9 +20,8 @@ Roon account, and no access to anything else in your Roon setup.
 - **Up next and Played** lists, so everyone can see what's coming and what's been on.
 - **Keep the party's playlist:** download everything that was queued as a spreadsheet
   file, ready to import into a music service.
-- **In their language:** the guest pages and the Party Hub follow each phone's or
-  screen's language, or one you choose for the Hub in the settings, in 30 languages
-  (see [Languages](#languages)).
+- **In their language:** 30 languages. Each phone shows its own, and the Party Hub
+  follows its screen or a language you choose (see [Languages](#languages)).
 
 What's changed in each version is in [RELEASES.md](RELEASES.md).
 
@@ -42,7 +41,7 @@ If you use the [Extension Manager](https://github.com/TheAppgineer/roon-extensio
 set it up), you can install Party Mode with it.
 
 Party Mode isn't in the Manager's list yet, but you can add it yourself if the Manager
-runs on DietPi, Linux or Docker:
+runs in Docker (as it does on DietPi and Linux):
 
 1. On the computer running the Manager, check that the Manager is running in Docker:
 
@@ -97,9 +96,9 @@ set up:
    created** if it isn't already, and press **Done**. Container Manager downloads Party
    Mode and starts it.
 
-To update, select the project and choose **Action → Stop**, then **Action → Build**, with
-**Start the project once it is created** ticked. Build downloads the new version and keeps
-your settings. (Don't use **Clean**: it deletes them.)
+To update, select the project and choose **Action → Stop**, then **Action → Build**,
+with **Start the project once it is created** ticked. Build downloads the new version and
+keeps your settings. (Don't use **Clean**: it deletes them.)
 
 On other NAS Docker apps and older DSM, search the app's registry for
 `stubaggs/roon-extension-party-mode`, download the **beta** tag, and create a container
@@ -174,23 +173,24 @@ again.
    [Settings](#settings)).
 3. Click **Party Mode**'s link in the Extensions list to open the **Party Hub**. Put it
    on a TV, a tablet or a laptop where guests can see it (see
-   [Showing the Party Hub on a TV](#showing-the-party-hub-on-a-tv)). Bookmark it, or add it to a
-   tablet's home screen, to find it again: it shows with Party Mode's jukebox icon.
+   [Showing the Party Hub on a TV](#showing-the-party-hub-on-a-tv)). Bookmark it, or add
+   it to a tablet's home screen, to find it again: it shows with Party Mode's jukebox icon.
 4. Guests scan the QR code on the Party Hub with their phone camera. That's it. Once
    they're in, they can show the same code from their phone by tapping the party's name
    at the top of the page (see **Invites** below).
 
 **Party mode**, at the top of the settings, runs the party:
 
-- **On**: guests can make requests. Switching On from **Off** starts a new party, with a
-  new QR code (old links stop working) and a new playlist.
-- **Paused**: for a speech or the cake. Playback pauses and guests' requests wait. Choose
-  **Unpause** to carry on where you left off.
+- **On**: guests can make requests. Switching to On or Paused from **Off** starts a new
+  party, with a new QR code (old links stop working) and a new playlist.
+- **Paused**: for a speech or the cake. Choose **Pause**: playback pauses and guests'
+  requests wait. Choose **Unpause** to carry on where you left off.
 - **Off**: when you're done taking requests. Playback pauses, guests can't make requests,
   and the playlist is ready to download.
 
 Under **Settings → Extensions**, Roon shows Party Mode's status: its Party mode, the
-party's name, the party zone and the Party Hub's address, for example:
+party's name, the zone (if it's named differently) and the Party Hub's address, for
+example:
 
 > Party mode: Paused<br>
 > Party: House Party<br>
@@ -200,7 +200,7 @@ party's name, the party zone and the Party Hub's address, for example:
 ## Showing the Party Hub on a TV
 
 The Party Hub is a web page, so anything that can show a web page can show it. Use the
-address from Roon's status line (above), e.g. `http://192.0.2.10:8338/PartyHub`. The
+address from Roon's status line (above), for example `http://192.0.2.10:8338/PartyHub`. The
 device has to be on the same network as Party Mode.
 
 - **The TV's own browser.** Most smart TVs have one, and a Fire TV or Google TV stick can
@@ -224,22 +224,21 @@ A tablet on a stand, or a laptop where guests can see it, also works without a T
 ## The party's playlist
 
 Once **Party mode** is **Off**, the Party Hub shows the playlist to download (see
-**Playlist** below). It's always at the address in that setting's hint,
-e.g. `http://192.0.2.10:8338/Download/playlist.csv`, which you can open in any browser on
-your network.
+**Playlist** below). It's always at the address in that setting's hint, for example
+`http://192.0.2.10:8338/Download/playlist.csv`, which you can open in any browser on your
+network.
 
-It's a CSV file of every track queued in the party zone: title, artist, album, length, who
-asked for it and when. To leave guests' names out, turn on **Hide names in downloadable
-playlist** under **Advanced**. Roon can't import it directly, but Soundiiz can: choose
-**Import playlist**, then the file, and pick TIDAL, Qobuz or Spotify. Roon then shows it
-with your playlists. Excel on Windows can garble accented names when you double-click the
-file; Google Sheets, Numbers and Excel's **Data → From Text/CSV** read it correctly.
+It's a CSV file of every track queued in the party zone, numbered, with title, artist,
+album, length, who asked for it and when. To leave guests' names out, turn on **Hide
+names in downloadable playlist** under **Advanced**. Roon can't import it directly, but
+[Soundiiz](https://soundiiz.com) can: choose **Import playlist**, then the file, and pick
+the streaming service you use with Roon (TIDAL or Qobuz). Roon then shows it with your
+other streaming playlists.
 
 ## Settings
 
 Only **Party mode** shows when you open the settings; the rest is in groups you open when
-you need them. While the party has no zone, or its zone isn't available, **Party** opens
-by itself, with **Zone** marked in red.
+you need them.
 
 | Setting | What it does |
 | --- | --- |
@@ -292,8 +291,8 @@ straight away to guests already there, counting what they've used.
 
 - **Keep it at home.** Anyone on your network who has scanned the code can add tracks, and
   the Party Hub needs no login at all. Don't open the port to the internet.
-- **For a speech, use Paused.** Set **Party mode** to **Paused** rather than pausing in
-  Roon: a track a guest adds starts playback again if only paused in Roon.
+- **For a speech, use Pause.** Choose **Pause** under **Party mode** rather than pausing
+  in Roon: a track a guest adds starts playback again if only paused in Roon.
 - **Guests can't rearrange the queue.** They can add a track to the end, or play one next
   when they add it, but Roon doesn't yet let anyone move a queued track.
 - **A radio station waits for you.** While a live radio station plays on the party zone,
@@ -306,8 +305,8 @@ straight away to guests already there, counting what they've used.
 - **Guests' names:** guests can't call themselves Host, Roon Radio, Radio or Anon, in any
   language, or your **Host name**.
 - **Download the playlist before** restarting the extension, changing the party zone or
-  turning **Party mode** back on from **Off**: each of those starts a new playlist. It
-  keeps up to 5000 tracks, guests' requests longest.
+  switching **Party mode** to On or Paused from **Off**: each of those starts a new
+  playlist. It keeps up to 5000 tracks, guests' requests longest.
 - **The playlist has guests' names in it.** With **Playlist** set to **QR code**,
   anyone at the party can keep a copy. If that's not what you want, turn on **Hide names
   in downloadable playlist** under **Advanced**, or choose **Link only** or **Off**.
@@ -323,9 +322,9 @@ Linux computer, a Raspberry Pi or a NAS.
 **Docker says "permission denied".** Your user isn't allowed to use Docker. Put `sudo` in
 front of each `docker` command.
 
-**Phones can't open the page after scanning.** Check that the phones are on the same Wi-Fi as
-the computer running Party Mode, and that the computer's firewall allows the port shown in
-Roon's status line (8338 unless it was busy).
+**Phones can't open the page after scanning.** Check that the phones are on the same
+Wi-Fi as the computer running Party Mode, and that the computer's firewall allows the port
+shown in Roon's status line (8338 unless it was busy).
 
 **Roon says settings can't be saved.** The extension has nowhere to keep them. Check that
 `docker-compose.yml` still has its `party-mode-data:/data` volume line, or that your
@@ -396,13 +395,13 @@ docker logs -t roon-extension-party-mode-beta       # docker run
 With the Extension Manager, use its **Collect Logs**. Turn the detailed log off again
 afterwards: it's large and records what guests search for.
 
-**Need some help troubleshooting, or have some suggestions?** Mosey on over to the
+**Need help, or have a suggestion?** Ask on the
 [Roon forum](https://community.roonlabs.com/t/party-mode-extension).
 
 When asking for help:
 
-- **If Party Mode is running,** open **☰ → About Party Mode** at the top left of the Party
-  Hub (or the Party Hub's address with `/About` in place of `/PartyHub`, for example
+- **If Party Mode is running,** open **☰ → About Party Mode** at the top left of the
+  Party Hub (or the Party Hub's address with `/About` in place of `/PartyHub`, for example
   `http://192.0.2.10:8338/About`). Select **Copy details** and paste them into your post.
   They show how Party Mode is installed, its connection to Roon and the state of the
   party, without names, addresses or other personal details.
@@ -428,13 +427,15 @@ of the tag at the end of the image's name: in `docker-compose.yml`'s `image:` li
 last line of the `docker run` command. For example:
 
 ```yaml
-    image: stubaggs/roon-extension-party-mode:1.3.2
+    image: stubaggs/roon-extension-party-mode:1.4.0
 ```
 
 Then update as usual (see [With Docker](#with-docker)). The versions are in
 [RELEASES.md](RELEASES.md) and on
 [Docker Hub](https://hub.docker.com/r/stubaggs/roon-extension-party-mode/tags). To get
-the newest again, put the original tag back and update.
+the newest again, put back the tag you had (`beta` or `latest`) and update. Versions
+before 1.4.0 keep their settings elsewhere, so going back to one means setting Party Mode
+up again.
 
 ## Running more than one party
 
@@ -553,8 +554,8 @@ Chinese (Simplified and Traditional), Czech, Danish, Dutch, Finnish, French, Ger
 Greek, Hebrew, Hungarian, Italian, Japanese, Korean, Norwegian, Polish, Portuguese
 (Portugal and Brazil), Romanian, Russian, Spanish, Swedish, Thai, Turkish, Ukrainian and
 Vietnamese. Guests can pick another with the 🌐 button next to their name at the top of
-the page. The translations were generated by AI, so apologies for any errors; corrections
-from native speakers are welcome: please let us know on the
+the page. The translations were generated by AI, so please excuse any errors. Corrections
+from native speakers are welcome on the
 [Roon forum](https://community.roonlabs.com/t/party-mode-extension).
 
 ## For developers
@@ -564,4 +565,5 @@ How it works, running it from source, tests, translations and publishing:
 
 ## Licence
 
-Copyright © 2026 Stubaggs. Licensed under the Apache License, Version 2.0 (see `LICENSE`).
+Copyright © 2026 Stubaggs. Licensed under the Apache License, Version 2.0; see
+[LICENSE](LICENSE).
