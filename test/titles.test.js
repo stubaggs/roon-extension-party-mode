@@ -1,4 +1,4 @@
-// Copyright 2026 Stubaggs
+// Copyright (c) 2026 Stubaggs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -212,6 +212,110 @@ const artists = [{ title: 'ABBA', item_key: 'x2', hint: 'list' }];
     const fake = fakeSearch({ Tracks: [...tracks, { title: 'More', item_key: 'm1', hint: 'list' }], actions: english });
     const found = await service(fake).search('s1', 'abba');
     assert.deepStrictEqual(found.map((t) => t.title), ['Dancing Queen', 'Waterloo']);
+  });
+
+  /** Roon stops answering browse requests until answer() is called. */
+  const stalling = (roon) => {
+    const real = roon._browse;
+    let stalled = true;
+    roon._browse = (opts) => (stalled ? new Promise(() => {}) : real(opts));
+    roon.requestTimeoutMs = 30;
+    return () => (stalled = false);
+  };
+
+  await check("Roon not answering: a search gives up instead of waiting for good, and the guest's next one runs", async () => {
+    const roon = service(fakeSearch({ Tracks: tracks, actions: english }));
+    const answer = stalling(roon);
+    await assert.rejects(roon.search('s1', 'abba'), /Roon did not answer/);
+    answer();
+    const found = await roon.search('s1', 'abba');
+    assert.deepStrictEqual(found.map((t) => t.title), ['Dancing Queen', 'Waterloo']);
+  });
+
+  await check('Roon not answering: a request gives up, and so does a skip', async () => {
+    const roon = service(fakeSearch({ Tracks: tracks, actions: english }));
+    stalling(roon);
+    await assert.rejects(roon.performAction('s1', 't1', 'add'), /Roon did not answer/);
+    roon.zone = { is_next_allowed: true, now_playing: { length: 200 } };
+    roon.core = { services: { RoonApiTransport: { control: () => {} } } };
+    await assert.rejects(roon.skip(), /Roon did not answer/);
+    assert.strictEqual(roon.timedOut, 2, 'counted for the About page');
+    assert.deepStrictEqual(roon.actionTimes || [], [], 'and not timed');
+  });
+
+  console.log('\nsearches at once');
+
+  // Every search reaching the Core, by guest session and query; the Core
+  // answers only when let go.
+  const gated = (roon) => {
+    const real = roon._browse;
+    const reached = [];
+    let open = false;
+    const waiting = [];
+    roon._browse = (opts) => {
+      if (opts.input) reached.push(`${opts.multi_session_key}:${opts.input}`);
+      if (open) return real(opts);
+      return new Promise((resolve) => waiting.push(() => resolve(real(opts))));
+    };
+    return {
+      reached,
+      letGo: () => {
+        open = true;
+        waiting.splice(0).forEach((go) => go());
+      }
+    };
+  };
+  const settle = () => new Promise((resolve) => setTimeout(resolve, 20));
+
+  await check('no more than the cap reach the Core at once; the rest run in turn', async () => {
+    const roon = service(fakeSearch({ Tracks: tracks, actions: english }));
+    roon.searchSlots = 2;
+    const core = gated(roon);
+    const searches = ['s1', 's2', 's3'].map((s) => roon.search(s, 'abba'));
+    await settle();
+    assert.strictEqual(roon.searchesRunning, 2);
+    assert.ok(!core.reached.some((r) => r.startsWith('s3:')), 'the third waits');
+    core.letGo();
+    for (const found of await Promise.all(searches)) assert.deepStrictEqual(found.map((t) => t.title), ['Dancing Queen', 'Waterloo']);
+    assert.strictEqual(roon.searchesRunning, 0);
+    assert.strictEqual(roon.searchesMost, 2, 'the most at once, for the About page');
+    const { area, busyMs } = roon.searchLoad;
+    assert.ok(busyMs > 0 && area / busyMs >= 1 && area / busyMs <= 2, 'the average while any ran');
+    assert.strictEqual(roon.searchTimes.length, 3, "each search's time at the Core");
+    assert.strictEqual(roon.searchSlowest, Math.max(...roon.searchTimes));
+    assert.strictEqual(roon.actionTimes.length, 3, 'each timed start to finish too');
+    assert.ok(Math.min(...roon.actionTimes) >= Math.min(...roon.searchTimes), 'waiting for a turn included');
+  });
+
+  await check("a waiting search the guest has typed past never reaches the Core", async () => {
+    const roon = service(fakeSearch({ Tracks: tracks, actions: english }));
+    roon.searchSlots = 1;
+    const core = gated(roon);
+    const first = roon.search('s1', 'abba');
+    await settle();
+    const typedPast = roon.search('s2', 'ab');
+    await settle(); // waiting for a turn, behind s1's
+    const latest = roon.search('s2', 'abba');
+    core.letGo();
+    await first;
+    assert.strictEqual(await typedPast, null);
+    assert.ok(await latest);
+    assert.ok(!core.reached.includes('s2:ab'));
+  });
+
+  await check('a search that waits past the time limit gives up, and never reaches the Core', async () => {
+    const roon = service(fakeSearch({ Tracks: tracks, actions: english }));
+    roon.searchSlots = 1;
+    roon.requestTimeoutMs = 30;
+    const core = gated(roon);
+    const first = roon.search('s1', 'abba').catch(() => 'gave up');
+    await assert.rejects(roon.search('s2', 'abba'), /Roon did not answer/);
+    core.letGo();
+    await first;
+    await settle();
+    assert.ok(!core.reached.some((r) => r.startsWith('s2:')));
+    assert.strictEqual(roon.searchesRunning, 0);
+    assert.ok(roon.timedOut >= 1, 'counted, waiting for a turn included');
   });
 
   console.log('\nparty mode');

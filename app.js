@@ -1,4 +1,4 @@
-// Copyright 2026 Stubaggs
+// Copyright (c) 2026 Stubaggs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,6 +14,10 @@
 
 'use strict';
 
+const { countWarnings } = require('./lib/log');
+
+countWarnings();
+
 const { RoonService } = require('./lib/roon-service');
 const { GuestStore } = require('./lib/guests');
 const { createServer } = require('./lib/server');
@@ -23,19 +27,19 @@ const roon = new RoonService();
 const guests = new GuestStore();
 const server = createServer(roon, guests);
 
-// Set when the configured port was busy at startup and a later one is in use.
-let portNote = '';
 // Set when no port could be opened at startup; the host fixes it in Roon.
 let startError = '';
 
 function publishLinks() {
   if (!server.port) {
-    roon.setStatusLine(startError);
+    // No web server, so no playlist address either.
+    roon.setPlaylistUrl(null);
+    roon.setStatusLine(startError, true);
     return;
   }
   roon.setWebsite(server.hubUrl());
-  roon.setPlaylistUrl(server.playlistUrl());
-  roon.setStatusLine(`Party Hub at ${server.hubUrl()}${portNote}`);
+  roon.setPlaylistUrl(() => server.playlistUrl());
+  roon.setStatusLine(`Hub: ${server.hubUrl()}`);
 }
 
 function logLinks() {
@@ -50,16 +54,23 @@ roon.on('core_paired', publishLinks);
 // port in use, so saving other settings while on a fallback port doesn't retry.
 let configuredPort = roon.settings.port;
 
+/** "Port 8340 is in use", or why else it couldn't be opened. */
+function portProblem(port, err) {
+  return err.code === 'EADDRINUSE' ? `Port ${port} is in use` : `Could not open port ${port} (${err.code || err.message})`;
+}
+
 // A new web port in the extension settings moves the web server there, then
 // reconnects to the Core so Roon shows the new link. The host chose this port,
-// so a busy one is refused rather than replaced.
+// so one that can't be opened is refused rather than replaced: the port in use
+// goes back into the settings, so they always say where Party Mode is. With no
+// web server running (the port at startup couldn't be opened), saving the same
+// port again tries it again.
 roon.on('settings_changed', (settings) => {
-  if (settings.port === configuredPort) return;
+  if (settings.port === configuredPort && server.port) return;
   const previous = server.port;
   server.listen(settings.port).then(
     () => {
       configuredPort = settings.port;
-      portNote = '';
       startError = '';
       publishLinks();
       logLinks();
@@ -67,36 +78,44 @@ roon.on('settings_changed', (settings) => {
     },
     (err) => {
       console.error(`Could not move to port ${settings.port}: ${err.message}`);
-      roon.setStatusLine(
-        previous
-          ? `Port ${settings.port} is not available, still on ${previous}`
-          : `Port ${settings.port} is not available either. Pick another web port in the settings.`
-      );
+      if (previous) {
+        const why = err.code === 'EADDRINUSE' ? `${settings.port} is in use` : `could not open ${settings.port} (${err.code || err.message})`;
+        roon.refusePort(previous, `Web port not changed: ${why}, still on ${previous}`);
+        return;
+      }
+      configuredPort = settings.port;
+      startError = `${portProblem(settings.port, err)}. Pick another web port in the settings.`;
+      publishLinks();
     }
   );
 });
 
 // Start Roon discovery once the web server knows its port, so the link Roon
 // shows for the extension points at the Party Hub from the first pairing.
-// If the configured port is taken (another app, or an old copy still running),
-// use the next free one rather than failing, and say so. If none is free, still
-// connect to Roon, so the host can pick another port in the settings.
-listenWithFallback((port) => server.listen(port), configuredPort).then(
+// A port the host chose (saved in the settings, or in the environment) is used
+// or nothing: if it's taken, the status says so. Before one is chosen, a taken
+// 8338 (another app, or another copy of Party Mode) gives way to the next free
+// port, logged rather than a warning, as a second copy relies on it; the port
+// in use goes into the settings, so the first Save keeps it. If none is free,
+// still connect to Roon, so the host can pick another port in the settings.
+const tries = roon.portChosen ? 0 : FALLBACK_PORTS;
+listenWithFallback((port) => server.listen(port), configuredPort, tries).then(
   (port) => {
     if (port !== configuredPort) {
-      portNote = ` (port ${configuredPort} was busy)`;
-      console.warn(`Port ${configuredPort} is in use, using ${port} instead`);
+      console.log(`Port ${configuredPort} is in use, using ${port} instead`);
+      roon.settings.port = port;
+      configuredPort = port;
     }
     publishLinks();
     logLinks();
     roon.start();
   },
   (err) => {
-    const range = `${configuredPort}-${configuredPort + FALLBACK_PORTS}`;
-    startError =
-      err.code === 'EADDRINUSE'
-        ? `Ports ${range} are all in use. Pick another web port in the settings.`
-        : `Could not open port ${configuredPort} (${err.code || err.message}). Pick another web port in the settings.`;
+    const problem =
+      tries && err.code === 'EADDRINUSE'
+        ? `Ports ${configuredPort}-${configuredPort + tries} are all in use`
+        : portProblem(configuredPort, err);
+    startError = `${problem}. Pick another web port in the settings.`;
     console.error(startError);
     publishLinks();
     roon.start();

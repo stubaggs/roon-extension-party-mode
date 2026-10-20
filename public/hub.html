@@ -1,4 +1,19 @@
 <!doctype html>
+<!--
+  Copyright (c) 2026 Stubaggs
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -32,19 +47,19 @@
           <img id="qr" class="qr" src="/api/qr.svg" alt="QR code for the guest page" data-i18n-alt="screen.qr_alt" />
           <p class="join-copy"><a class="join-link" id="join-link" target="_blank" rel="noopener" data-i18n="screen.scan">Scan to add a track</a></p>
         </div>
-        <!-- With party mode off: the playlist in place of the guest code, as a QR
+        <!-- With Party off: the playlist in place of the guest code, as a QR
              code or a link as the Party playlist setting says. -->
         <div id="join-closed" class="join-closed" hidden>
           <div id="playlist-qr-offer" hidden>
             <img id="playlist-qr" class="qr" alt="QR code for the playlist" data-i18n-alt="screen.playlist_qr_alt" />
-            <p class="join-copy"><a class="join-link" href="/Download/playlist.csv" download data-i18n="screen.scan_playlist">Scan to download the playlist</a></p>
+            <p class="join-copy"><a id="playlist-qr-link" class="join-link" download data-i18n="screen.scan_playlist">Scan to download the playlist</a></p>
           </div>
-          <a id="playlist-link-offer" class="pill pill-primary download" href="/Download/playlist.csv" download hidden data-i18n="screen.download_playlist">Download the playlist</a>
+          <a id="playlist-link-offer" class="pill pill-primary download" download hidden data-i18n="screen.download_playlist">Download the playlist</a>
         </div>
       </section>
 
       <section class="stack">
-        <!-- With party mode off, in place of what's playing. -->
+        <!-- With Party off, in place of what's playing. -->
         <div id="closed" class="closed-message" hidden>
           <h2 class="closed-title" data-i18n="screen.closed_title">Requests are closed</h2>
           <p class="closed-text muted" data-i18n="screen.closed_text">Thanks for all the tracks.</p>

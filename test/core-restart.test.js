@@ -1,4 +1,4 @@
-// Copyright 2026 Stubaggs
+// Copyright (c) 2026 Stubaggs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -36,13 +36,19 @@ function check(name, fn) {
 const entry = (id, title) => ({ queue_item_id: id, length: 200, two_line: { line1: title, line2: 'Artist' } });
 const zone = { zone_id: 'z1', display_name: 'Lounge', state: 'playing', outputs: [{ output_id: 'o1' }], settings: {} };
 
-/** A fake Core: the zones it knows, and every queue subscription made to it. */
+/**
+ * A fake Core: the zones it knows, every queue subscription made to it, and
+ * which of those were ended (by index).
+ */
 function fakeCore(zones) {
-  const core = { zones, queueSubs: [], zonesCb: null };
+  const core = { zones, queueSubs: [], unsubscribed: [], zonesCb: null };
   core.services = {
     RoonApiTransport: {
       subscribe_zones: (cb) => (core.zonesCb = cb),
-      subscribe_queue: (output, count, cb) => core.queueSubs.push(cb),
+      subscribe_queue: (output, count, cb) => {
+        const index = core.queueSubs.push(cb) - 1;
+        return { unsubscribe: () => core.unsubscribed.push(index) };
+      },
       zone_by_output_id: (id) => core.zones.find((z) => z.outputs.some((o) => o.output_id === id)) || null
     }
   };
@@ -229,7 +235,7 @@ check('losing the Core is logged as that, not as the zone, and so is getting it 
 
 console.log('the party pauses itself while its zone is gone');
 
-/** A paired service with the zone there, and the party mode changes it announces. */
+/** A paired service with the zone there, and the Party changes it announces. */
 function partyWithZone(enabled = true) {
   const roon = service();
   roon.settings = { zone: { output_id: 'o1', name: 'Lounge' }, enabled };
@@ -468,6 +474,39 @@ check('Roon starting or stopping to allow a skip tells the pages, so Skip shows 
   assert.strictEqual(told, 1);
   roon._refreshZone();
   assert.strictEqual(told, 1, 'no change, nothing said');
+});
+
+check("asking for the queue again ends the old subscription; a refused one or a lost connection's is left", () => {
+  withTimers(() => {
+    const roon = service();
+    const first = fakeCore([zone]);
+    roon._onCorePaired(first);
+    first.zonesCb('Subscribed', {});
+    first.queueSubs[0]('Subscribed', { items: [entry(1, 'Waterloo')] });
+
+    // The host picks the zone again (or another): the old subscription ends,
+    // and anything still on its way from it is ignored.
+    roon._subscribeQueue();
+    assert.deepStrictEqual(first.unsubscribed, [0]);
+    first.queueSubs[0]('Changed', { changes: [{ operation: 'insert', index: 1, items: [entry(9, 'Late')] }] });
+    assert.strictEqual(roon.queue.length, 0, 'the old one is ignored');
+    first.queueSubs[1]('Subscribed', { items: [entry(1, 'Waterloo')] });
+
+    // A refused subscription has nothing to end.
+    roon._subscribeQueue();
+    first.queueSubs[2]('InvalidRequest', { error: 'zone not found' });
+    roon._subscribeQueue();
+    assert.deepStrictEqual(first.unsubscribed, [0, 1], 'only the working one');
+
+    // The connection drops: its subscriptions ended with it, so nothing is
+    // sent on it, and the new connection starts clean.
+    roon._onCoreUnpaired();
+    const second = fakeCore([zone]);
+    roon._onCorePaired(second);
+    assert.deepStrictEqual(first.unsubscribed, [0, 1], 'nothing sent to the old connection');
+    assert.deepStrictEqual(second.unsubscribed, []);
+    assert.strictEqual(second.queueSubs.length, 1);
+  });
 });
 
 console.log(failures ? `\n${failures} failing` : '\nall passing');

@@ -1,4 +1,4 @@
-// Copyright 2026 Stubaggs
+// Copyright (c) 2026 Stubaggs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 'use strict';
 
 // The web server's own answers, against a stand-in for Roon: the playlist and
-// its QR code, Party mode Off, and the pages a join link gets.
+// its QR code, Party Off, and the pages a join link gets.
 
 const assert = require('assert');
 const EventEmitter = require('events');
@@ -118,35 +118,84 @@ const set = (values) => Object.assign(roon.settings, values);
     assert.strictEqual((await (await get('/api/hub')).json()).playlist, 'off');
   });
 
-  await check('the download works whatever the setting, as a named CSV file', async () => {
-    for (const choice of ['qr', 'link', 'off']) {
-      set({ playlist_download: choice });
-      const res = await get('/Download/playlist.csv');
+  const playlistPath = () => new URL(server.playlistUrl()).pathname;
+
+  await check('the playlist is at a secret address, offered to the Hub only once requests close', async () => {
+    assert.match(playlistPath(), /^\/p\/[0-9A-Z]{4}-[0-9A-Z]{4}$/);
+    for (const enabled of [true, 'paused']) {
+      set({ enabled, playlist_download: 'qr' });
+      assert.strictEqual((await (await get('/api/hub')).json()).playlist_url, null, String(enabled));
+    }
+    for (const choice of ['qr', 'link']) {
+      set({ enabled: false, playlist_download: choice });
+      assert.strictEqual((await (await get('/api/hub')).json()).playlist_url, playlistPath(), choice);
+    }
+    set({ playlist_download: 'off' });
+    assert.strictEqual((await (await get('/api/hub')).json()).playlist_url, null, 'off');
+  });
+
+  await check('the download works at its address whatever the setting, as a named CSV file', async () => {
+    for (const [enabled, choice] of [[false, 'qr'], [false, 'link'], [false, 'off'], [true, 'qr']]) {
+      set({ enabled, playlist_download: choice });
+      const res = await get(playlistPath());
       assert.strictEqual(res.status, 200, choice);
       assert.match(res.headers.get('content-type'), /^text\/csv/);
       assert.match(res.headers.get('content-disposition'), /attachment; filename="Test Party \d{4}-\d{2}-\d{2}\.csv"/);
-      assert.match(await res.text(), /^title,artist,album,/);
+      const bytes = Buffer.from(await res.arrayBuffer());
+      assert.ok(bytes.subarray(0, 3).equals(Buffer.from([0xef, 0xbb, 0xbf])), 'byte order mark');
+      assert.match(bytes.toString('utf8', 3), /^index,title,artist,album,/);
     }
   });
 
-  await check('the playlist\'s old /api addresses still work', async () => {
-    const res = await get('/api/playlist.csv');
-    assert.strictEqual(res.status, 200);
-    assert.match(await res.text(), /^title,artist,album,/);
-    assert.match(await (await get('/api/playlist-qr.svg')).text(), /^<svg/);
+  await check('not at any other address: the fixed ones before 1.4.0, or a guessed code', async () => {
+    set({ enabled: false, playlist_download: 'qr' });
+    for (const path of ['/Download/playlist.csv', '/api/playlist.csv', `/Download${playlistPath().slice(2)}`, '/p/0000-0000', `${playlistPath()}x`]) {
+      assert.strictEqual((await get(path)).status, 404, path);
+    }
   });
 
-  await check('the playlist QR code is an SVG, and not the join code', async () => {
+  await check('the address works as it may be typed: lower case, no hyphen', async () => {
+    set({ enabled: false });
+    const code = playlistPath().slice(3);
+    for (const path of [`/P/${code.toLowerCase()}`, `/p/${code.replace('-', '')}`]) {
+      assert.strictEqual((await get(path)).status, 200, path);
+    }
+  });
+
+  await check('a new party has a new playlist at a new address; the old one stops working', async () => {
+    set({ enabled: false });
+    const old = playlistPath();
+    let refreshed = 0;
+    roon.refreshStatus = () => (refreshed += 1);
+    set({ enabled: true });
+    roon.emit('party_mode_changed', 'on', 'off');
+    delete roon.refreshStatus;
+    assert.notStrictEqual(playlistPath(), old);
+    assert.strictEqual(refreshed, 1, "Roon's status sent again, with the new address");
+    assert.strictEqual((await get(old)).status, 404);
+    assert.strictEqual((await get(playlistPath())).status, 200);
+  });
+
+  await check('the playlist QR code: only once requests close, with QR code chosen; not the join code', async () => {
+    set({ enabled: true, playlist_download: 'qr' });
+    assert.strictEqual((await get('/Download/playlist-qr.svg')).status, 404, 'during the party');
+    set({ enabled: false, playlist_download: 'link' });
+    assert.strictEqual((await get('/Download/playlist-qr.svg')).status, 404, 'link only');
+    set({ playlist_download: 'off' });
+    assert.strictEqual((await get('/Download/playlist-qr.svg')).status, 404, 'off');
+    set({ playlist_download: 'qr' });
     const playlist = await (await get('/Download/playlist-qr.svg')).text();
     const join = await (await get('/api/qr.svg')).text();
     assert.match(playlist, /^<svg/);
     assert.notStrictEqual(playlist, join);
-    assert.ok(server.playlistUrl().endsWith('/Download/playlist.csv'));
+    // Its address before 1.2.0, for a Hub left open across an update.
+    assert.match(await (await get('/api/playlist-qr.svg')).text(), /^<svg/);
+    set({ enabled: true });
   });
 
   console.log('\njoining');
 
-  await check('Party mode Off: the join link says requests are closed, in the guest\'s language', async () => {
+  await check('Party Off: the join link says requests are closed, in the guest\'s language', async () => {
     set({ enabled: false });
     const res = await get(`/j/${guests.joinCode}`, { 'Accept-Language': 'fr-FR,fr;q=0.9' });
     assert.strictEqual(res.status, 403);
@@ -233,7 +282,7 @@ const set = (values) => Object.assign(roon.settings, values);
     assert.match(page, /id="invite-qr"/);
   });
 
-  await check('Party mode Off: the guest API says closed, for "Requests are closed"', async () => {
+  await check('Party Off: the guest API says closed, for "Requests are closed"', async () => {
     const cookie = (await get(`/j/${guests.joinCode}`)).headers.get('set-cookie').split(';')[0];
     set({ enabled: false });
     const res = await get('/api/party', { Cookie: cookie });
@@ -256,7 +305,7 @@ const set = (values) => Object.assign(roon.settings, values);
     }
   });
 
-  await check('a change of party mode sends the pages the queue too, so a gone track goes', async () => {
+  await check('a change of Party sends the pages the queue too, so a gone track goes', async () => {
     const controller = new AbortController();
     const res = await fetch(`${base}/api/events`, { signal: controller.signal });
     const reader = res.body.getReader();
@@ -271,6 +320,19 @@ const set = (values) => Object.assign(roon.settings, values);
       await until(/event: party[\s\S]*event: queue/);
       assert.match(text, /"party_mode":"paused"/);
       assert.match(text, /"now_playing":null/);
+    } finally {
+      controller.abort();
+    }
+  });
+
+  await check("the first update carries an id, so a browser's own reconnect says so", async () => {
+    const controller = new AbortController();
+    const res = await fetch(`${base}/api/events`, { signal: controller.signal });
+    const reader = res.body.getReader();
+    let text = '';
+    try {
+      while (!/event: queue/.test(text)) text += new TextDecoder().decode((await reader.read()).value);
+      assert.match(text, /^id: 1\nevent: queue\n/);
     } finally {
       controller.abort();
     }
@@ -332,6 +394,28 @@ const set = (values) => Object.assign(roon.settings, values);
       assert.strictEqual((await res.json()).error, 'unknown_track');
     }
     assert.deepStrictEqual(roon.actions, []);
+  });
+
+  await check("Roon not answering a request: no second try (it may still add it), and the guest's allowance is given back", async () => {
+    const cookie = await newGuest();
+    const before = (await (await get('/api/party', { Cookie: cookie })).json()).allowances;
+    const searches = roon.searches.length;
+    const real = roon.performAction;
+    let asked = 0;
+    roon.performAction = async () => {
+      asked += 1;
+      throw new Error('Roon did not answer');
+    };
+    try {
+      const res = await post('/api/request', cookie, { key: '10:0', mode: 'add' });
+      assert.strictEqual(res.status, 502);
+      assert.strictEqual((await res.json()).error, 'Roon did not answer');
+      assert.strictEqual(asked, 1, 'asked once');
+      assert.strictEqual(roon.searches.length, searches, 'the search was not replayed');
+    } finally {
+      roon.performAction = real;
+    }
+    assert.deepStrictEqual((await (await get('/api/party', { Cookie: cookie })).json()).allowances, before);
   });
 
   await check('the results of the last two searches are remembered: on screen, and on their way', () => {
@@ -512,7 +596,7 @@ const set = (values) => Object.assign(roon.settings, values);
     const cookie = await newGuest();
     roon.zone = {
       zone_id: 'z1',
-      display_name: 'D90',
+      display_name: 'Lounge',
       state: 'playing',
       is_seek_allowed: false,
       is_next_allowed: false,
@@ -538,10 +622,10 @@ const set = (values) => Object.assign(roon.settings, values);
 
   await check('while the party zone is gone, its last track stays, paused, until another zone is chosen', async () => {
     const before = roon.settings.zone;
-    roon.settings.zone = { output_id: 'o1', name: 'D90' };
+    roon.settings.zone = { output_id: 'o1', name: 'Lounge' };
     roon.zone = {
       zone_id: 'z1',
-      display_name: 'D90',
+      display_name: 'Lounge',
       state: 'playing',
       settings: { auto_radio: false },
       now_playing: { length: 200, two_line: { line1: 'Seasons', line2: 'Bebe Rexha' }, image_key: 'seasons' }
@@ -564,8 +648,8 @@ const set = (values) => Object.assign(roon.settings, values);
   await check('while the Core is gone, Up next stays too; with only the zone away, it is as Roon has it', async () => {
     const before = roon.settings.zone;
     const entry = (id, title) => ({ queue_item_id: id, length: 200, two_line: { line1: title, line2: 'ABBA' } });
-    roon.settings.zone = { output_id: 'o1', name: 'D90' };
-    roon.zone = { zone_id: 'z1', display_name: 'D90', state: 'playing', settings: {}, now_playing: entry(1, 'Waterloo') };
+    roon.settings.zone = { output_id: 'o1', name: 'Lounge' };
+    roon.zone = { zone_id: 'z1', display_name: 'Lounge', state: 'playing', settings: {}, now_playing: entry(1, 'Waterloo') };
     roon.queue = [entry(1, 'Waterloo'), entry(2, 'SOS'), entry(3, 'Fernando')];
     roon.core = {};
     try {
@@ -639,7 +723,7 @@ const set = (values) => Object.assign(roon.settings, values);
   });
 
   await check('other sites cannot embed the files, and the pages load only their own', async () => {
-    for (const path of ['/', '/PartyHub', '/api/hub', '/api/qr.svg', '/Download/playlist.csv']) {
+    for (const path of ['/', '/PartyHub', '/api/hub', '/api/qr.svg', playlistPath()]) {
       const res = await get(path);
       assert.strictEqual(res.headers.get('cross-origin-resource-policy'), 'same-origin', path);
       // Ignored over plain HTTP, with an error in the console, so not sent.
@@ -1011,17 +1095,17 @@ const set = (values) => Object.assign(roon.settings, values);
   });
 
   await check("the About page says the Core is connected, never its name", async () => {
-    roon.core = { display_name: 'Okiba' };
+    roon.core = { display_name: 'Home Core' };
     try {
       const html = await (await get('/About')).text();
       assert.ok(html.includes('<td>Connected for '));
-      assert.ok(!html.includes('Okiba'));
+      assert.ok(!html.includes('Home Core'));
     } finally {
       delete roon.core;
     }
   });
 
-  await check('About: the base image, and how locked down the container is', async () => {
+  await check('About: the base image, and how the container is hardened', async () => {
     const fs = require('fs');
     const os = require('os');
     const { baseImage, lockdown, memoryLimit } = require('../lib/about');
@@ -1039,11 +1123,20 @@ const set = (values) => Object.assign(roon.settings, values);
       const root = (opts) => file('mountinfo', `20 1 0:30 / / ${opts} - overlay overlay rw\n21 20 0:31 / /data rw - ext4 /dev/sda1 rw\n`);
       const status = (cap, nnp) => file('status', `Name:\tnode\nNoNewPrivs:\t${nnp}\nCapEff:\t0000000000000000\nCapBnd:\t${cap}\n`);
       assert.strictEqual(lockdown(root('ro,relatime'), status('0000000000000000', 1), true), 'read-only, no capabilities, no new privileges');
-      assert.strictEqual(lockdown(root('rw,relatime'), status('00000000a80425fb', 0), true), "Docker's defaults");
+      assert.strictEqual(lockdown(root('rw,relatime'), status('00000000a80425fb', 0), true), "None (the container's defaults)");
       assert.strictEqual(lockdown(root('ro'), status('0', 1), false), '');
 
       assert.strictEqual(memoryLimit(file('max', 'max\n')), 'None');
       assert.strictEqual(memoryLimit(file('limit', '268435456\n')), '256 MB');
+      // cgroup v1 (older kernels), inside a container only.
+      const none = require('path').join(dir, 'missing');
+      const gb2 = 2 * 1024 ** 3;
+      assert.strictEqual(memoryLimit(none, file('v1', '536870912\n'), true, gb2), '512 MB');
+      assert.strictEqual(memoryLimit(none, file('v1max', '9223372036854771712\n'), true, gb2), 'None');
+      assert.strictEqual(memoryLimit(none, file('v1max64k', '9223372036854710272\n'), true, gb2), 'None');
+      assert.strictEqual(memoryLimit(none, file('v1', '536870912\n'), false, gb2), '');
+      assert.strictEqual(memoryLimit(none, none, true, gb2), '');
+      assert.strictEqual(memoryLimit(file('limit', '268435456\n'), file('v1', '536870912\n'), true, gb2), '256 MB');
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
     }
@@ -1052,7 +1145,11 @@ const set = (values) => Object.assign(roon.settings, values);
   await check("licence texts: Party Mode's and each library's, nothing else", async () => {
     const own = await get('/About/license/party-mode');
     assert.strictEqual(own.status, 200);
-    assert.match(await own.text(), /Apache License\s+Version 2\.0/);
+    const ownText = await own.text();
+    assert.match(ownText, /Apache License\s+Version 2\.0/);
+    // The NOTICE, the copyright notice, comes above the licence.
+    const notice = ownText.indexOf('Copyright (c) 2026 Stubaggs');
+    assert.ok(notice !== -1 && notice < ownText.indexOf('Apache License'));
     const express = require('express/package.json');
     const lib = await get(`/About/license/${encodeURIComponent(`express@${express.version}`)}`);
     assert.strictEqual(lib.status, 200);
@@ -1081,11 +1178,27 @@ const set = (values) => Object.assign(roon.settings, values);
     }
   });
 
+  await check("the Party Hub's and guest page's data never name the party zone", async () => {
+    set({ enabled: true });
+    roon.zone = { zone_id: 'z1', display_name: 'Kitchen AirPlay', state: 'stopped', settings: {} };
+    try {
+      const cookie = (await get(`/j/${guests.joinCode}`)).headers.get('set-cookie').split(';')[0];
+      for (const [path, headers] of [['/api/hub', {}], ['/api/party', { Cookie: cookie }]]) {
+        const text = await (await get(path, headers)).text();
+        assert.ok(text.includes('Test Party'), path);
+        assert.ok(!text.includes('Kitchen AirPlay'), path);
+        assert.ok(!('zone' in JSON.parse(text)), path);
+      }
+    } finally {
+      roon.zone = null;
+    }
+  });
+
   await check('About: the party zone, by its state and never its name; failures counted', async () => {
-    const { runtime } = require('../lib/about');
+    const { runtime, loopTime, cpuUse } = require('../lib/about');
     const rows = (ctx) => Object.fromEntries(runtime(ctx).flatMap(([, r]) => r));
     const fake = {
-      core: { display_name: 'Okiba', display_version: '2.0 (build 1500) production' },
+      core: { display_name: 'Home Core', display_version: '2.0 (build 1500) production' },
       settings: { zone: { output_id: 'o1' } },
       queue: [{}, {}, {}],
       queueState: 'subscribed',
@@ -1100,7 +1213,7 @@ const set = (values) => Object.assign(roon.settings, values);
     };
     const shown = rows({ roon: fake, stats: { searches: 9, searchesFailed: 2, requestsFailed: 1, skips: 0, skipsFailed: 0 } });
     assert.ok(!JSON.stringify(shown).includes('Kitchen'));
-    assert.ok(!JSON.stringify(shown).includes('Okiba'));
+    assert.ok(!JSON.stringify(shown).includes('Home Core'));
     assert.strictEqual(shown['Roon Core version'], '2.0 (build 1500) production');
     assert.strictEqual(shown['Party zone'], 'Available, 2 grouped outputs');
     assert.strictEqual(shown.Playback, 'Playing');
@@ -1115,6 +1228,7 @@ const set = (values) => Object.assign(roon.settings, values);
     // The zone with Roon's side, the guests and their settings with the party's.
     const sections = Object.fromEntries(runtime({ roon: fake }).map(([title, r]) => [title, r.map(([label]) => label)]));
     assert.deepStrictEqual(Object.keys(sections), ['Installation', 'Roon', 'Party', 'Health']);
+    assert.strictEqual(rows({ roon: fake })['Code version'], require('../package.json').version, 'in what Copy details copies');
     assert.ok(sections.Roon.includes('Queue'));
     assert.ok(sections.Party.includes('Play it next'));
 
@@ -1126,14 +1240,39 @@ const set = (values) => Object.assign(roon.settings, values);
       rate_limit: 123, search_limit: 45
     } }) });
     assert.strictEqual(requests['Block duplicates'], 'Yes');
-    assert.strictEqual(requests['Add to queue'], 'On, 5 per guest, one back every 10 minutes');
-    assert.strictEqual(requests['Play it next'], 'On, 1 per guest, none back');
+    assert.strictEqual(requests['Add to queue'], 'On, 5 per guest, 10 minutes refresh');
+    assert.strictEqual(requests['Play it next'], 'On, 1 per guest, no refresh');
     assert.strictEqual(requests['Skip tracks'], 'Off');
     const requestLines = ['Block duplicates', 'Add to queue', 'Play it next', 'Skip tracks'].map((label) => requests[label]);
     assert.ok(!requestLines.some((value) => /123|45/.test(value)), 'never the Flood protection numbers');
     assert.strictEqual(rows({ roon: Object.assign({}, fake, { settings: { allow_add: true, add_limit: 0 } }) })['Add to queue'], 'On, no limit');
     assert.strictEqual(rows({ roon: Object.assign({}, fake, { settings: { allow_add: true, add_limit: 2, add_refill: 1 } }) })['Add to queue'],
-      'On, 2 per guest, one back every minute');
+      'On, 2 per guest, 1 minute refresh');
+    const artCache = { images: new Map([['a', {}], ['b', {}]]), bytes: 2048, maxBytes: 8 << 20, hits: 3, misses: 1, failed: 1 };
+    assert.strictEqual(rows({ roon: Object.assign({}, fake, { artCache }) })['Album art cache'], '2 covers, 75% hit rate, 1 failed');
+
+    const health = rows({ roon: Object.assign({}, fake, { searchTimes: [400, 300, 3200], searchSlowest: 3200, searchesMost: 9, searchLoad: { area: 14000, busyMs: 10000 }, actionTimes: [700, 500, 900], actionSlowest: 3100, timedOut: 2 }) });
+    assert.strictEqual(health['Search time'], '0.4 s typical, 3.2 s slowest');
+    assert.strictEqual(health['Concurrent searches'], '1 typical, 9 at most');
+    assert.strictEqual(rows({ roon: fake })['Concurrent searches'], 'No searches yet');
+    assert.strictEqual(health['Guest actions'], '0.7 s typical, 3.1 s slowest, 2 timed out');
+    assert.strictEqual(rows({ roon: fake })['Guest actions'], 'None yet');
+    assert.strictEqual(rows({ roon: Object.assign({}, fake, { timedOut: 1 }) })['Guest actions'], '1 timed out');
+    assert.match(health['Memory in use'], /^\d+ MB now, \d+ MB at most$/);
+    assert.strictEqual(rows({ roon: fake })['Search time'], 'No searches yet');
+    assert.strictEqual(loopTime({ count: 3, percentile: () => 21e6, max: 60e6 }), '1 ms typical, 40 ms slowest');
+    assert.strictEqual(loopTime({ count: 0 }), '');
+    assert.strictEqual(cpuUse({ now: 3, most: 40 }), '3% now, 40% at most');
+    assert.strictEqual(cpuUse({ now: null, most: 0 }), '', 'nothing until the first sample');
+
+    const counted = rows({
+      roon: Object.assign({}, fake, { settings: { prevent_duplicates: true } }),
+      stats: { tooMany: 0, usedUp: { add: 3, next: 0, skip: 1 }, duplicates: 4, reconnects: 2 }
+    });
+    assert.strictEqual(counted['Block duplicates'], 'Yes, 4 blocked');
+    assert.strictEqual(counted['Allowances used up'], 'Add to queue 3, play next 0, skip 1');
+    assert.strictEqual(counted['Live update reconnects'], '2 since Party Mode started');
+    assert.match(counted['Warnings logged'], /^\d+ since Party Mode started$/);
 
     const hour = 3600 * 1000;
     const lost = (lastOutage) => rows({ roon: Object.assign({}, fake, { lastOutage }) })['Last lost'];
@@ -1203,7 +1342,7 @@ const set = (values) => Object.assign(roon.settings, values);
       }
       return dir;
     };
-    const code = { 'app.js': 'a', 'lib/server.js': 'b', 'public/hub.js': 'c', 'test/x.js': 'not counted' };
+    const code = { 'app.js': 'a', NOTICE: 'n', 'lib/server.js': 'b', 'public/hub.js': 'c', 'test/x.js': 'not counted' };
     code['lib/server.js'] = 'b\nc\n';
     code['public/icon.png'] = Buffer.from([1, 13, 10, 2]);
     const dirs = [copy(code), copy(Object.assign({}, code, { 'test/x.js': 'changed', 'base-image': 'node' })),
@@ -1211,15 +1350,17 @@ const set = (values) => Object.assign(roon.settings, values);
       // Checked out by Git on Windows: CRLF in text files, images untouched.
       copy(Object.assign({}, code, { 'lib/server.js': 'b\r\nc\r\n' })),
       copy(Object.assign({}, code, { 'lib/server.js': 'b \nc\n' })),
-      copy(Object.assign({}, code, { 'public/icon.png': Buffer.from([1, 10, 2]) }))];
+      copy(Object.assign({}, code, { 'public/icon.png': Buffer.from([1, 10, 2]) })),
+      copy(Object.assign({}, code, { NOTICE: 'n!' }))];
     try {
-      const [one, same, changed, windows, space, image] = dirs.map((dir) => fingerprint(dir));
+      const [one, same, changed, windows, space, image, notice] = dirs.map((dir) => fingerprint(dir));
       assert.match(one, /^[0-9a-f]{12}$/);
       assert.strictEqual(same, one);
       assert.notStrictEqual(changed, one);
       assert.strictEqual(windows, one);
       assert.notStrictEqual(space, one);
       assert.notStrictEqual(image, one);
+      assert.notStrictEqual(notice, one);
     } finally {
       for (const dir of dirs) fs.rmSync(dir, { recursive: true, force: true });
     }
@@ -1229,19 +1370,11 @@ const set = (values) => Object.assign(roon.settings, values);
     const fs = require('fs');
     const os = require('os');
     const { installKind, imageBuilt } = require('../lib/about');
-    // Published: the workflow's stamp. A custom build: the day, from
-    // the file the build wrote. Not in a container: no line at all.
-    const written = require('path').join(os.tmpdir(), `base-image-${process.pid}`);
-    fs.writeFileSync(written, 'node:22-alpine\n');
-    fs.utimesSync(written, new Date('2026-10-12T12:00:00Z'), new Date('2026-10-12T12:00:00Z'));
-    try {
-      assert.strictEqual(imageBuilt('2026-10-16 abc1234', written, true), '2026-10-16 abc1234');
-      assert.strictEqual(imageBuilt('', written, true), 'Custom build, 2026-10-12');
-      assert.strictEqual(imageBuilt('', `${written}-missing`, true), 'Custom build');
-      assert.strictEqual(imageBuilt('2026-10-16 abc1234', written, false), '');
-    } finally {
-      fs.unlinkSync(written);
-    }
+    // Published: the workflow's stamp. A custom build: just that, no date.
+    // Not in a container: no line at all.
+    assert.strictEqual(imageBuilt('2026-10-16 abc1234', true), '2026-10-16 abc1234');
+    assert.strictEqual(imageBuilt('', true), 'Custom build');
+    assert.strictEqual(imageBuilt('2026-10-16 abc1234', false), '');
     const mounts = (points) => {
       const file = require('path').join(os.tmpdir(), `mountinfo-${process.pid}`);
       fs.writeFileSync(file, points.map((p, i) => `${i} 1 0:1 / ${p} rw - ext4 x rw`).join('\n'));
@@ -1257,8 +1390,71 @@ const set = (values) => Object.assign(roon.settings, values);
     const { copyrightOf, duration } = require('../lib/about');
     assert.strictEqual(copyrightOf('MIT\n\nCopyright (c) 2020 A Person\n\nThe above copyright notice', {}), 'Copyright (c) 2020 A Person');
     assert.strictEqual(copyrightOf('(c) You must retain\nCopyright [yyyy] [name of copyright owner]', { author: 'Roon Labs, LLC' }), 'Copyright Roon Labs, LLC');
+    // A year alone: the holder is on the next line (dijkstrajs).
+    assert.strictEqual(copyrightOf('```\nCopyright (C) 2008\n  A Person <a@example.org>\n```', {}), 'Copyright (C) 2008 A Person <a@example.org>');
     assert.strictEqual(duration(59), 'less than a minute');
     assert.strictEqual(duration(3 * 86400 + 4 * 3600 + 5 * 60), '3 days, 4 hours');
+  });
+
+  await check("libraries: a Readme's licence when there's no file; notes on those only a tool installs", async () => {
+    const { readPackages, readmeLicense } = require('../lib/about');
+    const fs = require('fs');
+    const os = require('os');
+    const path = require('path');
+    assert.strictEqual(readmeLicense('# lib\n\nUse it.\n\n## License \n\n(The MIT License)\n\nCopyright (c) 2012 A &lt;a@example.org&gt;\n\n### Terms\n\nFree.\n\n## Thanks\n\nYou.'),
+      '(The MIT License)\n\nCopyright (c) 2012 A <a@example.org>\n\n### Terms\n\nFree.');
+    assert.strictEqual(readmeLicense('# lib\n\nNo licence here.'), '');
+
+    // app needs lib, a package with a command-line tool needing cli-lib,
+    // which needs cli-dep; lib's licence is in its Readme.
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), 'libs-'));
+    const pkg = (dir, json, files = {}) => {
+      const full = path.join(root, dir);
+      fs.mkdirSync(full, { recursive: true });
+      fs.writeFileSync(path.join(full, 'package.json'), JSON.stringify(json));
+      for (const [name, text] of Object.entries(files)) {
+        fs.mkdirSync(path.dirname(path.join(full, name)), { recursive: true });
+        fs.writeFileSync(path.join(full, name), text);
+      }
+    };
+    try {
+      pkg('.', { name: 'app', dependencies: { tool: '1' } });
+      pkg('node_modules/tool', { name: 'tool', version: '1.0.0', bin: { tool: './bin/tool' }, dependencies: { lib: '1', 'cli-lib': '1' } },
+        { 'index.js': "require('lib/x')", 'bin/tool': "require('cli-lib')", LICENSE: 'MIT\nCopyright (c) 2020 Tool' });
+      pkg('node_modules/lib', { name: 'lib', version: '1.0.0', license: 'MIT' }, { 'README.md': '# lib\n\n## License\n\nCopyright (c) 2021 Lib\n' });
+      pkg('node_modules/cli-lib', { name: 'cli-lib', version: '1.0.0', dependencies: { 'cli-dep': '1' } }, { LICENSE: 'Copyright (c) 2022 Cli' });
+      pkg('node_modules/cli-lib/node_modules/cli-dep', { name: 'cli-dep', version: '1.0.0' }, { LICENSE: 'Copyright (c) 2023 Dep' });
+      const found = Object.fromEntries(readPackages(path.join(root, 'node_modules')).map((p) => [p.name, p]));
+      assert.deepStrictEqual(Object.keys(found).sort(), ['cli-dep', 'cli-lib', 'lib', 'tool']);
+      assert.strictEqual(found.tool.note, undefined);
+      assert.strictEqual(found.lib.note, undefined);
+      assert.strictEqual(found['cli-lib'].note, 'Installed with tool package');
+      assert.strictEqual(found['cli-dep'].note, found['cli-lib'].note);
+      assert.ok(found.lib.fromReadme && found.lib.file.endsWith('README.md'));
+      assert.strictEqual(found.lib.copyright, 'Copyright (c) 2021 Lib');
+    } finally {
+      fs.rmSync(root, { recursive: true, force: true });
+    }
+
+    // Party Mode's own: every library has a licence, its text and a holder,
+    // and none this test has loaded is marked as unused.
+    const packages = readPackages();
+    for (const p of packages) {
+      assert.ok(p.license && p.file && p.copyright, `${p.id}: licence ${p.license}, file ${p.file}, copyright ${p.copyright}`);
+    }
+    const loaded = new Set(Object.keys(require.cache).map((f) => (f.match(/node_modules\/((?:@[^/]+\/)?[^/]+)\/(?!.*node_modules)/) || [])[1]));
+    for (const p of packages) assert.ok(!(p.note && loaded.has(p.name)), `${p.id} is loaded, yet noted as unused`);
+    assert.match(packages.find((p) => p.name === 'yargs').note, /^Installed with qrcode package$/);
+
+    // A Readme's licence is served as the section alone, with the note on the page.
+    const fromReadme = packages.find((p) => p.fromReadme);
+    if (fromReadme) {
+      const text = await (await get(`/About/license/${encodeURIComponent(fromReadme.id)}`)).text();
+      assert.match(text, /Permission is hereby granted/);
+      assert.ok(!text.includes('## License'));
+    }
+    const html = await (await get('/About')).text();
+    assert.ok(html.includes('<span class="who">Installed with qrcode package</span>'));
   });
 
   console.log(failures ? `\n${failures} failed` : '\nall passed');

@@ -1,4 +1,4 @@
-// Copyright 2026 Stubaggs
+// Copyright (c) 2026 Stubaggs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -107,7 +107,7 @@ function fakeRoon(profiles, menuTitle = 'Profile', current = 'Guest') {
   console.log('\nprofile setting');
   const layout = (self, values) =>
     RoonService.prototype._layout.call(Object.assign({ _resolveZone: () => null }, self), values);
-  const dropdown = (result) => result.layout.find((item) => item.title === 'Party').items.find((item) => item.setting === 'guest_profile');
+  const dropdown = (result) => result.layout.find((item) => item.title === 'Party setup').items.find((item) => item.setting === 'guest_profile');
 
   await check("offers Roon's default, by name when known, plus the Core's profiles", async () => {
     const item = dropdown(layout({ profiles: ['Stu', 'Guests'], defaultProfile: 'Guest' }, {}));
@@ -168,6 +168,23 @@ function fakeRoon(profiles, menuTitle = 'Profile', current = 'Guest') {
     await roon.search('guest-1', 'queen');
     await roon.search('guest-2', 'abba');
     assert.deepStrictEqual(core.events.filter((e) => e.includes(':profile ')), ['guest-1:profile Party', 'guest-2:profile Party']);
+  });
+
+  await check('Roon losing a guest\'s session: their next step selects the profile again', async () => {
+    const core = fakeBrowseCore({ categories: { Tracks: tracks } });
+    const roon = serviceFor(core, { guest_profile: 'Party' });
+    await roon.search('guest-1', 'abba');
+    core.drop('guest-1');
+    await assert.rejects(roon.search('guest-1', 'queen'), /SessionNotFound/);
+    await roon.search('guest-1', 'queen');
+    assert.strictEqual(core.profileOf('guest-1'), 'Party', 'not Roon\'s default');
+    assert.deepStrictEqual(core.events.filter((e) => e.includes(':profile ')), ['guest-1:profile Party', 'guest-1:profile Party']);
+    // The same after a request that failed.
+    const found = await roon.search('guest-1', 'abba');
+    core.drop('guest-1');
+    await assert.rejects(roon.performAction('guest-1', found[0].item_key, 'add'), /SessionNotFound/);
+    await roon.search('guest-1', 'abba');
+    assert.strictEqual(core.profileOf('guest-1'), 'Party');
   });
 
   await check('changing the setting reselects in sessions already set up', async () => {

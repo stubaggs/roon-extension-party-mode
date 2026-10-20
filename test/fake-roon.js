@@ -1,4 +1,4 @@
-// Copyright 2026 Stubaggs
+// Copyright (c) 2026 Stubaggs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,7 +22,10 @@
  *
  * Each multi_session_key is its own session with its own position and profile,
  * as on a real Core. Records what happened as "<session>:<event>" in `events`:
- * "profile Party", "search abba", "press Queue".
+ * "profile Party", "search abba", "press Queue". drop(key) makes the Core lose
+ * a session, as Roon is reported to: the next request in it fails with
+ * SessionNotFound, and the one after starts a new session on the default
+ * profile.
  */
 function fakeBrowseCore(options = {}) {
   const o = Object.assign(
@@ -40,6 +43,7 @@ function fakeBrowseCore(options = {}) {
   );
   const sessions = {};
   const events = [];
+  const dropped = new Set();
   const session = (key) => sessions[key] || (sessions[key] = { path: [], profile: o.current });
   const categoryNames = () => Object.keys(o.categories);
 
@@ -75,6 +79,11 @@ function fakeBrowseCore(options = {}) {
   const browse = async (opts) => {
     if (opts.hierarchy !== 'browse') throw new Error(`unexpected hierarchy ${opts.hierarchy}`);
     const key = opts.multi_session_key;
+    if (dropped.has(key)) {
+      dropped.delete(key);
+      delete sessions[key];
+      throw new Error('SessionNotFound');
+    }
     const s = session(key);
     if (opts.pop_all) {
       s.path = [];
@@ -109,7 +118,7 @@ function fakeBrowseCore(options = {}) {
     return { list: { hint: level && level.startsWith('t') ? 'action_list' : null }, items: itemsAt(s) };
   };
 
-  return { browse, load, events, profileOf: (key) => session(key).profile };
+  return { browse, load, events, profileOf: (key) => session(key).profile, drop: (key) => dropped.add(key) };
 }
 
 /** A RoonService wired to a fake Core, without a real connection. */

@@ -1,4 +1,4 @@
-// Copyright 2026 Stubaggs
+// Copyright (c) 2026 Stubaggs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,6 +23,43 @@
     return key ? `/api/image/${encodeURIComponent(key)}?size=${size}` : '';
   }
 
+  // Beside the playing track, the cover's top is level with the middle of the
+  // "Playing now" line, and its bottom with the middle of the credit when the
+  // track has an album and a credit. It keeps that size for every track; with
+  // fewer lines, the space below them stays empty. Phones lay it out their own
+  // way.
+  const wide = window.matchMedia('(min-width: 721px)');
+  function alignArt() {
+    const image = el('current-art');
+    image.style.width = '';
+    image.style.height = '';
+    image.style.marginTop = '';
+    if (!wide.matches || el('current').hidden) return;
+    // Measured with an album line and a credit, put in for the moment if the
+    // track has none: they're taken out again before the page is drawn.
+    const added = [el('current-album'), el('current-who')].filter((line) => line.hidden);
+    for (const line of added) {
+      line.textContent = '\u00a0';
+      line.hidden = false;
+    }
+    const top = document.querySelector('.current-text').getBoundingClientRect().top;
+    const middle = (line) => {
+      const box = line.getBoundingClientRect();
+      return (box.top + box.bottom) / 2 - top;
+    };
+    const from = middle(el('current-label'));
+    const size = middle(el('current-who')) - from;
+    for (const line of added) {
+      line.textContent = '';
+      line.hidden = true;
+    }
+    image.style.marginTop = `${from}px`;
+    image.style.width = `${size}px`;
+    image.style.height = `${size}px`;
+  }
+
+  window.addEventListener('resize', alignArt);
+
   function render(data) {
     // The host chose another language for the Hub in Roon's settings.
     if (data.language && data.language !== window.I18N.lang) {
@@ -32,10 +69,10 @@
     window.I18N.setHostName(data.host_name);
     const name = data.party_name || t('party.default_name');
     el('party-name').textContent = name;
-    // "EX5 Test-o-rama Hub" in the tab, a bookmark or on a tablet's home screen.
+    // "Garden Party Hub" in the tab, a bookmark or on a tablet's home screen.
     document.title = t('page.hub_title', { name }).replace(/[\u2068\u2069]/g, '');
     if (data.join_url) el('join-link').href = data.join_url;
-    // Party mode off ends the party: no QR code that no longer works, but
+    // Party Off ends the party: no QR code that no longer works, but
     // the playlist, as a QR code or a link as the host chose, and "Requests
     // are closed" where the playing track was. Paused keeps the code but says so.
     const over = data.party_mode === 'off';
@@ -44,11 +81,18 @@
     el('closed').hidden = !over;
     el('current').hidden = over;
     const qr = el('playlist-qr-offer');
-    const showQr = over && data.playlist === 'qr';
+    // The playlist's address is secret, new with each playlist: the server
+    // sends it only once requests close, and only to offer it.
+    const download = data.playlist_url || '';
+    const showQr = over && data.playlist === 'qr' && Boolean(download);
     // Loaded each time it appears, so the code follows a change of address or port.
     if (showQr && qr.hidden) el('playlist-qr').src = `/Download/playlist-qr.svg?t=${Date.now()}`;
     qr.hidden = !showQr;
-    el('playlist-link-offer').hidden = !(over && data.playlist === 'link');
+    for (const id of ['playlist-qr-link', 'playlist-link-offer']) {
+      if (download) el(id).href = download;
+      else el(id).removeAttribute('href');
+    }
+    el('playlist-link-offer').hidden = !(over && data.playlist === 'link' && download);
     el('join-link').textContent = data.party_mode === 'paused' ? t('allowance.paused') : t('screen.scan');
 
     const playing = data.now_playing;
@@ -75,7 +119,11 @@
     // the caption under the QR code already says requests are on hold.
     el('current-note').hidden = !(playing && playing.station) || data.party_mode === 'paused';
     const image = el('current-art');
-    if (playing && playing.image_key) image.src = art(playing.image_key, 400);
+    alignArt();
+    // 400 pixels is sharp up to a 4K screen; only a cover drawn bigger than
+    // that (an 8K one) asks for 800, which is four times the bytes.
+    const drawn = image.getBoundingClientRect().width * (window.devicePixelRatio || 1);
+    if (playing && playing.image_key) image.src = art(playing.image_key, drawn > 400 ? 800 : 400);
     else image.removeAttribute('src');
 
     list.innerHTML = '';

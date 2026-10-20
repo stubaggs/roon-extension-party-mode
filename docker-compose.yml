@@ -1,3 +1,17 @@
+# Copyright (c) 2026 Stubaggs
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 # Host networking is required: Roon discovery uses UDP broadcast on port 9003.
 # Settings, including Roon's pairing token, are kept in the volume
 # roon-extension-party-mode-beta-data (the same one the README's docker run
@@ -8,19 +22,23 @@ services:
     container_name: roon-extension-party-mode-beta
     network_mode: host
     restart: unless-stopped
-    # No Linux capabilities, and no gaining privileges.
+    # Nothing in the image can change (settings save to the volume), no Linux
+    # capabilities, and no gaining privileges.
+    read_only: true
+    # A cap well above what Party Mode uses (under 100 MB at a busy party), so a
+    # runaway can't take memory from the Roon Core or anything else on the host.
+    mem_limit: 512m
     cap_drop:
       - ALL
     security_opt:
       - no-new-privileges:true
-    environment:
-      # The first port only: once settings are saved in Roon (even just choosing the
-      # zone), change it with Web port there. A busy port falls back to the next free one.
-      - ROON_EXTENSION_PARTY_MODE_PORT=8338
+    # To set one of these, remove the # from `environment:` and from its line.
+    # environment:
+      # Unset, the first run uses 8338, or the next free port if it's busy, and keeps
+      # it. Set, it's that port or nothing. Change it later with Web port in Roon.
+      # - ROON_EXTENSION_PARTY_MODE_PORT=8338
       # - ROON_EXTENSION_PARTY_MODE_DEBUG=1   # detailed log, including every message to and from Roon
       # - ROON_EXTENSION_PARTY_MODE_INSTANCE=Garden   # a name, to run more than one copy (see the README)
-      # - ROON_EXTENSION_PARTY_MODE_RATE_LIMIT=1200   # requests a minute per device (0 = no limit)
-      # - ROON_EXTENSION_PARTY_MODE_SEARCH_LIMIT=200  # searches a minute per device (0 = no limit)
     volumes:
       - party-mode-data:/data
     # Keep the log from growing without limit.

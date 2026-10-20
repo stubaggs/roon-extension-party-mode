@@ -1,13 +1,40 @@
+/*
+ * Copyright (c) 2026 Stubaggs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/* Laid out for a 1920 × 1080 screen. On a bigger one (a 4K or 8K TV) everything
+   grows with it, by the side that runs out first, so it looks the same, only
+   larger: every size below is in rem, or capped in rem. Never smaller than the
+   browser's own text size, so phones and small screens are as they were. Only
+   the Hub loads this file, so this is the Hub's page alone. */
+html {
+  font-size: max(100%, min(100vh / 67.5, 100vw / 120));
+}
+
 .hub {
   overflow: hidden;
   height: 100vh;
+  font-size: 1.0625rem;
 }
 
 .stage {
   display: grid;
-  grid-template-columns: minmax(280px, 34%) 1fr;
-  /* The join code and what's playing on top; the whole queue underneath,
-     taking the rest of the screen and scrolling when it is longer. */
+  grid-template-columns: minmax(17.5rem, 34%) 1fr;
+  /* The join code down the left, the whole height; what's playing at the top
+     right, and the queue under it, taking the rest of the height and
+     scrolling when it is longer. */
   grid-template-rows: auto minmax(0, 1fr);
   gap: clamp(1rem, 3vh, 2.5rem) clamp(1.5rem, 4vw, 4rem);
   height: 100vh;
@@ -18,6 +45,11 @@
 }
 
 .join {
+  grid-row: 1 / -1;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   text-align: center;
 }
 
@@ -31,8 +63,10 @@
   letter-spacing: -0.03em;
 }
 
+/* Nearly half the screen's height, to scan from across the room: the queue is
+   beside it, so this costs it nothing. */
 .qr {
-  width: min(100%, 22rem, 32vh);
+  width: min(100%, 30.5rem, 45vh);
   aspect-ratio: 1;
   background: #fff;
   border-radius: 18px;
@@ -116,15 +150,16 @@
 .current {
   display: flex;
   gap: clamp(1rem, 2vw, 2rem);
-  align-items: center;
+  /* hub.js then lines the cover up with the text (see alignArt). */
+  align-items: flex-start;
   min-width: 0;
 }
 
 .current-art {
-  width: clamp(96px, 13vw, 200px);
-  height: clamp(96px, 13vw, 200px);
+  width: clamp(6rem, 13vw, 12.5rem);
+  height: clamp(6rem, 13vw, 12.5rem);
   border-radius: 10px;
-  box-shadow: 0 0 90px -20px var(--amber);
+  box-shadow: 0 0 5.6rem -1.25rem var(--amber);
 }
 
 .current-label {
@@ -185,7 +220,7 @@
 }
 
 .upnext {
-  grid-column: 1 / -1;
+  grid-column: 2;
   align-self: stretch;
   min-height: 0;
   display: flex;
@@ -200,12 +235,22 @@
 }
 
 .upnext .list {
+  flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
 }
 
+/* An empty queue says so in the middle of its space, at the size of the
+   playing track's artist: filling the gap without outshouting the track. */
 .list .empty {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  height: 100%;
+  border-bottom: 0;
+  text-align: center;
+  font-size: clamp(1rem, 1.8vw, 1.6rem);
 }
 
 .list {
@@ -321,6 +366,13 @@
     grid-template-rows: none;
     height: auto;
     align-content: start;
+  }
+  .join {
+    grid-row: auto;
+    display: block;
+  }
+  .upnext {
+    grid-column: auto;
   }
   .upnext .list {
     overflow: visible;

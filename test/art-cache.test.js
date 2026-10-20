@@ -1,4 +1,4 @@
-// Copyright 2026 Stubaggs
+// Copyright (c) 2026 Stubaggs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 
 'use strict';
 const assert = require('assert');
-const { ArtCache, ART_CACHE_BYTES, KnownKeys, KNOWN_KEYS } = require('../lib/art-cache');
+const { ArtCache, ART_CACHE_BYTES, LARGEST_KEPT, KnownKeys, KNOWN_KEYS } = require('../lib/art-cache');
 
 let failures = 0;
 async function check(name, fn) {
@@ -65,6 +65,7 @@ const image = (bytes) => ({ contentType: 'image/jpeg', body: Buffer.alloc(bytes)
     assert.strictEqual(loads, 2);
     assert.strictEqual(cache.images.size, 0);
     assert.strictEqual(cache.loading.size, 0);
+    assert.strictEqual(cache.failed, 2, 'counted for the About page');
   });
 
   await check('over its size, the least recently used go first', async () => {
@@ -84,6 +85,24 @@ const image = (bytes) => ({ contentType: 'image/jpeg', body: Buffer.alloc(bytes)
     await cache.get('empty', async () => image(0));
     assert.strictEqual(cache.images.size, 0);
     assert.strictEqual(cache.bytes, 0);
+  });
+
+  await check('the Hub\'s 400-pixel cover is the largest kept', () => assert.strictEqual(LARGEST_KEPT, 400));
+
+  await check('an image fetched with keep false is served, and shared while on its way, but not kept', async () => {
+    const cache = new ArtCache(1000);
+    let loads = 0;
+    let finish;
+    const load = () => { loads++; return new Promise((resolve) => { finish = resolve; }); };
+    const waiting = [cache.get('big', load, { keep: false }), cache.get('big', load, { keep: false })];
+    finish(image(100));
+    const images = await Promise.all(waiting);
+    assert.strictEqual(loads, 1, 'one fetch for both');
+    assert.strictEqual(images[0].body.length, 100);
+    assert.strictEqual(cache.images.size, 0);
+    assert.strictEqual(cache.bytes, 0);
+    await cache.get('big', async () => { loads++; return image(100); }, { keep: false });
+    assert.strictEqual(loads, 2, 'asked for again later: fetched again');
   });
 
   console.log('known image keys');

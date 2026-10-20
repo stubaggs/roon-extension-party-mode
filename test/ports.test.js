@@ -1,4 +1,4 @@
-// Copyright 2026 Stubaggs
+// Copyright (c) 2026 Stubaggs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -82,6 +82,12 @@ async function freeRun(count) {
     await listen(start + 1);
     await listen(start + 2);
     assert.strictEqual(await listenWithFallback(listen, start), start + 3);
+  });
+
+  await check('with no tries (a port the host chose), a busy port is an error', async () => {
+    const start = await freeRun(2);
+    await listen(start);
+    await assert.rejects(listenWithFallback(listen, start, 0), { code: 'EADDRINUSE' });
   });
 
   await check('gives up with EADDRINUSE when every port in range is busy', async () => {

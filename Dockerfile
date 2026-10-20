@@ -1,5 +1,19 @@
 # syntax=docker/dockerfile:1
 
+# Copyright (c) 2026 Stubaggs
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 # Base image: node:22-alpine, pinned by digest in both FROM lines below.
 # Node 22 LTS (supported to April 2027) is the newest line that still ships
 # 32-bit ARM (linux/arm/v7) images; Node 24 dropped it. The digest pin means a
@@ -20,7 +34,7 @@ RUN apk add --no-cache git
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev --no-audit --no-fund
 
-COPY app.js LICENSE ./
+COPY app.js healthcheck.js LICENSE NOTICE ./
 COPY lib ./lib
 COPY public ./public
 COPY test ./test
@@ -28,7 +42,7 @@ RUN npm test
 
 # The base image, from the FROM line above, for the About page.
 COPY Dockerfile ./
-RUN grep -m1 -E '^FROM ' Dockerfile | cut -d' ' -f2 > base-image
+RUN awk '/^FROM /{print $2; found=1; exit} END{exit !found}' Dockerfile > base-image
 
 # -------------------------------------------------------------- final image
 FROM node:22-alpine@sha256:0a7108bf6c7bf5de370ffb1a3ed6be93d405b43ff159f681a8d18c0e2bc2e402
@@ -46,7 +60,7 @@ ENV ROON_EXTENSION_PARTY_MODE_BUILD=$BUILD
 WORKDIR /usr/src/app
 
 COPY --from=build /usr/src/app/node_modules ./node_modules
-COPY package.json app.js healthcheck.js LICENSE ./
+COPY package.json app.js healthcheck.js LICENSE NOTICE ./
 COPY --from=build /usr/src/app/base-image ./
 COPY lib ./lib
 COPY public ./public

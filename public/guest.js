@@ -1,4 +1,4 @@
-// Copyright 2026 Stubaggs
+// Copyright (c) 2026 Stubaggs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@
     const res = await fetch(path, Object.assign({ headers: { 'Content-Type': 'application/json' } }, options));
     const body = await res.json().catch(() => ({}));
     if (res.status === 401 || res.status === 403) {
-      // Party mode Off answers "closed": requests are over, not the guest's link.
+      // Party Off answers "closed": requests are over, not the guest's link.
       showLocked(body.error === 'closed' ? 'closed' : 'locked');
       throw new Error('no_session');
     }
@@ -795,7 +795,7 @@
     el('closed').hidden = true;
     document.title = party.party_name || t('page.title');
     const skip = el('skip');
-    // Runs again when Party mode changes, with the station still playing.
+    // Runs again when Party changes, with the station still playing.
     showSkip();
     if (party.capabilities.skip) Object.assign(skip.dataset, { bucket: 'skip', label: 'skip.button', quiet: '' });
     else delete skip.dataset.bucket;

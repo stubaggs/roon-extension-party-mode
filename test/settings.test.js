@@ -1,4 +1,4 @@
-// Copyright 2026 Stubaggs
+// Copyright (c) 2026 Stubaggs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 'use strict';
 
 const assert = require('assert');
-const { RoonService, describeZone, normaliseInteger, partyName, configWritable, configFolder, extensionIdentity, statusText, detailedLogAfterSave, DETAILED_LOG_WARNING, settingErrors, REQUEST_LIMIT_PRESETS, requestLimits, requestLimitSettings } = require('../lib/roon-service');
+const { RoonService, describeZone, normaliseInteger, partyName, configWritable, configFolder, extensionIdentity, statusText, detailedLogAfterSave, DETAILED_LOG_WARNING, settingErrors, REQUEST_LIMIT_PRESETS, requestLimits } = require('../lib/roon-service');
 const { setDebug } = require('../lib/log');
 const fs = require('fs');
 const os = require('os');
@@ -82,37 +82,21 @@ check('an unnamed zone does not produce a stray dash', () => {
 console.log('\nparty name');
 
 check('a typed name wins', () => {
-  assert.strictEqual(partyName({ party_name: "Sam's 40th", zone: picked('Kitchen') }, zone('Kitchen', 1)), "Sam's 40th");
+  assert.strictEqual(partyName({ party_name: "Sam's 40th", zone: picked('Kitchen') }), "Sam's 40th");
 });
 
-check('blank uses the zone name', () => {
-  assert.strictEqual(partyName({ party_name: '', zone: picked('Kitchen') }, zone('Kitchen', 1)), 'Kitchen');
+check("blank is blank, never the zone's name: the pages say \"Party\" in the guest's language", () => {
+  assert.strictEqual(partyName({ party_name: '', zone: picked('Kitchen') }), '');
+  assert.strictEqual(partyName({ party_name: '   ', zone: picked('Kitchen') }), '');
+  assert.strictEqual(partyName({ party_name: '', zone: null }), '');
+  assert.strictEqual(partyName(undefined), '');
 });
 
-check('blank with a grouped zone uses the group name, not the endpoint picked', () => {
-  const group = zone('Kitchen + Living Room + Study', 3);
-  assert.strictEqual(partyName({ party_name: '', zone: picked('Kitchen') }, group), 'Kitchen + Living Room + Study');
-});
-
-check('spaces only count as blank', () => {
-  assert.strictEqual(partyName({ party_name: '   ', zone: picked('Kitchen') }, zone('Kitchen', 1)), 'Kitchen');
-});
-
-check('zone not available yet: the endpoint picked', () => {
-  assert.strictEqual(partyName({ party_name: '', zone: picked('Kitchen') }, null), 'Kitchen');
-});
-
-check('nothing chosen at all: "Party"', () => {
-  assert.strictEqual(partyName({ party_name: '', zone: null }, null), 'Party');
-  // The pages get nothing, and say "Party" in the guest's language.
-  assert.strictEqual(partyName({ party_name: '', zone: null }, null, ''), '');
-});
-
-check('the settings say what a blank name will use', () => {
+check('the settings say what a blank name will be', () => {
   const self = { _resolveZone: () => zone('Kitchen + Living Room', 2) };
   const result = RoonService.prototype._layout.call(self, { zone: picked('Kitchen') });
-  const field = result.layout.find((item) => item.title === 'Party').items.find((item) => item.setting === 'party_name');
-  assert.strictEqual(field.subtitle, 'Leave blank to use the zone name: Kitchen + Living Room');
+  const field = result.layout.find((item) => item.title === 'Party setup').items.find((item) => item.setting === 'party_name');
+  assert.strictEqual(field.subtitle, 'Leave blank for "Party", in each guest\'s language');
 });
 
 console.log('\nconfig.json');
@@ -233,7 +217,7 @@ check(`a pairing made while config.json can't be saved is saved once it can${isR
   }
 });
 
-check("the host's Party mode changes are logged, naming both", () => {
+check("the host's Party changes are logged, naming both", () => {
   const dir = path.join(tmp, 'modes');
   fs.mkdirSync(dir, { recursive: true });
   const cwd = process.cwd();
@@ -254,10 +238,10 @@ check("the host's Party mode changes are logged, naming both", () => {
     save({ enabled: 'paused', party_name: 'Garden' }); // no change of mode: nothing
     save({ enabled: false });
     save({ enabled: true });
-    assert.deepStrictEqual(lines.filter((l) => String(l).startsWith('Party mode')), [
-      'Party mode: Paused (was On)',
-      'Party mode: Off (was Paused)',
-      'Party mode: On (was Off)'
+    assert.deepStrictEqual(lines.filter((l) => String(l).startsWith('Party')), [
+      'Party: Paused (was On)',
+      'Party: Off (was Paused)',
+      'Party: On (was Off)'
     ]);
   } finally {
     process.chdir(cwd);
@@ -310,32 +294,34 @@ check('Party Hub language: Automatic first, then every language by its own name;
   assert.strictEqual(layout({}).values.hub_language, '');
 });
 
-check('party mode is first, with on, paused and off', () => {
+check('Party is first, with on, paused and off', () => {
   const result = layout({});
   assert.strictEqual(result.layout[0].setting, 'enabled');
-  assert.strictEqual(result.layout[0].title, 'Party mode');
+  assert.strictEqual(result.layout[0].title, 'Party');
   assert.deepStrictEqual(result.layout[0].values.map((v) => v.value), [true, 'paused', false]);
 });
 
 check("Roon's status line: the mode, the party's name, the zone and the Hub's address, in every mode", () => {
-  const hub = 'Party Hub at http://192.0.2.10:8338/PartyHub';
-  assert.strictEqual(statusText('House Party', 'on', hub, 'EX5'), `Party mode: On\nParty: House Party\nParty zone: EX5\n${hub}`);
-  assert.strictEqual(statusText('House Party', 'paused', hub, 'EX5'), `Party mode: Paused\nParty: House Party\nParty zone: EX5\n${hub}`);
-  assert.strictEqual(statusText('House Party', 'off', hub, 'Kitchen + 2'), `Party mode: Off\nParty: House Party\nParty zone: Kitchen + 2\n${hub}`);
+  const hub = 'Hub: http://192.0.2.10:8338/PartyHub';
+  assert.strictEqual(statusText('House Party', 'on', hub, 'Living Room'), `Party: On\nName: House Party\nZone: Living Room\n${hub}`);
+  assert.strictEqual(statusText('House Party', 'paused', hub, 'Living Room'), `Party: Paused\nName: House Party\nZone: Living Room\n${hub}`);
+  assert.strictEqual(statusText('House Party', 'off', hub, 'Kitchen + 2'), `Party: Off\nName: House Party\nZone: Kitchen + 2\n${hub}`);
   // No web server address yet: the zone still follows the name.
-  assert.strictEqual(statusText('House Party', 'on', '', 'EX5'), 'Party mode: On\nParty: House Party\nParty zone: EX5');
-  // Named after its zone: the zone isn't said twice.
-  assert.strictEqual(statusText('Kitchen', 'on', '', 'Kitchen'), 'Party mode: On\nParty: Kitchen');
+  assert.strictEqual(statusText('House Party', 'on', '', 'Living Room'), 'Party: On\nName: House Party\nZone: Living Room');
+  // A name typed the same as the zone's: the zone is still said.
+  assert.strictEqual(statusText('Kitchen', 'on', '', 'Kitchen'), 'Party: On\nName: Kitchen\nZone: Kitchen');
+  // No name typed: no "Name: Party", just the zone.
+  assert.strictEqual(statusText('', 'on', '', 'Kitchen'), 'Party: On\nZone: Kitchen');
 });
 
-check('the status line uses the party name, falling back to the zone, with the address', () => {
+check('the status line uses the party name, and the zone, with the address; no Name line with no name', () => {
   const said = [];
   const self = {
     svcStatus: { set_status: (message) => said.push(message) },
     configWritable: true,
     core: {},
     zone: { display_name: 'Kitchen', outputs: [{ output_id: 'o1' }] },
-    statusLine: 'Party Hub at http://h:8338/PartyHub',
+    statusLine: 'Hub: http://h:8338/PartyHub',
     settings: { zone: { output_id: 'o1', name: 'Kitchen' }, enabled: 'paused', party_name: 'Sam\'s 40th' },
     get partyName() {
       return partyName(this.settings, this.zone);
@@ -346,8 +332,8 @@ check('the status line uses the party name, falling back to the zone, with the a
   self.settings.enabled = false;
   RoonService.prototype._updateStatus.call(self);
   assert.deepStrictEqual(said, [
-    "Party mode: Paused\nParty: Sam's 40th\nParty zone: Kitchen\nParty Hub at http://h:8338/PartyHub",
-    'Party mode: Off\nParty: Kitchen\nParty Hub at http://h:8338/PartyHub'
+    "Party: Paused\nName: Sam's 40th\nZone: Kitchen\nHub: http://h:8338/PartyHub",
+    'Party: Off\nZone: Kitchen\nHub: http://h:8338/PartyHub'
   ]);
 });
 
@@ -405,7 +391,7 @@ check('a saved on/off from "Guest access" carries over, and junk reads as on', (
 check('host name: a text field after Name, blank unless set', () => {
   const result = layout({});
   assert.strictEqual(item(result, 'host_name').title, 'Host name');
-  const names = result.layout.find((entry) => entry.title === 'Party').items.map((entry) => entry.setting);
+  const names = result.layout.find((entry) => entry.title === 'Party setup').items.map((entry) => entry.setting);
   assert.strictEqual(names.indexOf('host_name'), names.indexOf('party_name') + 1);
   assert.strictEqual(item(result, 'host_name').type, 'string');
   assert.strictEqual(result.values.host_name, '');
@@ -429,7 +415,7 @@ check('Invites: On or Off after Host name, On unless turned off', () => {
   const entry = item(result, 'guest_invite');
   assert.strictEqual(entry.title, 'Invites');
   assert.deepStrictEqual(entry.values.map((v) => v.value), [true, false]);
-  const names = result.layout.find((e) => e.title === 'Party').items.map((e) => e.setting);
+  const names = result.layout.find((e) => e.title === 'Party setup').items.map((e) => e.setting);
   assert.strictEqual(names.indexOf('guest_invite'), names.indexOf('host_name') + 1);
   assert.strictEqual(result.values.guest_invite, true);
   assert.strictEqual(layout({ guest_invite: false }).values.guest_invite, false);
@@ -450,13 +436,36 @@ check('a saved yes/no for the playlist carries over, and junk reads as QR code',
   assert.strictEqual(layout({ playlist_download: 'maybe' }).values.playlist_download, 'qr');
 });
 
-check('the hint names the download address once it is known', () => {
+check("the Playlist hint says when the Hub shows it; the address is in Roon's status instead", () => {
   const hint = (self) => item(RoonService.prototype._layout.call(self, {}), 'playlist_download').subtitle;
-  assert.strictEqual(hint({ _resolveZone: () => null }), 'On the Party Hub when Party mode is Off');
+  assert.strictEqual(hint({ _resolveZone: () => null }), 'On the Party Hub when Party is Off');
   assert.strictEqual(
-    hint({ _resolveZone: () => null, playlistUrl: 'http://192.0.2.10:8338/Download/playlist.csv' }),
-    'On the Party Hub when Party mode is Off\nAlways downloadable at\nhttp://192.0.2.10:8338/Download/playlist.csv'
+    hint({ _resolveZone: () => null, playlistUrl: () => 'http://192.0.2.10:8338/p/7KQ4-M9XD' }),
+    'On the Party Hub when Party is Off'
   );
+});
+
+check("Roon's status has the playlist's address under the Hub's, and the new one when it changes", () => {
+  const said = [];
+  let code = 'first0000000';
+  const self = Object.assign(Object.create(RoonService.prototype), {
+    svcStatus: { set_status: (message) => said.push(message) },
+    configWritable: true,
+    core: {},
+    zone: { display_name: 'Kitchen', outputs: [{ output_id: 'o1' }] },
+    statusLine: 'Hub: http://192.0.2.10:8338/PartyHub',
+    settings: { zone: { output_id: 'o1', name: 'Kitchen' }, enabled: false, party_name: '' },
+    playlistUrl: () => `http://192.0.2.10:8338/p/${code}`
+  });
+  self.refreshStatus();
+  code = 'second000000';
+  self.refreshStatus();
+  assert.deepStrictEqual(said, [
+    'Party: Off\nZone: Kitchen\nHub: http://192.0.2.10:8338/PartyHub\nPlaylist: http://192.0.2.10:8338/p/first0000000',
+    'Party: Off\nZone: Kitchen\nHub: http://192.0.2.10:8338/PartyHub\nPlaylist: http://192.0.2.10:8338/p/second000000'
+  ]);
+  // No web server: neither address.
+  assert.strictEqual(statusText('', 'on', "Party Hub couldn't start", 'Kitchen', ''), "Party: On\nZone: Kitchen\nParty Hub couldn't start");
 });
 
 check('hide names in playlist: a Yes/No under Advanced, off unless chosen', () => {
@@ -518,7 +527,7 @@ check('the hints under the settings say what 0 means', () => {
     assert.strictEqual(item(result, setting).subtitle, '0 = never', setting);
   }
   for (const setting of ['add_refill', 'next_refill', 'skip_refill']) {
-    assert.strictEqual(item(result, setting).title, 'Minutes to earn one back', setting);
+    assert.strictEqual(item(result, setting).title, 'One more every (minutes)', setting);
   }
   assert.strictEqual(item(result, 'add_limit').title, '"Add to queue" per guest', 'named after the button');
   assert.strictEqual(item(result, 'next_limit').title, '"Play it next" per guest', 'named after the button');
@@ -527,21 +536,21 @@ check('the hints under the settings say what 0 means', () => {
 
 check('blocking duplicates comes first in Guest requests, then adding, playing next and skipping, each with its counts', () => {
   const groups = layout({}).layout.filter((entry) => entry.type === 'group');
-  assert.deepStrictEqual(groups.map((g) => g.title), ['Party', 'Guest requests', 'Advanced']);
+  assert.deepStrictEqual(groups.map((g) => g.title), ['Party setup', 'Guest requests', 'Advanced']);
   assert.deepStrictEqual(groups[1].items.map((i) => i.setting), [
     'prevent_duplicates', 'allow_add', 'add_limit', 'add_refill', 'allow_next', 'next_limit', 'next_refill',
     'allow_skip', 'skip_limit', 'skip_refill'
   ]);
 });
 
-check('with the zone found, only Party mode is at the top; every group starts closed', () => {
+check('with the zone found, only Party is at the top; every group starts closed', () => {
   const self = { _resolveZone: () => zone('Kitchen', 1) };
   const result = RoonService.prototype._layout.call(self, { zone: picked('Kitchen') });
   assert.deepStrictEqual(result.layout.filter((entry) => entry.type !== 'group').map((entry) => entry.setting), ['enabled']);
   for (const group of result.layout.filter((entry) => entry.type === 'group')) {
     assert.strictEqual(group.collapsable, true, `${group.title} starts closed`);
   }
-  assert.deepStrictEqual(result.layout.find((entry) => entry.title === 'Party').items.map((i) => i.setting), [
+  assert.deepStrictEqual(result.layout.find((entry) => entry.title === 'Party setup').items.map((i) => i.setting), [
     'zone', 'guest_profile', 'party_name', 'host_name', 'guest_invite', 'hub_language', 'playlist_download'
   ]);
 });
@@ -549,7 +558,7 @@ check('with the zone found, only Party mode is at the top; every group starts cl
 check('while the saved zone needs the host, Party starts open and the zone has a red box and says why', () => {
   const run = (self, values) => {
     const result = RoonService.prototype._layout.call(self, values);
-    const party = result.layout.find((entry) => entry.title === 'Party');
+    const party = result.layout.find((entry) => entry.title === 'Party setup');
     const picker = party.items[0];
     return { open: !party.collapsable, error: picker.error, hint: picker.subtitle, top: result.layout[0].setting, has_error: result.has_error };
   };
@@ -577,7 +586,7 @@ check('an out-of-range value keeps its hint alongside the error', () => {
 check('one Advanced group with sub-headings, and browse titles explain themselves in a hint', () => {
   const result = layout({});
   const groups = result.layout.filter((entry) => entry.type === 'group').map((g) => g.title);
-  assert.deepStrictEqual(groups, ['Party', 'Guest requests', 'Advanced']);
+  assert.deepStrictEqual(groups, ['Party setup', 'Guest requests', 'Advanced']);
   const advanced = result.layout.find((entry) => entry.title === 'Advanced');
   assert.strictEqual(advanced.collapsable, true, 'starts closed');
   // One group, with a label as the sub-heading for each kind of setting.
@@ -646,8 +655,45 @@ check('a refused save says on the status line what wasn\'t saved, in red', () =>
   self.settingsRejected = null;
   RoonService.prototype._updateStatus.call(self);
   assert.deepStrictEqual(said, [
-    ['Settings not saved: Host name: 24 characters max\nParty mode: On\nParty: Kitchen', true],
-    ['Party mode: On\nParty: Kitchen', false]
+    ['Settings not saved: Host name: 24 characters max\nParty: On\nZone: Kitchen', true],
+    ['Party: On\nZone: Kitchen', false]
+  ]);
+});
+
+check("the web server's errors show in red: no port to listen on, or a new one refused", () => {
+  const said = [];
+  const self = Object.assign(Object.create(RoonService.prototype), {
+    svcStatus: { set_status: (message, isError) => said.push([message, isError]) },
+    configWritable: true,
+    core: {},
+    zone: { display_name: 'Kitchen', outputs: [{ output_id: 'o1' }] },
+    settings: { zone: { output_id: 'o1', name: 'Kitchen' }, enabled: true, party_name: '' }
+  });
+  self.setStatusLine('Port 9000 is in use. Pick another web port in the settings.', true);
+  self.setStatusLine('Hub: http://192.0.2.10:9001/PartyHub');
+  assert.deepStrictEqual(said, [
+    ['Party: On\nZone: Kitchen\nPort 9000 is in use. Pick another web port in the settings.', true],
+    ['Party: On\nZone: Kitchen\nHub: http://192.0.2.10:9001/PartyHub', false]
+  ]);
+});
+
+check('a new web port that could not be opened: the one in use is saved back, and the status says so in red until the next save', () => {
+  const said = [];
+  const saved = [];
+  const self = Object.assign(Object.create(RoonService.prototype), {
+    svcStatus: { set_status: (message, isError) => said.push([message, isError]) },
+    api: { save_config: (key, value) => saved.push([key, value.port]) },
+    configWritable: true,
+    core: {},
+    zone: { display_name: 'Kitchen', outputs: [{ output_id: 'o1' }] },
+    statusLine: 'Hub: http://192.0.2.10:8339/PartyHub',
+    settings: { zone: { output_id: 'o1', name: 'Kitchen' }, enabled: true, party_name: '', port: 8340 }
+  });
+  self.refusePort(8339, 'Web port not changed: 8340 is in use, still on 8339');
+  assert.strictEqual(self.settings.port, 8339);
+  assert.deepStrictEqual(saved, [['settings', 8339]]);
+  assert.deepStrictEqual(said, [
+    ['Web port not changed: 8340 is in use, still on 8339\nParty: On\nZone: Kitchen\nHub: http://192.0.2.10:8339/PartyHub', true]
   ]);
 });
 
@@ -669,8 +715,39 @@ check('the status line starts with a warning while the detailed log is on', () =
   setDebug(false);
   RoonService.prototype._updateStatus.call(self);
   assert.deepStrictEqual(said, [
-    [`${DETAILED_LOG_WARNING}\nParty mode: On\nParty: Kitchen`, false],
-    ['Party mode: On\nParty: Kitchen', false]
+    [`${DETAILED_LOG_WARNING}\nParty: On\nZone: Kitchen`, false],
+    ['Party: On\nZone: Kitchen', false]
+  ]);
+});
+
+check('the status goes to Roon only when it changes, not on every zone update', () => {
+  const said = [];
+  const self = {
+    svcStatus: { set_status: (message, isError) => said.push([message, isError]) },
+    configWritable: true,
+    core: {},
+    zone: { display_name: 'Kitchen', outputs: [{ output_id: 'o1' }] },
+    statusLine: '',
+    settings: { zone: { output_id: 'o1', name: 'Kitchen' }, enabled: true, party_name: '' },
+    get partyName() {
+      return partyName(this.settings, this.zone);
+    }
+  };
+  // A playing zone's position updates, each second: the status is the same.
+  for (let i = 0; i < 5; i++) RoonService.prototype._updateStatus.call(self);
+  // A change is sent, and so is going back, as is the same text as an error.
+  self.settings.enabled = 'paused';
+  RoonService.prototype._updateStatus.call(self);
+  self.settings.enabled = true;
+  RoonService.prototype._updateStatus.call(self);
+  RoonService.prototype._updateStatus.call(self);
+  self.configWritable = false;
+  RoonService.prototype._updateStatus.call(self);
+  assert.deepStrictEqual(said, [
+    ['Party: On\nZone: Kitchen', false],
+    ['Party: Paused\nZone: Kitchen', false],
+    ['Party: On\nZone: Kitchen', false],
+    ["Party: On\nZone: Kitchen — settings can't be saved: config.json is read-only", true]
   ]);
 });
 
@@ -714,25 +791,14 @@ check('request limits in force: the default, or the custom numbers (0 = no limit
   assert.deepStrictEqual(requestLimits({ request_limits: 'custom', rate_limit: 2000, search_limit: 0 }), { all: 2000, search: 0 });
 });
 
-check('limits from the environment show as Default when they match it, else Custom', () => {
-  assert.deepStrictEqual(requestLimitSettings({ all: 1200, search: 200 }), { request_limits: 'default', rate_limit: 1200, search_limit: 200 });
-  assert.deepStrictEqual(requestLimitSettings({ all: 600, search: 60 }), { request_limits: 'custom', rate_limit: 600, search_limit: 60 });
-  assert.deepStrictEqual(requestLimitSettings({ all: 0, search: 0 }), { request_limits: 'custom', rate_limit: 0, search_limit: 0 });
-  assert.deepStrictEqual(requestLimitSettings({ all: 1200, search: 60 }), { request_limits: 'custom', rate_limit: 1200, search_limit: 60 });
-  // The hint says where they came from until the host changes them.
-  const self = { _resolveZone: () => null, limitsFromEnv: { all: 1200, search: 60 } };
-  const result = RoonService.prototype._layout.call(self, requestLimitSettings(self.limitsFromEnv));
-  assert.match(item(result, 'request_limits').subtitle, /Set by the environment/);
-});
-
 check('every title and hint line stays narrow, so the settings window does too', () => {
   const lines = [];
   const walk = (items) => items.forEach((i) => {
     for (const text of [i.title, i.subtitle]) if (text) String(text).split('\n').forEach((l) => lines.push(l));
     if (i.items) walk(i.items);
   });
-  // With the playlist's address in its hint, as when running.
-  const self = { _resolveZone: () => null, playlistUrl: 'http://192.0.2.10:8338/Download/playlist.csv' };
+  // As when running.
+  const self = { _resolveZone: () => null, playlistUrl: () => 'http://192.168.100.200:65535/p/7KQ4-M9XD' };
   for (const values of [{}, { request_limits: 'custom' }]) {
     walk(RoonService.prototype._layout.call(self, values).layout);
   }
