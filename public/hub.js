@@ -24,10 +24,10 @@
   }
 
   // Beside the playing track, the cover's top is level with the middle of the
-  // "Playing now" line, and its bottom with the middle of the credit when the
-  // track has an album and a credit. It keeps that size for every track; with
-  // fewer lines, the space below them stays empty. Phones lay it out their own
-  // way.
+  // "Playing now" line (the credit is on it too), and its bottom with the middle
+  // of the album line when the track has one. It keeps that size for every
+  // track; without an album, the space below stays empty. Phones lay it out
+  // their own way.
   const wide = window.matchMedia('(min-width: 721px)');
   function alignArt() {
     const image = el('current-art');
@@ -35,9 +35,9 @@
     image.style.height = '';
     image.style.marginTop = '';
     if (!wide.matches || el('current').hidden) return;
-    // Measured with an album line and a credit, put in for the moment if the
-    // track has none: they're taken out again before the page is drawn.
-    const added = [el('current-album'), el('current-who')].filter((line) => line.hidden);
+    // Measured with an album line, put in for the moment if the track has
+    // none: it's taken out again before the page is drawn.
+    const added = [el('current-album')].filter((line) => line.hidden);
     for (const line of added) {
       line.textContent = '\u00a0';
       line.hidden = false;
@@ -48,7 +48,7 @@
       return (box.top + box.bottom) / 2 - top;
     };
     const from = middle(el('current-label'));
-    const size = middle(el('current-who')) - from;
+    const size = middle(el('current-album')) - from;
     for (const line of added) {
       line.textContent = '';
       line.hidden = true;

@@ -1064,13 +1064,16 @@ just "Hub".
 On a screen wider than a phone (721 pixels and up), the party's name, the QR code and its
 caption are one block, centred down the left third; the QR code is 45% of the height, as
 nothing shares its column. What's playing is at the top right, and Up next runs under it
-to the bottom of the screen (nine rows at 1080p), scrolling when it's longer. An empty
-queue says so in the middle of that space, at the size of the playing track's artist.
-`alignArt()` in `hub.js` sizes the playing track's cover from the text beside it: its top
-level with the middle of "Playing now", its bottom with the middle of the credit when the
-track has an album line and a credit (measured with stand-ins when it hasn't, so the
-cover is the same size for every track, and fewer lines leave space below). Phones keep
-one column, with "Playing now" above the cover.
+to the bottom of the screen (nine rows at 1080p), scrolling when it's longer. Each row
+has the title with its credit beside it, and the artist under them, beside the cover; a
+long title gives way to its credit. An empty queue says so in the middle of that space,
+at the size of the playing track's artist. The playing track's credit is on the
+"Playing now" line, at its far edge, the size of Up next's credits. `alignArt()` in
+`hub.js` sizes the playing track's cover from the text beside it: its top level with
+the middle of "Playing now", its bottom with the middle of the album line (measured with
+a stand-in when the track has none, so the cover is the same size for every track, and
+a missing album leaves space below). Phones keep one column, with "Playing now" and the
+credit above the cover.
 
 The layout is for a 1920 × 1080 screen. On a bigger one, `hub.css` scales the root font
 size with the screen (by whichever side runs out first, never below the browser's own),

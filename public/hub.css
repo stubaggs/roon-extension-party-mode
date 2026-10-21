@@ -179,8 +179,29 @@ html {
   white-space: nowrap;
 }
 
+/* "Playing now" on the top line with the credit at its far edge; title,
+   artist and album under them, across the whole width. */
 .current-text {
+  flex: 1 1 auto;
   min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 1rem;
+}
+
+.current-text > * {
+  grid-column: 1 / -1;
+}
+
+.current-text > .current-label {
+  grid-column: 1;
+}
+
+.current-text > .current-who {
+  grid-area: 1 / 2;
+  justify-self: end;
+  align-self: center;
+  margin: 0;
 }
 
 .current-artist {
@@ -205,12 +226,13 @@ html {
   max-width: 40ch;
 }
 
+/* The size of the credits in Up next (0.6 of a row's text). */
 .current-who {
   display: inline-block;
   margin: 0.8rem 0 0;
-  padding: 0.2rem 0.8rem;
+  padding: 0.1rem 0.6rem;
   border-radius: 999px;
-  font-size: clamp(0.85rem, 1.3vw, 1.15rem);
+  font-size: calc(0.6 * clamp(1rem, 1.6vw, 1.5rem));
   background: rgba(201, 182, 255, 0.18);
   color: var(--lavender);
 }
@@ -336,21 +358,29 @@ html {
 }
 
 
-/* With room to spare, one line per song so more of the queue fits. */
+/* With room to spare, the credit beside the title, and the artist under both. */
 @media (min-width: 721px) {
   .upnext .list > li > div {
-    display: flex;
+    display: grid;
+    /* The credit keeps its width and a long title gives way; the rest of the
+       row is for the artist line under them. */
+    grid-template-columns: minmax(0, max-content) max-content 1fr;
     align-items: baseline;
-    gap: 0.9em;
+    column-gap: 0.9em;
   }
   .upnext .list .t {
-    flex: 0 1 auto;
+    grid-area: 1 / 1;
   }
   .upnext .list .a {
-    flex: 0 1 auto;
+    grid-area: 2 / 1 / auto / -1;
+    /* Under the title and credit, without widening their columns: a long
+       artist line would take room from its own row's title. */
+    width: 0;
+    min-width: 100%;
   }
   .upnext .list .who {
-    flex: none;
+    grid-area: 1 / 2;
+    justify-self: start;
     margin-top: 0;
   }
 }
@@ -382,22 +412,22 @@ html {
   .current {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr);
-    /* The label, then the cover beside title, artist, album and credit. No row
-       gap: the inherited flex gap would push those apart. */
+    /* The label with the credit at its far edge, then the cover beside title,
+       artist and album. No row gap: the inherited flex gap would push those apart. */
     gap: 0 1rem;
     align-items: center;
   }
   .current-text {
     display: contents;
   }
-  .current-label {
-    grid-column: 1 / -1;
+  .current-text > .current-label {
+    grid-area: 1 / 1 / auto / -1;
     margin: 0 0 0.6rem;
     font-weight: 600;
   }
   .current-art {
     grid-column: 1;
-    grid-row: 2 / span 4;
+    grid-row: 2 / span 3;
   }
   .current-title {
     grid-area: 2 / 2;
@@ -408,11 +438,9 @@ html {
   .current-album {
     grid-area: 4 / 2;
   }
-  .current-who {
-    grid-area: 5 / 2;
-  }
-  .current-who {
-    justify-self: start;
+  .current-text > .current-who {
+    grid-area: 1 / 2;
+    align-self: start;
   }
   .qr {
     width: min(60%, 16rem);

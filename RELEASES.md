@@ -29,7 +29,8 @@ Not released yet. Its beta is out: you can try it as "Party Mode (beta)" (see
 
 - **A new Party Hub layout:** the QR code is bigger and has the left of the screen to
   itself, and Up next runs down the right under what's playing, showing about twice as
-  many tracks (nine on a 1080p TV).
+  many tracks (nine on a 1080p TV). Each track in Up next has its artist under its
+  title, and who asked for the playing track is beside "Playing now".
 - **No setup before installing with Docker:** settings now live in a Docker volume, so a
   new install is just `docker compose up -d` (or `docker run`), with no `config.json` to
   create. Updating keeps your settings; installing afresh with the new instructions
