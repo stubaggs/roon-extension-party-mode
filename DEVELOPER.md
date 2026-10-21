@@ -292,10 +292,10 @@ as guest names (`_reserved_host_words` in each language file).
 
 Stored as `guest_invite`, On (`true`) by default; settings saved before it existed read as
 On. `/api/party` passes it to the guest page as `invite`. On, the guest page shows the
-party's name top left, with a QR symbol, and tapping it shows the join code
+party's name top left, with a share symbol, and tapping it shows the join code
 (`/api/qr.svg`, the Hub's) on a card, for someone else to scan from that phone (see
 [The guest page](#the-guest-page)). It's the same code as on the Party Hub, so nothing
-new is let in. Off, the guest page shows the party's name without the QR symbol, as
+new is let in. Off, the guest page shows the party's name without the share symbol, as
 plain text. Either way, a change applies to open pages
 at once.
 
@@ -528,7 +528,7 @@ redirected, so an old bookmark needs a fresh scan.
   nothing different to do.
 - **The name tag**, top right, opens the name dialog. The 🌐 button beside it chooses the
   language (see [Translating the pages](#translating-the-pages)).
-- **The party's name**, top left, with a QR symbol, shows the join code for another
+- **The party's name**, top left, with a share symbol, shows the join code for another
   phone to scan (`openInvite()`). The code is fetched each time the card opens, so a new
   party's code is never stale. Turning [Invites](#party-invites) off closes the
   card, as Party Off does, and leaves the name alone, as a plain label

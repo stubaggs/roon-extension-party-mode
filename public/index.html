@@ -29,15 +29,14 @@
   </head>
   <body>
     <main id="app" hidden>
-      <!-- Top left: the party's name. With Party invites on, it's a button, with a QR
+      <!-- Top left: the party's name. With Party invites on, it's a button, with a share
            symbol, that shows the join code so a guest can pass the party on; off, just
            the name. Top right: the page's language (a globe) and who the guest's
            tracks are credited to; tap to change. -->
       <div class="topbar">
         <button class="name-chip party-chip" id="party-chip" type="button" hidden>
-          <svg class="qr-glyph" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
-            <path d="M1.75 1.75h4.5v4.5h-4.5zM9.75 1.75h4.5v4.5h-4.5zM1.75 9.75h4.5v4.5h-4.5z" fill="none" stroke="currentColor" stroke-width="1.5" />
-            <path d="M3.5 3.5h1v1h-1zM11.5 3.5h1v1h-1zM3.5 11.5h1v1h-1zM9 9h2.5v2.5H9zM12.5 12.5H15V15h-2.5zM12.5 9H15v2h-2.5zM9 13h2v2H9z" fill="currentColor" />
+          <svg class="share-glyph" viewBox="2 0 12 16" aria-hidden="true" focusable="false">
+            <path d="M5.75 6H4.5A1.5 1.5 0 0 0 3 7.5v6A1.5 1.5 0 0 0 4.5 15h7a1.5 1.5 0 0 0 1.5-1.5v-6A1.5 1.5 0 0 0 11.5 6h-1.25M8 10V1.25M6 3.25l2-2 2 2" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
           </svg>
           <span class="party-chip-name" id="party-chip-name" dir="auto"></span>
         </button>
