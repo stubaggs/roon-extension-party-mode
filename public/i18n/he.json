@@ -1,6 +1,6 @@
 {
   "_language": "עברית",
-  "_reserved_host_words": "המארח, המארחת",
+  "_reserved_host_words": "המארח, המארחת, מארח, מארחת",
   "_reserved_radio_words": "רדיו",
   "page.title": "הוספת רצועה",
   "page.hub_title": "{name} Hub",
@@ -10,7 +10,7 @@
   "playing.nothing": "שום דבר לא מתנגן",
   "playing.nothing_yet": "עדיין כלום",
   "playing.station": "תחנת רדיו",
-  "queue.waiting_for_host": "ממתינים שהמארח יפעיל את התור.",
+  "queue.waiting_for_host": "ממתינים שהמארחים יפעילו את התור.",
   "credit.requested_by": "בבקשת {name}",
   "credit.guest": "אנונימי",
   "credit.radio": "Roon Radio",
@@ -61,7 +61,7 @@
   "toast.already_queued": "הרצועה הזו כבר בתור.",
   "toast.none_left": "השתמשתם בכולם.",
   "toast.none_left_wait": "השתמשתם בכולם. אפשר שוב בעוד {wait}.",
-  "toast.disabled": "המארח כיבה את האפשרות הזו.",
+  "toast.disabled": "המארחים כיבו את האפשרות הזו.",
   "toast.skipped": "דולגה",
   "toast.failed": "מצטערים, זה לא הצליח.",
   "toast.too_many_requests": "יותר מדי בקשות. נא להמתין דקה ולנסות שוב.",
@@ -84,7 +84,7 @@
   "invite.open": "הצגת קוד ה-QR של {name} כדי שגם אחרים יוכלו להצטרף",
   "invite.close": "סגירה",
   "locked.title": "סרקו את הקוד שוב",
-  "locked.text": "הקישור הזה עובד רק אחרי סריקת הקוד ב-Party Hub. בקשו מהמארח להציג אותו.",
+  "locked.text": "הקישור הזה עובד רק אחרי סריקת הקוד ב-Party Hub. בקשו מהמארחים להציג אותו.",
   "screen.scan": "סרקו כדי להוסיף רצועה",
   "screen.qr_alt": "קוד QR לדף האורחים",
   "screen.download_playlist": "הורדת הפלייליסט",
@@ -92,6 +92,5 @@
   "screen.playlist_qr_alt": "קוד QR לפלייליסט",
   "screen.closed_title": "הבקשות נסגרו",
   "screen.closed_text": "תודה על כל הרצועות.",
-  "screen.menu": "תפריט",
-  "join.expired": "תוקף הקוד פג. סרקו שוב את הקוד ב-Party Hub."
+  "screen.menu": "תפריט"
 }

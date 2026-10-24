@@ -37,7 +37,7 @@
   "played.skipped_by": "Overgeslagen door {name}",
   "played.skipped_by_host": "Overgeslagen door de host",
   "allowance.closed": "Verzoekjes zijn nu gesloten.",
-  "allowance.paused": "Verzoeken staan even op pauze.",
+  "allowance.paused": "Verzoekjes staan even op pauze.",
   "button.left": {
     "one": "nog {count}",
     "other": "nog {count}"
@@ -86,6 +86,5 @@
   "screen.playlist_qr_alt": "QR-code voor de playlist",
   "screen.closed_title": "Verzoekjes zijn gesloten",
   "screen.closed_text": "Bedankt voor alle nummers.",
-  "screen.menu": "Menu",
-  "join.expired": "Deze code is verlopen. Scan de code op de Party Hub opnieuw."
+  "screen.menu": "Menu"
 }

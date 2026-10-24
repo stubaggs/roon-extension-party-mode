@@ -10,7 +10,7 @@
   "playing.nothing": "مفيش حاجة شغّالة",
   "playing.nothing_yet": "لسه مفيش حاجة",
   "playing.station": "محطة راديو",
-  "queue.waiting_for_host": "مستنيين صاحب الحفلة يشغّل الطابور.",
+  "queue.waiting_for_host": "مستنيين أصحاب الحفلة يشغّلوا الطابور.",
   "credit.requested_by": "طلب {name}",
   "credit.guest": "مجهول",
   "credit.radio": "Roon Radio",
@@ -62,7 +62,7 @@
   "toast.already_queued": "التراك ده موجود في الطابور أصلًا.",
   "toast.none_left": "استخدمتهم كلهم.",
   "toast.none_left_wait": "استخدمتهم كلهم. فيه تاني بعد {wait}.",
-  "toast.disabled": "صاحب الحفلة قفل الاختيار ده.",
+  "toast.disabled": "أصحاب الحفلة قفلوا الاختيار ده.",
   "toast.skipped": "اتعدّى",
   "toast.failed": "معلش، منفعش.",
   "toast.too_many_requests": "طلبات كتير أوي. استنى دقيقة وجرّب تاني.",
@@ -85,7 +85,7 @@
   "invite.open": "اعرض رمز QR بتاع {name} علشان غيرك يقدر ينضم",
   "invite.close": "قفل",
   "locked.title": "امسح الكود تاني",
-  "locked.text": "اللينك ده مش هيشتغل غير بعد ما تمسح الكود اللي على Party Hub. اطلب من صاحب الحفلة يوريهولك.",
+  "locked.text": "اللينك ده مش هيشتغل غير بعد ما تمسح الكود اللي على Party Hub. اطلب من أصحاب الحفلة يورّوهولك.",
   "screen.scan": "امسح عشان تضيف تراك",
   "screen.qr_alt": "كود QR لصفحة الضيوف",
   "screen.download_playlist": "نزّل البلاي ليست",
@@ -93,6 +93,5 @@
   "screen.playlist_qr_alt": "كود QR للبلاي ليست",
   "screen.closed_title": "الطلبات اتقفلت",
   "screen.closed_text": "شكرًا على كل التراكات.",
-  "screen.menu": "القائمة",
-  "join.expired": "الكود ده خلص. امسح الكود اللي على Party Hub تاني."
+  "screen.menu": "القائمة"
 }

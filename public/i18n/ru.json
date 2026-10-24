@@ -10,7 +10,7 @@
   "playing.nothing": "Ничего не играет",
   "playing.nothing_yet": "Пока ничего",
   "playing.station": "Радиостанция",
-  "queue.waiting_for_host": "Ждём, когда хозяин запустит очередь.",
+  "queue.waiting_for_host": "Ждём, когда хозяева запустят очередь.",
   "credit.requested_by": "Заказ от: {name}",
   "credit.guest": "Аноним",
   "credit.radio": "Roon Radio",
@@ -61,7 +61,7 @@
   "toast.already_queued": "Этот трек уже в очереди.",
   "toast.none_left": "Вы использовали все.",
   "toast.none_left_wait": "Вы использовали все. Ещё через {wait}.",
-  "toast.disabled": "Хозяин отключил эту возможность.",
+  "toast.disabled": "Хозяева отключили эту возможность.",
   "toast.skipped": "Пропущен",
   "toast.failed": "Извините, не получилось.",
   "toast.too_many_requests": "Слишком много запросов. Подождите минуту и попробуйте снова.",
@@ -84,7 +84,7 @@
   "invite.open": "Показать QR-код для «{name}», чтобы другие могли присоединиться",
   "invite.close": "Закрыть",
   "locked.title": "Отсканируйте код ещё раз",
-  "locked.text": "Эта ссылка работает только после сканирования кода на Party Hub. Попросите хозяина показать его.",
+  "locked.text": "Эта ссылка работает только после сканирования кода на Party Hub. Попросите хозяев показать его.",
   "screen.scan": "Отсканируйте, чтобы добавить трек",
   "screen.qr_alt": "QR-код страницы для гостей",
   "screen.download_playlist": "Скачать плейлист",
@@ -92,6 +92,5 @@
   "screen.playlist_qr_alt": "QR-код плейлиста",
   "screen.closed_title": "Заказы закрыты",
   "screen.closed_text": "Спасибо за все треки.",
-  "screen.menu": "Меню",
-  "join.expired": "Срок действия кода истёк. Отсканируйте код на Party Hub ещё раз."
+  "screen.menu": "Меню"
 }

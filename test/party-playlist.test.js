@@ -47,6 +47,16 @@ check('records each queue entry once, in the order it was queued', () => {
   assert.deepStrictEqual(titles(playlist), ['Dancing Queen', 'Waterloo', 'SOS']);
 });
 
+check('says when a queue entry was first seen, by its id', () => {
+  const playlist = new PartyPlaylist();
+  playlist.update('zone', [track(1, 'Waterloo')], nobody, 1000);
+  playlist.update('zone', [track(1, 'Waterloo'), track(2, 'SOS')], nobody, 2000);
+  assert.strictEqual(playlist.queuedAt(1), 1000);
+  assert.strictEqual(playlist.queuedAt(2), 2000);
+  assert.strictEqual(playlist.queuedAt(3), null);
+  assert.strictEqual(playlist.queuedAt(undefined), null);
+});
+
 check('keeps tracks after they leave the queue', () => {
   const playlist = new PartyPlaylist();
   playlist.update('o1', [track(1, 'Dancing Queen'), track(2, 'Waterloo')], nobody);

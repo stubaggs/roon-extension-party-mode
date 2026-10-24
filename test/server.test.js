@@ -19,10 +19,13 @@
 
 const assert = require('assert');
 const EventEmitter = require('events');
-const { createServer } = require('../lib/server');
+const QRCode = require('qrcode');
+const http = require('http');
+const { createServer, lanAddress, CONNECTION_LIMITS } = require('../lib/server');
 const { GuestStore, cleanName, MAX_SESSIONS, OFFERED_SEARCHES } = require('../lib/guests');
 const { DEFAULT_SETTINGS, RoonService } = require('../lib/roon-service');
 const { ArtCache, KnownKeys } = require('../lib/art-cache');
+const i18n = require('../lib/i18n');
 
 let failures = 0;
 async function check(name, fn) {
@@ -87,7 +90,7 @@ const post = (path, cookie, body) =>
 
 /** A new guest, joined and with Waterloo and SOS in their search results. */
 async function newGuest() {
-  const cookie = (await get(`/j/${guests.joinCode}`)).headers.get('set-cookie').split(';')[0];
+  const cookie = (await get('/GuestHub')).headers.get('set-cookie').split(';')[0];
   await get('/api/search?q=abba', { Cookie: cookie });
   return cookie;
 }
@@ -120,18 +123,33 @@ const set = (values) => Object.assign(roon.settings, values);
 
   const playlistPath = () => new URL(server.playlistUrl()).pathname;
 
-  await check('the playlist is at a secret address, offered to the Hub only once requests close', async () => {
+  await check('the playlist is at a secret address, which the Hub is never given', async () => {
     assert.match(playlistPath(), /^\/p\/[0-9A-Z]{4}-[0-9A-Z]{4}$/);
+    for (const [enabled, choice] of [[true, 'qr'], ['paused', 'qr'], [false, 'qr'], [false, 'link'], [false, 'off']]) {
+      set({ enabled, playlist_download: choice });
+      const hub = await (await get('/api/hub')).text();
+      assert.ok(!hub.includes(playlistPath().slice(3)), `${enabled} ${choice}`);
+      assert.ok(!hub.includes('playlist_url') && !hub.includes('join_url'), `${enabled} ${choice}`);
+    }
+  });
+
+  await check('/Playlist: the same file, only while the Hub offers it', async () => {
     for (const enabled of [true, 'paused']) {
       set({ enabled, playlist_download: 'qr' });
-      assert.strictEqual((await (await get('/api/hub')).json()).playlist_url, null, String(enabled));
+      assert.strictEqual((await get('/Playlist')).status, 404, String(enabled));
     }
     for (const choice of ['qr', 'link']) {
       set({ enabled: false, playlist_download: choice });
-      assert.strictEqual((await (await get('/api/hub')).json()).playlist_url, playlistPath(), choice);
+      const res = await get('/Playlist');
+      assert.strictEqual(res.status, 200, choice);
+      assert.match(res.headers.get('content-disposition'), /attachment; filename="Test Party \d{4}-\d{2}-\d{2}\.csv"/);
+      assert.strictEqual(await res.text(), await (await get(playlistPath())).text(), choice);
+      assert.strictEqual(res.headers.get('access-control-allow-origin'), null, 'no other site reads it');
     }
+    assert.strictEqual((await get('/playlist')).status, 200, 'as it may be typed');
     set({ playlist_download: 'off' });
-    assert.strictEqual((await (await get('/api/hub')).json()).playlist_url, null, 'off');
+    assert.strictEqual((await get('/Playlist')).status, 404, 'Playlist Off');
+    set({ enabled: true, playlist_download: 'qr' });
   });
 
   await check('the download works at its address whatever the setting, as a named CSV file', async () => {
@@ -178,55 +196,41 @@ const set = (values) => Object.assign(roon.settings, values);
 
   await check('the playlist QR code: only once requests close, with QR code chosen; not the join code', async () => {
     set({ enabled: true, playlist_download: 'qr' });
-    assert.strictEqual((await get('/Download/playlist-qr.svg')).status, 404, 'during the party');
+    assert.strictEqual((await get('/embed/playlist-qr.svg')).status, 404, 'during the party');
     set({ enabled: false, playlist_download: 'link' });
-    assert.strictEqual((await get('/Download/playlist-qr.svg')).status, 404, 'link only');
+    assert.strictEqual((await get('/embed/playlist-qr.svg')).status, 404, 'link only');
     set({ playlist_download: 'off' });
-    assert.strictEqual((await get('/Download/playlist-qr.svg')).status, 404, 'off');
+    assert.strictEqual((await get('/embed/playlist-qr.svg')).status, 404, 'off');
     set({ playlist_download: 'qr' });
-    const playlist = await (await get('/Download/playlist-qr.svg')).text();
-    const join = await (await get('/api/qr.svg')).text();
+    const playlist = await (await get('/embed/playlist-qr.svg')).text();
     assert.match(playlist, /^<svg/);
-    assert.notStrictEqual(playlist, join);
-    // Its address before 1.2.0, for a Hub left open across an update.
-    assert.match(await (await get('/api/playlist-qr.svg')).text(), /^<svg/);
+    assert.notStrictEqual(playlist, await (await get('/embed/join-qr.svg')).text());
+    // The addresses before 1.4.0 are gone.
+    for (const path of ['/api/qr.svg', '/Download/playlist-qr.svg', '/api/playlist-qr.svg']) {
+      assert.strictEqual((await get(path)).status, 404, path);
+    }
     set({ enabled: true });
   });
 
   console.log('\njoining');
 
-  await check('Party Off: the join link says requests are closed, in the guest\'s language', async () => {
-    set({ enabled: false });
-    const res = await get(`/j/${guests.joinCode}`, { 'Accept-Language': 'fr-FR,fr;q=0.9' });
-    assert.strictEqual(res.status, 403);
+  await check('the root asks the guest to scan the code, in their language', async () => {
+    const res = await get('/', { 'Accept-Language': 'fr-FR,fr;q=0.9' });
     assert.match(res.headers.get('content-type'), /^text\/html/);
     const html = await res.text();
     assert.match(html, /<html lang="fr" dir="ltr">/);
     assert.match(html, /name="viewport"/);
-    assert.match(html, /<h1>Les demandes sont fermées<\/h1>/);
+    assert.ok(html.includes(`<h1>${i18n.t('fr', 'locked.title')}</h1>`));
   });
 
-  await check('an old code asks the guest to scan again, in English by default', async () => {
+  await check('the join links before 1.4.0 (/j/<code>) are gone', async () => {
     set({ enabled: true });
-    const res = await get('/j/not-the-code');
-    assert.strictEqual(res.status, 403);
-    const html = await res.text();
-    assert.match(html, /<html lang="en" dir="ltr">/);
-    assert.match(html, /<h1>Scan the code again<\/h1>/);
-    assert.match(html, /That code has expired/);
-  });
-
-  await check('the right code starts a session and opens the guest page', async () => {
-    set({ enabled: true });
-    const res = await get(`/j/${guests.joinCode}`);
-    assert.strictEqual(res.status, 302);
-    assert.strictEqual(res.headers.get('location'), '/GuestHub');
-    assert.match(res.headers.get('set-cookie'), /^party_sid=/);
+    assert.strictEqual((await get('/j/AAAAAAAAAAAA')).status, 404);
   });
 
   await check('the session cookie lasts 12 hours and is renewed whenever it is used', async () => {
     set({ enabled: true });
-    const joined = (await get(`/j/${guests.joinCode}`)).headers.get('set-cookie');
+    const joined = (await get('/GuestHub')).headers.get('set-cookie');
     assert.match(joined, /Max-Age=43200/);
     const cookie = joined.split(';')[0];
     const res = await get('/api/party', { Cookie: cookie });
@@ -238,19 +242,24 @@ const set = (values) => Object.assign(roon.settings, values);
 
   await check('scanning again keeps the session and its name; an unknown one starts afresh', async () => {
     set({ enabled: true });
-    const cookie = (await get(`/j/${guests.joinCode}`)).headers.get('set-cookie').split(';')[0];
+    const cookie = (await get('/GuestHub')).headers.get('set-cookie').split(';')[0];
     await post('/api/name', cookie, { name: 'Rescan Ronnie', confirm: true });
-    const again = (await get(`/j/${guests.joinCode}`, { Cookie: cookie })).headers.get('set-cookie').split(';')[0];
+    const again = (await get('/GuestHub', { Cookie: cookie })).headers.get('set-cookie').split(';')[0];
     assert.strictEqual(again, cookie, 'the same session');
     const party = await (await get('/api/party', { Cookie: again })).json();
     assert.strictEqual(party.guest_name, 'Rescan Ronnie');
-    const stranger = (await get(`/j/${guests.joinCode}`, { Cookie: 'party_sid=not-a-session' })).headers.get('set-cookie').split(';')[0];
+    const stranger = (await get('/GuestHub', { Cookie: 'party_sid=not-a-session' })).headers.get('set-cookie').split(';')[0];
     assert.notStrictEqual(stranger, 'party_sid=not-a-session', 'a new session');
     assert.notStrictEqual(stranger, cookie);
   });
 
   await check('the guest page is at /GuestHub, in any case, and no longer at the root', async () => {
-    for (const path of ['/GuestHub', '/guesthub']) assert.strictEqual((await get(path)).status, 200, path);
+    for (const path of ['/GuestHub', '/guesthub']) {
+      const res = await get(path);
+      assert.strictEqual(res.status, 200, path);
+      // Never from a cache: opening it again is how a page rejoins a party.
+      assert.strictEqual(res.headers.get('cache-control'), 'no-store', path);
+    }
     const html = await (await get('/', { 'Accept-Language': 'fr' })).text();
     assert.match(html, /<html lang="fr"/);
     assert.match(html, /<h1>Scannez à nouveau le code<\/h1>/);
@@ -282,12 +291,19 @@ const set = (values) => Object.assign(roon.settings, values);
     assert.match(page, /id="invite-qr"/);
   });
 
-  await check('Party Off: the guest API says closed, for "Requests are closed"', async () => {
-    const cookie = (await get(`/j/${guests.joinCode}`)).headers.get('set-cookie').split(';')[0];
-    set({ enabled: false });
+  await check('Party Off: the guest API says closed, for "Requests are closed", and whether the playlist is offered', async () => {
+    const cookie = (await get('/GuestHub')).headers.get('set-cookie').split(';')[0];
+    set({ enabled: false, playlist_download: 'qr' });
     const res = await get('/api/party', { Cookie: cookie });
     assert.strictEqual(res.status, 403);
-    assert.strictEqual((await res.json()).error, 'closed');
+    assert.deepStrictEqual(await res.json(), { error: 'closed', playlist: true });
+    set({ playlist_download: 'link' });
+    assert.strictEqual((await (await get('/api/party', { Cookie: cookie })).json()).playlist, true);
+    set({ playlist_download: 'off' });
+    assert.strictEqual((await (await get('/api/party', { Cookie: cookie })).json()).playlist, false);
+    set({ playlist_download: 'qr' });
+    const html = await (await get('/GuestHub')).text();
+    assert.match(html, /<a id="closed-playlist"[^>]* href="\/Playlist" download hidden/);
   });
 
   await check('while the party has paused itself (its zone gone), guests are told paused', async () => {
@@ -474,7 +490,7 @@ const set = (values) => Object.assign(roon.settings, values);
     const cookie = await newGuest();
     assert.strictEqual((await post('/api/request', cookie, { key: '10:0', mode: 'add' })).status, 200);
     // The phone takes whichever cookie the scan sets.
-    const after = (await get(`/j/${guests.joinCode}`, { Cookie: cookie })).headers.get('set-cookie').split(';')[0];
+    const after = (await get('/GuestHub', { Cookie: cookie })).headers.get('set-cookie').split(';')[0];
     const party = await (await get('/api/party', { Cookie: after })).json();
     assert.strictEqual(party.allowances.add.remaining, 1);
     set({ add_limit: 10 });
@@ -706,7 +722,7 @@ const set = (values) => Object.assign(roon.settings, values);
   });
 
   await check('pages allow only their own scripts and styles, and guest pages cannot be framed', async () => {
-    for (const path of ['/', '/GuestHub', '/api/party', '/j/not-the-code']) {
+    for (const path of ['/', '/GuestHub', '/api/party']) {
       const res = await get(path);
       assert.match(res.headers.get('content-security-policy'), /script-src 'self'.*frame-ancestors 'none'/, path);
       assert.strictEqual(res.headers.get('x-frame-options'), 'DENY', path);
@@ -723,12 +739,31 @@ const set = (values) => Object.assign(roon.settings, values);
   });
 
   await check('other sites cannot embed the files, and the pages load only their own', async () => {
-    for (const path of ['/', '/PartyHub', '/api/hub', '/api/qr.svg', playlistPath()]) {
+    for (const path of ['/', '/PartyHub', '/GuestHub', '/api/hub', playlistPath()]) {
       const res = await get(path);
       assert.strictEqual(res.headers.get('cross-origin-resource-policy'), 'same-origin', path);
       // Ignored over plain HTTP, with an error in the console, so not sent.
       assert.strictEqual(res.headers.get('cross-origin-opener-policy'), null, path);
       assert.strictEqual(res.headers.get('cross-origin-embedder-policy'), 'require-corp', path);
+    }
+  });
+
+  await check('slow devices: limits on headers, whole requests, idle sockets and connections', async () => {
+    const other = createServer(roon, new GuestStore(), { limits: { all: 0, search: 0 } });
+    const listening = await other.listen(0);
+    try {
+      assert.strictEqual(listening.headersTimeout, 10000);
+      assert.strictEqual(listening.requestTimeout, 30000);
+      assert.strictEqual(listening.timeout, 60000);
+      assert.strictEqual(listening.maxConnections, 2000);
+      assert.deepStrictEqual(CONNECTION_LIMITS, { headersTimeout: 10000, requestTimeout: 30000, timeout: 60000, maxConnections: 2000 });
+      // Headers within the request's time; streams stay inside the cap.
+      assert.ok(CONNECTION_LIMITS.headersTimeout <= CONNECTION_LIMITS.requestTimeout);
+      assert.ok(CONNECTION_LIMITS.maxConnections > 1000);
+      // A stream's heartbeat comes well inside the idle limit.
+      assert.ok(20000 * 2 < CONNECTION_LIMITS.timeout);
+    } finally {
+      listening.close();
     }
   });
 
@@ -913,11 +948,300 @@ const set = (values) => Object.assign(roon.settings, values);
     for (const icon of manifest.icons) assert.strictEqual((await get(icon.src)).status, 200, icon.src);
   });
 
+  await check('the QR codes under /embed/ can be shown on any site, in a frame or as an image', async () => {
+    set({ enabled: false, playlist_download: 'qr' });
+    // The codes carry /GuestHub and /Playlist, never the secret addresses.
+    const qrOf = (url) => QRCode.toString(url, { type: 'svg', margin: 1, errorCorrectionLevel: 'M', color: { dark: '#160E24', light: '#FFFFFF' } });
+    const origin = new URL(server.guestUrl()).origin;
+    assert.strictEqual(server.guestUrl(), `${origin}/GuestHub`);
+    assert.strictEqual(await (await get('/embed/join-qr.svg')).text(), await qrOf(`${origin}/GuestHub`));
+    assert.strictEqual(await (await get('/embed/playlist-qr.svg')).text(), await qrOf(`${origin}/Playlist`));
+    for (const path of ['/embed/join-qr.svg', '/Embed/Join-QR.svg', '/embed/playlist-qr.svg']) {
+      const res = await get(path);
+      assert.strictEqual(res.status, 200, path);
+      assert.match(res.headers.get('content-type'), /image\/svg\+xml/, path);
+      assert.strictEqual(res.headers.get('cache-control'), 'no-store', path);
+      assert.strictEqual(res.headers.get('cross-origin-resource-policy'), 'cross-origin', path);
+      assert.doesNotMatch(res.headers.get('content-security-policy'), /frame-ancestors/, path);
+      assert.strictEqual(res.headers.get('x-frame-options'), null, path);
+    }
+    set({ enabled: true });
+  });
+
+  await check('/GuestHub lets a guest in when opened, during the party', async () => {
+    set({ enabled: true });
+    const open = { 'Sec-Fetch-Dest': 'document', 'Sec-Fetch-Mode': 'navigate' };
+    const cookieOf = (res) => (res.headers.get('set-cookie') || '').split(';')[0];
+    let res = await get('/GuestHub', open);
+    assert.strictEqual(res.status, 200);
+    const cookie = cookieOf(res);
+    assert.match(cookie, /^party_sid=/);
+    // Opening it again keeps the session; so does a browser that sends no Sec-Fetch-Dest.
+    assert.strictEqual(cookieOf(await get('/GuestHub', Object.assign({ Cookie: cookie }, open))), cookie);
+    assert.match(cookieOf(await get('/GuestHub')), /^party_sid=/);
+    // One that ran out, or from an earlier party, gets a new one.
+    assert.notStrictEqual(cookieOf(await get('/GuestHub', Object.assign({ Cookie: 'party_sid=gone' }, open))), cookie);
+    // Another site's image, frame or fetch makes none.
+    const before = guests.sessions.size;
+    for (const dest of ['image', 'iframe', 'empty', 'script']) {
+      res = await get('/GuestHub', { 'Sec-Fetch-Dest': dest });
+      assert.strictEqual(res.headers.get('set-cookie'), null, dest);
+    }
+    assert.strictEqual(guests.sessions.size, before);
+    // Paused lets guests in to look around; Off makes no session.
+    set({ enabled: 'paused' });
+    assert.match(cookieOf(await get('/GuestHub', open)), /^party_sid=/);
+    set({ enabled: false });
+    res = await get('/GuestHub', open);
+    assert.strictEqual(res.status, 200);
+    assert.strictEqual(res.headers.get('set-cookie'), null, 'Off');
+    set({ enabled: true });
+  });
+
+  await check('/embed/join and /embed/playlist are gone: /GuestHub and /Playlist instead', async () => {
+    set({ enabled: false, playlist_download: 'link' });
+    for (const path of ['/embed/join', '/embed/playlist']) assert.strictEqual((await get(path)).status, 404, path);
+    set({ enabled: true, playlist_download: 'qr' });
+  });
+
+  await check('a QR code is made once per address, and a new address gets a new one', async () => {
+    const calls = [];
+    const original = QRCode.toString;
+    QRCode.toString = (...args) => { calls.push(args[0]); return original.apply(QRCode, args); };
+    try {
+      const first = await (await get('/embed/join-qr.svg')).text();
+      assert.match(first, /^<svg/);
+      for (let i = 0; i < 5; i += 1) assert.strictEqual(await (await get('/embed/join-qr.svg')).text(), first);
+      assert.ok(calls.length <= 1, `made ${calls.length} times`);
+      set({ enabled: false, playlist_download: 'qr' });
+      assert.notStrictEqual(await (await get('/embed/playlist-qr.svg')).text(), first);
+      set({ enabled: true });
+    } finally {
+      QRCode.toString = original;
+    }
+  });
+
+  await check("/embed/status.json: any site may read the party's state, and nothing more", async () => {
+    for (const [values, party] of [[{ enabled: true }, 'on'], [{ enabled: false }, 'off']]) {
+      set(values);
+      const res = await get('/embed/status.json');
+      assert.strictEqual(res.headers.get('access-control-allow-origin'), '*');
+      assert.strictEqual(res.headers.get('access-control-allow-credentials'), null);
+      assert.strictEqual(res.headers.get('cache-control'), 'no-store');
+      assert.strictEqual(res.headers.get('cross-origin-resource-policy'), 'cross-origin');
+      const status = await res.json();
+      assert.deepStrictEqual(Object.keys(status), ['party', 'party_name', 'host_name', 'ready', 'playlist', 'language', 'roon_radio']);
+      assert.strictEqual(status.roon_radio, false, 'no zone');
+      assert.strictEqual(status.party, party);
+      assert.strictEqual(status.party_name, 'Test Party');
+      // How the playlist is offered only once the party's over, and never its address.
+      assert.strictEqual(status.playlist, party === 'off' ? 'qr' : null);
+    }
+    roon.currentMode = 'paused';
+    assert.strictEqual((await (await get('/embed/status.json')).json()).party, 'paused');
+    delete roon.currentMode;
+    set({ enabled: true });
+    // The extension's own addresses stay unreadable to other sites.
+    assert.strictEqual((await get('/api/hub')).headers.get('access-control-allow-origin'), null);
+  });
+
+  await check('/embed/: playing now, up next and played, with credits and covers, and no address', async () => {
+    roon.zone = {
+      zone_id: 'z1', state: 'playing', is_seek_allowed: true, settings: { auto_radio: true },
+      now_playing: { length: 200, seek_position: 42, image_key: 'cover-now', three_line: { line1: 'Seasons', line2: 'Bebe Rexha', line3: 'Better Mistakes' } }
+    };
+    roon.queue = [
+      { queue_item_id: 21, length: 180, image_key: 'cover-21', two_line: { line1: 'Fernando', line2: 'ABBA' } },
+      { queue_item_id: 22, length: 240, two_line: { line1: 'Chiquitita', line2: 'ABBA' } }
+    ];
+    roon.radioPicks.add(21);
+    set({ host_name: 'Sam' });
+    try {
+      const before = Date.now();
+      const playing = await (await get('/embed/now-playing.json')).json();
+      assert.deepStrictEqual(Object.keys(playing), ['track']);
+      assert.deepStrictEqual(Object.keys(playing.track),
+        ['title', 'artist', 'album', 'length', 'art', 'credit', 'queued_at', 'state', 'station', 'seek_position', 'at']);
+      assert.deepStrictEqual([playing.track.title, playing.track.album, playing.track.state, playing.track.seek_position],
+        ['Seasons', 'Better Mistakes', 'playing', 42]);
+      assert.strictEqual(playing.track.art, '/embed/art/cover-now');
+      assert.ok(playing.track.at >= before && playing.track.at <= Date.now());
+      assert.deepStrictEqual(playing.track.credit, { kind: 'host', name: 'Sam', how: null });
+      // Roon Radio on in the party zone.
+      assert.strictEqual((await (await get('/embed/status.json')).json()).roon_radio, true);
+
+      const next = await (await get('/embed/up-next.json')).json();
+      assert.deepStrictEqual(Object.keys(next), ['tracks', 'empty']);
+      assert.deepStrictEqual(next.tracks.map((t) => [t.title, t.credit]),
+        [['Fernando', { kind: 'radio', name: null, how: null }], ['Chiquitita', { kind: 'host', name: 'Sam', how: null }]]);
+      assert.deepStrictEqual(Object.keys(next.tracks[0]), ['title', 'artist', 'album', 'length', 'art', 'credit', 'queued_at']);
+      assert.strictEqual(next.tracks[1].art, null);
+
+      const played = await (await get('/embed/played.json')).json();
+      assert.deepStrictEqual(Object.keys(played), ['tracks']);
+
+      // Nothing any site could use to join, find the playlist or the speaker.
+      for (const path of ['/embed/status.json', '/embed/now-playing.json', '/embed/up-next.json', '/embed/played.json']) {
+        const text = await (await get(path)).text();
+        assert.ok(!/\/j\/|\/p\/|http|z1|queue_item|guest"/.test(text), `${path}: ${text}`);
+      }
+
+      roon.queue = [];
+      assert.strictEqual((await (await get('/embed/up-next.json')).json()).empty, 'add_radio');
+      // The zone gone: the last track stays, paused, as on the Hub.
+      roon.zone = null;
+      const held = (await (await get('/embed/now-playing.json')).json()).track;
+      assert.deepStrictEqual([held.title, held.state], ['Seasons', 'paused']);
+    } finally {
+      roon.zone = null;
+      roon.queue = [];
+      roon.radioPicks.clear();
+      set({ host_name: '' });
+    }
+  });
+
+  await check("/embed/: a guest's track is credited by the name they gave, or none", async () => {
+    const { credit } = require('../lib/embed');
+    assert.deepStrictEqual(credit({ kind: 'add', requested_by: 'Alex' }), { kind: 'guest', name: 'Alex', how: 'add' });
+    assert.deepStrictEqual(credit({ kind: 'next', requested_by: null }), { kind: 'guest', name: null, how: 'next' });
+    assert.deepStrictEqual(credit({ kind: 'host' }, ''), { kind: 'host', name: null, how: null });
+    assert.strictEqual(credit({ kind: 'add', station: true }), null);
+    assert.strictEqual(credit(null), null);
+    // Internal references never go out.
+    assert.deepStrictEqual(Object.keys(credit({ kind: 'add', requested_by: 'Alex', guest: 'g1' })), ['kind', 'name', 'how']);
+    // Who skipped a played track: a guest by name (or none), or the host in Roon.
+    const { skippedBy, played } = require('../lib/embed');
+    assert.strictEqual(skippedBy({ skipped: false }), null);
+    assert.deepStrictEqual(skippedBy({ skipped: true, skipped_by: 'Alex' }), { kind: 'guest', name: 'Alex' });
+    assert.deepStrictEqual(skippedBy({ skipped: true, skipped_by: null }), { kind: 'guest', name: null });
+    assert.deepStrictEqual(skippedBy({ skipped: true, skipped_by: null, skipped_by_host: true }, 'Sam'), { kind: 'host', name: 'Sam' });
+    const [one] = played([{ title: 'SOS', length: 200, queued_at: 1, played_at: 2, skipped: true, skipped_by: 'Alex',
+      skipped_guest: 'g1', requested_guest: 'g2', kind: 'add', requested_by: 'Bo' }]).tracks;
+    assert.deepStrictEqual(Object.keys(one),
+      ['title', 'artist', 'album', 'length', 'art', 'credit', 'queued_at', 'played_at', 'skipped', 'skipped_by']);
+    assert.deepStrictEqual([one.queued_at, one.played_at, one.credit.name], [1, 2, 'Bo']);
+  });
+
+  await check('/embed/art: covers at the kept sizes only, from any site', async () => {
+    const asked = [];
+    roon.getImage = async (key, size) => {
+      asked.push(size);
+      if (key !== 'known') throw new Error('unknown_image');
+      return { contentType: 'image/jpeg', body: Buffer.from('jpeg') };
+    };
+    try {
+      const res = await get('/embed/art/known?size=120');
+      assert.strictEqual(res.status, 200);
+      assert.strictEqual(res.headers.get('cross-origin-resource-policy'), 'cross-origin');
+      await get('/embed/art/known?size=777');
+      await get('/embed/art/known');
+      await get('/embed/art/known?size=800');
+      assert.deepStrictEqual(asked, [120, 400, 400, 800]);
+      assert.strictEqual((await get('/embed/art/unknown')).status, 404);
+    } finally {
+      delete roon.getImage;
+    }
+  });
+
+  await check('/embed/events: the four views at once, then what changes; from any site', async () => {
+    const controller = new AbortController();
+    const res = await fetch(`${base}/embed/events`, { signal: controller.signal });
+    assert.strictEqual(res.headers.get('access-control-allow-origin'), '*');
+    assert.match(res.headers.get('content-type'), /text\/event-stream/);
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let text = '';
+    const until = async (pattern) => {
+      const stop = Date.now() + 2000;
+      while (!pattern.test(text) && Date.now() < stop) {
+        const { value, done } = await Promise.race([reader.read(), new Promise((r) => setTimeout(() => r({}), 200))]);
+        if (done) break;
+        if (value) text += decoder.decode(value);
+      }
+      return pattern.test(text);
+    };
+    try {
+      assert.ok(await until(/event: played\n/), text);
+      for (const event of ['status', 'now-playing', 'up-next', 'played']) assert.ok(text.includes(`event: ${event}\n`), event);
+      assert.ok(!text.includes('/j/'));
+      // A change: only the view that changed is sent.
+      text = '';
+      roon.queue = [{ queue_item_id: 31, length: 200, two_line: { line1: 'Waterloo', line2: 'ABBA' } }];
+      roon.emit('queue_changed');
+      assert.ok(await until(/event: up-next\n.*Waterloo/s), text);
+      assert.ok(!text.includes('event: status'), 'status unchanged, not sent');
+      const about = await (await get('/About')).text();
+      assert.match(about, /<th scope="row">Custom Party Hub pages<\/th><td>1 open<\/td>/);
+    } finally {
+      controller.abort();
+      roon.queue = [];
+    }
+  });
+
   await check('the Party Hub can be shown inside a dashboard', async () => {
     const res = await get('/PartyHub');
     assert.match(res.headers.get('content-security-policy'), /script-src 'self'/);
     assert.doesNotMatch(res.headers.get('content-security-policy'), /frame-ancestors/);
     assert.strictEqual(res.headers.get('x-frame-options'), null);
+  });
+
+  await check("with Roon Display, the Hub may frame Roon's site alone, without require-corp", async () => {
+    set({ hub_playing: 'roon' });
+    roon.coreAddress = { host: '192.0.2.10', port: 9330 };
+    try {
+      const hub = await get('/PartyHub');
+      assert.match(hub.headers.get('content-security-policy'), /; frame-src http:\/\/192\.0\.2\.10:9330$/);
+      assert.strictEqual(hub.headers.get('cross-origin-embedder-policy'), null);
+      assert.strictEqual((await (await get('/api/hub')).json()).frame_url, 'http://192.0.2.10:9330/display/');
+      // Every other page is as it was.
+      const guest = await get('/GuestHub');
+      assert.doesNotMatch(guest.headers.get('content-security-policy'), /frame-src/);
+      assert.strictEqual(guest.headers.get('cross-origin-embedder-policy'), 'require-corp');
+      set({ hub_playing: 'simple' });
+      assert.doesNotMatch((await get('/PartyHub')).headers.get('content-security-policy'), /frame-src/);
+      assert.strictEqual((await (await get('/api/hub')).json()).frame_url, null);
+    } finally {
+      delete roon.coreAddress;
+      set({ hub_playing: 'simple' });
+    }
+  });
+
+  await check("Roon's display page is at the Core's address; a Core on this computer at this one's", async () => {
+    set({ hub_playing: 'roon' });
+    try {
+      assert.strictEqual((await (await get('/api/hub')).json()).frame_url, null, 'no Core found yet');
+      roon.coreAddress = { host: '127.0.0.1', port: 9330 };
+      assert.strictEqual(server.roonDisplayUrl(), `http://${lanAddress()}:9330/display/`, 'for the Hub');
+      assert.strictEqual(server.roonDisplayUrl(false), 'http://127.0.0.1:9330/display/', 'for Party Mode');
+    } finally {
+      delete roon.coreAddress;
+      set({ hub_playing: 'simple' });
+    }
+  });
+
+  await check("the Hub is told whether Roon's display page answers", async () => {
+    const page = http.createServer((req, res) => res.end('ok'));
+    await new Promise((resolve) => page.listen(0, '127.0.0.1', resolve));
+    const frameOk = async () => (await (await get('/api/hub')).json()).frame_ok;
+    const settled = async (want) => {
+      for (let i = 0; i < 50 && (await frameOk()) !== want; i += 1) await new Promise((r) => setTimeout(r, 20));
+      return frameOk();
+    };
+    try {
+      set({ hub_playing: 'roon' });
+      // A Core on this computer: Party Mode checks it at 127.0.0.1.
+      roon.coreAddress = { host: '127.0.0.1', port: page.address().port };
+      roon.emit('core_paired');
+      assert.strictEqual(await settled(true), true);
+      await new Promise((resolve) => page.close(resolve));
+      roon.emit('settings_changed');
+      assert.strictEqual(await settled(false), false, 'nothing answers');
+    } finally {
+      delete roon.coreAddress;
+      set({ hub_playing: 'simple' });
+      roon.emit('settings_changed');
+    }
+    assert.strictEqual(await frameOk(), null);
   });
 
   console.log('\nParty Hub');
@@ -1006,7 +1330,7 @@ const set = (values) => Object.assign(roon.settings, values);
     const limited = createServer(roon, store, { limits: { all: 0, search: 2 } });
     await limited.listen(0);
     const at = `http://127.0.0.1:${limited.port}`;
-    const cookie = (await fetch(`${at}/j/${store.joinCode}`, { redirect: 'manual' })).headers.get('set-cookie').split(';')[0];
+    const cookie = (await fetch(`${at}/GuestHub`, { redirect: 'manual' })).headers.get('set-cookie').split(';')[0];
     const search = () => fetch(`${at}/api/search?q=abba`, { headers: { Cookie: cookie } }).then((r) => r.status);
     assert.deepStrictEqual([await search(), await search(), await search()], [200, 200, 429]);
     assert.strictEqual((await fetch(`${at}/api/party`, { headers: { Cookie: cookie } })).status, 200, 'the rest still work');
@@ -1084,10 +1408,16 @@ const set = (values) => Object.assign(roon.settings, values);
     assert.ok(html.includes('Not connected'));
     assert.match(html, /<span class="lib"><a [^>]+>express<\/a> <span class="ver">\d/);
     assert.ok(html.includes('href="/About/license/party-mode"'));
-    // Listed though not included: it installs Party Mode. Its licence links to its repository.
-    assert.ok(html.includes('<span class="lib"><a href="https://github.com/TheAppgineer/roon-extension-manager" target="_blank" rel="noopener">roon-extension-manager</a> <span class="ver"></span></span>' +
+    // Thanked though not included: the Extension Manager, which installs Party Mode,
+    // then the security tools. Licences link to their repositories; not with the libraries.
+    const thanks = html.slice(html.indexOf('<h3>Installed and tested with</h3>'), html.indexOf('<h3>Open-source licences</h3>'));
+    assert.ok(thanks.includes('<span class="lib"><a href="https://github.com/TheAppgineer/roon-extension-manager" target="_blank" rel="noopener">roon-extension-manager</a> <span class="ver"></span></span>' +
       '<span class="lic"><a href="https://github.com/TheAppgineer/roon-extension-manager" target="_blank" rel="noopener">Apache-2.0</a></span>' +
       '<span class="who">By TheAppgineer</span>'));
+    assert.ok(thanks.indexOf('roon-extension-manager') < thanks.indexOf('>Docker Engine<'));
+    assert.ok(thanks.indexOf('>Docker Engine<') < thanks.indexOf('>autocannon<'));
+    for (const tool of ['ZAP', 'Trivy', 'Nuclei', 'Schemathesis']) assert.ok(thanks.includes(`>${tool}</a>`), tool);
+    assert.ok(!html.slice(html.indexOf('<h3>Open-source licences</h3>')).includes('roon-extension-manager'));
     assert.ok(html.includes('<h2>Installation</h2>'));
     assert.ok(html.includes('<button type="button" id="copy-details" hidden>'));
     assert.ok(html.includes('<script src="/about.js"></script>'));
@@ -1182,7 +1512,7 @@ const set = (values) => Object.assign(roon.settings, values);
     set({ enabled: true });
     roon.zone = { zone_id: 'z1', display_name: 'Kitchen AirPlay', state: 'stopped', settings: {} };
     try {
-      const cookie = (await get(`/j/${guests.joinCode}`)).headers.get('set-cookie').split(';')[0];
+      const cookie = (await get('/GuestHub')).headers.get('set-cookie').split(';')[0];
       for (const [path, headers] of [['/api/hub', {}], ['/api/party', { Cookie: cookie }]]) {
         const text = await (await get(path, headers)).text();
         assert.ok(text.includes('Test Party'), path);
@@ -1283,7 +1613,10 @@ const set = (values) => Object.assign(roon.settings, values);
     const open = rows({ roon: fake, guests: { sessions: new Map([['a', {}], ['b', {}], ['c', {}]]) },
       streams: new Set([{ guestId: 'a' }, { guestId: 'a' }, { guestId: 'b' }, { guestId: null }]) });
     assert.strictEqual(open.Guests, '3 joined, 2 on the page now');
-    assert.strictEqual(open['Party Hub'], '1 open');
+    assert.strictEqual(open['Party Hub'], '1 open, Standard');
+    // The Party Hub now playing setting, as chosen in Roon.
+    const roonDisplay = rows({ roon: Object.assign({}, fake, { settings: Object.assign({}, fake.settings, { hub_playing: 'roon' }) }) });
+    assert.match(roonDisplay['Party Hub'], /^\d+ open, Roon Display$/);
     assert.strictEqual(rows({ roon: Object.assign({}, fake, { zone: null }) })['Party zone'],
       'Not available in Roon (switched off, unplugged or removed?)');
     assert.strictEqual(rows({ roon: Object.assign({}, fake, { settings: {} }) })['Party zone'], 'Not chosen yet');

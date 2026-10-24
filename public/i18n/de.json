@@ -10,7 +10,7 @@
   "playing.nothing": "Es läuft nichts",
   "playing.nothing_yet": "Noch nichts",
   "playing.station": "Radiosender",
-  "queue.waiting_for_host": "Warten, bis der Gastgeber die Warteschlange startet.",
+  "queue.waiting_for_host": "Warten, bis die Gastgebenden die Warteschlange starten.",
   "credit.requested_by": "Gewünscht von {name}",
   "credit.guest": "Anonym",
   "credit.radio": "Roon Radio",
@@ -55,7 +55,7 @@
   "toast.already_queued": "Der Titel ist schon in der Warteschlange.",
   "toast.none_left": "Du hast alle aufgebraucht.",
   "toast.none_left_wait": "Du hast alle aufgebraucht. Mehr in {wait}.",
-  "toast.disabled": "Der Gastgeber hat das ausgeschaltet.",
+  "toast.disabled": "Die Gastgebenden haben das ausgeschaltet.",
   "toast.skipped": "Übersprungen",
   "toast.failed": "Leider hat das nicht geklappt.",
   "toast.too_many_requests": "Zu viele Anfragen. Warte eine Minute und versuch es dann noch mal.",
@@ -78,7 +78,7 @@
   "invite.open": "QR-Code für {name} zeigen, damit andere mitmachen können",
   "invite.close": "Schließen",
   "locked.title": "Scanne den Code noch einmal",
-  "locked.text": "Dieser Link funktioniert erst, nachdem du den Code auf dem Party Hub gescannt hast. Bitte den Gastgeber, ihn zu zeigen.",
+  "locked.text": "Dieser Link funktioniert erst, nachdem du den Code auf dem Party Hub gescannt hast. Bitte die Gastgebenden, ihn zu zeigen.",
   "screen.scan": "Scannen, um einen Titel hinzuzufügen",
   "screen.qr_alt": "QR-Code für die Gästeseite",
   "screen.download_playlist": "Die Playlist herunterladen",
@@ -86,6 +86,5 @@
   "screen.playlist_qr_alt": "QR-Code für die Playlist",
   "screen.closed_title": "Keine Wünsche mehr",
   "screen.closed_text": "Danke für all die Titel.",
-  "screen.menu": "Menü",
-  "join.expired": "Dieser Code ist abgelaufen. Scanne den Code auf dem Party Hub noch einmal."
+  "screen.menu": "Menü"
 }

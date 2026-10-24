@@ -43,6 +43,20 @@ check('a skipped track says who skipped it once it has played', () => {
   assert.strictEqual(played.skipped_by, 'Stu');
 });
 
+check('a played track keeps its album, which Roon gives only while it plays', () => {
+  const history = new PlayHistory();
+  history.update('z1', Object.assign(playing('Waterloo'), { album: 'Waterloo' }), null);
+  history.update('z1', playing('SOS'), null);
+  assert.strictEqual(history.list()[0].album, 'Waterloo');
+  history.update('z1', playing('Fernando'), null);
+  assert.strictEqual(history.list()[0].album, '', 'none given');
+  // When it was queued, too, if known.
+  history.update('z1', Object.assign(playing('Chiquitita'), { queued_at: 1234 }), null);
+  history.update('z1', playing('Mamma Mia'), null);
+  assert.strictEqual(history.list()[0].queued_at, 1234);
+  assert.strictEqual(history.list()[1].queued_at, null);
+});
+
 check('a guest with no name is kept as null, for "a guest"', () => {
   const history = new PlayHistory();
   history.update('z1', playing('Waterloo'), null);

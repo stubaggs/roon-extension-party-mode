@@ -47,7 +47,10 @@
     const body = await res.json().catch(() => ({}));
     if (res.status === 401 || res.status === 403) {
       // Party Off answers "closed": requests are over, not the guest's link.
-      showLocked(body.error === 'closed' ? 'closed' : 'locked');
+      // No session (a new party, or it ran out): opening /GuestHub again lets
+      // the guest back in, once; if that didn't help (cookies blocked), say so.
+      if (body.error !== 'closed' && rejoin()) throw new Error('no_session');
+      showLocked(body.error === 'closed' ? 'closed' : 'locked', body.playlist === true);
       throw new Error('no_session');
     }
     // Past the per-minute limit (lib/server.js): one note here, so callers stay
@@ -57,16 +60,33 @@
     return body;
   }
 
+  /** Opens /GuestHub again for a new session, unless it was tried a moment ago. */
+  function rejoin() {
+    const KEY = 'partyMode.rejoined';
+    try {
+      if (Date.now() - Number(sessionStorage.getItem(KEY) || 0) < 30000) return false;
+      sessionStorage.setItem(KEY, String(Date.now()));
+    } catch {
+      return false; // No storage: no way to tell a loop, so "Scan the code again".
+    }
+    window.location.replace('/GuestHub');
+    return true;
+  }
+
   /** Errors already explained: the page is closed, or the limit note is up. */
   const explained = (err) => err.message === 'no_session' || err.message === 'too_many_requests';
 
-  /** In place of the page: 'locked' (scan again) or 'closed' (requests are over). */
-  function showLocked(which) {
+  /**
+   * In place of the page: 'locked' (scan again) or 'closed' (requests are
+   * over), with a link to the playlist while the host offers it.
+   */
+  function showLocked(which, playlist) {
     app.hidden = true;
     el('nickname').hidden = true;
     closeInvite();
     locked.hidden = which !== 'locked';
     el('closed').hidden = which !== 'closed';
+    el('closed-playlist').hidden = !(which === 'closed' && playlist);
   }
 
   const { t } = window.I18N;
@@ -751,7 +771,7 @@
 
   function openInvite() {
     // Asked for each time: a new party has a new code.
-    el('invite-qr').src = `/api/qr.svg?t=${Date.now()}`;
+    el('invite-qr').src = `/embed/join-qr.svg?t=${Date.now()}`;
     inviteOpener = document.activeElement;
     app.inert = true;
     invite.hidden = false;

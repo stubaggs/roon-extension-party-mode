@@ -10,7 +10,7 @@
   "playing.nothing": "再生していません",
   "playing.nothing_yet": "まだありません",
   "playing.station": "ラジオ局",
-  "queue.waiting_for_host": "ホストがキューを再生するのを待っています。",
+  "queue.waiting_for_host": "主催者がキューを開始するのを待っています。",
   "credit.requested_by": "{name} さんのリクエスト",
   "credit.guest": "匿名",
   "credit.radio": "Roon Radio",
@@ -52,7 +52,7 @@
   "toast.already_queued": "そのトラックはすでにキューにあります。",
   "toast.none_left": "すべて使い切りました。",
   "toast.none_left_wait": "すべて使い切りました。{wait}後にまた使えます。",
-  "toast.disabled": "ホストがこの機能をオフにしています。",
+  "toast.disabled": "主催者がこの機能をオフにしています。",
   "toast.skipped": "スキップしました",
   "toast.failed": "すみません、うまくいきませんでした。",
   "toast.too_many_requests": "リクエストが多すぎます。1分ほど待ってからもう一度お試しください。",
@@ -75,7 +75,7 @@
   "invite.open": "{name} のQRコードを表示して、ほかの人も参加できるようにする",
   "invite.close": "閉じる",
   "locked.title": "もう一度コードをスキャンしてください",
-  "locked.text": "このリンクは Party Hub のコードをスキャンした後でのみ使えます。ホストに見せてもらってください。",
+  "locked.text": "このリンクは Party Hub のコードをスキャンした後でのみ使えます。主催者に見せてもらってください。",
   "screen.scan": "スキャンしてトラックを追加",
   "screen.qr_alt": "ゲストページの QR コード",
   "screen.download_playlist": "プレイリストをダウンロード",
@@ -83,6 +83,5 @@
   "screen.playlist_qr_alt": "プレイリストの QR コード",
   "screen.closed_title": "リクエストは締め切りました",
   "screen.closed_text": "たくさんのトラックをありがとう。",
-  "screen.menu": "メニュー",
-  "join.expired": "このコードは期限切れです。Party Hub のコードをもう一度スキャンしてください。"
+  "screen.menu": "メニュー"
 }

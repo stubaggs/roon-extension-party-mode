@@ -60,7 +60,7 @@
   "toast.failed": "Spiacenti, non ha funzionato.",
   "toast.too_many_requests": "Troppe richieste. Aspetta un minuto e riprova.",
   "skip.button": "Salta",
-  "name.adding_as": "Aggiungi come {name}",
+  "name.adding_as": "Stai aggiungendo come {name}",
   "name.change": "Cambia",
   "name.add": "Aggiungi il tuo nome",
   "name.prompt": "Come ti chiami?",
@@ -86,6 +86,5 @@
   "screen.playlist_qr_alt": "Codice QR per la playlist",
   "screen.closed_title": "Le richieste sono chiuse",
   "screen.closed_text": "Grazie per tutti i brani.",
-  "screen.menu": "Menu",
-  "join.expired": "Questo codice è scaduto. Scansiona di nuovo il codice sul Party Hub."
+  "screen.menu": "Menu"
 }

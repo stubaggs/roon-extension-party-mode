@@ -12,6 +12,8 @@ Not released yet. Its beta is out: you can try it as "Party Mode (beta)" (see
 
 - Guests can pass the party on: tapping the party's name on the guest page shows the QR
   code for a friend to scan. Turn it off with **Invites**, under **Party setup**.
+- Once the party is over, guests can download the playlist from the guest page too, with
+  a button under "Requests are closed", unless **Playlist** is set to **Off**.
 - The guest page and the Party Hub have their own icon, a jukebox, in the browser tab,
   bookmarks and on a phone's home screen.
 - **Detailed log**, under **Advanced**: for troubleshooting, turned on and off from Roon
@@ -20,16 +22,46 @@ Not released yet. Its beta is out: you can try it as "Party Mode (beta)" (see
   how to add it to the Manager yourself, and how to remove it again.
 - **About page**, from the menu at the top left of the Party Hub (or `/About` on its
   address): Party Mode's version and licence, the state of the running copy (a good start
-  when asking for help: "Copy details" copies it, ready to paste into a forum post), and
-  the open-source libraries it uses, each with its licence. It also shows a **code
+  when asking for help: "Copy details" copies it, ready to paste into a forum post), the
+  open-source libraries it uses, each with its licence, and the open-source tools that
+  install it and check its security. It also shows a **code
   fingerprint**: from this version on, each release here lists its own, so you can check
   that a copy's code is unchanged.
+- **Your own Party Hub:** build a screen of your own, such as a dashboard or a Home
+  Assistant card, from what the Party Hub shows: what's playing now, up next and played,
+  with covers and who asked for each track, the party's state, and the QR codes, or
+  links to join and to download the playlist for a screen people tap. It's
+  read-only and comes from addresses under `/embed/` on the Party Hub's address, as files
+  or as a live stream ([EMBED.md](EMBED.md)). Party Hubs to start from, the built-in one
+  among them, are in
+  [roon-extension-party-mode-hubs](https://github.com/stubaggs/roon-extension-party-mode-hubs),
+  and anyone can add theirs.
+- **Roon Display on the Party Hub:** set **Party Hub now playing**, under **Party setup**,
+  to **Roon Display** to show Roon's own display page on the right of the Party Hub, with
+  the QR code and Up next beside it. Party Mode finds it; in Roon, pick the Party Hub's
+  display in the party zone's options (its volume control, then **Displays**). Who asked
+  for the track still shows above it, the Party Hub's own view comes back while Roon's
+  page can't be reached, and phones always show the Party Hub's own.
 
 ### Improvements
 
-- **A new Party Hub layout:** the QR code is bigger and has the left of the screen to
-  itself, and Up next runs down the right under what's playing, showing about twice as
-  many tracks (nine on a 1080p TV).
+- **One QR code for every party.** The code to join now leads to `/GuestHub` on the
+  Party Hub's address, the same each time, so guests can bookmark the guest page or add
+  it to their home screen and come straight back in at the next party, and you can print
+  the code. Turning **Party** Off still ends everyone's session. After updating, reload
+  the Party Hub's page so its code shows. Links to join from earlier versions no longer
+  work: scan the new code once.
+- **A new Party Hub layout:** the QR code is much bigger and has the left of the screen
+  to itself, and Up next runs down the right under what's playing, showing about twice
+  as many tracks (eight on a 1080p TV). It shows only whole tracks, never a scroll bar,
+  and keeps a margin at the top and bottom, for TVs that cut off the edges. The playing
+  track's cover is bigger, and its credit sits beside "Playing now", leaving the title
+  room to show in full; Up next's credits line up down the right. Text is the same size
+  on any shape of screen, and the extra space on a wider one is shared evenly around the
+  two sides. A long party name makes the QR code smaller only when it has to. It also
+  lays out right in older TVs' built-in browsers, such as LG's from 2021, and fits the
+  screen in Safari on an iPad. With **Party** Off, "Requests are closed" takes the place
+  of what's playing and Up next, centred.
 - Optimized Party Hub layout.
 - **No setup before installing with Docker:** settings now live in a Docker volume, so a
   new install is just `docker compose up -d` (or `docker run`), with no `config.json` to
@@ -83,7 +115,7 @@ Not released yet. Its beta is out: you can try it as "Party Mode (beta)" (see
   Mode as unhealthy for a minute or two while it's serving guests normally.
 - Joining the party is quicker in Firefox, which fetched the playing track's cover three
   times.
-- **Host name** shows an error past 24 characters, the most a guest's name may be,
+- **Host name** shows an error past 24 characters, the most a guest's nickname may be,
   rather than being cut short on the pages.
 - The guest page's dialogs always close with Escape, and Tab stays inside them. In Chrome
   and Safari, Escape stopped working once Tab passed the last button.
@@ -96,6 +128,8 @@ Not released yet. Its beta is out: you can try it as "Party Mode (beta)" (see
   the host turns skips off.
 - When Roon closes the settings window on a change that can't be saved (a name that's
   too long, say), the status line in Roon says what wasn't saved.
+- Translation fixes in several languages. The guest pages now refer to the host in the
+  same gender-neutral way everywhere, as they already did on the host's tags.
 
 ### Security
 
@@ -108,11 +142,11 @@ Not released yet. Its beta is out: you can try it as "Party Mode (beta)" (see
 - `docker-compose.yml` and the README's `docker run` commands now set a 512 MB memory
   limit, so a fault can't take memory from your Core or anything else on the computer.
   Download the new `docker-compose.yml`, or run the new `docker run` command, to get it.
-- The playlist download has an address of its own for each party, hard to guess, in
-  place of the fixed `/Download/playlist.csv`, which anyone on your network could open
-  at any time. It's short and easy to type, like `/p/7KQ4-M9XD`. The Party Hub shows it
-  once the party is over, as before, and Party Mode's status in Roon always has it, under
-  the Party Hub's address. With **Playlist** set to **Off**, only you have it.
+- The playlist is no longer at the fixed `/Download/playlist.csv`, which anyone on your
+  network could open at any time. Once the party is over, the Party Hub offers it at
+  `/Playlist`, as before, and only then. Party Mode's status in Roon always has your own
+  address for it, new for each party and hard to guess, but short and easy to type, like
+  `/p/7KQ4-M9XD`. With **Playlist** set to **Off**, only you have it.
 - Various security enhancements.
 
 ## 1.3.2

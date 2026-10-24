@@ -161,7 +161,7 @@ check('a browser asking for a language without a file gets English', () => {
 });
 
 check('server messages come from the same file', () => {
-  assert.ok(usedKeys().has('join.expired'));
+  assert.ok(usedKeys().has('locked.text'));
   assert.strictEqual(i18n.t('en', 'screen.closed_title'), 'Requests are closed');
   assert.strictEqual(i18n.t('fr', 'screen.closed_title'), JSON.parse(read('i18n/fr.json'))['screen.closed_title']);
   assert.strictEqual(i18n.t('xx', 'screen.closed_title'), 'Requests are closed');
@@ -191,7 +191,6 @@ check('French text, plurals and clock', () => {
   assert.strictEqual(I18N.t('button.left', { count: 3 }), '3 restants');
   assert.strictEqual(I18N.minutes(30 * 1000), 'une minute');
   assert.strictEqual(I18N.credit({ kind: 'add', requested_by: null }), 'Anonyme');
-  assert.strictEqual(i18n.t('fr', 'join.expired'), 'Ce code a expiré. Scannez à nouveau le code affiché sur le Party Hub.');
 });
 
 console.log('\nSpanish, German, Dutch');

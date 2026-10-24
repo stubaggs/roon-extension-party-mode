@@ -561,6 +561,22 @@ main {
   margin: 0 0 0.5rem;
 }
 
+/* "Requests are closed", centred, as on the Party Hub. */
+#closed {
+  text-align: center;
+}
+
+/* The playlist, under "Requests are closed", while the host offers it. */
+.locked .download {
+  display: inline-block;
+  margin-top: 1.25rem;
+  text-decoration: none;
+}
+
+.locked .download[hidden] {
+  display: none;
+}
+
 .toast {
   position: fixed;
   left: 50%;

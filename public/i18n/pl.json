@@ -10,7 +10,7 @@
   "playing.nothing": "Nic nie gra",
   "playing.nothing_yet": "Jeszcze nic",
   "playing.station": "Stacja radiowa",
-  "queue.waiting_for_host": "Czekamy, aż gospodarz uruchomi kolejkę.",
+  "queue.waiting_for_host": "Czekamy, aż gospodarze uruchomią kolejkę.",
   "credit.requested_by": "Zamówienie: {name}",
   "credit.guest": "Anonim",
   "credit.radio": "Roon Radio",
@@ -36,8 +36,8 @@
   "queue.empty_radio": "Roon Radio wybierze, co dalej.",
   "played.title": "Odtworzone",
   "played.empty": "Nic jeszcze nie zostało odtworzone.",
-  "played.skipped_by": "Pominięte przez: {name}",
-  "played.skipped_by_host": "Pominięte przez gospodarzy",
+  "played.skipped_by": "Pominięty przez {name}",
+  "played.skipped_by_host": "Pominięty przez gospodarzy",
   "allowance.closed": "Zamówienia są teraz zamknięte.",
   "allowance.paused": "Zamówienia są na chwilę wstrzymane.",
   "button.left": {
@@ -61,7 +61,7 @@
   "toast.already_queued": "Ten utwór jest już w kolejce.",
   "toast.none_left": "Wykorzystano wszystkie.",
   "toast.none_left_wait": "Wykorzystano wszystkie. Kolejne za {wait}.",
-  "toast.disabled": "Gospodarz to wyłączył.",
+  "toast.disabled": "Gospodarze to wyłączyli.",
   "toast.skipped": "Pominięto",
   "toast.failed": "Przepraszamy, nie udało się.",
   "toast.too_many_requests": "Zbyt wiele żądań. Odczekaj minutę i spróbuj ponownie.",
@@ -84,7 +84,7 @@
   "invite.open": "Pokaż kod QR ({name}), aby inni mogli dołączyć",
   "invite.close": "Zamknij",
   "locked.title": "Zeskanuj kod ponownie",
-  "locked.text": "Ten link działa dopiero po zeskanowaniu kodu z Party Hub. Poproś gospodarza, żeby go pokazał.",
+  "locked.text": "Ten link działa dopiero po zeskanowaniu kodu z Party Hub. Poproś gospodarzy, żeby go pokazali.",
   "screen.scan": "Zeskanuj, aby dodać utwór",
   "screen.qr_alt": "Kod QR strony dla gości",
   "screen.download_playlist": "Pobierz playlistę",
@@ -92,6 +92,5 @@
   "screen.playlist_qr_alt": "Kod QR playlisty",
   "screen.closed_title": "Zamówienia są zamknięte",
   "screen.closed_text": "Dzięki za wszystkie utwory.",
-  "screen.menu": "Menu",
-  "join.expired": "Ten kod wygasł. Zeskanuj ponownie kod z Party Hub."
+  "screen.menu": "Menu"
 }

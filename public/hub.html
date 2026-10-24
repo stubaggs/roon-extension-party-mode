@@ -44,17 +44,17 @@
       <section class="join">
         <h1 id="party-name" data-i18n="party.default_name">Party</h1>
         <div id="join-open">
-          <img id="qr" class="qr" src="/api/qr.svg" alt="QR code for the guest page" data-i18n-alt="screen.qr_alt" />
-          <p class="join-copy"><a class="join-link" id="join-link" target="_blank" rel="noopener" data-i18n="screen.scan">Scan to add a track</a></p>
+          <img id="qr" class="qr" src="/embed/join-qr.svg" alt="QR code for the guest page" data-i18n-alt="screen.qr_alt" />
+          <p class="join-copy"><a class="join-link" id="join-link" href="/GuestHub" target="_blank" rel="noopener" data-i18n="screen.scan">Scan to add a track</a></p>
         </div>
         <!-- With Party off: the playlist in place of the guest code, as a QR
              code or a link as the Party playlist setting says. -->
         <div id="join-closed" class="join-closed" hidden>
           <div id="playlist-qr-offer" hidden>
             <img id="playlist-qr" class="qr" alt="QR code for the playlist" data-i18n-alt="screen.playlist_qr_alt" />
-            <p class="join-copy"><a id="playlist-qr-link" class="join-link" download data-i18n="screen.scan_playlist">Scan to download the playlist</a></p>
+            <p class="join-copy"><a id="playlist-qr-link" class="join-link" href="/Playlist" download data-i18n="screen.scan_playlist">Scan to download the playlist</a></p>
           </div>
-          <a id="playlist-link-offer" class="pill pill-primary download" download hidden data-i18n="screen.download_playlist">Download the playlist</a>
+          <a id="playlist-link-offer" class="pill pill-primary download" href="/Playlist" download hidden data-i18n="screen.download_playlist">Download the playlist</a>
         </div>
       </section>
 
@@ -74,6 +74,14 @@
             <p class="current-who" id="current-who" hidden></p>
             <p class="current-note muted" id="current-note" data-i18n="queue.waiting_for_host" hidden>Waiting for the host to start the queue.</p>
           </div>
+        </div>
+        <!-- With Roon Display (Party Hub now playing): Roon's display page in
+             place of what's playing, with "Playing now" and who asked for
+             the track above it. hub.js adds the frame. -->
+        <div id="frame-slot" class="frame-slot" hidden>
+          <p class="frame-credit"><span class="current-label frame-label" id="frame-label" data-i18n="playing.now">Playing now</span><span class="current-who" id="frame-who" hidden></span></p>
+          <div id="frame-box"></div>
+          <p class="current-note muted" id="frame-note" data-i18n="queue.waiting_for_host" hidden>Waiting for the host to start the queue.</p>
         </div>
       </section>
 

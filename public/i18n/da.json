@@ -31,7 +31,7 @@
   "queue.empty": "Intet i køen.",
   "queue.empty_add": "Intet i køen. Tilføj et nummer.",
   "queue.empty_add_radio": "Intet i køen. Tilføj et nummer, eller overlad det til Roon Radio.",
-  "queue.empty_radio": "Roon Radio vælger, hvad der kommer nu.",
+  "queue.empty_radio": "Roon Radio vælger, hvad der kommer som det næste.",
   "played.title": "Afspillet",
   "played.empty": "Intet afspillet endnu.",
   "played.skipped_by": "Sprunget over af {name}",
@@ -86,6 +86,5 @@
   "screen.playlist_qr_alt": "QR-kode til playlisten",
   "screen.closed_title": "Der er lukket for ønsker",
   "screen.closed_text": "Tak for alle numrene.",
-  "screen.menu": "Menu",
-  "join.expired": "Koden er udløbet. Scan koden på Party Hub igen."
+  "screen.menu": "Menu"
 }

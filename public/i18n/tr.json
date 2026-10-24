@@ -17,7 +17,7 @@
   "credit.host": "Ev sahibi",
   "search.placeholder": "Parça veya sanatçı ara",
   "search.clear": "Aramayı temizle",
-  "search.no_results": "Parça bulunamadı. Sanatçının adını deneyin.",
+  "search.no_results": "Parça bulunamadı. Sanatçının adını dene.",
   "search.results": {
     "one": "{count} parça bulundu.",
     "other": "{count} parça bulundu."
@@ -86,6 +86,5 @@
   "screen.playlist_qr_alt": "Çalma listesi için QR kod",
   "screen.closed_title": "İstekler kapandı",
   "screen.closed_text": "Tüm parçalar için teşekkürler.",
-  "screen.menu": "Menü",
-  "join.expired": "Bu kodun süresi doldu. Party Hub'daki kodu yeniden tara."
+  "screen.menu": "Menü"
 }

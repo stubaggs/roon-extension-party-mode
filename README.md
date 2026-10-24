@@ -179,10 +179,17 @@ again.
    they're in, they can show the same code from their phone by tapping the party's name
    at the top of the page (see **Invites** below).
 
+The QR code is the same for every party: it leads to `/GuestHub` on the Party Hub's
+address, for example `http://192.0.2.10:8338/GuestHub`. Guests can bookmark the page or
+add it to their home screen, and it opens straight in at the next party. You can print
+the code, too. For bookmarks, home-screen icons and printed codes to keep working,
+Party Mode's address has to stay the same: reserve it for the computer running Party
+Mode in your router's settings (often called a DHCP reservation or a fixed IP address).
+
 **Party**, at the top of the settings, runs the party:
 
 - **On**: guests can make requests. Switching to On or Paused from **Off** starts a new
-  party, with a new QR code (old links stop working) and a new playlist.
+  party and a new playlist. Guests' pages let them back in by themselves.
 - **Paused**: for a speech or the cake. Choose **Pause**: playback pauses and guests'
   requests wait. Choose **Unpause** to carry on where you left off.
 - **Off**: when you're done taking requests. Playback pauses, guests can't make requests,
@@ -221,6 +228,28 @@ device has to be on the same network as Party Mode.
 
 A tablet on a stand, or a laptop where guests can see it, also works without a TV.
 
+With **Party Hub now playing** set to **Roon Display**, each browser showing the Party Hub
+becomes a display device in Roon, named after the browser (such as "Chrome on Linux").
+Once for each screen, tie it to the party zone: in Roon, click the party zone's volume
+control to bring up the zone's options, pick **Displays** and choose the Party Hub's
+display device. Phones showing the Hub never load Roon's page, so they don't appear. The
+screen has to reach the Roon Core as well as Party Mode; until it can, the Hub shows its
+own view.
+
+After updating Party Mode, reload the Party Hub's page on the screen, so it shows the new
+version.
+
+## Your own custom Party Hub page
+
+You can make a Party Hub page of your own, such as a dashboard, a Home Assistant card or a
+design for your TV, from what the Party Hub shows: what's playing, up next and played, who
+asked for each track, and the QR codes. Party Mode shares these, read-only, at addresses
+under `/embed/`, described in [EMBED.md](EMBED.md). Pages to start from, among them one
+with Roon's own display page (Roon Display) beside the queue, as the built-in Party Hub
+can also show it, are in
+[roon-extension-party-mode-hubs](https://github.com/stubaggs/roon-extension-party-mode-hubs),
+and you can add yours there.
+
 ## The party's playlist
 
 Once **Party** is **Off**, the Party Hub shows the playlist to download (see
@@ -231,7 +260,7 @@ address, so only people you give it to can download it, and the old one stops wo
 when the next party starts.
 
 It's a CSV file of every track queued in the party zone, numbered, with title, artist,
-album, length, who asked for it and when. To leave guests' names out, turn on **Hide
+album, length, who asked for it and when. To leave guests' nicknames out, turn on **Hide
 names in downloadable playlist** under **Advanced**. Roon can't import it directly, but
 [Soundiiz](https://soundiiz.com) can: choose **Import playlist**, then the file, and pick
 the streaming service you use with Roon (TIDAL or Qobuz). Roon then shows it with your
@@ -251,6 +280,7 @@ you need them.
 | Name | The party's name, shown on the Party Hub. Leave blank for "Party", in each guest's language. |
 | Host name | Your name, shown instead of **Host** on the tracks you queue or skip in Roon and in the playlist download, up to 24 characters. Leave blank for **Host** in each guest's language. Guests can't use it as their name. |
 | Invites | Guests can tap the party's name at the top of the guest page to show the QR code, so a friend can scan it from their phone. On by default. Off, the party's name still shows, but only the Party Hub has the code. |
+| Party Hub now playing | What the Party Hub shows for the playing track. **Standard** (the default) is Party Mode's own: the cover, track and artist. **Roon Display** shows Roon's own display page instead, with Roon's artist pictures, and the QR code and Up next beside it. Then, once for each screen, pick its display for the party zone in Roon (see [Showing the Party Hub on a TV](#showing-the-party-hub-on-a-tv)). |
 | Party Hub language | The language of the Party Hub, for every screen showing it. Automatic (the default) follows the screen's browser. Guests' phones always follow their own. |
 | Playlist | What the Party Hub shows once **Party** is **Off**: a **QR code** guests can scan (the default), a **Link only** to click on the Hub itself, or **Off** for nothing. |
 | **Guest requests** | |
@@ -274,7 +304,7 @@ straight away to guests already there, counting what they've used.
 - **Detailed log**: for troubleshooting. It logs every message to and from Roon, including
   guests' searches, so turn it off when you're done.
 - **Hide names in downloadable playlist**: the playlist download says **Anon** instead of
-  each guest's name. Tracks Roon Radio picked or you queued still say **Roon Radio** or
+  each guest's nickname. Tracks Roon Radio picked or you queued still say **Roon Radio** or
   **Host** (or your **Host name**). Off by default.
 - **Network**
   - **Web port**: the port the guest pages and the Party Hub use (8338). If it's busy the
@@ -293,6 +323,12 @@ straight away to guests already there, counting what they've used.
 
 - **Keep it at home.** Anyone on your network can join and add tracks, and the Party Hub
   needs no login at all. Don't open the port to the internet.
+- **On a shared network, anyone on it can join.** In a dorm, a hotel, an office or a
+  holiday rental, being on the Wi-Fi doesn't mean being at the party. Turn **Party** Off
+  when the party ends. Roon works the same way: anyone on your network with the Roon app
+  can control your Core. Party Mode makes joining easier, with nothing to install, but
+  gives guests far less: adding tracks to the party zone, within your limits, not full
+  access to your Core.
 - **For a speech, use Pause.** Choose **Pause** under **Party** rather than pausing
   in Roon: a track a guest adds starts playback again if only paused in Roon.
 - **Guests can't rearrange the queue.** They can add a track to the end, or play one next
@@ -304,12 +340,12 @@ straight away to guests already there, counting what they've used.
   **amber** when a guest chose **Play it next**, **mint** for Roon Radio, and **sky blue**
   for **Host** (or your **Host name**), anything you queued in Roon. The Roon Radio
   tag is a good guess: a track you add just as the last one ends may get it.
-- **Guests' names:** guests can't call themselves Host, Roon Radio, Radio or Anon, in any
+- **Guests' nicknames:** guests can't call themselves Host, Roon Radio, Radio or Anon, in any
   language, or your **Host name**.
 - **Download the playlist before** restarting the extension, changing the party zone or
   switching **Party** to On or Paused from **Off**: each of those starts a new
   playlist. It keeps up to 5000 tracks, guests' requests longest.
-- **The playlist has guests' names in it.** With **Playlist** set to **QR code**,
+- **The playlist has guests' nicknames in it.** With **Playlist** set to **QR code**,
   anyone at the party can keep a copy once it's over. If that's not what you want, turn
   on **Hide names in downloadable playlist** under **Advanced**, or choose **Link only**
   or **Off**: with **Off**, only you have the address, in Party Mode's status in Roon.
@@ -365,12 +401,8 @@ its settings again.
 **There's no Skip button.** **Skip tracks** is off in the settings, a radio station is
 playing, or it's the last track with Roon Radio off, so there's nothing to skip to.
 
-**A guest's page says "Scan the code again".** Their session ended after 12 hours without
-using the page, or they opened an old bookmark. Scanning the QR code again lets them back
-in, under the name their phone remembers.
-
-**"That code has expired".** **Party** was set to Off and back to On, which makes a new
-code. Scan the code on the Party Hub again.
+**A guest's page says "Scan the code again".** Their browser blocks cookies (some private
+modes do). Allowing cookies for the Party Hub's address lets them in.
 
 **Guests can't join, and Roon shows Party Mode's address as `127.0.0.1`.** The QR code
 and links point at the computer itself, which phones can't reach. It happens after the

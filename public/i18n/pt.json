@@ -10,7 +10,7 @@
   "playing.nothing": "Nada a tocar",
   "playing.nothing_yet": "Ainda nada",
   "playing.station": "Estação de rádio",
-  "queue.waiting_for_host": "À espera que o anfitrião inicie a fila.",
+  "queue.waiting_for_host": "À espera que os anfitriões iniciem a fila.",
   "credit.requested_by": "Pedido por {name}",
   "credit.guest": "Anónimo",
   "credit.radio": "Roon Radio",
@@ -55,7 +55,7 @@
   "toast.already_queued": "Essa faixa já está na fila.",
   "toast.none_left": "Já usou todos.",
   "toast.none_left_wait": "Já usou todos. Mais daqui a {wait}.",
-  "toast.disabled": "O anfitrião desativou essa opção.",
+  "toast.disabled": "Os anfitriões desativaram essa opção.",
   "toast.skipped": "Saltada",
   "toast.failed": "Lamentamos, não funcionou.",
   "toast.too_many_requests": "Demasiados pedidos. Aguarde um minuto e tente novamente.",
@@ -78,7 +78,7 @@
   "invite.open": "Mostrar o código QR de {name} para que outros possam participar",
   "invite.close": "Fechar",
   "locked.title": "Leia o código novamente",
-  "locked.text": "Esta ligação só funciona depois de ler o código no Party Hub. Peça ao anfitrião para o mostrar.",
+  "locked.text": "Esta ligação só funciona depois de ler o código no Party Hub. Peça aos anfitriões para o mostrarem.",
   "screen.scan": "Leia para adicionar uma faixa",
   "screen.qr_alt": "Código QR da página dos convidados",
   "screen.download_playlist": "Transferir a playlist",
@@ -86,6 +86,5 @@
   "screen.playlist_qr_alt": "Código QR da playlist",
   "screen.closed_title": "Os pedidos estão fechados",
   "screen.closed_text": "Obrigado por todas as faixas.",
-  "screen.menu": "Menu",
-  "join.expired": "Este código expirou. Leia novamente o código no Party Hub."
+  "screen.menu": "Menu"
 }

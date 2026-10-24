@@ -10,7 +10,7 @@
   "playing.nothing": "Нищо не звучи",
   "playing.nothing_yet": "Още нищо",
   "playing.station": "Радиостанция",
-  "queue.waiting_for_host": "Чака се домакинът да пусне опашката.",
+  "queue.waiting_for_host": "Чака се домакините да пуснат опашката.",
   "credit.requested_by": "Поръчан от {name}",
   "credit.guest": "Анонимен",
   "credit.radio": "Roon Radio",
@@ -32,7 +32,7 @@
   "queue.empty_add": "Опашката е празна. Добави запис.",
   "queue.empty_add_radio": "Опашката е празна. Добави запис или остави на Roon Radio.",
   "queue.empty_radio": "Roon Radio избира следващото.",
-  "played.title": "Изсвирени",
+  "played.title": "Пуснати",
   "played.empty": "Още нищо не е звучало.",
   "played.skipped_by": "Прескочен от {name}",
   "played.skipped_by_host": "Прескочен от домакините",
@@ -55,7 +55,7 @@
   "toast.already_queued": "Този запис вече е в опашката.",
   "toast.none_left": "Всички са използвани.",
   "toast.none_left_wait": "Всички са използвани. Още след {wait}.",
-  "toast.disabled": "Домакинът е изключил това.",
+  "toast.disabled": "Домакините са изключили това.",
   "toast.skipped": "Прескочен",
   "toast.failed": "Съжаляваме, не се получи.",
   "toast.too_many_requests": "Твърде много заявки. Изчакай минута и опитай пак.",
@@ -78,7 +78,7 @@
   "invite.open": "Покажи QR кода за {name}, за да се включат и други",
   "invite.close": "Затвори",
   "locked.title": "Сканирай кода отново",
-  "locked.text": "Тази връзка работи само след като сканираш кода от Party Hub. Помоли домакина да го покаже.",
+  "locked.text": "Тази връзка работи само след като сканираш кода от Party Hub. Помоли домакините да го покажат.",
   "screen.scan": "Сканирай, за да добавиш запис",
   "screen.qr_alt": "QR код за страницата за гости",
   "screen.download_playlist": "Изтегли плейлиста",
@@ -86,6 +86,5 @@
   "screen.playlist_qr_alt": "QR код за плейлиста",
   "screen.closed_title": "Поръчките са затворени",
   "screen.closed_text": "Благодарим за всички записи.",
-  "screen.menu": "Меню",
-  "join.expired": "Кодът е изтекъл. Сканирай отново кода от Party Hub."
+  "screen.menu": "Меню"
 }
