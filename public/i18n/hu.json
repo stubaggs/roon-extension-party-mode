@@ -28,6 +28,10 @@
   "track.add": "Hozzáadás a sorhoz",
   "track.next": "Lejátszás következőként",
   "queue.up_next": "Következik",
+  "queue.count": {
+    "one": "{count} szám",
+    "other": "{count} szám"
+  },
   "queue.empty": "Üres a sor.",
   "queue.empty_add": "Üres a sor. Adj hozzá egy számot.",
   "queue.empty_add_radio": "Üres a sor. Adj hozzá egy számot, vagy bízd a Roon Radióra.",

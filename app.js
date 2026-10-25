@@ -37,7 +37,9 @@ function publishLinks() {
     roon.setStatusLine(startError, true);
     return;
   }
-  roon.setWebsite(server.hubUrl());
+  // Roon's link for the extension: the About page, which says what Party Mode
+  // is and who makes it, with the Party Hub one click on.
+  roon.setWebsite(server.aboutUrl());
   roon.setPlaylistUrl(() => server.playlistUrl());
   roon.setStatusLine(`Hub: ${server.hubUrl()}`);
 }

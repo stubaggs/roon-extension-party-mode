@@ -30,6 +30,12 @@
   "track.add": "Dodaj do kolejki",
   "track.next": "Odtwórz jako następny",
   "queue.up_next": "Następne",
+  "queue.count": {
+    "one": "{count} utwór",
+    "few": "{count} utwory",
+    "many": "{count} utworów",
+    "other": "{count} utworu"
+  },
   "queue.empty": "Kolejka jest pusta.",
   "queue.empty_add": "Kolejka jest pusta. Dodaj utwór.",
   "queue.empty_add_radio": "Kolejka jest pusta. Dodaj utwór albo zostaw to Roon Radio.",

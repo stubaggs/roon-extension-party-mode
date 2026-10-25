@@ -19,7 +19,7 @@
 
 const assert = require('assert');
 const EventEmitter = require('events');
-const QRCode = require('qrcode');
+const qr = require('../lib/qr');
 const http = require('http');
 const { createServer, lanAddress, CONNECTION_LIMITS } = require('../lib/server');
 const { GuestStore, cleanName, MAX_SESSIONS, OFFERED_SEARCHES } = require('../lib/guests');
@@ -238,6 +238,19 @@ const set = (values) => Object.assign(roon.settings, values);
     const renewed = res.headers.get('set-cookie') || '';
     assert.strictEqual(renewed.split(';')[0], cookie, 'the same session');
     assert.match(renewed, /Max-Age=43200/);
+  });
+
+  await check("the session is read among a browser's other cookies, however they're written", async () => {
+    set({ enabled: true });
+    const cookie = (await get('/GuestHub')).headers.get('set-cookie').split(';')[0];
+    await post('/api/name', cookie, { name: 'Cookie Carla', confirm: true });
+    const id = cookie.split('=')[1];
+    const nameWith = async (header) => (await (await get('/api/party', { Cookie: header })).json()).guest_name;
+    assert.strictEqual(await nameWith(`a=1; junk; =x; __proto__=y; bad=%E0%A4%A; party_sid=${id}; other=2`), 'Cookie Carla');
+    assert.strictEqual(await nameWith(`party_sid="${id}"`), 'Cookie Carla', 'quoted');
+    assert.strictEqual(await nameWith(`party_sid=${encodeURIComponent(id)}`), 'Cookie Carla', 'encoded');
+    assert.strictEqual(await nameWith(`party_sid=${id}; party_sid=someone-else`), 'Cookie Carla', 'the first counts');
+    assert.notStrictEqual(await nameWith(`party_sid=someone-else; party_sid=${id}`), 'Cookie Carla');
   });
 
   await check('scanning again keeps the session and its name; an unknown one starts afresh', async () => {
@@ -951,7 +964,7 @@ const set = (values) => Object.assign(roon.settings, values);
   await check('the QR codes under /embed/ can be shown on any site, in a frame or as an image', async () => {
     set({ enabled: false, playlist_download: 'qr' });
     // The codes carry /GuestHub and /Playlist, never the secret addresses.
-    const qrOf = (url) => QRCode.toString(url, { type: 'svg', margin: 1, errorCorrectionLevel: 'M', color: { dark: '#160E24', light: '#FFFFFF' } });
+    const qrOf = (url) => qr.svg(url);
     const origin = new URL(server.guestUrl()).origin;
     assert.strictEqual(server.guestUrl(), `${origin}/GuestHub`);
     assert.strictEqual(await (await get('/embed/join-qr.svg')).text(), await qrOf(`${origin}/GuestHub`));
@@ -1006,8 +1019,8 @@ const set = (values) => Object.assign(roon.settings, values);
 
   await check('a QR code is made once per address, and a new address gets a new one', async () => {
     const calls = [];
-    const original = QRCode.toString;
-    QRCode.toString = (...args) => { calls.push(args[0]); return original.apply(QRCode, args); };
+    const original = qr.svg;
+    qr.svg = (...args) => { calls.push(args[0]); return original(...args); };
     try {
       const first = await (await get('/embed/join-qr.svg')).text();
       assert.match(first, /^<svg/);
@@ -1017,7 +1030,7 @@ const set = (values) => Object.assign(roon.settings, values);
       assert.notStrictEqual(await (await get('/embed/playlist-qr.svg')).text(), first);
       set({ enabled: true });
     } finally {
-      QRCode.toString = original;
+      qr.svg = original;
     }
   });
 
@@ -1203,6 +1216,121 @@ const set = (values) => Object.assign(roon.settings, values);
     } finally {
       delete roon.coreAddress;
       set({ hub_playing: 'simple' });
+    }
+  });
+
+  await check('a screen can choose its view in the address, whatever the setting', async () => {
+    roon.coreAddress = { host: '192.0.2.10', port: 9330 };
+    const frameOf = async (query) => (await (await get(`/api/hub${query}`)).json()).frame_url;
+    try {
+      for (const setting of ['simple', 'roon']) {
+        set({ hub_playing: setting });
+        // /PartyHub/Roon frames Roon's page; /PartyHub/Standard never does.
+        for (const path of ['/PartyHub/Roon', '/partyhub/roon', '/PartyHub/Roon/']) {
+          const res = await get(path);
+          assert.strictEqual(res.status, 200, path);
+          assert.match(res.headers.get('content-security-policy'), /; frame-src http:\/\/192\.0\.2\.10:9330$/, path);
+          assert.doesNotMatch(res.headers.get('content-security-policy'), /frame-ancestors/, `${path} can be framed`);
+          assert.strictEqual(res.headers.get('cross-origin-embedder-policy'), null, path);
+          assert.match(await res.text(), /<html lang="[^"]+" dir="(ltr|rtl)" data-view="roon">/, path);
+        }
+        const standard = await get('/PartyHub/Standard');
+        assert.strictEqual(standard.status, 200);
+        assert.doesNotMatch(standard.headers.get('content-security-policy'), /frame-src|frame-ancestors/);
+        assert.match(await standard.text(), /data-view="standard"/);
+        assert.strictEqual(await frameOf('?view=roon'), 'http://192.0.2.10:9330/display/', setting);
+        assert.strictEqual(await frameOf('?view=standard'), null, setting);
+        // No view, or one it doesn't know: the setting's.
+        for (const query of ['', '?view=nope']) {
+          assert.strictEqual(await frameOf(query), setting === 'roon' ? 'http://192.0.2.10:9330/display/' : null, `${setting} ${query}`);
+        }
+        assert.doesNotMatch(await (await get('/PartyHub')).text(), /data-view/);
+      }
+      // Only those views: anything else under /PartyHub isn't a page.
+      for (const path of ['/PartyHub/nope', '/PartyHub/Roon/x', '/PartyHub/simple']) assert.strictEqual((await get(path)).status, 404, path);
+    } finally {
+      delete roon.coreAddress;
+      set({ hub_playing: 'simple' });
+    }
+  });
+
+  await check('the basic Party Hub: at /PartyHub/Basic, and at /PartyHub with the Basic view', async () => {
+    roon.coreAddress = { host: '192.0.2.10', port: 9330 };
+    try {
+      for (const setting of ['simple', 'roon', 'basic']) {
+        set({ hub_playing: setting });
+        for (const path of ['/PartyHub/Basic', '/partyhub/basic']) {
+          const res = await get(path);
+          assert.strictEqual(res.status, 200, path);
+          const html = await res.text();
+          assert.match(html, /<script src="\/basic\.js"><\/script>/, path);
+          assert.match(html, /<html lang="[^"]+" dir="(ltr|rtl)" data-view="basic">/, path);
+          assert.doesNotMatch(res.headers.get('content-security-policy'), /frame-src|frame-ancestors/, `${path} frames nothing, and can be framed`);
+        }
+        assert.strictEqual((await (await get('/api/hub?view=basic')).json()).frame_url, null, setting);
+        // Plain /PartyHub: the basic page with the Basic view, else the Party Hub.
+        const plain = await (await get('/PartyHub')).text();
+        assert.strictEqual(plain.includes('/basic.js'), setting === 'basic', setting);
+      }
+      assert.strictEqual((await (await get('/api/hub')).json()).frame_url, null, 'Basic frames nothing');
+      // The Party Hub sends a browser too old for it there, before anything else loads.
+      const hub = await (await get('/PartyHub/Standard')).text();
+      assert.ok(hub.indexOf('<script src="/hub-check.js"></script>') < hub.indexOf('<link rel="stylesheet"'));
+      assert.match(await (await get('/hub-check.js')).text(), /location\.replace\('\/PartyHub\/Basic'\)/);
+    } finally {
+      delete roon.coreAddress;
+      set({ hub_playing: 'simple' });
+    }
+  });
+
+  await check('the Hub is told when Roon sent all the queue it would: there may be more', async () => {
+    const before = roon.queue;
+    try {
+      const { QUEUE_ITEMS } = require('../lib/roon-service');
+      const item = (i) => ({ queue_item_id: i, length: 200, image_key: null, one_line: { line1: `T${i}` }, two_line: { line1: `T${i}`, line2: 'A' }, three_line: { line1: `T${i}`, line2: 'A', line3: 'B' } });
+      roon.queue = Array.from({ length: 3 }, (v, i) => item(i));
+      assert.strictEqual((await (await get('/api/hub')).json()).queue_full, false);
+      roon.queue = Array.from({ length: QUEUE_ITEMS }, (v, i) => item(i));
+      const hub = await (await get('/api/hub')).json();
+      assert.strictEqual(hub.queue_full, true);
+      assert.ok(hub.upcoming.length >= QUEUE_ITEMS - 1);
+    } finally {
+      roon.queue = before;
+    }
+  });
+
+  await check('the scripts old TV browsers run are plain ES5', async () => {
+    const fs = require('fs');
+    const path = require('path');
+    for (const file of ['basic.js', 'hub-check.js', 'i18n-runtime.js']) {
+      const code = fs.readFileSync(path.join(__dirname, '..', 'public', file), 'utf8')
+        .replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '').replace(/'(?:[^'\\\n]|\\.)*'/g, "''");
+      for (const [feature, pattern] of [['arrow functions', /=>/], ['let or const', /\b(let|const)\s/], ['template strings', /`/],
+        ['classes', /\bclass\s+\w/], ['async', /\basync\s/], ['for...of', /\bfor\s*\([^)]*\bof\b/], ['spread', /\.\.\./]]) {
+        assert.doesNotMatch(code, pattern, `${file}: ${feature}`);
+      }
+    }
+  });
+
+  await check("Roon's display page is checked while a screen shows it by its address, whatever the setting", async () => {
+    const page = http.createServer((req, res) => res.end('ok'));
+    await new Promise((resolve) => page.listen(0, '127.0.0.1', resolve));
+    const frameOk = async () => (await (await get('/api/hub?view=roon')).json()).frame_ok;
+    try {
+      set({ hub_playing: 'simple' });
+      roon.coreAddress = { host: '127.0.0.1', port: page.address().port };
+      roon.emit('core_paired');
+      let ok = await frameOk();
+      for (let i = 0; i < 50 && ok !== true; i += 1) {
+        await new Promise((r) => setTimeout(r, 20));
+        ok = await frameOk();
+      }
+      assert.strictEqual(ok, true);
+    } finally {
+      await new Promise((resolve) => page.close(resolve));
+      delete roon.coreAddress;
+      set({ hub_playing: 'simple' });
+      roon.emit('settings_changed');
     }
   });
 
@@ -1392,6 +1520,32 @@ const set = (values) => Object.assign(roon.settings, values);
 
   console.log('about');
 
+  await check('the About page offers the Party Hub only once connected to Roon, and says how to enable it', async () => {
+    const top = async () => {
+      const html = await (await get('/About')).text();
+      return {
+        note: (html.match(/<p class="not-connected" role="status">([^<]*)<\/p>/) || [])[1] || null,
+        button: html.includes('<a class="pill pill-primary open-hub" href="/PartyHub">Open the Party Hub</a>')
+      };
+    };
+    try {
+      assert.deepStrictEqual(await top(), {
+        note: 'Not connected to Roon, or not enabled yet. With Roon running on the same network as Party Mode, open Settings → Extensions in Roon and enable Party Mode, then refresh this page.',
+        button: false
+      });
+      roon.core = {};
+      assert.deepStrictEqual(await top(), { note: null, button: true });
+      // Copy Party Hub address copies the address Roon's status shows; the script shows it.
+      const html = await (await get('/About')).text();
+      assert.ok(html.includes(`<button type="button" class="copy-button" id="copy-hub" data-url="${server.hubUrl()}" aria-label="Copy Party Hub address" hidden>`));
+      // In a labelled box with the address itself, to read off when typing it on a TV.
+      assert.ok(html.includes('<span class="hub-label" id="hub-label">Party Hub address</span>'));
+      assert.ok(html.includes(`<span class="hub-address">${server.hubUrl().replace('/PartyHub', '<wbr />/PartyHub')}</span>`));
+    } finally {
+      roon.core = null;
+    }
+  });
+
   await check('the About page shows the version, this copy and the libraries', async () => {
     const res = await get('/About');
     assert.strictEqual(res.status, 200);
@@ -1405,6 +1559,7 @@ const set = (values) => Object.assign(roon.settings, values);
     assert.ok(!html.includes("What's new"));
     assert.ok(html.includes('<a href="https://github.com/stubaggs/roon-extension-party-mode/blob/main/README.md" target="_blank" rel="noopener">Instructions and releases</a>'));
     assert.ok(html.includes('/325638" target="_blank" rel="noopener">Roon forum</a>'));
+    assert.ok(server.aboutUrl().endsWith('/About'));
     assert.ok(html.includes('Not connected'));
     assert.match(html, /<span class="lib"><a [^>]+>express<\/a> <span class="ver">\d/);
     assert.ok(html.includes('href="/About/license/party-mode"'));
@@ -1419,7 +1574,7 @@ const set = (values) => Object.assign(roon.settings, values);
     for (const tool of ['ZAP', 'Trivy', 'Nuclei', 'Schemathesis']) assert.ok(thanks.includes(`>${tool}</a>`), tool);
     assert.ok(!html.slice(html.indexOf('<h3>Open-source licences</h3>')).includes('roon-extension-manager'));
     assert.ok(html.includes('<h2>Installation</h2>'));
-    assert.ok(html.includes('<button type="button" id="copy-details" hidden>'));
+    assert.ok(html.includes('<button type="button" class="copy-button" id="copy-details" aria-label="Copy details" hidden>'));
     assert.ok(html.includes('<script src="/about.js"></script>'));
     assert.strictEqual((await get('/about.js')).status, 200);
   });
@@ -1558,7 +1713,7 @@ const set = (values) => Object.assign(roon.settings, values);
     // The zone with Roon's side, the guests and their settings with the party's.
     const sections = Object.fromEntries(runtime({ roon: fake }).map(([title, r]) => [title, r.map(([label]) => label)]));
     assert.deepStrictEqual(Object.keys(sections), ['Installation', 'Roon', 'Party', 'Health']);
-    assert.strictEqual(rows({ roon: fake })['Code version'], require('../package.json').version, 'in what Copy details copies');
+    assert.strictEqual(rows({ roon: fake })['Code version'], require('../package.json').version, 'in what Copy copies');
     assert.ok(sections.Roon.includes('Queue'));
     assert.ok(sections.Party.includes('Play it next'));
 
@@ -1613,10 +1768,10 @@ const set = (values) => Object.assign(roon.settings, values);
     const open = rows({ roon: fake, guests: { sessions: new Map([['a', {}], ['b', {}], ['c', {}]]) },
       streams: new Set([{ guestId: 'a' }, { guestId: 'a' }, { guestId: 'b' }, { guestId: null }]) });
     assert.strictEqual(open.Guests, '3 joined, 2 on the page now');
-    assert.strictEqual(open['Party Hub'], '1 open, Standard');
-    // The Party Hub now playing setting, as chosen in Roon.
+    assert.strictEqual(open['Party Hub'], '1 open, Standard by default');
+    // The Party Hub default view setting, as chosen in Roon.
     const roonDisplay = rows({ roon: Object.assign({}, fake, { settings: Object.assign({}, fake.settings, { hub_playing: 'roon' }) }) });
-    assert.match(roonDisplay['Party Hub'], /^\d+ open, Roon Display$/);
+    assert.match(roonDisplay['Party Hub'], /^\d+ open, Roon Display by default$/);
     assert.strictEqual(rows({ roon: Object.assign({}, fake, { zone: null }) })['Party zone'],
       'Not available in Roon (switched off, unplugged or removed?)');
     assert.strictEqual(rows({ roon: Object.assign({}, fake, { settings: {} }) })['Party zone'], 'Not chosen yet');
@@ -1730,13 +1885,17 @@ const set = (values) => Object.assign(roon.settings, values);
   });
 
   await check("libraries: a Readme's licence when there's no file; notes on those only a tool installs", async () => {
-    const { readPackages, readmeLicense } = require('../lib/about');
+    const { readPackages, readmeLicense, sourceLicense } = require('../lib/about');
     const fs = require('fs');
     const os = require('os');
     const path = require('path');
     assert.strictEqual(readmeLicense('# lib\n\nUse it.\n\n## License \n\n(The MIT License)\n\nCopyright (c) 2012 A &lt;a@example.org&gt;\n\n### Terms\n\nFree.\n\n## Thanks\n\nYou.'),
       '(The MIT License)\n\nCopyright (c) 2012 A <a@example.org>\n\n### Terms\n\nFree.');
     assert.strictEqual(readmeLicense('# lib\n\nNo licence here.'), '');
+    assert.strictEqual(sourceLicense('//----\n//\n// Lib\n//\n// Copyright (c) 2009 A\n// Licensed under the MIT license\n//----\n\nvar x;'),
+      'Lib\n\nCopyright (c) 2009 A\nLicensed under the MIT license');
+    assert.strictEqual(sourceLicense('/*!\n * Lib\n * MIT License\n */\nx();'), 'Lib\nMIT License');
+    assert.strictEqual(sourceLicense('// Just code.\nvar x;'), '');
 
     // app needs lib, a package with a command-line tool needing cli-lib,
     // which needs cli-dep; lib's licence is in its Readme.
@@ -1777,7 +1936,10 @@ const set = (values) => Object.assign(roon.settings, values);
     }
     const loaded = new Set(Object.keys(require.cache).map((f) => (f.match(/node_modules\/((?:@[^/]+\/)?[^/]+)\/(?!.*node_modules)/) || [])[1]));
     for (const p of packages) assert.ok(!(p.note && loaded.has(p.name)), `${p.id} is loaded, yet noted as unused`);
-    assert.match(packages.find((p) => p.name === 'yargs').note, /^Installed with qrcode package$/);
+    // qrcode-generator ships its licence only as its code's opening comment.
+    const generator = packages.find((p) => p.name === 'qrcode-generator');
+    assert.ok(generator.fromSource && generator.license === 'MIT' && generator.copyright === 'Copyright (c) 2009 Kazuhiko Arase');
+    assert.match(await (await get(`/About/license/${encodeURIComponent(generator.id)}`)).text(), /Licensed under the MIT license/);
 
     // A Readme's licence is served as the section alone, with the note on the page.
     const fromReadme = packages.find((p) => p.fromReadme);
@@ -1786,8 +1948,6 @@ const set = (values) => Object.assign(roon.settings, values);
       assert.match(text, /Permission is hereby granted/);
       assert.ok(!text.includes('## License'));
     }
-    const html = await (await get('/About')).text();
-    assert.ok(html.includes('<span class="who">Installed with qrcode package</span>'));
   });
 
   console.log(failures ? `\n${failures} failed` : '\nall passed');

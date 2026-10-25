@@ -28,6 +28,10 @@
   "track.add": "Ajouter à la file",
   "track.next": "Lire ensuite",
   "queue.up_next": "À suivre",
+  "queue.count": {
+    "one": "{count} morceau",
+    "other": "{count} morceaux"
+  },
   "queue.empty": "Rien de prévu.",
   "queue.empty_add": "Rien de prévu. Ajoutez un morceau.",
   "queue.empty_add_radio": "Rien de prévu. Ajoutez un morceau, ou laissez faire Roon Radio.",

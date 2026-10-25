@@ -28,6 +28,10 @@
   "track.add": "Lisää jonoon",
   "track.next": "Soita seuraavaksi",
   "queue.up_next": "Seuraavaksi",
+  "queue.count": {
+    "one": "{count} kappale",
+    "other": "{count} kappaletta"
+  },
   "queue.empty": "Jono on tyhjä.",
   "queue.empty_add": "Jono on tyhjä. Lisää kappale.",
   "queue.empty_add_radio": "Jono on tyhjä. Lisää kappale tai anna Roon Radion valita.",

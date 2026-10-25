@@ -19,6 +19,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Party Hub</title>
+    <!-- First: a browser too old for this page goes to the basic Party Hub. -->
+    <script src="/hub-check.js"></script>
     <link rel="icon" href="/favicon.ico" sizes="32x32" />
     <link rel="icon" href="/icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
@@ -75,7 +77,7 @@
             <p class="current-note muted" id="current-note" data-i18n="queue.waiting_for_host" hidden>Waiting for the host to start the queue.</p>
           </div>
         </div>
-        <!-- With Roon Display (Party Hub now playing): Roon's display page in
+        <!-- With Roon Display (Party Hub default view, or /PartyHub/Roon): Roon's display page in
              place of what's playing, with "Playing now" and who asked for
              the track above it. hub.js adds the frame. -->
         <div id="frame-slot" class="frame-slot" hidden>
@@ -86,7 +88,7 @@
       </section>
 
       <section class="upnext">
-        <h2 class="upnext-title" data-i18n="queue.up_next">Up next</h2>
+        <h2 class="upnext-title"><span data-i18n="queue.up_next">Up next</span><span id="upnext-count" class="upnext-count" hidden></span></h2>
         <ol class="list" id="list"></ol>
       </section>
     </main>

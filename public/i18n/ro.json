@@ -29,6 +29,11 @@
   "track.add": "Adaugă în coadă",
   "track.next": "Redă în continuare",
   "queue.up_next": "Urmează",
+  "queue.count": {
+    "one": "{count} piesă",
+    "few": "{count} piese",
+    "other": "{count} de piese"
+  },
   "queue.empty": "Nimic în coadă.",
   "queue.empty_add": "Nimic în coadă. Adaugă o piesă.",
   "queue.empty_add_radio": "Nimic în coadă. Adaugă o piesă sau lasă totul pe seama Roon Radio.",

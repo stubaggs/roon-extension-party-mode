@@ -62,15 +62,12 @@ const placeholders = (entry) =>
   [...new Set((typeof entry === 'object' ? Object.values(entry).join(' ') : entry).match(/\{\w+\}/g) || [])].sort();
 
 /** Runs the page runtime as a browser would, with the given served data. */
-function runtimeFor(lang, strings) {
+function runtimeFor(lang, strings, { intl = Intl } = {}) {
   const html = { lang: '' };
   const window = { I18N_DATA: { lang, dir: i18n.dir(lang), strings, fallback: en } };
-  vm.runInNewContext(fs.readFileSync(path.join(PUBLIC, 'i18n-runtime.js'), 'utf8'), {
-    window,
-    document: { documentElement: html, querySelectorAll: () => [] },
-    Intl,
-    Date
-  });
+  const globals = { window, document: { documentElement: html, querySelectorAll: () => [] }, Date };
+  if (intl) globals.Intl = intl;
+  vm.runInNewContext(fs.readFileSync(path.join(PUBLIC, 'i18n-runtime.js'), 'utf8'), globals);
   return Object.assign(window.I18N, { html });
 }
 
@@ -285,6 +282,14 @@ check('plurals follow each language: Russian, Polish, Czech, Arabic, Japanese', 
   assert.strictEqual(t('ar', 'time.minutes', 2), 'دقيقتين');
   assert.strictEqual(t('ar', 'time.minutes', 4), '4 دقائق');
   assert.strictEqual(t('ja', 'search.results', 1), '1 件のトラックが見つかりました。');
+});
+
+check("a browser without the language's plural rules gets English's, not an error", () => {
+  const strings = JSON.parse(read('i18n/ru.json'));
+  // Intl without PluralRules, as before Chrome 63 and Safari 13.
+  const { t } = runtimeFor('ru', strings, { intl: {} });
+  assert.strictEqual(t('time.minutes', { count: 1 }), '1 минуту');
+  assert.strictEqual(t('time.minutes', { count: 5 }), '5 минуты');
 });
 
 console.log('\nchosen language');

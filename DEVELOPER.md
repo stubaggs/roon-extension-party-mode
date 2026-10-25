@@ -38,12 +38,13 @@ Roon Core  ──(node-roon-api over the local network)──  app.js
 | `lib/profiles.js` | Selecting the Roon profile in a browse session |
 | `lib/history.js` | The guest page's Played list and skips |
 | `lib/party-playlist.js` | The downloadable party playlist |
+| `lib/qr.js` | The join and playlist QR codes, as SVG |
 | `lib/art-cache.js` | Album art kept in memory, and the image keys that may be fetched |
 | `lib/about.js` | The About page |
 | `lib/i18n.js`, `public/i18n/`, `public/i18n-runtime.js` | Page text in 30 languages |
 | `lib/ports.js`, `lib/env.js`, `lib/log.js` | The web port, environment variables, logging |
 | `healthcheck.js` | Docker's health check |
-| `public/` | The guest page (`index.html`, `guest.js`) and the Party Hub (`hub.html`, `hub.js`, `hub.css`); no build step |
+| `public/` | The guest page (`index.html`, `guest.js`) the Party Hub (`hub.html`, `hub.js`, `hub.css`, `hub-check.js`) and the basic Party Hub (`basic.html`, `basic.js`, `basic.css`); no build step |
 | `test/` | `npm test` |
 
 ## Running it with Node.js
@@ -62,8 +63,8 @@ prints the guest link and the Party Hub's address. Settings are written to `conf
 in the folder it's started from.
 
 Dependencies: Roon Labs' `node-roon-api*` packages (from `github:roonlabs/…`), `express`,
-`express-rate-limit`, `cookie-parser` and `qrcode`. There are no development
-dependencies.
+`express-rate-limit` and `qrcode-generator` (`lib/qr.js` draws its codes as SVG; cookies are
+read in `lib/server.js`). There are no development dependencies.
 
 ## Tests
 
@@ -77,10 +78,11 @@ the image (see [Running the image](#running-the-image)).
 | Address | What it is |
 | --- | --- |
 | `/GuestHub` | The guest page, and the way in: opening it starts or keeps a guest session while Party is On or Paused. Sent `no-store`. The join QR code carries it |
-| `/PartyHub` | The Party Hub (the TV page) |
+| `/PartyHub` | The Party Hub (the TV page), in the Party Hub default view |
+| `/PartyHub/Standard`, `/PartyHub/Roon`, `/PartyHub/Basic` | The Party Hub in that view, whatever the setting (`data-view` on the page, `?view=` to `/api/hub`); Basic is `basic.html`, for TV browsers too old for the Party Hub |
 | `/Playlist` | The party playlist, only while Party is Off and Playlist isn't Off |
 | `/p/<code>` | The party playlist at the host's own address, new for each party (in Roon's status) |
-| `/About`, `/About/license/<id>` | Version, the running copy's state, every library and its licence |
+| `/About`, `/About/license/<id>` | Version, the running copy's state, every library and its licence; Open the Party Hub and the Hub's address (as Roon's status shows it) with a Copy button, once connected to Roon; how to enable Party Mode until then. Roon's link for the extension (`website`) |
 | `/` | "Scan the code again" |
 | `/api/party`, `/api/queue`, `/api/search`, `POST /api/request`, `POST /api/skip`, `POST /api/name` | The guest page's API; need a guest session |
 | `/api/hub` | The Party Hub's data; no session |
@@ -117,7 +119,7 @@ are `label` items.
 | Name | `party_name` | blank: the pages say "Party" in the guest's language |
 | Host name | `host_name` | at most 24 characters; blank: "Host" in each language |
 | Invites | `guest_invite` | `true` (default): the guest page can show the join code |
-| Party Hub now playing | `hub_playing` | `'simple'` (Standard, default) or `'roon'` (Roon Display) |
+| Party Hub default view | `hub_playing` | `'simple'` (Standard, default), `'roon'` (Roon Display) or `'basic'` (Basic) |
 | Party Hub language | `hub_language` | `''` (Automatic) or a language code |
 | Playlist | `playlist_download` | `'qr'`, `'link'` or `'off'` |
 | Guest requests | `allow_add`, `allow_next`, `allow_skip` and their counts; `prevent_duplicates` | for adding, playing next and skipping: allowed or not, goes per guest (0 = no limit) and minutes per extra go (0 = never); Block tracks already in the queue |
@@ -145,7 +147,10 @@ after the setting changes, the Core reconnects or a step fails.
 **Web port.** A port chosen in the settings or with `ROON_EXTENSION_PARTY_MODE_PORT` is
 used or nothing: if it's busy the status says so in red. Only on the very first run, with
 no port chosen, a busy 8338 moves to the next free one of the nine after it. Saving a port
-that can't be opened keeps the current one and puts it back in the settings. Roon saves
+that can't be opened keeps the current one and puts it back in the settings. A port that
+opens moves the pages at once, then the Core connection is dropped so Roon registers the
+new link: node-roon-api's discovery looks again every 10 s in its first minute and once a
+minute after, so Party Mode is back in Roon's list within a minute. Roon saves
 every field on the first Save, so the variable only matters before that. Links use the
 machine's first non-internal IPv4 address.
 
@@ -192,9 +197,18 @@ address `/p/<code>` is 8 Crockford base32 characters (`7KQ4-M9XD`), new for each
 matched however it's typed. Times are the extension's local time (UTC in Docker unless
 `TZ` is set).
 
+**Guest page browsers.** `guest.js` is ES2017 with no build step: Chrome 55, Safari 10.3
+(iOS 10.3), Firefox 52 or newer. It asks `fetch` for cookies (`credentials:
+'same-origin'`: older browsers leave them out by default), and Skip in the nickname
+dialog falls back from `requestSubmit` (Safari 16) to a submit event. `i18n-runtime.js`
+is ES5 (the basic Party Hub loads it too), with English's one/other plurals where
+`Intl.PluralRules` is missing.
+
 **Party Hub layout.** Laid out for 1920 × 1080 and the same on any screen shape as at 4:3
 (`--w`), scaling with the height up to 4K and 8K. Up next shows only whole tracks
-(`fitRows()`), with the spare room shared above and below (`--shift`). Heights use `--vh`,
+(`fitRows()`), with the spare room shared above and below (`--shift`), and no numbers;
+when more are queued than fit, its heading says how many (`queue.count`; "499+" when Roon
+sent all it will, `queue_full`). Heights use `--vh`,
 measured from `innerHeight` (iPad Safari counts its bars in `100vh`), again after load.
 The Hub's CSS and script use nothing newer than Chromium 79 (TVs' built-in browsers): no
 `aspect-ratio`, no flex `gap`, no `inset` or `*-inline` shorthands. **Roon Display** frames
@@ -203,6 +217,14 @@ Roon's own display page (`http://<Core address>:<port>/display/`, found from dis
 picture, sandboxed, shown only once Party Mode has checked the page answers and never on
 a phone-width screen. Its zone is chosen in Roon (the zone's Displays) and kept in the
 browser.
+
+**Basic Party Hub** (`basic.html`): for TV browsers too old for the Party Hub, which
+`hub-check.js` sends there first thing (no CSS `clamp()`, or no MediaQueryList events).
+One 16:9 stage, 120 × 67.5 rem in fixed positions, scaled by setting the root font size
+(text stays sharp) and letterboxed in the page's colour; ES5, XMLHttpRequest, EventSource
+where there is one (else polling), six Up next rows, no frame or menu. A long party name
+steps down in size to fit (`fitName()`), then ends with an ellipsis. Checked back to
+Chrome 53 and Firefox 47.
 
 ## Translations
 
@@ -368,7 +390,7 @@ Named `ROON_EXTENSION_PARTY_MODE_<SETTING>` and read through `lib/env.js`; the h
 | `ROON_EXTENSION_PARTY_MODE_PORT` | The first run's port (default 8338); after that, Web port in Roon |
 | `ROON_EXTENSION_PARTY_MODE_INSTANCE` | A name for this copy (see [Running several copies](#running-several-copies)) |
 | `ROON_EXTENSION_PARTY_MODE_DEBUG` | `1`, `true`, `yes` or `on`: the detailed log from the start |
-| `ROON_EXTENSION_PARTY_MODE_BUILD` | Set by the publish workflow for the About page; not for setting by hand |
+| `ROON_EXTENSION_PARTY_MODE_BUILD` | Set by the publish workflow for the About page; its commit also follows the version in Roon (`1.4.0 (b51496d)`). Not for setting by hand |
 
 ## Logging
 
@@ -447,6 +469,10 @@ number, or a digest from RELEASES.md, to stay on one image.
 - **Some duplicates can't be seen from search:** two versions on one album with the same
   title and artist, and an album's other versions, which search doesn't show.
 - **Credits can swap** if Roon reports two inserts of the same recording out of order.
+- **Back in Roon's list within a minute:** node-roon-api looks for the Core every 10 s in
+  the first minute after Party Mode starts, then once a minute. So after the extension is
+  disabled in Roon, or the Core restarts, it can be missing from Roon's Extensions list
+  for up to a minute.
 - **Everything is in memory:** Played, the playlist and credits start over on a restart.
 - **Sessions can take tens of megabytes** if all 2000 are filled, which anyone on the
   network could do; the longest idle go first, and real guests rejoin by themselves.

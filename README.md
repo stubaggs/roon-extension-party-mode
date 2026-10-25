@@ -12,9 +12,8 @@ Roon account, and no access to anything else in your Roon setup.
 
 - **Guests add, play next or skip tracks** from their phone.
 - **Fair shares:** limit how many of each a guest gets, with more added back over time.
-- **Names on tracks:** guests can give a nickname, shown next to the tracks they add (or
-  "Anon" if they'd rather not).
-- **The Party Hub** for a TV or tablet: QR code, what's playing and the whole queue.
+- **Names on tracks:** guests can give a nickname, shown next to the tracks.
+- **The Party Hub** for a TV or tablet: QR code, what's playing and what's up next.
 - **Pass it on:** guests tap the party's name on their phone to show the QR code, so a
   friend can scan it there and then.
 - **Up next and Played** lists, so everyone can see what's coming and what's been on.
@@ -30,11 +29,17 @@ What's changed in each version is in [RELEASES.md](RELEASES.md).
 - A Roon Core.
 - A computer on the same network to run the extension: a 64-bit PC or NAS, or a
   Raspberry Pi from 2014 or later with at least 512 MB of memory.
-- Guests' phones on the same Wi-Fi as that computer.
+- Guests' phones on the same Wi-Fi as that computer: iOS 10.3 or later, or Android with
+  Chrome 55 or later (Chrome updates from the Play Store on almost any Android phone).
+- For the Party Hub, any screen with a web browser (see
+  [Showing the Party Hub on a TV](#showing-the-party-hub-on-a-tv)).
 
 ## Installing
 
-### With the Extension Manager
+Choose one way:
+
+<details>
+<summary><strong>With the Extension Manager</strong></summary>
 
 If you use the [Extension Manager](https://github.com/TheAppgineer/roon-extension-manager)
 (its [wiki](https://github.com/TheAppgineer/roon-extension-manager/wiki) explains how to
@@ -50,7 +55,7 @@ runs in Docker (as it does on DietPi and Linux):
    ```
 
    It should list `roon-extension-manager` (if it says "permission denied", see
-   [Troubleshooting](#troubleshooting)).
+   [Troubleshooting](#installing-and-roon)).
 
    Then run these in any folder (the last one deletes the downloaded file):
 
@@ -79,7 +84,10 @@ Party Mode keeps running, and updates come from the Manager's own list.
 
 Then see [Starting a party](#starting-a-party).
 
-### On a NAS with Docker support
+</details>
+
+<details>
+<summary><strong>On a NAS with Docker support</strong></summary>
 
 On a Synology with DSM 7.2 or later, install **Container Manager** from Package Center,
 then run Party Mode as a project. Its settings are kept through updates, with nothing to
@@ -109,7 +117,10 @@ settings again.
 
 Then see [Starting a party](#starting-a-party).
 
-### With Docker
+</details>
+
+<details>
+<summary><strong>With Docker</strong></summary>
 
 On Linux, including a Raspberry Pi, install Docker with its Compose plugin (see
 [Install Docker Engine](https://docs.docker.com/engine/install/)).
@@ -162,36 +173,29 @@ again.
 
 </details>
 
+</details>
+
 ## Starting a party
 
 1. In Roon, open **Settings → Extensions**, press **Enable** next to **Party Mode** if it
-   isn't enabled yet, then press its **Settings**. Under **Party setup**, which opens by itself
-   until there's a zone, pick the party's **Zone**: where the music plays. Give the party
-   a **Name** if you like; otherwise it's called "Party". Choose a **Roon profile**
-   if you want to change from the default. Press **Save** to apply your choices.
+   isn't enabled yet, then press its **Settings**. Under **Party setup**, pick the party's
+   **Zone**: where the music plays. Everything else is optional.
 2. To change what guests can do, and how often, open **Guest requests** (see
    [Settings](#settings)).
-3. Click **Party Mode**'s link in the Extensions list to open the **Party Hub**. Put it
+3. Press **Save** to apply your choices.
+4. Click **Party Mode**'s link in the Extensions list to open its About page, then press
+   **Open the Party Hub** (or **Copy** its address for another screen). Put the Party Hub
    on a TV, a tablet or a laptop where guests can see it (see
-   [Showing the Party Hub on a TV](#showing-the-party-hub-on-a-tv)). Bookmark it, or add
-   it to a tablet's home screen, to find it again: it shows with Party Mode's jukebox icon.
-4. Guests scan the QR code on the Party Hub with their phone camera. That's it. Once
-   they're in, they can show the same code from their phone by tapping the party's name
-   at the top of the page (see **Invites** below).
-
-The QR code is the same for every party: it leads to `/GuestHub` on the Party Hub's
-address, for example `http://192.0.2.10:8338/GuestHub`. Guests can bookmark the page or
-add it to their home screen, and it opens straight in at the next party. You can print
-the code, too. For bookmarks, home-screen icons and printed codes to keep working,
-Party Mode's address has to stay the same: reserve it for the computer running Party
-Mode in your router's settings (often called a DHCP reservation or a fixed IP address).
+   [Showing the Party Hub on a TV](#showing-the-party-hub-on-a-tv)).
+5. Guests scan the QR code on the Party Hub with their phone camera. That's it.
 
 **Party**, at the top of the settings, runs the party:
 
 - **On**: guests can make requests. Switching to On or Paused from **Off** starts a new
   party and a new playlist. Guests' pages let them back in by themselves.
 - **Paused**: for a speech or the cake. Choose **Pause**: playback pauses and guests'
-  requests wait. Choose **Unpause** to carry on where you left off.
+  requests wait. Choose **Unpause** to carry on where you left off. Pausing only in Roon
+  isn't enough: a guest's next request starts playback again.
 - **Off**: when you're done taking requests. Playback pauses, guests can't make requests,
   and the playlist is ready to download.
 
@@ -206,58 +210,41 @@ party's name, the zone, the Party Hub's address and the playlist's, for example:
 
 ## Showing the Party Hub on a TV
 
-The Party Hub is a web page, so anything that can show a web page can show it. Use the
-address from Roon's status line (above), for example `http://192.0.2.10:8338/PartyHub`. The
-device has to be on the same network as Party Mode.
+The Party Hub is a web page. Its address is in Party Mode's status in Roon (above) and on
+the About page; open it on any device on the same network as Party Mode:
 
-- **The TV's own browser.** Most smart TVs have one, and a Fire TV or Google TV stick can
-  use a browser app. Open the Hub's address and bookmark it. Nothing else has to stay on,
-  so this is the most reliable option. Turn off the TV's screen saver or power saving
-  for the party.
-- **Chromecast or Google TV, from a computer.** Open the Hub in Chrome, then choose
-  **Cast…** from Chrome's menu and pick the TV. If Chrome asks what to cast, choose the
-  tab. Put the tab in full screen (F11, or Ctrl+Cmd+F on a Mac). The computer has to stay
-  on and awake, with the tab open.
-- **Apple TV or an AirPlay TV, from an iPhone, iPad or Mac.** Open the Hub in Safari,
-  then choose **Screen Mirroring** in Control Centre and pick the TV. Turn an iPhone or
-  iPad sideways. The device has to stay awake, so plug it in and set **Auto-Lock** to
-  **Never** for the party (**Settings → Display & Brightness**). An Apple TV can't open
-  web pages itself, so mirroring is the way.
-- **A cable.** A laptop plugged into the TV with HDMI, with the Hub in full screen, works
-  everywhere.
+- **The TV's own browser,** or a browser app on a Fire TV or Google TV stick. Bookmark the
+  address. Nothing else has to stay on, so this is the most reliable. Turn off the TV's
+  screen saver for the party.
+- **Chromecast or Google TV, from a computer:** in Chrome, choose **Cast…** from the menu,
+  pick the TV and cast the tab, then make it full screen (F11, or Ctrl+Cmd+F on a Mac).
+  The computer has to stay on, with the tab open.
+- **Apple TV or an AirPlay TV, from an iPhone, iPad or Mac:** open the Hub in Safari and
+  choose **Screen Mirroring** in Control Centre. Turn an iPhone or iPad sideways, plug it
+  in and set **Auto-Lock** to **Never** (**Settings → Display & Brightness**).
+- **A laptop** plugged into the TV with HDMI, with the Hub in full screen.
 
-A tablet on a stand, or a laptop where guests can see it, also works without a TV.
+**Choosing the view.** **Party Hub default view** in the [settings](#settings) decides
+what `/PartyHub` shows. One screen can show a different view by adding it to the address:
+`/PartyHub/Standard`, `/PartyHub/Roon` or `/PartyHub/Basic`.
 
-With **Party Hub now playing** set to **Roon Display**, each browser showing the Party Hub
-becomes a display device in Roon, named after the browser (such as "Chrome on Linux").
-Once for each screen, tie it to the party zone: in Roon, click the party zone's volume
-control to bring up the zone's options, pick **Displays** and choose the Party Hub's
-display device. Phones showing the Hub never load Roon's page, so they don't appear. The
-screen has to reach the Roon Core as well as Party Mode; until it can, the Hub shows its
-own view.
+**Older TVs.** If the Hub doesn't look right on a TV's browser, use `/PartyHub/Basic`: a
+simpler 16:9 page with the same QR code, what's playing and Up next. A browser too old for
+the Party Hub is sent there automatically.
 
-After updating Party Mode, reload the Party Hub's page on the screen, so it shows the new
-version.
-
-## Your own custom Party Hub page
-
-You can make a Party Hub page of your own, such as a dashboard, a Home Assistant card or a
-design for your TV, from what the Party Hub shows: what's playing, up next and played, who
-asked for each track, and the QR codes. Party Mode shares these, read-only, at addresses
-under `/embed/`, described in [EMBED.md](EMBED.md). Pages to start from, among them one
-with Roon's own display page (Roon Display) beside the queue, as the built-in Party Hub
-can also show it, are in
-[roon-extension-party-mode-hubs](https://github.com/stubaggs/roon-extension-party-mode-hubs),
-and you can add yours there.
+**Roon Display** (`/PartyHub/Roon`, or as the default view): each screen showing it
+appears in Roon as a display device, named after its browser (such as "Chrome on Linux").
+Once for each screen, tie it to the party zone: in Roon, click the zone's volume control,
+pick **Displays** and choose it. The screen has to reach the Roon Core too; until it can,
+the Hub shows its own view.
 
 ## The party's playlist
 
-Once **Party** is **Off**, the Party Hub shows the playlist to download (see
-**Playlist** below). Its address is also in Party Mode's status in Roon, under
-**Settings → Extensions**, for example `http://192.0.2.10:8338/p/7KQ4-M9XD`,
-which you can open in any browser on your network. Each party's playlist has its own
-address, so only people you give it to can download it, and the old one stops working
-when the next party starts.
+Once **Party** is **Off**, the Party Hub offers the playlist to download, unless
+**Playlist** is **Off** (see [Settings](#settings)). Its address is also in Party Mode's
+status in Roon; open it in any browser on your network. Each party's playlist has its own
+address, so only people you give it to can download it, and the old one stops working when
+the next party starts.
 
 It's a CSV file of every track queued in the party zone, numbered, with title, artist,
 album, length, who asked for it and when. To leave guests' nicknames out, turn on **Hide
@@ -277,45 +264,42 @@ you need them.
 | **Party setup** | |
 | Zone | Where the music plays. If you pick a speaker that's grouped with others, the whole group plays. |
 | Roon profile | The Roon profile guests' tracks play under, so they count toward its play history and recommendations. Unless you choose one, that's Roon's default profile (normally **Guest**). To keep a record of the party, create a profile such as "Party" in Roon first, then choose it here. |
-| Name | The party's name, shown on the Party Hub. Leave blank for "Party", in each guest's language. |
-| Host name | Your name, shown instead of **Host** on the tracks you queue or skip in Roon and in the playlist download, up to 24 characters. Leave blank for **Host** in each guest's language. Guests can't use it as their name. |
-| Invites | Guests can tap the party's name at the top of the guest page to show the QR code, so a friend can scan it from their phone. On by default. Off, the party's name still shows, but only the Party Hub has the code. |
-| Party Hub now playing | What the Party Hub shows for the playing track. **Standard** (the default) is Party Mode's own: the cover, track and artist. **Roon Display** shows Roon's own display page instead, with Roon's artist pictures, and the QR code and Up next beside it. Then, once for each screen, pick its display for the party zone in Roon (see [Showing the Party Hub on a TV](#showing-the-party-hub-on-a-tv)). |
-| Party Hub language | The language of the Party Hub, for every screen showing it. Automatic (the default) follows the screen's browser. Guests' phones always follow their own. |
-| Playlist | What the Party Hub shows once **Party** is **Off**: a **QR code** guests can scan (the default), a **Link only** to click on the Hub itself, or **Off** for nothing. |
+| Name | The party's name, shown on the Party Hub and guests' pages. |
+| Host name | Your name in place of **Host**, up to 24 characters. Guests can't use it as their name. |
+| Invites | Whether guests can show the QR code on their phone. On by default; off, only the Party Hub has it. |
+| Party Hub default view | What `/PartyHub` shows: **Standard** (the default), **Roon Display** or **Basic** (see [Showing the Party Hub on a TV](#showing-the-party-hub-on-a-tv)). |
+| Party Hub language | The language of the Party Hub, for every screen showing it. |
+| Playlist | How the Party Hub offers the playlist once **Party** is **Off**: a **QR code**, a **Link only**, or **Off**. |
 | **Guest requests** | |
 | Block tracks already in the queue | Whether a track already in the queue can be added again, either way of adding. Covers, live takes, remasters and the same track on another album count as different tracks. |
 | Add to queue | Whether guests can add tracks to the end of the queue. |
-| Play it next | Whether guests can put a track straight after the one playing. Each one plays before earlier requests. |
-| Skip tracks | Whether guests can skip the track playing now, for everyone. Off unless you turn it on. |
+| Play it next | Whether guests can put a track straight after the one playing. |
+| Skip tracks | Whether guests can skip the track playing now. Off unless you turn it on. |
 | **Advanced** | See below. |
 
 **Add to queue**, **Play it next** and **Skip tracks** are separate: allow any of them, in
 any combination. Under each, **"Add to queue" per guest**, **"Play it next" per guest** or
-**"Skip" per guest** sets how many a guest gets (**0 means no limit**), and **One more
-every (minutes)** how often they get another (**0 means never**). By default, each
-guest can add 5 tracks, with one more every 10 minutes, and play next once an hour;
-skipping, once you turn it on, is once an hour too. Changing these during a party applies
+**"Skip" per guest** sets how many a guest gets, and **One more every (minutes)** how
+often they get another. By default, each guest can add 5 tracks, with one more every 10
+minutes, and play next once an hour; skipping, once you turn it on, is once an hour too. Changing these during a party applies
 straight away to guests already there, counting what they've used.
 
 <details>
 <summary><strong>Advanced settings</strong></summary>
 
-- **Detailed log**: for troubleshooting. It logs every message to and from Roon, including
-  guests' searches, so turn it off when you're done.
-- **Hide names in downloadable playlist**: the playlist download says **Anon** instead of
-  each guest's nickname. Tracks Roon Radio picked or you queued still say **Roon Radio** or
-  **Host** (or your **Host name**). Off by default.
+- **Detailed log**: for troubleshooting (see [Getting help](#getting-help)).
+- **Hide names in downloadable playlist**: tracks Roon Radio picked or you queued still
+  say **Roon Radio** or **Host** (or your **Host name**). Off by default.
 - **Network**
-  - **Web port**: the port the guest pages and the Party Hub use (8338). If it's busy the
-    very first time Party Mode starts, it takes the next free one and keeps it. Only change
-    it if something else on the computer uses that port.
-  - **Flood protection**: how many page loads and searches a minute each IP address may
-    make, so one misbehaving device can't overwhelm Party Mode or your Core. **Default**
-    suits almost everyone; **Custom** lets you set the numbers (0 for no limit). How high
-    is useful depends on your network, your Core and the computer running Party Mode.
-- **Roon menu names**: Party Mode normally finds them by itself. Only fill them in if
-  search or adding tracks fails on a Core that isn't in English.
+  - **Web port**: 8338 unless it's busy the very first time Party Mode starts, when it
+    takes the next free one and keeps it. Only change it if something else on the computer
+    uses that port. After you save a new port, Party Mode reconnects to your Core so Roon
+    shows the new link: it disappears from Roon's Extensions list for up to a minute, then
+    comes back by itself. Pages already open, and phones, need the new link or a fresh scan.
+  - **Flood protection**: so one misbehaving device can't overwhelm Party Mode or your
+    Core. **Default** suits almost everyone. How high **Custom** is useful depends on your
+    network, your Core and the computer running Party Mode.
+- **Roon menu names**: see [Installing and Roon](#installing-and-roon) under Troubleshooting.
 
 </details>
 
@@ -323,14 +307,12 @@ straight away to guests already there, counting what they've used.
 
 - **Keep it at home.** Anyone on your network can join and add tracks, and the Party Hub
   needs no login at all. Don't open the port to the internet.
-- **On a shared network, anyone on it can join.** In a dorm, a hotel, an office or a
-  holiday rental, being on the Wi-Fi doesn't mean being at the party. Turn **Party** Off
-  when the party ends. Roon works the same way: anyone on your network with the Roon app
-  can control your Core. Party Mode makes joining easier, with nothing to install, but
-  gives guests far less: adding tracks to the party zone, within your limits, not full
-  access to your Core.
-- **For a speech, use Pause.** Choose **Pause** under **Party** rather than pausing
-  in Roon: a track a guest adds starts playback again if only paused in Roon.
+- **Keep the QR code the same, party after party,** by reserving the address of the
+  computer running Party Mode in your router's settings (often called a DHCP reservation
+  or a fixed IP address). The code leads to `/GuestHub` at that address, for example
+  `http://192.0.2.10:8338/GuestHub`, so if the router gives the computer a new address,
+  the code changes. With the address reserved, you can print the code, and guests'
+  bookmarks and home-screen icons open straight in at the next party.
 - **Guests can't rearrange the queue.** They can add a track to the end, or play one next
   when they add it, but Roon doesn't yet let anyone move a queued track.
 - **A radio station waits for you.** While a live radio station plays on the party zone,
@@ -350,7 +332,7 @@ straight away to guests already there, counting what they've used.
   on **Hide names in downloadable playlist** under **Advanced**, or choose **Link only**
   or **Off**: with **Off**, only you have the address, in Party Mode's status in Roon.
 - **Big parties need a capable Core.** Guests' searches run on your Roon Core, and a
-  busy party can keep it hard at work. In our tests, every guest searched about twice a
+  busy party can keep it hard at work. In tests, every guest searched about twice a
   minute without a break:
   - A Core on an Intel Core i9 answered searches in under a second and a half for 150
     guests. Held to one of its cores, it stayed quick for about 30 guests, and searches
@@ -364,6 +346,8 @@ straight away to guests already there, counting what they've used.
 
 ## Troubleshooting
 
+### Installing and Roon
+
 **Docker says "permission denied".** Your user isn't set up to use Docker. Put `sudo` in
 front of each `docker` command.
 
@@ -371,11 +355,8 @@ front of each `docker` command.
 the same network as the Roon Core, and Docker must use the host network (`network_mode:
 host` in `docker-compose.yml`, `--network host` with `docker run`). If your Docker doesn't
 support [host networking](https://docs.docker.com/engine/network/drivers/host/), use a
-Linux computer, a Raspberry Pi or a NAS.
-
-**Phones can't open the page after scanning.** Check that the phones are on the same
-Wi-Fi as the computer running Party Mode, and that the computer's firewall allows the port
-shown in Roon's status line (8338, unless you chose another or it was busy).
+Linux computer, a Raspberry Pi or a NAS. After you disable or unauthorize Party Mode, or
+restart the Roon Core, it can take up to a minute to appear again.
 
 **Roon says settings can't be saved.** The extension has nowhere to keep them. Check that
 `docker-compose.yml` still has its `party-mode-data:/data` volume line, or that your
@@ -389,32 +370,9 @@ sudo chown 1000 config.json && chmod 600 config.json
 Once it's fixed, press **Save** in Party Mode's settings: the warning clears, with no
 restart.
 
-**A change in the settings didn't stick.** Roon closes the settings window when you press
-**Save**, even if a value can't be saved, such as a **Host name** over 24
-characters. Party Mode's status under **Settings → Extensions** then says what wasn't
-saved, in red. Open the settings, fix it and press **Save** again.
-
 **Party Mode is new in Roon again after an update in a NAS Docker app other than
 Container Manager.** Its settings were kept inside the old container. Enable it and choose
 its settings again.
-
-**There's no Skip button.** **Skip tracks** is off in the settings, a radio station is
-playing, or it's the last track with Roon Radio off, so there's nothing to skip to.
-
-**A guest's page says "Scan the code again".** Their browser blocks cookies (some private
-modes do). Allowing cookies for the Party Hub's address lets them in.
-
-**Guests can't join, and Roon shows Party Mode's address as `127.0.0.1`.** The QR code
-and links point at the computer itself, which phones can't reach. It happens after the
-computer restarts, when Party Mode starts before the network is up. Restart Party Mode
-once:
-
-```bash
-docker compose restart                              # Docker Compose, in its folder
-docker restart roon-extension-party-mode-beta       # docker run
-```
-
-In Synology's Container Manager, stop Party Mode's project and start it again.
 
 **Roon's status says a port is in use, in red.** Another app, or another copy of Party
 Mode, is using Party Mode's **Web port**, so the guest pages and the Party Hub can't
@@ -429,18 +387,55 @@ the default 8338.
 **Search finds nothing, or adding fails, on a Core in a language other than English.**
 Under **Advanced** in the settings, fill in the **Roon menu names** your Core uses.
 
+### Guests
+
+**Phones can't open the page after scanning.** Check that the phones are on the same
+Wi-Fi as the computer running Party Mode, and that the computer's firewall allows the port
+shown in Roon's status line (8338, unless you chose another or it was busy).
+
+**A guest's page says "Scan the code again".** Their browser blocks cookies (some private
+modes do). Allowing cookies for the Party Hub's address lets them in.
+
+**A guest's page stays blank.** Their phone's browser is too old: the guest page needs
+iOS 10.3 or later, or Chrome 55 or later on Android. On Android, updating Chrome from the
+Play Store usually fixes it; otherwise they can use a friend's phone.
+
+**Guests can't join, and Roon shows Party Mode's address as `127.0.0.1`.** The QR code
+and links point at the computer itself, which phones can't reach. It happens after the
+computer restarts, when Party Mode starts before the network is up. Restart Party Mode
+once:
+
+```bash
+docker compose restart                              # Docker Compose, in its folder
+docker restart roon-extension-party-mode-beta       # docker run
+```
+
+In Synology's Container Manager, stop Party Mode's project and start it again.
+
+**A guest sees "Too many requests".** Set **Flood protection** under **Advanced** to
+**Custom** and raise the numbers.
+
+**There's no Skip button.** **Skip tracks** is off in the settings, a radio station is
+playing, or it's the last track with Roon Radio off, so there's nothing to skip to.
+
+**Guests can't change the volume.** That's on purpose: Party Mode never gives guests
+volume control. Set the party zone's volume in Roon. If the zone has no volume control in
+Roon (fixed volume, or an amplifier controlled on its own), set it on the amplifier.
+
+### During the party
+
 **Guests see "Requests are paused for a moment", but you didn't pause the party.** The
 party zone isn't available in Roon (its device is switched off, unplugged or asleep), or
 your Roon Core is restarting or can't be reached. Roon's status line for Party Mode says
 which. Requests come back on by themselves as soon as the zone and the Core are back. If
 the zone stays away, check the device, or choose another **Zone** under **Party setup**.
 
-**A guest sees "Too many requests".** Set **Flood protection** under **Advanced** to
-**Custom** and raise the numbers.
+**A change in the settings didn't stick.** Roon closes the settings window when you press
+**Save**, even if a value can't be saved, such as a **Host name** over 24
+characters. Party Mode's status under **Settings → Extensions** then says what wasn't
+saved, in red. Open the settings, fix it and press **Save** again.
 
-**Guests can't change the volume.** That's on purpose: Party Mode never gives guests
-volume control. Set the party zone's volume in Roon. If the zone has no volume control in
-Roon (fixed volume, or an amplifier controlled on its own), set it on the amplifier.
+### Getting help
 
 **Something else isn't working.** Turn on **Detailed log** under **Advanced**, try again,
 then inspect the log:
@@ -458,15 +453,18 @@ afterwards: it's large and records what guests search for.
 
 When asking for help:
 
-- **If Party Mode is running,** open **☰ → About Party Mode** at the top left of the
-  Party Hub (or the Party Hub's address with `/About` in place of `/PartyHub`, for example
-  `http://192.0.2.10:8338/About`). Select **Copy details** and paste them into your post.
-  They show how Party Mode is installed, its connection to Roon and the state of the
-  party, without names, addresses or other personal details.
+- **If Party Mode is running,** click its link in Roon's Extensions list to open the About
+  page, select **Copy** above the details and paste them into your post. They show how
+  Party Mode is installed, its connection to Roon and the state of the party, without
+  names, addresses or other personal details.
 - **If it won't install or start,** say how you installed it, on what device, and paste
   any error.
 
 ## Options
+
+<details>
+<summary>With Docker: a fixed web port, the detailed log from the start, or staying on one
+version.</summary>
 
 `docker-compose.yml` has a few optional settings, commented out with `#` and explained
 beside them: a fixed **Web port**, the detailed log from the moment Party Mode starts (also
@@ -488,12 +486,14 @@ last line of the `docker run` command. For example:
     image: stubaggs/roon-extension-party-mode:1.4.0
 ```
 
-Then update as usual (see [With Docker](#with-docker)). The versions are in
+Then update as usual (see **With Docker** under [Installing](#installing)). The versions are in
 [RELEASES.md](RELEASES.md) and on
 [Docker Hub](https://hub.docker.com/r/stubaggs/roon-extension-party-mode/tags). To get
 the newest again, put back the tag you had (`beta` or `latest`) and update. Versions
 before 1.4.0 keep their settings elsewhere, so going back to one means setting Party Mode
 up again.
+
+</details>
 
 ## Running more than one party
 
@@ -504,7 +504,7 @@ rooms on one Roon Core, run another copy with a name of its own.</summary>
 Give each copy its own container name and its own settings. For example, a second copy
 named Garden (replace Garden with whatever you choose):
 
-**With Docker Compose:** set up a new folder as in [With Docker](#with-docker). In its
+**With Docker Compose:** set up a new folder as in **With Docker** under [Installing](#installing). In its
 `docker-compose.yml`, change `container_name` and the volume's `name`, and remove the `#`
 from `environment:` and from the `ROON_EXTENSION_PARTY_MODE_INSTANCE` line, with your name
 in it. Leave the other lines as they are:
@@ -615,6 +615,15 @@ Vietnamese. Guests can pick another with the 🌐 button next to their name at t
 the page. The translations were generated by AI, so please excuse any errors. Corrections
 from native speakers are welcome on the
 [Roon forum](https://community.roonlabs.com/t/party-mode-extension).
+
+## Your own custom Party Hub page
+
+You can make a Party Hub page of your own, such as a dashboard, a Home Assistant card or a
+design for your TV, from what the Party Hub shows: what's playing, up next and played, who
+asked for each track, and the QR codes. Party Mode shares these, read-only, at addresses
+under `/embed/`, described in [EMBED.md](EMBED.md). Pages to start from, including
+versions of the built-in Party Hub, are in
+[roon-extension-party-mode-hubs](https://github.com/stubaggs/roon-extension-party-mode-hubs).
 
 ## For developers
 

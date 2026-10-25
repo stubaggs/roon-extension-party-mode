@@ -28,6 +28,10 @@
   "track.add": "Добави в опашката",
   "track.next": "Пусни следващ",
   "queue.up_next": "Следват",
+  "queue.count": {
+    "one": "{count} запис",
+    "other": "{count} записа"
+  },
   "queue.empty": "Опашката е празна.",
   "queue.empty_add": "Опашката е празна. Добави запис.",
   "queue.empty_add_radio": "Опашката е празна. Добави запис или остави на Roon Radio.",

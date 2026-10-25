@@ -30,6 +30,12 @@
   "track.add": "Добавить в очередь",
   "track.next": "Играть следующим",
   "queue.up_next": "Далее",
+  "queue.count": {
+    "one": "{count} трек",
+    "few": "{count} трека",
+    "many": "{count} треков",
+    "other": "{count} трека"
+  },
   "queue.empty": "Очередь пуста.",
   "queue.empty_add": "Очередь пуста. Добавьте трек.",
   "queue.empty_add_radio": "Очередь пуста. Добавьте трек или доверьтесь Roon Radio.",

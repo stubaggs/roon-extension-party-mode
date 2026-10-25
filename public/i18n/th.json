@@ -27,6 +27,9 @@
   "track.add": "เพิ่มในคิว",
   "track.next": "เล่นถัดไป",
   "queue.up_next": "ถัดไป",
+  "queue.count": {
+    "other": "{count} แทร็ก"
+  },
   "queue.empty": "คิวว่างอยู่",
   "queue.empty_add": "คิวว่างอยู่ เพิ่มแทร็กได้เลย",
   "queue.empty_add_radio": "คิวว่างอยู่ เพิ่มแทร็กได้เลย หรือปล่อยให้ Roon Radio เลือก",

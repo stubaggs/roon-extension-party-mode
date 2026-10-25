@@ -32,6 +32,14 @@
   "track.add": "ضيفه للطابور",
   "track.next": "شغّله اللي بعده",
   "queue.up_next": "اللي جاي",
+  "queue.count": {
+    "zero": "مفيش تراكات",
+    "one": "تراك واحد",
+    "two": "تراكين",
+    "few": "{count} تراكات",
+    "many": "{count} تراك",
+    "other": "{count} تراك"
+  },
   "queue.empty": "الطابور فاضي.",
   "queue.empty_add": "الطابور فاضي. ضيف تراك.",
   "queue.empty_add_radio": "الطابور فاضي. ضيف تراك، أو سيبها على Roon Radio.",

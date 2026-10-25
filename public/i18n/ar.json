@@ -32,6 +32,14 @@
   "track.add": "إضافة إلى قائمة الانتظار",
   "track.next": "تشغيله تاليًا",
   "queue.up_next": "التالي",
+  "queue.count": {
+    "zero": "لا مقاطع",
+    "one": "مقطع واحد",
+    "two": "مقطعان",
+    "few": "{count} مقاطع",
+    "many": "{count} مقطعًا",
+    "other": "{count} مقطع"
+  },
   "queue.empty": "قائمة الانتظار فارغة.",
   "queue.empty_add": "قائمة الانتظار فارغة. أضف مقطعًا.",
   "queue.empty_add_radio": "قائمة الانتظار فارغة. أضف مقطعًا، أو اترك الأمر لـ Roon Radio.",

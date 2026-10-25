@@ -294,13 +294,18 @@ check('Party Hub language: Automatic first, then every language by its own name;
   assert.strictEqual(layout({}).values.hub_language, '');
 });
 
-check('Party Hub now playing: Standard or Roon Display, Standard unless chosen', () => {
+check('Party Hub default view: Standard, Roon Display or Basic, Standard unless chosen', () => {
   const setting = item(layout({}), 'hub_playing');
-  assert.deepStrictEqual(setting.values, [{ title: 'Standard', value: 'simple' }, { title: 'Roon Display', value: 'roon' }]);
-  // The hint follows the choice: only Roon Display needs a zone picked in Roon.
-  assert.strictEqual(setting.subtitle, "Party Mode's own: cover, track and artist");
+  assert.deepStrictEqual(setting.values, [{ title: 'Standard', value: 'simple' }, { title: 'Roon Display', value: 'roon' }, { title: 'Basic', value: 'basic' }]);
+  // The hint follows the choice: only Roon Display needs a zone picked in Roon;
+  // each names the other views' addresses, on a line of their own.
+  assert.strictEqual(setting.title, 'Party Hub default view');
+  assert.strictEqual(setting.subtitle, "Party Mode's own: cover, track and artist.\nOverride: /PartyHub/Roon or /PartyHub/Basic");
   const roonHint = item(layout({ hub_playing: 'roon' }), 'hub_playing').subtitle;
-  assert.strictEqual(roonHint, "Roon's Now Playing display. In Roon, open the\nzone's options and choose Displays.");
+  assert.strictEqual(roonHint, "Roon's Now Playing display. In Roon, open the\nzone's options and choose Displays.\nOverride: /PartyHub/Standard or /PartyHub/Basic");
+  assert.strictEqual(item(layout({ hub_playing: 'basic' }), 'hub_playing').subtitle,
+    'A plain 16:9 page for older TV browsers.\nOverride: /PartyHub/Standard or /PartyHub/Roon');
+  assert.strictEqual(layout({ hub_playing: 'basic' }).values.hub_playing, 'basic');
   assert.doesNotMatch(roonHint, /http/, 'no address');
   assert.strictEqual(layout({}).values.hub_playing, 'simple');
   assert.strictEqual(layout({ hub_playing: 'roon' }).values.hub_playing, 'roon');
@@ -370,6 +375,15 @@ check('a beta is a separate extension to Roon, named after its suffix; a release
   });
   assert.strictEqual(extensionIdentity('1.4.0-1').display_name, 'Party Mode (beta)', 'no word counts as beta');
   assert.strictEqual(extensionIdentity('1.4.0-RC.2').extension_id, 'com.stubaggs.party-mode.rc');
+});
+
+check('the version Roon shows ends with the image\'s commit, and the id stays the same', () => {
+  const stamped = extensionIdentity('1.4.0-beta.9.a', '', '2026-10-24 7bd0f78');
+  assert.strictEqual(stamped.display_version, '1.4.0-beta.9.a (7bd0f78)');
+  assert.strictEqual(stamped.extension_id, extensionIdentity('1.4.0-beta.9.a').extension_id);
+  assert.strictEqual(extensionIdentity('1.4.0', 'Garden', '2026-10-24 7bd0f78').display_version, '1.4.0 (7bd0f78)');
+  assert.strictEqual(extensionIdentity('1.4.0', '', '').display_version, '1.4.0', 'no stamp, no build');
+  assert.strictEqual(extensionIdentity('1.4.0', '', 'hand-made').display_version, '1.4.0', 'a stamp with no commit adds nothing');
 });
 
 check('a named copy is its own extension, and the name shows in Roon', () => {
@@ -570,7 +584,7 @@ check('with the zone found, only Party is at the top; every group starts closed'
   for (const group of result.layout.filter((entry) => entry.type === 'group')) {
     assert.strictEqual(group.collapsable, true, `${group.title} starts closed`);
   }
-  // The Party Hub's settings last, Party Hub now playing first.
+  // The Party Hub's settings last, Party Hub default view first.
   assert.deepStrictEqual(result.layout.find((entry) => entry.title === 'Party setup').items.map((i) => i.setting || `[${i.title}]`), [
     'zone', 'guest_profile', 'party_name', 'host_name', 'guest_invite', 'hub_playing', 'hub_language', 'playlist_download'
   ]);
@@ -820,7 +834,7 @@ check('every title and hint line stays narrow, so the settings window does too',
   });
   // As when running.
   const self = { _resolveZone: () => null, playlistUrl: () => 'http://192.168.100.200:65535/p/7KQ4-M9XD' };
-  for (const values of [{}, { request_limits: 'custom' }, { hub_playing: 'roon' }]) {
+  for (const values of [{}, { request_limits: 'custom' }, { hub_playing: 'roon' }, { hub_playing: 'basic' }]) {
     walk(RoonService.prototype._layout.call(self, values).layout);
   }
   const wide = lines.filter((l) => l.length > 51);

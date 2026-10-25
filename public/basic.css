@@ -1,0 +1,311 @@
+/*
+ * Copyright (c) 2026 Stubaggs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+/* The basic Party Hub (basic.html): one 16:9 stage, 120 by 67.5 rem, laid
+   out with fixed positions and scaled to the window by setting the root font
+   size (basic.js), so text is drawn at its size, not stretched. Only CSS that
+   TV browsers from about 2016 know: no custom properties, flex gap, clamp()
+   or logical properties. Right-to-left mirrors with [dir="rtl"]. */
+
+* {
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #170f2b;
+}
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  color: #f0eaff;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  line-height: 1.25;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+p,
+ol {
+  margin: 0;
+  padding: 0;
+  font-weight: inherit;
+}
+
+.stage {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 120rem;
+  height: 67.5rem;
+  overflow: hidden;
+  background: #170f2b;
+}
+
+.muted {
+  color: #a79bd0;
+}
+
+/* One line, cut with an ellipsis when long. */
+.line,
+.list .t,
+.list .a {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.art {
+  display: block;
+  background: #3a2a63;
+  border-radius: 0.5rem;
+}
+
+/* The code to join, on the left. */
+.join {
+  position: absolute;
+  left: 4rem;
+  top: 3.5rem;
+  width: 40rem;
+  height: 60.5rem;
+  text-align: center;
+}
+
+/* Two lines; a longer name gets smaller to fit, down to three lines (basic.js),
+   and only then ends with an ellipsis (where the browser can). */
+.party-name {
+  height: 8.4rem;
+  overflow: hidden;
+  font-size: 3.4rem;
+  font-weight: 800;
+  line-height: 1.2;
+  word-wrap: break-word;
+}
+
+.party-name.clamped {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.qr {
+  display: block;
+  width: 40rem;
+  height: 40rem;
+  margin-top: 2.5rem;
+  padding: 1.6rem;
+  background: #fff;
+  border-radius: 1.4rem;
+}
+
+.join-copy {
+  margin-top: 2rem;
+  color: #ffc24b;
+  font-size: 2.6rem;
+  font-weight: 700;
+}
+
+/* What's playing, top right. */
+.current {
+  position: absolute;
+  left: 50rem;
+  top: 3.5rem;
+  width: 66rem;
+  height: 20rem;
+}
+
+.current-art {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 20rem;
+  height: 20rem;
+}
+
+.current-text {
+  position: absolute;
+  left: 23rem;
+  right: 0;
+  top: 0.4rem;
+}
+
+.label {
+  color: #ffc24b;
+  font-size: 1.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.current-title {
+  margin-top: 0.6rem;
+  font-size: 3.6rem;
+  font-weight: 800;
+}
+
+.current-artist {
+  margin-top: 0.3rem;
+  font-size: 2.5rem;
+}
+
+.current-album {
+  margin-top: 0.2rem;
+  font-size: 2rem;
+}
+
+.who,
+.note {
+  margin-top: 0.8rem;
+  font-size: 2rem;
+}
+
+.who {
+  color: #c9b6ff;
+  font-weight: 600;
+}
+
+.who.radio {
+  color: #7be0c0;
+}
+
+.who.next,
+.who.host {
+  color: #ffc24b;
+}
+
+/* Up next, below it: as many rows as fit (basic.js shows six). */
+.upnext {
+  position: absolute;
+  left: 50rem;
+  top: 27rem;
+  width: 66rem;
+  height: 37rem;
+  overflow: hidden;
+}
+
+/* "499 tracks", across from the heading, when more are queued than show. */
+.upnext-title {
+  position: relative;
+}
+
+.upnext-count {
+  position: absolute;
+  right: 0;
+  top: 0;
+  color: #a79bd0;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+[dir="rtl"] .upnext-count { right: auto; left: 0; }
+
+.list {
+  margin-top: 1.2rem;
+  list-style: none;
+}
+
+.list li {
+  position: relative;
+  height: 5.3rem;
+  margin-bottom: 0.3rem;
+}
+
+.list .cover {
+  position: absolute;
+  left: 0;
+  top: 0.15rem;
+  width: 5rem;
+  height: 5rem;
+}
+
+.list .text {
+  position: absolute;
+  left: 6.4rem;
+  right: 15rem;
+  top: 0.1rem;
+}
+
+.list .t {
+  font-size: 2.1rem;
+  font-weight: 700;
+}
+
+.list .a {
+  color: #a79bd0;
+  font-size: 1.7rem;
+}
+
+.list .who {
+  position: absolute;
+  right: 0;
+  top: 1.4rem;
+  width: 14rem;
+  margin: 0;
+  font-size: 1.7rem;
+  text-align: right;
+}
+
+.list .empty {
+  height: auto;
+  color: #a79bd0;
+  font-size: 2.1rem;
+}
+
+/* With Party off: across the right-hand side. */
+.closed {
+  position: absolute;
+  left: 50rem;
+  top: 24rem;
+  width: 66rem;
+  text-align: center;
+}
+
+.closed-title {
+  font-size: 4.4rem;
+  font-weight: 800;
+}
+
+.closed-text {
+  margin-top: 1rem;
+  font-size: 2.6rem;
+}
+
+/* Right to left: the same stage, mirrored. */
+[dir="rtl"] .join { left: auto; right: 4rem; }
+[dir="rtl"] .current,
+[dir="rtl"] .upnext,
+[dir="rtl"] .closed { left: auto; right: 50rem; }
+[dir="rtl"] .current-art { left: auto; right: 0; }
+[dir="rtl"] .current-text { left: 0; right: 23rem; }
+[dir="rtl"] .list .cover { left: auto; right: 0; }
+[dir="rtl"] .list .text { left: 15rem; right: 6.4rem; }
+[dir="rtl"] .list .who { right: auto; left: 0; text-align: left; }

@@ -28,6 +28,10 @@
   "track.add": "Aggiungi alla coda",
   "track.next": "Riproduci dopo",
   "queue.up_next": "A seguire",
+  "queue.count": {
+    "one": "{count} brano",
+    "other": "{count} brani"
+  },
   "queue.empty": "Niente in programma.",
   "queue.empty_add": "Niente in programma. Aggiungi un brano.",
   "queue.empty_add_radio": "Niente in programma. Aggiungi un brano, o lascia fare a Roon Radio.",

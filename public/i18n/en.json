@@ -28,6 +28,10 @@
   "track.add": "Add to queue",
   "track.next": "Play it next",
   "queue.up_next": "Up next",
+  "queue.count": {
+    "one": "{count} track",
+    "other": "{count} tracks"
+  },
   "queue.empty": "Nothing lined up.",
   "queue.empty_add": "Nothing lined up. Add a track.",
   "queue.empty_add_radio": "Nothing lined up. Add a track, or leave it to Roon Radio.",

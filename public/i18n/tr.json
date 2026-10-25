@@ -28,6 +28,10 @@
   "track.add": "Sıraya ekle",
   "track.next": "Sonra çal",
   "queue.up_next": "Sıradaki",
+  "queue.count": {
+    "one": "{count} parça",
+    "other": "{count} parça"
+  },
   "queue.empty": "Sırada bir şey yok.",
   "queue.empty_add": "Sırada bir şey yok. Bir parça ekle.",
   "queue.empty_add_radio": "Sırada bir şey yok. Bir parça ekle ya da Roon Radio'ya bırak.",

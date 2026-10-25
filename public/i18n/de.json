@@ -28,6 +28,10 @@
   "track.add": "Zur Warteschlange",
   "track.next": "Als Nächstes spielen",
   "queue.up_next": "Als Nächstes",
+  "queue.count": {
+    "one": "{count} Titel",
+    "other": "{count} Titel"
+  },
   "queue.empty": "Noch nichts geplant.",
   "queue.empty_add": "Noch nichts geplant. Füge einen Titel hinzu.",
   "queue.empty_add_radio": "Noch nichts geplant. Füge einen Titel hinzu oder überlass es Roon Radio.",

@@ -27,6 +27,9 @@
   "track.add": "キューに追加",
   "track.next": "次に再生",
   "queue.up_next": "このあと",
+  "queue.count": {
+    "other": "{count} トラック"
+  },
   "queue.empty": "キューは空です。",
   "queue.empty_add": "キューは空です。トラックを追加してください。",
   "queue.empty_add_radio": "キューは空です。トラックを追加するか、Roon Radio に任せましょう。",

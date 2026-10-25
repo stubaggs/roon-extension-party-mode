@@ -28,6 +28,10 @@
   "track.add": "Lägg till i kön",
   "track.next": "Spela härnäst",
   "queue.up_next": "Härnäst",
+  "queue.count": {
+    "one": "{count} spår",
+    "other": "{count} spår"
+  },
   "queue.empty": "Inget i kön.",
   "queue.empty_add": "Inget i kön. Lägg till ett spår.",
   "queue.empty_add_radio": "Inget i kön. Lägg till ett spår, eller överlåt det åt Roon Radio.",

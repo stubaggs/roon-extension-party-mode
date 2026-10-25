@@ -30,6 +30,12 @@
   "track.add": "Přidat do fronty",
   "track.next": "Přehrát jako další",
   "queue.up_next": "Následuje",
+  "queue.count": {
+    "one": "{count} skladba",
+    "few": "{count} skladby",
+    "many": "{count} skladeb",
+    "other": "{count} skladeb"
+  },
   "queue.empty": "Nic ve frontě.",
   "queue.empty_add": "Nic ve frontě. Přidejte skladbu.",
   "queue.empty_add_radio": "Nic ve frontě. Přidejte skladbu, nebo to nechte na Roon Radio.",

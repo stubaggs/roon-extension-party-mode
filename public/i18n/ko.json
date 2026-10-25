@@ -27,6 +27,9 @@
   "track.add": "대기열에 추가",
   "track.next": "다음에 재생",
   "queue.up_next": "다음 순서",
+  "queue.count": {
+    "other": "트랙 {count}개"
+  },
   "queue.empty": "대기열이 비어 있습니다.",
   "queue.empty_add": "대기열이 비어 있습니다. 트랙을 추가하세요.",
   "queue.empty_add_radio": "대기열이 비어 있습니다. 트랙을 추가하거나 Roon Radio에 맡기세요.",

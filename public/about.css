@@ -66,6 +66,8 @@
   padding: 0.25rem 1.5rem 0.25rem 0;
   text-align: start;
   vertical-align: top;
+  /* Long values (digests, kernel versions) wrap on a phone, not widen the page. */
+  overflow-wrap: anywhere;
 }
 
 .facts th {
@@ -111,7 +113,67 @@
   line-height: 1.5;
 }
 
-/* The details "Copy details" copies, in a box with the button at its top right. */
+/* In place of the Party Hub button while Party Mode isn't connected to Roon. */
+.not-connected {
+  margin-top: 1rem;
+  padding: 0.7rem 1rem;
+  border: 1px solid var(--amber);
+  border-radius: 10px;
+  color: var(--amber);
+}
+
+/* Roon's link for Party Mode opens this page, so the Party Hub is one click on:
+   the pages' main-action button (party.css), as a link. */
+.hub-actions {
+  margin-top: 0.4rem;
+}
+
+.about a.open-hub {
+  display: inline-block;
+  color: #2a1c00;
+  text-decoration: none;
+}
+
+/* The Party Hub's address, labelled, with its Copy button: large enough to read
+   off and type on a TV. Copy drops under the address on a phone. */
+.hub-box {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem 1rem;
+  margin: 1rem 0 0;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--edge);
+  border-radius: 10px;
+}
+
+.hub-label {
+  display: block;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.hub-address {
+  display: block;
+  font-size: 1.1rem;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+  user-select: all;
+}
+
+.hub-copy {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+/* No gap for "Copied" until it's said, so Copy lines up with the address on a phone. */
+#hub-copied:empty {
+  display: none;
+}
+
+/* The details the Copy button copies, in a box with the button at its top right. */
 .help {
   margin: 2rem 0 0.6rem;
 }
@@ -137,7 +199,8 @@
   gap: 0.75rem;
 }
 
-#copy-details {
+/* The Copy buttons: for the details, and in the Party Hub address box. */
+.copy-button {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
@@ -148,11 +211,11 @@
   font-weight: 600;
 }
 
-#copy-details[hidden] {
+.copy-button[hidden] {
   display: none;
 }
 
-#copy-details svg {
+.copy-button svg {
   fill: none;
   stroke: currentColor;
   stroke-width: 2;

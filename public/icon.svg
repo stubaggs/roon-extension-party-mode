@@ -1,26 +1,42 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <!-- Party Mode's icon: a jukebox in the pages' colours (party.css), dark on
-       a lavender a shade deeper than the pages'. The PNGs and favicon.ico are
-       drawn from this file (see DEVELOPER.md, Icon). -->
-  <rect width="64" height="64" rx="14" fill="#b39bff"/>
-  <!-- Raised 3.4 from the bottom: halfway between centring its outline and its
-       weight, which the wide base pulls down, so it looks centred -->
-  <g transform="translate(0 -3.4)">
-    <!-- Cabinet with an arched top, and the glowing bands round the arch -->
-    <path d="M13 58V30a19 19 0 0 1 38 0v28z" fill="#170f2b"/>
-    <path d="M17 44V30a15 15 0 0 1 30 0v14" fill="none" stroke="#ffc24b" stroke-width="4"/>
-    <path d="M22.5 44V30a9.5 9.5 0 0 1 19 0v14" fill="none" stroke="#7be0c0" stroke-width="3.5"/>
+  <!-- Party Mode's icon: a near-black jukebox with chrome trim and a cyan neon
+       tube, on dark grey. The PNGs and favicon.ico are drawn from this file
+       (see DEVELOPER.md, Icon). -->
+  <defs>
+    <!-- Bright chrome: highlights at the same place on every part -->
+    <linearGradient id="chrome" gradientUnits="userSpaceOnUse" x1="10" y1="8" x2="54" y2="60">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="0.32" stop-color="#d6dae0"/>
+      <stop offset="0.5" stop-color="#ffffff"/>
+      <stop offset="0.74" stop-color="#a9aeb6"/>
+      <stop offset="1" stop-color="#f4f6f8"/>
+    </linearGradient>
+    <!-- The neon's glow: the tube blurred in its own colour behind it -->
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="1.6" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="#2a2a2e"/>
+  <!-- Scaled to 115% about the centre, raised 1, then the original 3.4: halfway
+       between centring its outline and its weight, which the wide base pulls
+       down, so it looks centred -->
+  <g transform="translate(32 31) scale(1.15) translate(-32 -32) translate(0 -3.4)">
+    <!-- Cabinet with an arched top, a chrome band and a neon tube round the arch -->
+    <path d="M13 58V30a19 19 0 0 1 38 0v28z" fill="#050506"/>
+    <path d="M17 44V30a15 15 0 0 1 30 0v14" fill="none" stroke="url(#chrome)" stroke-width="4"/>
+    <path d="M22.5 44V30a9.5 9.5 0 0 1 19 0v14" fill="none" stroke="#2de2ff" stroke-width="3.5" filter="url(#glow)"/>
     <!-- Title strips in the window: the tracks to choose from -->
-    <rect x="25.9" y="29" width="5.4" height="2" rx="1" fill="#c9b6ff"/>
-    <rect x="32.7" y="29" width="5.4" height="2" rx="1" fill="#c9b6ff"/>
-    <rect x="25.9" y="32.8" width="5.4" height="2" rx="1" fill="#c9b6ff"/>
-    <rect x="32.7" y="32.8" width="5.4" height="2" rx="1" fill="#c9b6ff"/>
-    <rect x="25.9" y="36.6" width="5.4" height="2" rx="1" fill="#c9b6ff"/>
-    <rect x="32.7" y="36.6" width="5.4" height="2" rx="1" fill="#c9b6ff"/>
-    <rect x="25.9" y="40.4" width="5.4" height="2" rx="1" fill="#c9b6ff"/>
-    <rect x="32.7" y="40.4" width="5.4" height="2" rx="1" fill="#c9b6ff"/>
-    <!-- Speaker -->
-    <rect x="17" y="47" width="30" height="8" rx="2" fill="#3a2a63"/>
-    <path d="M20.5 49.6h23M20.5 52.4h23" stroke="#8ccfff" stroke-width="1.5" stroke-linecap="round"/>
+    <rect x="25.9" y="29" width="5.4" height="2" rx="1" fill="#f3ead2"/>
+    <rect x="32.7" y="29" width="5.4" height="2" rx="1" fill="#f3ead2"/>
+    <rect x="25.9" y="32.8" width="5.4" height="2" rx="1" fill="#f3ead2"/>
+    <rect x="32.7" y="32.8" width="5.4" height="2" rx="1" fill="#f3ead2"/>
+    <rect x="25.9" y="36.6" width="5.4" height="2" rx="1" fill="#f3ead2"/>
+    <rect x="32.7" y="36.6" width="5.4" height="2" rx="1" fill="#f3ead2"/>
+    <rect x="25.9" y="40.4" width="5.4" height="2" rx="1" fill="#f3ead2"/>
+    <rect x="32.7" y="40.4" width="5.4" height="2" rx="1" fill="#f3ead2"/>
+    <!-- Speaker with a chrome grille -->
+    <rect x="17" y="47" width="30" height="8" rx="2" fill="#2a2a2e"/>
+    <path d="M20.5 49.6h23M20.5 52.4h23" stroke="url(#chrome)" stroke-width="1.5" stroke-linecap="round"/>
   </g>
 </svg>

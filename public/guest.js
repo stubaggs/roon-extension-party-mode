@@ -43,7 +43,9 @@
   }
 
   async function api(path, options) {
-    const res = await fetch(path, Object.assign({ headers: { 'Content-Type': 'application/json' } }, options));
+    // With the session cookie: older browsers' fetch leaves cookies out unless
+    // asked (the default changed in Chrome 72, Firefox 61 and Safari 12.1).
+    const res = await fetch(path, Object.assign({ credentials: 'same-origin', headers: { 'Content-Type': 'application/json' } }, options));
     const body = await res.json().catch(() => ({}));
     if (res.status === 401 || res.status === 403) {
       // Party Off answers "closed": requests are over, not the guest's link.
@@ -63,10 +65,12 @@
   /** Opens /GuestHub again for a new session, unless it was tried a moment ago. */
   function rejoin() {
     const KEY = 'partyMode.rejoined';
+    // A named catch, not catch {}: browsers before Chrome 66 and Safari 11.1
+    // can't read the shorter form, and would refuse the whole page.
     try {
       if (Date.now() - Number(sessionStorage.getItem(KEY) || 0) < 30000) return false;
       sessionStorage.setItem(KEY, String(Date.now()));
-    } catch {
+    } catch (err) {
       return false; // No storage: no way to tell a loop, so "Scan the code again".
     }
     window.location.replace('/GuestHub');
@@ -675,7 +679,11 @@
       return;
     }
     nicknameInput.value = '';
-    el('nickname-form').requestSubmit();
+    // requestSubmit runs the form's submit handler; before Chrome 76, Firefox
+    // 75 and Safari 16 (an iOS 15 iPad) there's none, so send the event itself.
+    const form = el('nickname-form');
+    if (form.requestSubmit) form.requestSubmit();
+    else form.dispatchEvent(new Event('submit', { cancelable: true }));
   }
 
   el('nickname-skip').addEventListener('click', skipName);

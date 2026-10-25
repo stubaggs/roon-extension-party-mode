@@ -28,6 +28,10 @@
   "track.add": "Adicionar à fila",
   "track.next": "Tocar em seguida",
   "queue.up_next": "A seguir",
+  "queue.count": {
+    "one": "{count} faixa",
+    "other": "{count} faixas"
+  },
   "queue.empty": "Nada na fila.",
   "queue.empty_add": "Nada na fila. Adicione uma faixa.",
   "queue.empty_add_radio": "Nada na fila. Adicione uma faixa, ou deixe com o Roon Radio.",

@@ -28,6 +28,10 @@
   "track.add": "Aan wachtrij toevoegen",
   "track.next": "Hierna afspelen",
   "queue.up_next": "Hierna",
+  "queue.count": {
+    "one": "{count} nummer",
+    "other": "{count} nummers"
+  },
   "queue.empty": "Er staat nog niets klaar.",
   "queue.empty_add": "Er staat nog niets klaar. Voeg een nummer toe.",
   "queue.empty_add_radio": "Er staat nog niets klaar. Voeg een nummer toe, of laat het aan Roon Radio over.",

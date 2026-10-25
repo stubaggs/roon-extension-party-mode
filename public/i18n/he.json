@@ -30,6 +30,12 @@
   "track.add": "הוספה לתור",
   "track.next": "לנגן הבא",
   "queue.up_next": "הבא בתור",
+  "queue.count": {
+    "one": "רצועה אחת",
+    "two": "{count} רצועות",
+    "many": "{count} רצועות",
+    "other": "{count} רצועות"
+  },
   "queue.empty": "התור ריק.",
   "queue.empty_add": "התור ריק. הוסיפו רצועה.",
   "queue.empty_add_radio": "התור ריק. הוסיפו רצועה, או השאירו את זה ל-Roon Radio.",

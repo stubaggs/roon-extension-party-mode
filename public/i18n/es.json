@@ -28,6 +28,10 @@
   "track.add": "Añadir a la cola",
   "track.next": "Poner a continuación",
   "queue.up_next": "A continuación",
+  "queue.count": {
+    "one": "{count} pista",
+    "other": "{count} pistas"
+  },
   "queue.empty": "No hay nada en cola.",
   "queue.empty_add": "No hay nada en cola. Añade una pista.",
   "queue.empty_add_radio": "No hay nada en cola. Añade una pista o déjaselo a Roon Radio.",

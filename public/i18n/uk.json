@@ -30,6 +30,12 @@
   "track.add": "Додати в чергу",
   "track.next": "Грати наступним",
   "queue.up_next": "Далі",
+  "queue.count": {
+    "one": "{count} трек",
+    "few": "{count} треки",
+    "many": "{count} треків",
+    "other": "{count} треку"
+  },
   "queue.empty": "Черга порожня.",
   "queue.empty_add": "Черга порожня. Додайте трек.",
   "queue.empty_add_radio": "Черга порожня. Додайте трек або довіртеся Roon Radio.",

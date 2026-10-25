@@ -8,145 +8,86 @@ running in its Extensions list.
 Not released yet. Its beta is out: you can try it as "Party Mode (beta)" (see
 [DEVELOPER.md](DEVELOPER.md#running-the-beta)).
 
+Latest beta: 1.4.0-beta.10<br>
+Code fingerprint: `94ef8faaabb1`
+
 ### New
 
-- Guests can pass the party on: tapping the party's name on the guest page shows the QR
-  code for a friend to scan. Turn it off with **Invites**, under **Party setup**.
-- Once the party is over, guests can download the playlist from the guest page too, with
-  a button under "Requests are closed", unless **Playlist** is set to **Off**.
-- The guest page and the Party Hub have their own icon, a jukebox, in the browser tab,
-  bookmarks and on a phone's home screen.
-- **Detailed log**, under **Advanced**: for troubleshooting, turned on and off from Roon
-  with no restart. The Extension Manager's **Collect Logs** includes it.
-- Install with the Extension Manager before Party Mode is in its list: the README shows
-  how to add it to the Manager yourself, and how to remove it again.
-- **About page**, from the menu at the top left of the Party Hub (or `/About` on its
-  address): Party Mode's version and licence, the state of the running copy (a good start
-  when asking for help: "Copy details" copies it, ready to paste into a forum post), the
-  open-source libraries it uses, each with its licence, and the open-source tools that
-  install it and check its security. It also shows a **code
-  fingerprint**: from this version on, each release here lists its own, so you can check
-  that a copy's code is unchanged.
-- **Your own Party Hub:** build a screen of your own, such as a dashboard or a Home
-  Assistant card, from what the Party Hub shows: what's playing now, up next and played,
-  with covers and who asked for each track, the party's state, and the QR codes, or
-  links to join and to download the playlist for a screen people tap. It's
-  read-only and comes from addresses under `/embed/` on the Party Hub's address, as files
-  or as a live stream ([EMBED.md](EMBED.md)). Party Hubs to start from, the built-in one
-  among them, are in
-  [roon-extension-party-mode-hubs](https://github.com/stubaggs/roon-extension-party-mode-hubs),
-  and anyone can add theirs.
-- **Roon Display on the Party Hub:** set **Party Hub now playing**, under **Party setup**,
-  to **Roon Display** to show Roon's own display page on the right of the Party Hub, with
-  the QR code and Up next beside it. Party Mode finds it; in Roon, pick the Party Hub's
-  display in the party zone's options (its volume control, then **Displays**). Who asked
-  for the track still shows above it, the Party Hub's own view comes back while Roon's
-  page can't be reached, and phones always show the Party Hub's own.
+- **Pass it on:** guests tap the party's name to show the QR code to a friend. Turn it off
+  with **Invites**.
+- Once the party is over, guests can download the playlist from the guest page too.
+- A jukebox icon for the guest page and the Party Hub, in browser tabs, bookmarks and on
+  home screens.
+- **Detailed log**, under **Advanced**, for troubleshooting, with no restart.
+- Install with the Extension Manager before Party Mode is in its list (see the README).
+- **About page:** the version and licences, the running copy's details to paste into a
+  forum post, and a code fingerprint to check against the one listed here for each
+  release.
+- Roon's Extensions list shows the build after the version, such as "1.4.0 (b51496d)".
+- **Your own Party Hub:** build a screen of your own from what Party Mode shares under
+  `/embed/` ([EMBED.md](EMBED.md)). Pages to start from are in
+  [roon-extension-party-mode-hubs](https://github.com/stubaggs/roon-extension-party-mode-hubs).
+- **Roon Display:** the Party Hub can show Roon's own display page beside the QR code and
+  Up next.
+- **Basic Party Hub** for older TVs, used by itself where the Party Hub can't show.
+- Each screen can choose its view: `/PartyHub/Standard`, `/PartyHub/Roon` or
+  `/PartyHub/Basic`.
 
 ### Improvements
 
-- **One QR code for every party.** The code to join now leads to `/GuestHub` on the
-  Party Hub's address, the same each time, so guests can bookmark the guest page or add
-  it to their home screen and come straight back in at the next party, and you can print
-  the code. Turning **Party** Off still ends everyone's session. After updating, reload
-  the Party Hub's page so its code shows. Links to join from earlier versions no longer
-  work: scan the new code once.
-- **A new Party Hub layout:** the QR code is much bigger and has the left of the screen
-  to itself, and Up next runs down the right under what's playing, showing about twice
-  as many tracks (eight on a 1080p TV). It shows only whole tracks, never a scroll bar,
-  and keeps a margin at the top and bottom, for TVs that cut off the edges. The playing
-  track's cover is bigger, and its credit sits beside "Playing now", leaving the title
-  room to show in full; Up next's credits line up down the right. Text is the same size
-  on any shape of screen, and the extra space on a wider one is shared evenly around the
-  two sides. A long party name makes the QR code smaller only when it has to. It also
-  lays out right in older TVs' built-in browsers, such as LG's from 2021, and fits the
-  screen in Safari on an iPad. With **Party** Off, "Requests are closed" takes the place
-  of what's playing and Up next, centred.
-- Optimized Party Hub layout.
-- **No setup before installing with Docker:** settings now live in a Docker volume, so a
-  new install is just `docker compose up -d` (or `docker run`), with no `config.json` to
-  create. Updating keeps your settings; installing afresh with the new instructions
-  means enabling and setting up Party Mode in Roon again.
-- Docker Compose and `docker run` keep the settings in the same volume,
-  `roon-extension-party-mode-data`, so you can switch from one to the other and keep
-  them. If you tried an earlier beta with Docker Compose, its settings stay in the old
-  volume: after downloading the new `docker-compose.yml`, enable and set up Party Mode in
-  Roon again.
-- If Party Mode can't save its settings (a NAS folder it may not write to, say), the
-  warning names the folder. Once you fix its permissions, the next save in Roon clears
-  the warning and saves Roon's pairing too, with no restart.
-- Party Mode keeps its **Web port**: if something else is using it, Party Mode's status in
-  Roon says so in red, rather than moving to another port. Only on its very first run does
-  it take the next free one after 8338, which it then keeps. If you run two copies, check
-  that each has its own port.
-- Simpler settings window: only **Party** shows at first; the rest is in groups you
-  open: **Party setup**, **Guest requests** and **Advanced**.
-- Adding to the queue and playing next are now separate options in settings, so you can
-  allow either or both.
-- A party with no name of its own is called "Party" on the pages (in each guest's
-  language), rather than after its zone. Fill in **Name**, under **Party setup**, to show
-  your own.
-- Party Mode's status in Roon has a line each: **Party** (On, Paused or Off),
-  **Name**, **Zone**, and the addresses of the Party Hub and the playlist.
+- Up next on the Party Hub drops its numbers, and says how many tracks are queued when
+  they don't all fit.
+- Roon's link for Party Mode opens the About page, with **Open the Party Hub** and the
+  Hub's address to copy.
+- **One QR code for every party,** so guests' bookmarks and printed codes can keep
+  working. Links to join from earlier versions no longer work: scan the new code once.
+- **A new Party Hub layout:** a much bigger QR code on the left, and about twice as many
+  tracks in Up next.
+- **No setup before installing with Docker:** settings live in a Docker volume. Installing
+  afresh this way means setting up Party Mode in Roon again.
+- If Party Mode can't save its settings, the warning names the folder, and the next save
+  clears it once that's fixed.
+- Party Mode keeps its **Web port**, and Roon's status says so if something else is using
+  it, instead of moving to another.
+- Simpler settings: only **Party** shows at first, and the rest is in groups.
+- Adding to the queue and playing next can be allowed separately.
+- A party with no name is called "Party", not after its zone.
+- Party Mode's status in Roon has a line each for Party, Name, Zone and the addresses.
+- Fewer open-source libraries: 76 instead of 105.
 
 ### Performance improvements
 
-- Album art loads faster with lots of guests on, especially on a Raspberry Pi: Party Mode
-  asks your Core for each cover only once.
-- Search results load album art as guests scroll to it, so they show sooner and use less
-  data.
-- Less traffic to your Core: Party Mode's status in Roon is sent only when it changes,
-  rather than every second while the party zone plays, and changing the party zone stops
-  the old zone's queue updates.
-- A crowd searching at the same moment can't overwhelm your Core: Party Mode sends it at
-  most 16 searches at once, and the rest follow in turn, usually within a second or two.
+- Album art loads faster with lots of guests, especially on a Raspberry Pi, and search
+  results load covers as guests scroll.
+- A crowd searching at once no longer overwhelms your Core.
 
 ### Fixes
 
-- The Party Hub fills big screens: on a 4K or 8K TV the QR code, playing track and queue
-  now grow with the screen, instead of staying the size they were on a 1080p one.
-- If the party zone goes away (its device switched off, say) or your Roon Core restarts
-  or can't be reached, requests pause by themselves after a few seconds (currently 10),
-  so guests see "Requests are paused for a moment" rather than errors. They're back on
-  when the zone or Core returns. The status line in Roon and the log say what happened.
-- If your Core stops answering, a guest's search, request or skip gives up after 30
-  seconds, instead of waiting for good. A request that got no answer isn't sent twice.
-- On a busy Raspberry Pi 1, Docker (and the Extension Manager) no longer shows Party
-  Mode as unhealthy for a minute or two while it's serving guests normally.
-- Joining the party is quicker in Firefox, which fetched the playing track's cover three
-  times.
-- **Host name** shows an error past 24 characters, the most a guest's nickname may be,
-  rather than being cut short on the pages.
-- The guest page's dialogs always close with Escape, and Tab stays inside them. In Chrome
-  and Safari, Escape stopped working once Tab passed the last button.
-- The search box's clear button (×) is round, with the × centred, on older iPhones and
-  iPads (iOS 15).
+- The guest page works on older phones (iOS 10.3, or Chrome 55 on Android), and **Skip** in
+  the nickname window works before iOS 16.
+- The Party Hub fills 4K and 8K screens.
+- If the party zone or your Core goes away, requests pause by themselves and come back
+  when it returns.
+- A search, request or skip gives up after 30 seconds if your Core stops answering.
+- Docker no longer shows Party Mode as unhealthy on a busy Raspberry Pi 1.
+- Joining is quicker in Firefox.
+- A **Host name** over 24 characters shows an error instead of being cut short.
+- The guest page's dialogs always close with Escape, and Tab stays inside them.
+- The search box's clear button is round on iOS 15.
 - Screen readers find the Party Hub's main content, and the name prompt as a dialog.
-- Simpler error messages: when a request, a skip or saving a name fails, guests see one
-  message, "Sorry, that did not work.", rather than two that told them little more.
-- Skip disappears straight away when Roon can't skip (a radio station starts, say) or
-  the host turns skips off.
-- When Roon closes the settings window on a change that can't be saved (a name that's
-  too long, say), the status line in Roon says what wasn't saved.
-- Translation fixes in several languages. The guest pages now refer to the host in the
-  same gender-neutral way everywhere, as they already did on the host's tags.
+- One simple message when a request, a skip or saving a name fails.
+- Skip disappears straight away when Roon can't skip.
+- When a setting can't be saved, Roon's status says which.
+- Translation fixes, and the host is named the same gender-neutral way everywhere.
 
 ### Security
 
-- **Flood protection**, under **Advanced**: how many page loads and searches each IP
-  address may make a minute, so one misbehaving device can't overwhelm Party Mode or your
-  Core. The defaults are higher than before: 1,200 page loads (was 600) and 200 searches
-  (was 60). If guests still see "Too many requests", choose **Custom** and raise them.
-  It replaces `ROON_EXTENSION_PARTY_MODE_RATE_LIMIT` and `…_SEARCH_LIMIT`, which Party Mode
-  no longer reads: if you set them, choose **Custom** and enter your numbers there.
-- `docker-compose.yml` and the README's `docker run` commands now set a 512 MB memory
-  limit, so a fault can't take memory from your Core or anything else on the computer.
-  Download the new `docker-compose.yml`, or run the new `docker run` command, to get it.
-- The playlist is no longer at the fixed `/Download/playlist.csv`, which anyone on your
-  network could open at any time. Once the party is over, the Party Hub offers it at
-  `/Playlist`, as before, and only then. Party Mode's status in Roon always has your own
-  address for it, new for each party and hard to guess, but short and easy to type, like
-  `/p/7KQ4-M9XD`. With **Playlist** set to **Off**, only you have it.
+- **Flood protection**, under **Advanced**, with higher defaults: 1,200 page loads and 200
+  searches a minute. It replaces `ROON_EXTENSION_PARTY_MODE_RATE_LIMIT` and
+  `…_SEARCH_LIMIT`: if you set them, choose **Custom** and enter them there.
+- A 512 MB memory limit in `docker-compose.yml` and the `docker run` command: download the
+  new file, or run the new command, to get it.
+- The playlist has a new, hard-to-guess address for each party, instead of a fixed one.
 - Various security enhancements.
 
 ## 1.3.2

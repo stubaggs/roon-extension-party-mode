@@ -94,18 +94,34 @@
   // The room a track didn't fit in is shared above and below the right-hand
   // side (hub.css, --shift), so it sits in the middle, as the code does.
   const stage = document.querySelector('.stage');
+  // How many tracks are queued (Up next's), and whether Roon sent all it would
+  // (queue_full): set with each update.
+  const queued = { count: 0, full: false };
   function fitRows() {
     const rows = [...list.children];
     for (const row of rows) row.hidden = false;
     stage.style.setProperty('--shift', '0px');
+    showCount(rows.length);
     if (!wide.matches) return;
     const bottom = list.getBoundingClientRect().bottom;
     for (const row of rows) row.hidden = row.getBoundingClientRect().bottom > bottom + 0.5;
     const shown = rows.filter((row) => !row.hidden);
+    showCount(shown.length);
     if (shown.length < rows.length && shown.length) {
       const left = bottom - shown[shown.length - 1].getBoundingClientRect().bottom;
       stage.style.setProperty('--shift', `${Math.floor(left / 2)}px`);
     }
+  }
+
+  /**
+   * "499 tracks" across from Up next, when more are queued than it shows; at
+   * the most Roon sends, "500+ tracks", as there may be more.
+   */
+  function showCount(shown) {
+    const count = el('upnext-count');
+    count.hidden = queued.count <= shown;
+    const text = count.hidden ? '' : t('queue.count', { count: queued.count });
+    count.textContent = queued.full ? text.replace(String(queued.count), `${queued.count}+`) : text;
   }
 
   // Again whenever the list's room changes: the window, or what's above it.
@@ -129,7 +145,7 @@
   // Turning a tablet, or resizing a window, past a phone's width.
   wide.addEventListener('change', () => arrange());
 
-  // Roon Display (Party Hub now playing): Roon's display page in place of
+  // Roon Display (Party Hub default view, or /PartyHub/Roon): Roon's display page in place of
   // what's playing. Sandboxed: the page runs its scripts and keeps its own
   // storage (Roon's remembers its zone), but can't open windows or move the
   // Hub away. Added once, so it isn't reloaded with every update.
@@ -196,7 +212,7 @@
       window.location.reload();
       return;
     }
-    // The host changed Party Hub now playing, or the Core's address changed.
+    // The host changed Party Hub default view, or the Core's address changed.
     const frame = data.frame_url || '';
     if (frameUrl !== undefined && frame !== frameUrl) {
       window.location.reload();
@@ -249,6 +265,8 @@
     if (playing && playing.image_key) image.src = art(playing.image_key, drawn > 400 ? 800 : 400);
     else image.removeAttribute('src');
 
+    queued.count = data.upcoming.length;
+    queued.full = Boolean(data.queue_full);
     list.innerHTML = '';
     if (!data.upcoming.length) {
       const empty = document.createElement('li');
@@ -256,14 +274,8 @@
       empty.textContent = t(data.empty || 'queue.empty');
       list.appendChild(empty);
     }
-    data.upcoming.forEach((item, index) => {
+    data.upcoming.forEach((item) => {
       const li = document.createElement('li');
-
-      const n = document.createElement('span');
-      n.className = 'n';
-      n.textContent = String(index + 1);
-      // The list is numbered already; don't read the number twice.
-      n.setAttribute('aria-hidden', 'true');
 
       // A blank tile when Roon has no cover, so the titles stay in line.
       const cover = document.createElement('img');
@@ -287,7 +299,7 @@
         wrap.appendChild(who);
       }
 
-      li.append(n, cover, wrap);
+      li.append(cover, wrap);
       list.appendChild(li);
     });
     fitRows();
@@ -295,8 +307,12 @@
     fitQr();
   }
 
+  // The view this screen's address chose (/PartyHub/Roon), if any, over the setting's.
+  const view = document.documentElement.dataset.view;
+  const hubApi = view ? `/api/hub?view=${encodeURIComponent(view)}` : '/api/hub';
+
   async function refresh() {
-    const res = await fetch('/api/hub');
+    const res = await fetch(hubApi);
     if (res.ok) render(await res.json());
   }
 

@@ -25,29 +25,42 @@
  * object is a plural: { one, other, ... } chosen by the language's own rules.
  * Elements with data-i18n="key" get their text replaced; data-i18n-placeholder,
  * -aria-label, -alt and -title do the same for those attributes.
+ *
+ * Plain ES5, unlike the other page scripts: the basic Party Hub (basic.js) is
+ * for TV browsers years behind, and loads it too.
  */
 (function () {
   'use strict';
 
-  const data = window.I18N_DATA || { lang: 'en', dir: 'ltr', strings: {}, fallback: {} };
-  const plurals = {};
-  const pluralFor = (lang) => plurals[lang] || (plurals[lang] = new Intl.PluralRules(lang));
+  var data = window.I18N_DATA || { lang: 'en', dir: 'ltr', strings: {}, fallback: {} };
+  var plurals = {};
+  // The language's own plural rules; a browser without them (before Chrome 63
+  // or Safari 13) gets English's: one for 1, other for everything else.
+  function pluralFor(lang) {
+    if (!plurals[lang]) {
+      plurals[lang] =
+        typeof Intl !== 'undefined' && Intl.PluralRules
+          ? new Intl.PluralRules(lang)
+          : { select: function (n) { return n === 1 ? 'one' : 'other'; } };
+    }
+    return plurals[lang];
+  }
 
   // Names guests type, and language names, can be in another script from the
   // page ("Requested by יוסי", "דולגה על ידי Sam"). Wrapped in first-strong
   // isolates, they keep their place in the sentence. Only when it matters: a
   // right-to-left page, or right-to-left text, so other pages stay plain text.
-  const ISOLATE = ['name', 'language'];
-  const RTL_TEXT = /[\u0590-\u08ff\ufb1d-\ufdff\ufe70-\ufeff]/;
+  var ISOLATE = ['name', 'language'];
+  var RTL_TEXT = /[֐-ࣿיִ-﷿ﹰ-﻿]/;
   function isolate(value) {
-    const text = String(value);
-    return data.dir === 'rtl' || RTL_TEXT.test(text) ? `\u2068${text}\u2069` : text;
+    var text = String(value);
+    return data.dir === 'rtl' || RTL_TEXT.test(text) ? '⁨' + text + '⁩' : text;
   }
 
   function t(key, vars) {
     vars = vars || {};
-    let entry = data.strings[key];
-    let lang = data.lang;
+    var entry = data.strings[key];
+    var lang = data.lang;
     if (entry === undefined) {
       entry = data.fallback[key];
       lang = 'en';
@@ -56,35 +69,44 @@
     if (typeof entry === 'object') {
       entry = entry[pluralFor(lang).select(Number(vars.count))] || entry.other || '';
     }
-    return String(entry).replace(/\{(\w+)\}/g, (match, name) =>
-      vars[name] === undefined ? match : ISOLATE.includes(name) ? isolate(vars[name]) : vars[name]
-    );
+    return String(entry).replace(/\{(\w+)\}/g, function (match, name) {
+      if (vars[name] === undefined) return match;
+      return ISOLATE.indexOf(name) >= 0 ? isolate(vars[name]) : vars[name];
+    });
   }
 
-  const ATTRIBUTES = ['placeholder', 'aria-label', 'alt', 'title'];
+  var ATTRIBUTES = ['placeholder', 'aria-label', 'alt', 'title'];
+
+  function each(root, selector, fn) {
+    Array.prototype.forEach.call(root.querySelectorAll(selector), fn);
+  }
 
   function apply(root) {
     root = root || document;
-    root.querySelectorAll('[data-i18n]').forEach((el) => {
+    each(root, '[data-i18n]', function (el) {
       el.textContent = t(el.getAttribute('data-i18n'));
     });
-    for (const attribute of ATTRIBUTES) {
-      root.querySelectorAll(`[data-i18n-${attribute}]`).forEach((el) => {
-        el.setAttribute(attribute, t(el.getAttribute(`data-i18n-${attribute}`)));
+    ATTRIBUTES.forEach(function (attribute) {
+      each(root, '[data-i18n-' + attribute + ']', function (el) {
+        el.setAttribute(attribute, t(el.getAttribute('data-i18n-' + attribute)));
       });
-    }
+    });
   }
 
   /** The name a guest goes by: theirs, or "Anon" (credit.guest) without one. */
-  const guestName = (name) => name || t('credit.guest');
+  function guestName(name) {
+    return name || t('credit.guest');
+  }
 
   // The host's name from the settings, set from each queue update; null shows
   // "Host" in the page's language.
-  let hostName = null;
-  const setHostName = (name) => {
+  var hostName = null;
+  function setHostName(name) {
     hostName = name || null;
-  };
-  const hostLabel = () => hostName || t('credit.host');
+  }
+  function hostLabel() {
+    return hostName || t('credit.host');
+  }
 
   /** The credit line for a track: a guest's name, "Anon", Roon Radio or Host. */
   function credit(item) {
@@ -109,8 +131,8 @@
 
   /** "a minute" / "12 minutes" for a wait in milliseconds. */
   function minutes(ms) {
-    const count = Math.max(1, Math.ceil(ms / 60000));
-    return t('time.minutes', { count });
+    var count = Math.max(1, Math.ceil(ms / 60000));
+    return t('time.minutes', { count: count });
   }
 
   document.documentElement.lang = data.lang;
@@ -123,12 +145,12 @@
     // Every language by its own name, and whether the guest picked this one.
     languages: data.languages || [],
     chosen: Boolean(data.chosen),
-    t,
-    apply,
-    credit,
-    requestedBy,
-    setHostName,
-    skippedBy,
-    minutes
+    t: t,
+    apply: apply,
+    credit: credit,
+    requestedBy: requestedBy,
+    setHostName: setHostName,
+    skippedBy: skippedBy,
+    minutes: minutes
   };
 })();

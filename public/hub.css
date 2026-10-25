@@ -281,10 +281,22 @@ html {
 }
 
 .upnext-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
   margin: 0 0 0.6rem;
   color: var(--amber);
   font-size: clamp(0.9rem, calc(1.4 * var(--w)), 1.3rem);
   font-weight: 600;
+}
+
+/* How many tracks are queued, when more than fit: across from the heading,
+   quieter. A margin, not gap (older TV browsers). */
+.upnext-count {
+  margin-inline-start: 1rem;
+  color: var(--muted);
+  font-weight: 400;
+  white-space: nowrap;
 }
 
 .upnext .list {
@@ -314,9 +326,11 @@ html {
   min-width: 0;
 }
 
+/* No numbers: the Hub shows a few tracks, top to bottom, and the room goes to
+   the titles; the heading says how many are queued. */
 .list li {
   display: grid;
-  grid-template-columns: 2.6rem auto 1fr;
+  grid-template-columns: auto 1fr;
   gap: 1rem;
   align-items: center;
   padding: clamp(0.4rem, 1.1 * var(--vh), 0.9rem) 0;
@@ -333,12 +347,6 @@ html {
 .list .cover {
   width: 2.4em;
   height: 2.4em;
-}
-
-.list .n {
-  color: var(--lavender);
-  font-variant-numeric: tabular-nums;
-  font-size: 0.9em;
 }
 
 .list .t {
@@ -521,16 +529,6 @@ html {
 .stage.framed .upnext {
   grid-column: 1;
   grid-row: 2;
-}
-
-/* No numbers: with only a few tracks under the code, they're easy to count,
-   and the room goes to the tracks. */
-.stage.framed .list li {
-  grid-template-columns: auto 1fr;
-}
-
-.stage.framed .list .n {
-  display: none;
 }
 
 .frame-slot[hidden] {

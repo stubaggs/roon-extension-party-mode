@@ -28,6 +28,10 @@
   "track.add": "Tilføj til køen",
   "track.next": "Afspil som næste",
   "queue.up_next": "Næste",
+  "queue.count": {
+    "one": "{count} nummer",
+    "other": "{count} numre"
+  },
   "queue.empty": "Intet i køen.",
   "queue.empty_add": "Intet i køen. Tilføj et nummer.",
   "queue.empty_add_radio": "Intet i køen. Tilføj et nummer, eller overlad det til Roon Radio.",

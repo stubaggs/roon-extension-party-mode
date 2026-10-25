@@ -27,6 +27,9 @@
   "track.add": "Thêm vào hàng chờ",
   "track.next": "Phát tiếp theo",
   "queue.up_next": "Tiếp theo",
+  "queue.count": {
+    "other": "{count} bài"
+  },
   "queue.empty": "Hàng chờ đang trống.",
   "queue.empty_add": "Hàng chờ đang trống. Hãy thêm một bài.",
   "queue.empty_add_radio": "Hàng chờ đang trống. Hãy thêm một bài, hoặc để Roon Radio lo.",

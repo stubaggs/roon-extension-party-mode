@@ -27,6 +27,9 @@
   "track.add": "加入队列",
   "track.next": "下一首播放",
   "queue.up_next": "即将播放",
+  "queue.count": {
+    "other": "{count} 首曲目"
+  },
   "queue.empty": "队列为空。",
   "queue.empty_add": "队列为空。添加一首曲目吧。",
   "queue.empty_add_radio": "队列为空。添加一首曲目，或交给 Roon Radio。",
