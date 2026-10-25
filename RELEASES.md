@@ -9,7 +9,9 @@ Not released yet. Its beta is out: you can try it as "Party Mode (beta)" (see
 [DEVELOPER.md](DEVELOPER.md#running-the-beta)).
 
 Latest beta: 1.4.0-beta.10<br>
-Code fingerprint: `94ef8faaabb1`
+Image built: 2026-10-25 0571057<br>
+Code fingerprint: `94ef8faaabb1`<br>
+Docker image: `stubaggs/roon-extension-party-mode:1.4.0-beta.10@sha256:b4ce6891e9a1b1563838e6a4ce9fe8236ed9b612aa88e457933ac7d6149cefbc`
 
 ### New
 
