@@ -1241,13 +1241,13 @@ const set = (values) => Object.assign(roon.settings, values);
         assert.strictEqual(await frameOf('?view=roon'), 'http://192.0.2.10:9330/display/', setting);
         assert.strictEqual(await frameOf('?view=standard'), null, setting);
         // No view, or one it doesn't know: the setting's.
-        for (const query of ['', '?view=nope']) {
+        for (const query of ['', '?view=nope', '?view=constructor', '?view=__proto__']) {
           assert.strictEqual(await frameOf(query), setting === 'roon' ? 'http://192.0.2.10:9330/display/' : null, `${setting} ${query}`);
         }
         assert.doesNotMatch(await (await get('/PartyHub')).text(), /data-view/);
       }
       // Only those views: anything else under /PartyHub isn't a page.
-      for (const path of ['/PartyHub/nope', '/PartyHub/Roon/x', '/PartyHub/simple']) assert.strictEqual((await get(path)).status, 404, path);
+      for (const path of ['/PartyHub/nope', '/PartyHub/Roon/x', '/PartyHub/simple', '/PartyHub/constructor', '/PartyHub/__proto__']) assert.strictEqual((await get(path)).status, 404, path);
     } finally {
       delete roon.coreAddress;
       set({ hub_playing: 'simple' });
