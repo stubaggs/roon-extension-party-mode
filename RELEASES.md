@@ -8,10 +8,8 @@ running in its Extensions list.
 Not released yet. Its beta is out: you can try it as "Party Mode (beta)" (see
 [DEVELOPER.md](DEVELOPER.md#running-the-beta)).
 
-Latest beta: 1.4.0-beta.11<br>
-Image built: 2026-10-25 649bbdb<br>
-Code fingerprint: `5b60df2fba05`<br>
-Docker image: `stubaggs/roon-extension-party-mode:1.4.0-beta.11@sha256:3d788e687c1448bbc88370a278a32c216b16524b36d0c10e3ac358847d189303`
+Latest beta: 1.4.0-beta.12<br>
+Code fingerprint: `4762b2cf8140`
 
 ### New
 
@@ -62,6 +60,8 @@ Docker image: `stubaggs/roon-extension-party-mode:1.4.0-beta.11@sha256:3d788e687
 - Album art loads faster with lots of guests, especially on a Raspberry Pi, and search
   results load covers as guests scroll.
 - A crowd searching at once no longer overwhelms your Core.
+- A long queue no longer slows Party Mode down, which on a Raspberry Pi could make the
+  guest page unusable and lose the connection to your Core.
 
 ### Fixes
 
@@ -78,6 +78,8 @@ Docker image: `stubaggs/roon-extension-party-mode:1.4.0-beta.11@sha256:3d788e687
 - The search box's clear button is round on iOS 15.
 - Screen readers find the Party Hub's main content, and the name prompt as a dialog.
 - One simple message when a request, a skip or saving a name fails.
+- A guest's track keeps their name however long it waits in the queue, instead of being
+  credited to the host after a few hours.
 - Skip disappears straight away when Roon can't skip.
 - When a setting can't be saved, Roon's status says which.
 - Translation fixes, and the host is named the same gender-neutral way everywhere.

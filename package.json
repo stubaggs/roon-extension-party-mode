@@ -1,6 +1,6 @@
 {
   "name": "roon-extension-party-mode",
-  "version": "1.4.0-beta.11",
+  "version": "1.4.0-beta.12",
   "description": "Roon Extension for parties: guests request music from their phone, no app needed",
   "main": "app.js",
   "repository": {

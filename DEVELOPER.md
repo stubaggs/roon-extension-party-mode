@@ -169,9 +169,11 @@ while it's on, and a refused save comes first in red, since Roon closes the wind
 **Track identity.** Roon gives no stable track ID, and search results carry no length.
 A request is bound to its queue item when Roon reports the insert; after that the track
 is known by `sha1(version-sensitive title, sorted artists, length)`. Crediting falls back
-through queue item id, hash, recording, song and a unique recent title. Tracks no guest
-asked for are the Host's, or Roon Radio's: Roon Radio replaces the ending last entry with
-exactly one new one, a pattern no host addition makes.
+through queue item id, hash, recording, song and a unique recent title, each looked up
+by key, not by a scan, and remembered until the credits change. A credit is kept while
+its track is queued and a day after, and at most 5000 more, like the playlist. Tracks
+no guest asked for are the Host's, or Roon Radio's: Roon Radio replaces the ending last
+entry with exactly one new one, a pattern no host addition makes.
 
 **Duplicates** are the same recording, not the same song: titles must match exactly,
 then the cover decides when both have one, else the performers (search results also list
