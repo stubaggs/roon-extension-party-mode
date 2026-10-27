@@ -45,9 +45,9 @@ function publishLinks() {
 }
 
 function logLinks() {
-  console.log(`${roon.api.extension_reginfo.display_name} listening on port ${server.port}`);
-  console.log(`Guest link: ${server.guestUrl()}`);
-  console.log(`Party Hub:  ${server.hubUrl()}`);
+  console.log(`[PartyMode] ${roon.api.extension_reginfo.display_name} listening on port ${server.port}`);
+  console.log(`[PartyMode] Guest link: ${server.guestUrl()}`);
+  console.log(`[PartyMode] Party Hub:  ${server.hubUrl()}`);
 }
 
 roon.on('core_paired', publishLinks);
@@ -79,7 +79,7 @@ roon.on('settings_changed', (settings) => {
       roon.reconnect();
     },
     (err) => {
-      console.error(`Could not move to port ${settings.port}: ${err.message}`);
+      console.error(`[PartyMode] Could not move to port ${settings.port}: ${err.message}`);
       if (previous) {
         const why = err.code === 'EADDRINUSE' ? `${settings.port} is in use` : `could not open ${settings.port} (${err.code || err.message})`;
         roon.refusePort(previous, `Web port not changed: ${why}, still on ${previous}`);
@@ -104,7 +104,7 @@ const tries = roon.portChosen ? 0 : FALLBACK_PORTS;
 listenWithFallback((port) => server.listen(port), configuredPort, tries).then(
   (port) => {
     if (port !== configuredPort) {
-      console.log(`Port ${configuredPort} is in use, using ${port} instead`);
+      console.log(`[PartyMode] Port ${configuredPort} is in use, using ${port} instead`);
       roon.settings.port = port;
       configuredPort = port;
     }
@@ -118,7 +118,7 @@ listenWithFallback((port) => server.listen(port), configuredPort, tries).then(
         ? `Ports ${configuredPort}-${configuredPort + tries} are all in use`
         : portProblem(configuredPort, err);
     startError = `${problem}. Pick another web port in the settings.`;
-    console.error(startError);
+    console.error(`[PartyMode] ${startError}`);
     publishLinks();
     roon.start();
   }

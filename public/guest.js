@@ -462,6 +462,7 @@
       position.setAttribute('aria-hidden', 'true');
       return [position, ...trackCells(item)];
     });
+    showCount('upnext-count', snapshot.upcoming.length, snapshot.queue_full);
 
     renderList(playedList, snapshot.played || [], t('played.empty'), (item) => {
       const cells = trackCells(item);
@@ -473,10 +474,23 @@
       }
       return cells;
     });
+    showCount('played-count', (snapshot.played || []).length, snapshot.played_full);
   }
 
   function creditText(track) {
     return window.I18N.requestedBy(track);
+  }
+
+  /**
+   * "12 tracks" across from Up next or Played, as on the Party Hub; at the most
+   * Roon sends or Played keeps, "500+ tracks", as there may be more. None while
+   * it's empty.
+   */
+  function showCount(id, count, full) {
+    const label = el(id);
+    label.hidden = !count;
+    const text = count ? t('queue.count', { count }) : '';
+    label.textContent = full ? text.replace(String(count), `${count}+`) : text;
   }
 
   function renderList(list, items, emptyText, cells) {

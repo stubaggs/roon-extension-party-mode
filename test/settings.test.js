@@ -170,8 +170,8 @@ check(`whether config.json can be saved is checked again, and logged when it cha
     console.warn = warn;
   }
   assert.strictEqual(said.length, 2);
-  assert.match(said[0], /^warn config\.json in .* is not writable/);
-  assert.match(said[1], /^log config\.json is writable again/);
+  assert.match(said[0], /^warn \[PartyMode\] config\.json in .* is not writable/);
+  assert.match(said[1], /^log \[PartyMode\] config\.json is writable again/);
 });
 
 check('the warning names the folder config.json is really saved in', () => {
@@ -238,10 +238,10 @@ check("the host's Party changes are logged, naming both", () => {
     save({ enabled: 'paused', party_name: 'Garden' }); // no change of mode: nothing
     save({ enabled: false });
     save({ enabled: true });
-    assert.deepStrictEqual(lines.filter((l) => String(l).startsWith('Party')), [
-      'Party: Paused (was On)',
-      'Party: Off (was Paused)',
-      'Party: On (was Off)'
+    assert.deepStrictEqual(lines.filter((l) => String(l).startsWith('[PartyMode] Party')), [
+      '[PartyMode] Party: Paused (was On)',
+      '[PartyMode] Party: Off (was Paused)',
+      '[PartyMode] Party: On (was Off)'
     ]);
   } finally {
     process.chdir(cwd);

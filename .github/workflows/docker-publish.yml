@@ -56,6 +56,11 @@ jobs:
               if grep -nE 'roon-extension-party-mode(:|/|-)beta|\*\*beta\*\* tag|"beta"' README.md docker-compose.yml extension-manager/roon-extension-party-mode.json; then
                 echo "::error::README.md, docker-compose.yml or extension-manager/roon-extension-party-mode.json still names the beta image or copy; switch them back before releasing"; exit 1
               fi
+              # The setup script names the beta copy on purpose; only its own
+              # download link switches.
+              if grep -n 'party-mode/beta/party-mode-setup.sh' party-mode-setup.sh; then
+                echo "::error::party-mode-setup.sh's SETUP_URL still points at beta; switch it to main before releasing"; exit 1
+              fi
               case "$version" in
                 *-*) echo "::error::package.json on main says $version; a release has no suffix"; exit 1 ;;
               esac ;;

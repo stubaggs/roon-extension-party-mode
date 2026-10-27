@@ -502,12 +502,23 @@ main {
 }
 
 .upnext h2 {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
   font-size: 0.95rem;
   font-weight: 600;
   color: var(--muted);
   margin: 0 0 0.5rem;
   border-top: 1px solid var(--edge);
   padding-top: 1rem;
+}
+
+/* How many tracks are queued: across from the heading, quieter, as on the Party
+   Hub; the margin keeps it clear of a long translated heading. */
+.upnext-count {
+  margin-inline-start: 1rem;
+  font-weight: 400;
+  white-space: nowrap;
 }
 
 .queue .row {

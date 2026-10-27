@@ -535,6 +535,188 @@ const set = (values) => Object.assign(roon.settings, values);
     assert.strictEqual((await post('/api/skip', other, {})).status, 200);
   });
 
+  await check('a guest\'s skip is logged with their name and the track, and a failed one with why', async () => {
+    const cookie = await newGuest();
+    await post('/api/name', cookie, { name: 'Skipper' });
+    roon.zone = { zone_id: 'z1', state: 'playing', is_next_allowed: true, now_playing: { length: 200, two_line: { line1: 'Gold', line2: 'Spandau Ballet' } } };
+    const lines = [];
+    const log = console.log;
+    console.log = (m) => lines.push(m);
+    try {
+      roon.failing = true;
+      assert.strictEqual((await post('/api/skip', cookie, {})).status, 502);
+      roon.failing = false;
+      assert.strictEqual((await post('/api/skip', cookie, {})).status, 200);
+    } finally {
+      console.log = log;
+      roon.failing = false;
+      roon.zone = null;
+    }
+    assert.deepStrictEqual(lines.filter((m) => /^\[\w+\] Skip /.test(m)), [
+      '[Roon] Skip from Skipper failed: roon_refused',
+      '[Guest] Skip from Skipper: "Gold" / "Spandau Ballet"'
+    ]);
+  });
+
+  await check('the log: names, failed requests and downloads always; refusals and searches only in the detailed log', async () => {
+    const log = require('../lib/log');
+    const lines = [];
+    const write = console.log;
+    console.log = (m) => lines.push(m);
+    const cookie = await newGuest();
+    try {
+      await post('/api/name', cookie, { name: 'Logger' });
+      await post('/api/name', cookie, { name: 'Logger' });
+      await post('/api/name', cookie, { name: '' });
+      await post('/api/name', cookie, { name: 'Logger' });
+      roon.failing = true;
+      await post('/api/request', cookie, { key: '10:0', mode: 'add' });
+      roon.failing = false;
+      await post('/api/request', cookie, { key: 'nope', mode: 'add' });
+      await get(new URL(server.playlistUrl()).pathname);
+      log.setDebug(true);
+      await get('/api/search?q=abba', { Cookie: cookie });
+      await post('/api/request', cookie, { key: 'nope', mode: 'next' });
+    } finally {
+      log.setDebug(false);
+      console.log = write;
+      roon.failing = false;
+    }
+    const id = lines[0].match(/^\[Guest\] (\S+…)/)[1];
+    assert.deepStrictEqual(lines, [
+      `[Guest] ${id}: name "Logger" (was Anon)`,
+      `[Guest] ${id}: name Anon (was "Logger")`,
+      `[Guest] ${id}: name "Logger" (was Anon)`,
+      '[Roon] Request (add) from Logger failed: "Waterloo" / "ABBA": roon_refused',
+      lines.find((m) => m.startsWith('[PartyMode] Playlist downloaded')),
+      '[Guest] Search from Logger: "abba" (2 results)',
+      '[Guest] Request (next) from Logger refused: unknown_track'
+    ]);
+    assert.match(lines[4], /^\[PartyMode\] Playlist downloaded \(\d+ tracks, from its own address\)$/);
+  });
+
+  await check('a new party starts Played over; pausing and back keeps it', async () => {
+    const track = (title) => ({ zone_id: 'z-party', state: 'playing', now_playing: { length: 200, two_line: { line1: title, line2: 'ABBA' } } });
+    const played = async () => (await (await get('/api/hub')).json()).played.map((t) => t.title);
+    try {
+      for (const title of ['Waterloo', 'SOS', 'Fernando']) {
+        roon.zone = track(title);
+        roon.emit('now_playing_changed', null);
+      }
+      assert.deepStrictEqual(await played(), ['SOS', 'Waterloo']);
+      roon.emit('party_mode_changed', 'paused', 'on');
+      roon.emit('party_mode_changed', 'on', 'paused');
+      assert.deepStrictEqual(await played(), ['SOS', 'Waterloo'], 'the same party');
+      roon.emit('party_mode_changed', 'off', 'on');
+      roon.emit('party_mode_changed', 'on', 'off');
+      assert.deepStrictEqual(await played(), [], 'a new party');
+      roon.zone = track('Chiquitita');
+      roon.emit('now_playing_changed', null);
+      assert.deepStrictEqual(await played(), ['Fernando'], 'the track playing as it started is the new party\'s');
+    } finally {
+      roon.zone = { zone_id: 'z-after-party', state: 'stopped' };
+      roon.emit('now_playing_changed', null);
+      roon.zone = null;
+    }
+  });
+
+  await check('Roon reporting the insert before the request has finished: credited at once, not at the next change', async () => {
+    const track = (title) => ({ zone_id: 'z-early', state: 'playing', is_next_allowed: true, now_playing: { length: 200, two_line: { line1: title, line2: 'ABBA' } } });
+    const item = { queue_item_id: 61, length: 200, two_line: { line1: 'Mamma Mia', line2: 'ABBA' } };
+    results.push({ item_key: '10:8', title: 'Mamma Mia', subtitle: 'ABBA', hint: 'action_list' });
+    const cookie = await newGuest();
+    const perform = roon.performAction;
+    const lines = [];
+    const write = console.log;
+    console.log = (m) => lines.push(m);
+    try {
+      await post('/api/name', cookie, { name: 'Early' });
+      // As Roon does with the zone stopped: the insert and the track starting
+      // arrive while Party Mode is still pressing play for the request.
+      roon.performAction = async () => {
+        roon.queue = [item];
+        roon.emit('queue_inserted', [item]);
+        roon.emit('queue_changed');
+        roon.zone = track('Mamma Mia');
+        roon.emit('now_playing_changed', null);
+      };
+      assert.strictEqual((await post('/api/request', cookie, { key: '10:8', mode: 'add' })).status, 200);
+      const now = (await (await get('/api/hub')).json()).now_playing;
+      assert.deepStrictEqual([now.title, now.kind, now.requested_by], ['Mamma Mia', 'add', 'Early']);
+      roon.zone = track('SOS');
+      roon.queue = [];
+      roon.emit('now_playing_changed', null);
+      const [played] = (await (await get('/api/hub')).json()).played;
+      assert.deepStrictEqual([played.title, played.requested_by], ['Mamma Mia', 'Early']);
+    } finally {
+      console.log = write;
+      roon.performAction = perform;
+      results.pop();
+      roon.zone = { zone_id: 'z-after-early', state: 'stopped' };
+      roon.emit('now_playing_changed', null);
+      roon.zone = null;
+      roon.queue = [];
+    }
+    assert.deepStrictEqual(lines.filter((m) => /"Mamma Mia"/.test(m)).map((m) => m.replace(/ \[.*?\]/, '').replace(/ \d+s/, '')), [
+      '[PartyMode] Queued: "Mamma Mia" / "ABBA" -> Early',
+      '[PartyMode] Playing: "Mamma Mia" / "ABBA" -> Early',
+      '[Guest] Request (add) from Early: "Mamma Mia" / "ABBA"'
+    ]);
+  });
+
+  await check('a request Roon refuses leaves no credit behind', async () => {
+    const cookie = await newGuest();
+    await post('/api/name', cookie, { name: 'Refused' });
+    roon.failing = true;
+    try {
+      assert.strictEqual((await post('/api/request', cookie, { key: '10:1', mode: 'add' })).status, 502);
+    } finally {
+      roon.failing = false;
+    }
+    assert.strictEqual(guests.lookup({ title: 'SOS', artist: 'ABBA', length: 200 })?.name === 'Refused', false);
+  });
+
+  await check('the first request into a stopped zone is credited to its guest in Played, though it started first', async () => {
+    const track = (title) => ({ zone_id: 'z-stopped', state: 'playing', is_next_allowed: true, now_playing: { length: 200, two_line: { line1: title, line2: 'ABBA' } } });
+    const lines = [];
+    const write = console.log;
+    // A track no other check asks for, so no earlier request can claim it.
+    results.push({ item_key: '10:9', title: 'Dancing Queen', subtitle: 'ABBA', hint: 'action_list' });
+    const cookie = await newGuest();
+    console.log = (m) => lines.push(m);
+    try {
+      await post('/api/name', cookie, { name: 'Starter' });
+      // Roon starts the track while the request is still on its way, before
+      // it's credited, and reports the insert after.
+      roon.zone = track('Dancing Queen');
+      roon.emit('now_playing_changed', null);
+      assert.strictEqual((await post('/api/request', cookie, { key: '10:9', mode: 'add' })).status, 200);
+      roon.queue = [{ queue_item_id: 51, length: 200, two_line: { line1: 'Dancing Queen', line2: 'ABBA' } }];
+      roon.emit('queue_inserted', roon.queue);
+      roon.emit('queue_changed');
+      roon.emit('queue_changed');
+      roon.zone = track('SOS');
+      roon.queue = [];
+      roon.emit('now_playing_changed', null);
+      const [played] = (await (await get('/api/hub')).json()).played;
+      assert.strictEqual(played.title, 'Dancing Queen');
+      assert.strictEqual(played.requested_by, 'Starter');
+      assert.strictEqual(played.kind, 'add');
+    } finally {
+      console.log = write;
+      results.pop();
+      // Another zone starts Played over, for the checks after this one.
+      roon.zone = { zone_id: 'z-after', state: 'stopped' };
+      roon.emit('now_playing_changed', null);
+      roon.zone = null;
+      roon.queue = [];
+    }
+    assert.deepStrictEqual(lines.filter((m) => /^\[PartyMode\] (Playing|Credited): "Dancing Queen"/.test(m)).map((m) => m.replace(/ \[.*\]/, '')), [
+      '[PartyMode] Playing: "Dancing Queen" / "ABBA" -> Host',
+      '[PartyMode] Credited: "Dancing Queen" / "ABBA" -> Starter'
+    ]);
+  });
+
   await check('queued tracks no guest asked for are the host\'s, except Roon Radio\'s picks', async () => {
     roon.queue = [
       { queue_item_id: 21, length: 200, two_line: { line1: 'Seasons', line2: 'Bebe Rexha' } },
@@ -547,6 +729,40 @@ const set = (values) => Object.assign(roon.settings, values);
     } finally {
       roon.queue = [];
       roon.radioPicks.clear();
+    }
+  });
+
+  await check('the queue is built once and shared, and rebuilt whenever it may have changed', async () => {
+    const cookie = await newGuest();
+    const titles = async () => (await (await get('/api/queue', { Cookie: cookie })).json()).upcoming.map((t) => t.title);
+    const item = (id, title) => ({ queue_item_id: id, length: 200, two_line: { line1: title, line2: 'ABBA' } });
+    try {
+      // A new queue from Roon is seen at once, even without its event.
+      roon.queue = [item(31, 'Waterloo')];
+      assert.deepStrictEqual(await titles(), ['Waterloo']);
+      // Changed in place with no event: the shared copy stands for now...
+      roon.queue.push(item(32, 'SOS'));
+      roon.queue.shift();
+      assert.deepStrictEqual(await titles(), ['Waterloo']);
+      // ...and the event every queue change brings rebuilds it.
+      roon.emit('queue_changed');
+      assert.deepStrictEqual(await titles(), ['SOS']);
+      // A credit given with no queue event shows at once: a guest sees their name
+      // on the track they just asked for.
+      const guest = guests.create();
+      guest.name = 'Quick';
+      guests.bind(guests.attribute(guest, { title: 'SOS', artist: 'ABBA' }, 'add'), { id: 32, title: 'SOS', artist: 'ABBA', length: 200 });
+      const credited = await (await get('/api/queue', { Cookie: cookie })).json();
+      assert.strictEqual(credited.upcoming[0].requested_by, 'Quick');
+      // A setting changes it too: the Hub's own fields never leak into the shared copy.
+      await get('/api/hub');
+      set({ host_name: 'DJ Shared' });
+      const queue = await (await get('/api/queue', { Cookie: cookie })).json();
+      assert.strictEqual(queue.host_name, 'DJ Shared');
+      assert.ok(!('party_mode' in queue));
+    } finally {
+      set({ host_name: '' });
+      roon.queue = [];
     }
   });
 
@@ -1283,7 +1499,7 @@ const set = (values) => Object.assign(roon.settings, values);
     }
   });
 
-  await check('the Hub is told when Roon sent all the queue it would: there may be more', async () => {
+  await check('the Hub and guest page are told when Roon sent all the queue it would: there may be more', async () => {
     const before = roon.queue;
     try {
       const { QUEUE_ITEMS } = require('../lib/roon-service');
@@ -1293,6 +1509,10 @@ const set = (values) => Object.assign(roon.settings, values);
       roon.queue = Array.from({ length: QUEUE_ITEMS }, (v, i) => item(i));
       const hub = await (await get('/api/hub')).json();
       assert.strictEqual(hub.queue_full, true);
+      // The guest page says "500+ tracks" too.
+      const cookie = (await get('/GuestHub')).headers.get('set-cookie').split(';')[0];
+      assert.strictEqual((await (await get('/api/queue', { Cookie: cookie })).json()).queue_full, true);
+      assert.strictEqual((await (await get('/api/queue', { Cookie: cookie })).json()).played_full, false, 'Played is far from its 200');
       assert.ok(hub.upcoming.length >= QUEUE_ITEMS - 1);
     } finally {
       roon.queue = before;
