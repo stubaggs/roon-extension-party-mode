@@ -52,6 +52,7 @@ Roon Core  ──(node-roon-api over the local network)──  app.js
 | `public/i18n/`, `lib/i18n.js`, `public/i18n-runtime.js` | Page text per language, picking the language per browser, and applying it in the page |
 | `lib/env.js`, `lib/log.js` | Environment variables, and the debug log switch |
 | `test/` | Identity, attribution, settings and web server tests, `npm test` |
+| `images/` | The title image (1280×640 for GitHub's social preview, 1600×840) and screenshots of the Party Hub and guest page; not in the Docker image |
 
 ## Running it with Node.js
 
