@@ -143,7 +143,7 @@ This does the same as `docker-compose.yml`, and needs only Docker, not the Compo
 
 ```bash
 docker run -d --name roon-extension-party-mode-beta --network host --restart unless-stopped \
-  --log-opt max-size=10m --log-opt max-file=3 \
+  --log-driver json-file --log-opt max-size=10m --log-opt max-file=3 \
   --read-only --memory 512m --cap-drop ALL --security-opt no-new-privileges \
   -v roon-extension-party-mode-beta-data:/data \
   stubaggs/roon-extension-party-mode:beta
@@ -539,7 +539,7 @@ in it. Leave the other lines as they are:
 
 ```bash
 docker run -d --name roon-extension-party-mode-garden --network host --restart unless-stopped \
-  --log-opt max-size=10m --log-opt max-file=3 \
+  --log-driver json-file --log-opt max-size=10m --log-opt max-file=3 \
   --read-only --memory 512m --cap-drop ALL --security-opt no-new-privileges \
   -e ROON_EXTENSION_PARTY_MODE_INSTANCE=Garden \
   -v roon-extension-party-mode-garden-data:/data \

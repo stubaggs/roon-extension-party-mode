@@ -84,6 +84,7 @@ Docker image: `stubaggs/roon-extension-party-mode:1.4.0-beta.rc1@sha256:e69d9e40
 - Party Mode keeps its **Web port**, and Roon's status says so if something else is using
   it, instead of moving to another.
 - Docker no longer shows Party Mode as unhealthy on a busy Raspberry Pi 1.
+- The `docker run` command works where Docker logs to the system journal, as on DietPi.
 - A 512 MB memory limit in `docker-compose.yml` and the `docker run` command: download the
   new file, or run the new command, to get it.
 - Translation fixes, and the host is named the same gender-neutral way everywhere.

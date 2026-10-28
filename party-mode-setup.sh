@@ -20,11 +20,13 @@
 #   bash party-mode-setup.sh                 menus
 #   bash party-mode-setup.sh --status        what's installed
 
-set -euo pipefail
+set -Eeuo pipefail
+# Anything unexpected stops the program; say where, rather than quietly.
+trap 'printf "\nThe setup program stopped unexpectedly (line %s).\n" "$LINENO" >&2' ERR
 
 # This program's own version, separate from Party Mode's: raise it with every
 # change, so a copy kept on a computer can tell a newer one is out.
-SETUP_VERSION=1.1
+SETUP_VERSION=1.2
 IMAGE=stubaggs/roon-extension-party-mode
 SOURCE=https://github.com/stubaggs/roon-extension-party-mode
 DESCRIPTION="Roon Extension for parties: guests request music from their phone, no app needed"
@@ -415,6 +417,14 @@ listed() {
   [[ $(manager_category) != Local ]]
 }
 
+# The settings the Manager kept for Party Mode, removed.
+remove_manager_settings() {
+  if ! in_manager_data "rm -rf 'binds/$MANAGER_COPY'" 2>/dev/null; then
+    msg "Couldn't remove Party Mode's settings from the Extension Manager's data
+(binds/$MANAGER_COPY): it refused. Remove them yourself."
+  fi
+}
+
 manager_leftovers() {
   in_manager_data "test -d binds/$MANAGER_COPY" 2>/dev/null
 }
@@ -670,24 +680,29 @@ in Roon. From 1.4.0 they're kept." "Install" "Cancel" || return 0
     msg "There's already a container called $name. Remove it first."
     return 0
   fi
+  progress "Starting $(roon_name "$channel" "$instance")..."
+  if [[ -n $instance ]]; then env=(-e "ROON_EXTENSION_PARTY_MODE_INSTANCE=$instance"); fi
+  if ! run_container "$name" "$ref" -v "$vol:/data" "${env[@]+"${env[@]}"}"; then
+    docker rm -f "$name" >/dev/null 2>&1 || true
+    msg "Docker couldn't start Party Mode (see above)."
+    return 0
+  fi
   # So the Manager doesn't offer Party Mode to install beside it.
   if [[ $(manager_state) == running ]] && ! listed && [[ -n $(local_entries || true) ]]; then
     for c in $(local_entries || true); do remove_entry_file "$c" || true; done
     restart_manager
   fi
-  progress "Starting $(roon_name "$channel" "$instance")..."
-  if [[ -n $instance ]]; then env=(-e "ROON_EXTENSION_PARTY_MODE_INSTANCE=$instance"); fi
-  run_container "$name" "$ref" -v "$vol:/data" "${env[@]+"${env[@]}"}"
   wait_ready "$name" new
 }
 
 # run_container name image [docker run options…]: the README's options;
-# read-only where the image keeps its settings in /data.
+# read-only where the image keeps its settings in /data. The log driver is
+# named: DietPi's Docker defaults to journald, which refuses the size options.
 run_container() {
   local name=$1 ref=$2 ro=(); shift 2
   if image_has_data "$ref"; then ro=(--read-only); fi
   docker run -d --name "$name" --network host --restart unless-stopped \
-    --log-opt max-size=10m --log-opt max-file=3 \
+    --log-driver json-file --log-opt max-size=10m --log-opt max-file=3 \
     "${ro[@]+"${ro[@]}"}" --memory 512m --cap-drop ALL --security-opt no-new-privileges \
     "$@" "$ref" >/dev/null
 }
@@ -840,7 +855,7 @@ here. $ONE_WAY Which to keep?" \
     image=$C_IMAGE
     docker rm -f "$mcopy" >/dev/null
     docker image rm "$image" >/dev/null 2>&1 || true
-    if [[ $how == all ]]; then in_manager_data "rm -rf 'binds/$MANAGER_COPY'"; fi
+    if [[ $how == all ]]; then remove_manager_settings; fi
     # Without its entry, Party Mode isn't offered in the Manager to install again.
     for name in $(local_entries || true); do remove_entry_file "$name" || true; done
     restart_manager
@@ -968,7 +983,7 @@ category." \
     msg "Its settings are kept, for a reinstall."
     return 0
   fi
-  in_manager_data "rm -rf 'binds/$MANAGER_COPY'"
+  remove_manager_settings
   for name in $entries; do remove_entry_file "$name" || true; done
   if [[ -n $entries ]]; then restart_manager; fi
   msg "Removed."
