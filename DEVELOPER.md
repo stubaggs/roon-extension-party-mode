@@ -27,7 +27,7 @@ Roon Core  ──(node-roon-api over the local network)──  app.js
 
 | File | What it does |
 | --- | --- |
-| `app.js` | Wires the Roon service to the web server |
+| `app.js`, `lib/startup.js` | Wires the Roon service to the web server: the web port, then Roon discovery, and Roon's links |
 | `lib/roon-service.js` | Pairing, the settings layout, search, queue actions, the queue subscription, the status line |
 | `lib/server.js` | The web server: pages, API, live updates, security headers |
 | `lib/embed.js` | The `/embed/` views, built field by field |
@@ -64,7 +64,9 @@ prints the guest link and the Party Hub's address. Settings are written to `conf
 in the folder it's started from.
 
 Dependencies: Roon Labs' `node-roon-api*` packages (from `github:roonlabs/…`), `express`,
-`express-rate-limit` and `qrcode-generator`. There are no development dependencies.
+`express-rate-limit` and `qrcode-generator`. The one development dependency, `jsdom`, is
+for the page tests; the image installs without it (`npm ci --omit=dev`), and the About
+page leaves it out of its library list.
 
 ## Tests
 
@@ -73,8 +75,26 @@ Dependencies: Roon Labs' `node-roon-api*` packages (from `github:roonlabs/…`),
 build runs them too, so a failing test stops a build. Before pushing, also build and run
 the image (see [Running the image](#running-the-image)).
 
-`party-mode-setup.sh` isn't in `npm test` (the image has no bash): check it with
-`docker run --rm -v "$PWD:/mnt:ro" koalaman/shellcheck:stable /mnt/party-mode-setup.sh`.
+- `test/startup.test.js`: `lib/startup.js` (the web port, Roon's links) against stand-ins
+  for the Roon service and the web server.
+- `test/pages.test.js`: the page scripts in `jsdom`, each page as the server sends it,
+  with a stand-in for Roon playing a party (`test/party-roon.js`) and live updates from
+  `/api/events`. jsdom has no layout, so the tests set sizes where a script measures.
+  Skipped without jsdom, as in the Docker build.
+- `test/setup.test.js`: `party-mode-setup.sh`'s functions in bash against a stand-in for
+  `docker` (`test/fake-docker.js`) and `curl`, with nothing else on the `PATH`. Needs
+  bash 4, so the Docker build (Alpine, no bash) skips it. Also check the script with
+  `docker run --rm -v "$PWD:/mnt:ro" koalaman/shellcheck:stable /mnt/party-mode-setup.sh`.
+
+`test/browsers.js` isn't in `npm test`: it opens the pages in Chromium, WebKit and Firefox
+with the same stand-in, for what jsdom can't show (the security policy enforced, layout,
+Roon's display page in its frame, console errors). Run it in Playwright's image, with the
+image's version of Playwright, after a page change:
+
+```bash
+docker run --rm --init -v "$PWD:/app:ro" -w /app mcr.microsoft.com/playwright:v1.64.1-noble \
+  sh -c 'cd /tmp && npm i -s playwright@1.64.1 && cd /app && NODE_PATH=/tmp/node_modules node test/browsers.js'
+```
 
 ## Endpoints
 
@@ -85,7 +105,7 @@ the image (see [Running the image](#running-the-image)).
 | `/PartyHub/Standard`, `/PartyHub/Roon`, `/PartyHub/Basic` | The Party Hub in that view, whatever the setting (`data-view` on the page, `?view=` to `/api/hub`); Basic is `basic.html`, for TV browsers too old for the Party Hub |
 | `/Playlist` | The party playlist, only while Party is Off and Playlist isn't Off |
 | `/p/<code>` | The party playlist at the host's own address, new for each party (in Roon's status) |
-| `/About`, `/About/license/<id>` | Version, the running copy's state, every library and its licence, and the Party Hub's address; Roon's link for the extension (`website`) |
+| `/About`, `/About/license/<id>` | Version, the running copy's state, every library it runs on (not development ones) and its licence, and the Party Hub's address; Roon's link for the extension (`website`) |
 | `/` | "Scan the code again" |
 | `/api/party`, `/api/queue`, `/api/search`, `POST /api/request`, `POST /api/skip`, `POST /api/name` | The guest page's API; need a guest session |
 | `/api/hub` | The Party Hub's data; no session |

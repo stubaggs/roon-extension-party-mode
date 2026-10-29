@@ -2104,7 +2104,7 @@ const set = (values) => Object.assign(roon.settings, values);
     assert.strictEqual(duration(3 * 86400 + 4 * 3600 + 5 * 60), '3 days, 4 hours');
   });
 
-  await check("libraries: a Readme's licence when there's no file; notes on those only a tool installs", async () => {
+  await check("libraries: a Readme's licence when there's no file; notes on those only a tool installs; none only for development", async () => {
     const { readPackages, readmeLicense, sourceLicense } = require('../lib/about');
     const fs = require('fs');
     const os = require('os');
@@ -2118,7 +2118,8 @@ const set = (values) => Object.assign(roon.settings, values);
     assert.strictEqual(sourceLicense('// Just code.\nvar x;'), '');
 
     // app needs lib, a package with a command-line tool needing cli-lib,
-    // which needs cli-dep; lib's licence is in its Readme.
+    // which needs cli-dep; lib's licence is in its Readme. For development
+    // only, test-kit, which needs kit-dep and lib.
     const root = fs.mkdtempSync(path.join(os.tmpdir(), 'libs-'));
     const pkg = (dir, json, files = {}) => {
       const full = path.join(root, dir);
@@ -2130,7 +2131,9 @@ const set = (values) => Object.assign(roon.settings, values);
       }
     };
     try {
-      pkg('.', { name: 'app', dependencies: { tool: '1' } });
+      pkg('.', { name: 'app', dependencies: { tool: '1' }, devDependencies: { 'test-kit': '1' } });
+      pkg('node_modules/test-kit', { name: 'test-kit', version: '1.0.0', dependencies: { 'kit-dep': '1', lib: '1' } }, { LICENSE: 'MIT' });
+      pkg('node_modules/kit-dep', { name: 'kit-dep', version: '1.0.0' }, { LICENSE: 'MIT' });
       pkg('node_modules/tool', { name: 'tool', version: '1.0.0', bin: { tool: './bin/tool' }, dependencies: { lib: '1', 'cli-lib': '1' } },
         { 'index.js': "require('lib/x')", 'bin/tool': "require('cli-lib')", LICENSE: 'MIT\nCopyright (c) 2020 Tool' });
       pkg('node_modules/lib', { name: 'lib', version: '1.0.0', license: 'MIT' }, { 'README.md': '# lib\n\n## License\n\nCopyright (c) 2021 Lib\n' });
