@@ -16,7 +16,7 @@ updates:
       - dependency-name: node
         update-types: ["version-update:semver-major"]
 
-  # Express, qrcode, cookie-parser and the Roon API packages (from GitHub), as
+  # Express, qrcode-generator and the Roon API packages (from GitHub), as
   # package-lock.json pins them. Minor and patch updates come as one pull request.
   - package-ecosystem: npm
     directory: /

@@ -1,4 +1,4 @@
-// Copyright 2026 Stubaggs
+// Copyright (c) 2026 Stubaggs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,28 +15,34 @@
 'use strict';
 
 // Docker HEALTHCHECK: is the web server answering? It listens on the port saved
-// in config.json (else ROON_EXTENSION_PARTY_MODE_PORT, else 8338, the order the extension uses), or
-// on one of the next few ports if that one was busy at startup.
+// in config.json (else ROON_EXTENSION_PARTY_MODE_PORT, else 8338, the order the extension uses), or,
+// with neither set, on one of the next few if 8338 was busy at startup.
 
 const fs = require('fs');
 const http = require('http');
 const { FALLBACK_PORTS } = require('./lib/ports');
-const { startPort } = require('./lib/env');
+const { startPort, portChosen } = require('./lib/env');
 
-function configuredPort() {
+// How long the Party Hub's data may take. A Pi 1 serving a busy party took over 1.5
+// seconds at times; Docker allows the whole check 15, Node's start included.
+const ANSWER_MS = 5000;
+
+function savedSettings() {
   try {
-    const saved = JSON.parse(fs.readFileSync('config.json', 'utf8'));
-    const port = Number(saved.settings && saved.settings.port);
-    if (Number.isInteger(port) && port > 0) return port;
+    return JSON.parse(fs.readFileSync('config.json', 'utf8')).settings || {};
   } catch (err) {
-    /* no settings saved yet */
+    return {}; // no settings saved yet
   }
-  return startPort();
+}
+
+function configuredPort(saved) {
+  const port = Number(saved.port);
+  return Number.isInteger(port) && port > 0 ? port : startPort();
 }
 
 function answers(port) {
   return new Promise((resolve) => {
-    const req = http.get({ host: '127.0.0.1', port, path: '/api/hub', timeout: 1500 }, (res) => {
+    const req = http.get({ host: '127.0.0.1', port, path: '/api/hub', timeout: ANSWER_MS }, (res) => {
       res.resume();
       resolve(res.statusCode === 200);
     });
@@ -46,8 +52,10 @@ function answers(port) {
 }
 
 (async () => {
-  const first = configuredPort();
-  for (let port = first; port <= Math.min(first + FALLBACK_PORTS, 65535); port += 1) {
+  const saved = savedSettings();
+  const first = configuredPort(saved);
+  const tries = portChosen(saved) ? 0 : FALLBACK_PORTS;
+  for (let port = first; port <= Math.min(first + tries, 65535); port += 1) {
     if (await answers(port)) process.exit(0);
   }
   process.exit(1);

@@ -28,6 +28,10 @@
   "track.add": "Lägg till i kön",
   "track.next": "Spela härnäst",
   "queue.up_next": "Härnäst",
+  "queue.count": {
+    "one": "{count} spår",
+    "other": "{count} spår"
+  },
   "queue.empty": "Inget i kön.",
   "queue.empty_add": "Inget i kön. Lägg till ett spår.",
   "queue.empty_add_radio": "Inget i kön. Lägg till ett spår, eller överlåt det åt Roon Radio.",
@@ -53,15 +57,11 @@
   "toast.queued_next": "Spelas härnäst",
   "toast.queued": "Tillagd i kön",
   "toast.already_queued": "Det spåret finns redan i kön.",
-  "toast.nothing_left": "Inga fler just nu.",
-  "toast.nothing_left_wait": "Inga fler just nu. Försök igen om {wait}.",
+  "toast.none_left": "Du har använt alla.",
+  "toast.none_left_wait": "Du har använt alla. Fler om {wait}.",
   "toast.disabled": "Värden har stängt av det.",
-  "toast.roon_refused": "Roon tog inte emot det spåret.",
   "toast.skipped": "Överhoppad",
-  "toast.no_skips": "Du kan inte hoppa över fler.",
-  "toast.no_skips_wait": "Du kan inte hoppa över fler. Försök igen om {wait}.",
-  "toast.failed": "Det fungerade inte.",
-  "toast.name_not_saved": "Kunde inte spara ditt namn.",
+  "toast.failed": "Tyvärr fungerade det inte.",
   "toast.too_many_requests": "För många förfrågningar. Vänta en minut och försök igen.",
   "skip.button": "Hoppa över",
   "name.adding_as": "Lägger till som {name}",
@@ -79,6 +79,8 @@
   "lang.title": "Språk",
   "lang.automatic": "Automatiskt",
   "lang.change": "Språk: {language}. Ändra",
+  "invite.open": "Visa QR-koden för {name} så att andra kan vara med",
+  "invite.close": "Stäng",
   "locked.title": "Skanna koden igen",
   "locked.text": "Den här länken fungerar bara efter att du har skannat koden på Party Hub. Be värden att visa den.",
   "screen.scan": "Skanna för att lägga till ett spår",
@@ -88,5 +90,5 @@
   "screen.playlist_qr_alt": "QR-kod till spellistan",
   "screen.closed_title": "Önskemålen är stängda",
   "screen.closed_text": "Tack för alla spår.",
-  "join.expired": "Koden har gått ut. Skanna koden på Party Hub igen."
+  "screen.menu": "Meny"
 }

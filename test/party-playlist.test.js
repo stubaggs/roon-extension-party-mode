@@ -1,4 +1,4 @@
-// Copyright 2026 Stubaggs
+// Copyright (c) 2026 Stubaggs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 'use strict';
 
 const assert = require('assert');
-const { PartyPlaylist, playlistFileName, csvCell, defuse, MAX_TRACKS } = require('../lib/party-playlist');
+const { PartyPlaylist, playlistFileName, sameCode, csvCell, defuse, MAX_TRACKS } = require('../lib/party-playlist');
 
 let failures = 0;
 function check(name, fn) {
@@ -31,7 +31,10 @@ function check(name, fn) {
 const track = (id, title, extra) =>
   Object.assign({ id, title, artist: 'ABBA', album: 'Arrival', length: 231 }, extra);
 const nobody = () => null;
-const rows = (playlist, creditFor) => playlist.toCsv(creditFor).trim().split('\r\n');
+// The file's lines without their first column, "index", so each reads title
+// first. trim() also drops the byte order mark.
+const lines = (csv) => csv.trim().split('\r\n').map((line) => line.replace(/^[^,]*,/, ''));
+const rows = (playlist, creditFor) => lines(playlist.toCsv(creditFor));
 const titles = (playlist) => playlist.tracks.map((t) => t.title);
 
 console.log('PartyPlaylist');
@@ -42,6 +45,16 @@ check('records each queue entry once, in the order it was queued', () => {
   playlist.update('o1', [track(1, 'Dancing Queen'), track(2, 'Waterloo')], nobody);
   playlist.update('o1', [track(3, 'SOS'), track(2, 'Waterloo')], nobody);
   assert.deepStrictEqual(titles(playlist), ['Dancing Queen', 'Waterloo', 'SOS']);
+});
+
+check('says when a queue entry was first seen, by its id', () => {
+  const playlist = new PartyPlaylist();
+  playlist.update('zone', [track(1, 'Waterloo')], nobody, 1000);
+  playlist.update('zone', [track(1, 'Waterloo'), track(2, 'SOS')], nobody, 2000);
+  assert.strictEqual(playlist.queuedAt(1), 1000);
+  assert.strictEqual(playlist.queuedAt(2), 2000);
+  assert.strictEqual(playlist.queuedAt(3), null);
+  assert.strictEqual(playlist.queuedAt(undefined), null);
 });
 
 check('keeps tracks after they leave the queue', () => {
@@ -69,6 +82,30 @@ check('a new party zone starts over', () => {
   playlist.update('o1', [track(1, 'Waterloo')], nobody);
   playlist.update('o2', [track(9, 'SOS')], nobody);
   assert.deepStrictEqual(titles(playlist), ['SOS']);
+});
+
+check('each new list has a new secret code for its address: on a reset and a new zone', () => {
+  const playlist = new PartyPlaylist();
+  const first = playlist.code;
+  assert.match(first, /^[0-9A-HJKMNP-TV-Z]{4}-[0-9A-HJKMNP-TV-Z]{4}$/);
+  playlist.update('o1', [track(1, 'Waterloo')], nobody);
+  assert.strictEqual(playlist.code, first, 'the same list keeps its code');
+  playlist.reset();
+  const second = playlist.code;
+  assert.notStrictEqual(second, first);
+  playlist.update('o1', [track(1, 'Waterloo')], nobody);
+  playlist.update('o2', [track(9, 'SOS')], nobody);
+  assert.notStrictEqual(playlist.code, second);
+  assert.notStrictEqual(new PartyPlaylist().code, new PartyPlaylist().code);
+});
+
+check('a code matches as it may be typed: lower case, no hyphen, O for 0, I or L for 1', () => {
+  for (const typed of ['7K10-M9X0', '7k10-m9x0', '7K10M9X0', '7KIO-M9XO', '7klo m9xo']) {
+    assert.ok(sameCode(typed, '7K10-M9X0'), typed);
+  }
+  for (const typed of ['7K10-M9X', '7K10-M9X00', '', undefined, '7K10-M9X0'.repeat(3)]) {
+    assert.ok(!sameCode(typed, '7K10-M9X0'), String(typed));
+  }
 });
 
 check('a reset starts over from what is still queued', () => {
@@ -105,8 +142,14 @@ check('queued at is local time, to the minute', () => {
   assert.ok(rows(playlist)[1].endsWith(',2026-10-02 21:05'), rows(playlist)[1]);
 });
 
-check('Soundiiz finds the title column: no byte order mark before it', () => {
-  assert.ok(new PartyPlaylist().toCsv().startsWith('title,artist,album,'));
+check('a byte order mark for Excel, before an index column importers ignore', () => {
+  const playlist = new PartyPlaylist();
+  playlist.update('o1', [track(1, 'Waterloo'), track(2, 'SOS')], nobody, new Date(2026, 9, 2, 21, 5).getTime());
+  const csv = playlist.toCsv();
+  assert.ok(csv.startsWith('\ufeffindex,title,artist,album,length,requested by,queued at\r\n'), csv);
+  assert.ok(csv.includes('\r\n1,Waterloo,ABBA,Arrival,3:51,,2026-10-02 21:05\r\n'), csv);
+  assert.ok(csv.includes('\r\n2,SOS,'), csv);
+  assert.strictEqual(csv.indexOf('\ufeff', 1), -1, 'only one, at the start');
 });
 
 check("Roon's artist separator becomes a comma, in one quoted cell", () => {
@@ -159,7 +202,7 @@ check("the host's name, when set, credits the host's tracks in the file", () => 
   const playlist = new PartyPlaylist();
   const credit = (t) => ({ 1: { requested_by: 'Sam', kind: 'add', guest: 'g1' }, 2: { kind: 'host' }, 3: { kind: 'radio' } })[t.id];
   playlist.update('o1', [track(1, 'Waterloo'), track(2, 'SOS'), track(3, 'Fernando')], credit);
-  const csv = playlist.toCsv(credit, { hostName: 'DJ Stu' }).trim().split('\r\n');
+  const csv = lines(playlist.toCsv(credit, { hostName: 'DJ Stu' }));
   assert.ok(csv[1].includes(',Sam,'), csv[1]);
   assert.ok(csv[2].includes(',DJ Stu,'), csv[2]);
   assert.ok(csv[3].includes(',Roon Radio,'), csv[3]);
@@ -173,7 +216,7 @@ check('hidden names credit every guest as Anon, and keep Roon Radio and Host', (
   playlist.update('o1', [track(1, 'Waterloo'), track(2, 'SOS'), track(3, 'Fernando'), track(4, 'Chiquitita')], credit);
   const hidden = playlist.toCsv(credit, { hideNames: true });
   assert.ok(!hidden.includes('Sam') && !hidden.includes('Jo'), hidden);
-  const csv = hidden.trim().split('\r\n');
+  const csv = lines(hidden);
   assert.ok(csv[1].includes(',Anon,'), csv[1]);
   assert.ok(csv[2].includes(',Anon,'), csv[2]);
   assert.ok(csv[3].includes(',Roon Radio,'), csv[3]);

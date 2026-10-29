@@ -3,13 +3,13 @@
 # It only reads the code: it builds and publishes nothing.
 name: CodeQL
 
-# On demand: run it from the Actions tab (CodeQL → Run workflow) on experimental
+# On demand: run it from the Actions tab (CodeQL → Run workflow) on beta
 # before merging into main. Restore these to run it on every push and pull
 # request, and weekly so new queries catch issues in code that hasn't changed:
 #   push:
-#     branches: [main, experimental]
+#     branches: [main, beta]
 #   pull_request:
-#     branches: [main, experimental]
+#     branches: [main, beta]
 #   schedule:
 #     - cron: '23 5 * * 2'
 on:

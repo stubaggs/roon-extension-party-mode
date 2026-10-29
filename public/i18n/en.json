@@ -28,6 +28,10 @@
   "track.add": "Add to queue",
   "track.next": "Play it next",
   "queue.up_next": "Up next",
+  "queue.count": {
+    "one": "{count} track",
+    "other": "{count} tracks"
+  },
   "queue.empty": "Nothing lined up.",
   "queue.empty_add": "Nothing lined up. Add a track.",
   "queue.empty_add_radio": "Nothing lined up. Add a track, or leave it to Roon Radio.",
@@ -53,15 +57,11 @@
   "toast.queued_next": "Queued to play next",
   "toast.queued": "Added to the queue",
   "toast.already_queued": "That one is already in the queue.",
-  "toast.nothing_left": "Nothing left for now.",
-  "toast.nothing_left_wait": "Nothing left for now. Try again in {wait}.",
+  "toast.none_left": "You've used them all.",
+  "toast.none_left_wait": "You've used them all. More in {wait}.",
   "toast.disabled": "The host has turned that off.",
-  "toast.roon_refused": "Roon would not take that one.",
   "toast.skipped": "Skipped",
-  "toast.no_skips": "No skips left.",
-  "toast.no_skips_wait": "No skips left. Try again in {wait}.",
-  "toast.failed": "That did not work.",
-  "toast.name_not_saved": "Could not save your name.",
+  "toast.failed": "Sorry, that did not work.",
   "toast.too_many_requests": "Too many requests. Wait a minute and try again.",
   "skip.button": "Skip",
   "name.adding_as": "Adding as {name}",
@@ -79,6 +79,8 @@
   "lang.title": "Language",
   "lang.automatic": "Automatic",
   "lang.change": "Language: {language}. Change",
+  "invite.open": "Show the QR code for {name}, so others can join",
+  "invite.close": "Close",
   "locked.title": "Scan the code again",
   "locked.text": "This link only works after scanning the code on the Party Hub. Ask the host to show it.",
   "screen.scan": "Scan to add a track",
@@ -88,5 +90,5 @@
   "screen.playlist_qr_alt": "QR code for the playlist",
   "screen.closed_title": "Requests are closed",
   "screen.closed_text": "Thanks for all the tracks.",
-  "join.expired": "That code has expired. Scan the code on the Party Hub again."
+  "screen.menu": "Menu"
 }

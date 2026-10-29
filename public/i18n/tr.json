@@ -17,7 +17,7 @@
   "credit.host": "Ev sahibi",
   "search.placeholder": "Parça veya sanatçı ara",
   "search.clear": "Aramayı temizle",
-  "search.no_results": "Parça bulunamadı. Sanatçının adını deneyin.",
+  "search.no_results": "Parça bulunamadı. Sanatçının adını dene.",
   "search.results": {
     "one": "{count} parça bulundu.",
     "other": "{count} parça bulundu."
@@ -28,6 +28,10 @@
   "track.add": "Sıraya ekle",
   "track.next": "Sonra çal",
   "queue.up_next": "Sıradaki",
+  "queue.count": {
+    "one": "{count} parça",
+    "other": "{count} parça"
+  },
   "queue.empty": "Sırada bir şey yok.",
   "queue.empty_add": "Sırada bir şey yok. Bir parça ekle.",
   "queue.empty_add_radio": "Sırada bir şey yok. Bir parça ekle ya da Roon Radio'ya bırak.",
@@ -53,15 +57,11 @@
   "toast.queued_next": "Sonra çalacak",
   "toast.queued": "Sıraya eklendi",
   "toast.already_queued": "Bu parça zaten sırada.",
-  "toast.nothing_left": "Şimdilik hakkın kalmadı.",
-  "toast.nothing_left_wait": "Şimdilik hakkın kalmadı. {wait} sonra tekrar dene.",
+  "toast.none_left": "Hepsini kullandın.",
+  "toast.none_left_wait": "Hepsini kullandın. {wait} sonra yenisi gelir.",
   "toast.disabled": "Ev sahibi bunu kapattı.",
-  "toast.roon_refused": "Roon bu parçayı kabul etmedi.",
   "toast.skipped": "Atlandı",
-  "toast.no_skips": "Atlama hakkın kalmadı.",
-  "toast.no_skips_wait": "Atlama hakkın kalmadı. {wait} sonra tekrar dene.",
-  "toast.failed": "Olmadı.",
-  "toast.name_not_saved": "Adın kaydedilemedi.",
+  "toast.failed": "Üzgünüz, olmadı.",
   "toast.too_many_requests": "Çok fazla istek. Bir dakika bekleyip yeniden dene.",
   "skip.button": "Atla",
   "name.adding_as": "{name} olarak ekliyorsun",
@@ -79,6 +79,8 @@
   "lang.title": "Dil",
   "lang.automatic": "Otomatik",
   "lang.change": "Dil: {language}. Değiştir",
+  "invite.open": "Başkaları da katılabilsin diye {name} için QR kodunu göster",
+  "invite.close": "Kapat",
   "locked.title": "Kodu yeniden tara",
   "locked.text": "Bu bağlantı yalnızca Party Hub'daki kodu taradıktan sonra çalışır. Ev sahibinden göstermesini iste.",
   "screen.scan": "Parça eklemek için tara",
@@ -88,5 +90,5 @@
   "screen.playlist_qr_alt": "Çalma listesi için QR kod",
   "screen.closed_title": "İstekler kapandı",
   "screen.closed_text": "Tüm parçalar için teşekkürler.",
-  "join.expired": "Bu kodun süresi doldu. Party Hub'daki kodu yeniden tara."
+  "screen.menu": "Menü"
 }

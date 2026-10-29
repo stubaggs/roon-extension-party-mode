@@ -27,6 +27,9 @@
   "track.add": "加入队列",
   "track.next": "下一首播放",
   "queue.up_next": "即将播放",
+  "queue.count": {
+    "other": "{count} 首曲目"
+  },
   "queue.empty": "队列为空。",
   "queue.empty_add": "队列为空。添加一首曲目吧。",
   "queue.empty_add_radio": "队列为空。添加一首曲目，或交给 Roon Radio。",
@@ -50,15 +53,11 @@
   "toast.queued_next": "将在下一首播放",
   "toast.queued": "已加入队列",
   "toast.already_queued": "这首曲目已在队列中。",
-  "toast.nothing_left": "暂时没有剩余次数。",
-  "toast.nothing_left_wait": "暂时没有剩余次数。请在 {wait}后重试。",
+  "toast.none_left": "你已全部用完。",
+  "toast.none_left_wait": "你已全部用完。{wait}后可再用。",
   "toast.disabled": "主人已关闭此功能。",
-  "toast.roon_refused": "Roon 没有接受这首曲目。",
   "toast.skipped": "已跳过",
-  "toast.no_skips": "没有剩余的跳过次数。",
-  "toast.no_skips_wait": "没有剩余的跳过次数。请在 {wait}后重试。",
-  "toast.failed": "操作未成功。",
-  "toast.name_not_saved": "无法保存你的名字。",
+  "toast.failed": "抱歉，操作未成功。",
   "toast.too_many_requests": "请求过多，请等一分钟后再试。",
   "skip.button": "跳过",
   "name.adding_as": "以 {name} 的身份添加",
@@ -76,6 +75,8 @@
   "lang.title": "语言",
   "lang.automatic": "自动",
   "lang.change": "语言：{language}。更改",
+  "invite.open": "显示 {name} 的二维码，让其他人也能加入",
+  "invite.close": "关闭",
   "locked.title": "请重新扫描二维码",
   "locked.text": "此链接只有在扫描 Party Hub 上的二维码后才能使用。请让主人展示二维码。",
   "screen.scan": "扫码添加曲目",
@@ -85,5 +86,5 @@
   "screen.playlist_qr_alt": "播放列表的二维码",
   "screen.closed_title": "点播已结束",
   "screen.closed_text": "感谢大家点播的所有曲目。",
-  "join.expired": "此二维码已过期。请重新扫描 Party Hub 上的二维码。"
+  "screen.menu": "菜单"
 }

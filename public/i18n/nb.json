@@ -28,6 +28,10 @@
   "track.add": "Legg til i køen",
   "track.next": "Spill som neste",
   "queue.up_next": "Neste",
+  "queue.count": {
+    "one": "{count} spor",
+    "other": "{count} spor"
+  },
   "queue.empty": "Ingenting i køen.",
   "queue.empty_add": "Ingenting i køen. Legg til et spor.",
   "queue.empty_add_radio": "Ingenting i køen. Legg til et spor, eller overlat det til Roon Radio.",
@@ -53,15 +57,11 @@
   "toast.queued_next": "Spilles som neste",
   "toast.queued": "Lagt til i køen",
   "toast.already_queued": "Det sporet er allerede i køen.",
-  "toast.nothing_left": "Ingen flere akkurat nå.",
-  "toast.nothing_left_wait": "Ingen flere akkurat nå. Prøv igjen om {wait}.",
+  "toast.none_left": "Du har brukt opp alle.",
+  "toast.none_left_wait": "Du har brukt opp alle. Flere om {wait}.",
   "toast.disabled": "Verten har slått det av.",
-  "toast.roon_refused": "Roon ville ikke ta det sporet.",
   "toast.skipped": "Hoppet over",
-  "toast.no_skips": "Du kan ikke hoppe over flere.",
-  "toast.no_skips_wait": "Du kan ikke hoppe over flere. Prøv igjen om {wait}.",
-  "toast.failed": "Det fungerte ikke.",
-  "toast.name_not_saved": "Kunne ikke lagre navnet ditt.",
+  "toast.failed": "Beklager, det fungerte ikke.",
   "toast.too_many_requests": "For mange forespørsler. Vent et minutt og prøv igjen.",
   "skip.button": "Hopp over",
   "name.adding_as": "Legger til som {name}",
@@ -79,6 +79,8 @@
   "lang.title": "Språk",
   "lang.automatic": "Automatisk",
   "lang.change": "Språk: {language}. Endre",
+  "invite.open": "Vis QR-koden for {name}, så andre kan bli med",
+  "invite.close": "Lukk",
   "locked.title": "Skann koden på nytt",
   "locked.text": "Denne lenken virker bare etter at du har skannet koden på Party Hub. Be verten om å vise den.",
   "screen.scan": "Skann for å legge til et spor",
@@ -88,5 +90,5 @@
   "screen.playlist_qr_alt": "QR-kode til spillelisten",
   "screen.closed_title": "Det er stengt for ønsker",
   "screen.closed_text": "Takk for alle sporene.",
-  "join.expired": "Koden har utløpt. Skann koden på Party Hub på nytt."
+  "screen.menu": "Meny"
 }

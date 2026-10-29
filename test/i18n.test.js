@@ -1,4 +1,4 @@
-// Copyright 2026 Stubaggs
+// Copyright (c) 2026 Stubaggs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -62,15 +62,12 @@ const placeholders = (entry) =>
   [...new Set((typeof entry === 'object' ? Object.values(entry).join(' ') : entry).match(/\{\w+\}/g) || [])].sort();
 
 /** Runs the page runtime as a browser would, with the given served data. */
-function runtimeFor(lang, strings) {
+function runtimeFor(lang, strings, { intl = Intl } = {}) {
   const html = { lang: '' };
   const window = { I18N_DATA: { lang, dir: i18n.dir(lang), strings, fallback: en } };
-  vm.runInNewContext(fs.readFileSync(path.join(PUBLIC, 'i18n-runtime.js'), 'utf8'), {
-    window,
-    document: { documentElement: html, querySelectorAll: () => [] },
-    Intl,
-    Date
-  });
+  const globals = { window, document: { documentElement: html, querySelectorAll: () => [] }, Date };
+  if (intl) globals.Intl = intl;
+  vm.runInNewContext(fs.readFileSync(path.join(PUBLIC, 'i18n-runtime.js'), 'utf8'), globals);
   return Object.assign(window.I18N, { html });
 }
 
@@ -161,7 +158,7 @@ check('a browser asking for a language without a file gets English', () => {
 });
 
 check('server messages come from the same file', () => {
-  assert.ok(usedKeys().has('join.expired'));
+  assert.ok(usedKeys().has('locked.text'));
   assert.strictEqual(i18n.t('en', 'screen.closed_title'), 'Requests are closed');
   assert.strictEqual(i18n.t('fr', 'screen.closed_title'), JSON.parse(read('i18n/fr.json'))['screen.closed_title']);
   assert.strictEqual(i18n.t('xx', 'screen.closed_title'), 'Requests are closed');
@@ -191,7 +188,6 @@ check('French text, plurals and clock', () => {
   assert.strictEqual(I18N.t('button.left', { count: 3 }), '3 restants');
   assert.strictEqual(I18N.minutes(30 * 1000), 'une minute');
   assert.strictEqual(I18N.credit({ kind: 'add', requested_by: null }), 'Anonyme');
-  assert.strictEqual(i18n.t('fr', 'join.expired'), 'Ce code a expiré. Scannez à nouveau le code affiché sur le Party Hub.');
 });
 
 console.log('\nSpanish, German, Dutch');
@@ -220,7 +216,7 @@ check('German: a name after "von", and the wait', () => {
   const I18N = runtimeFor('de', JSON.parse(read('i18n/de.json')));
   assert.strictEqual(I18N.credit({ kind: 'add', requested_by: null }), 'Anonym');
   assert.strictEqual(I18N.requestedBy({ kind: 'add', requested_by: 'Lena' }), 'Gewünscht von Lena');
-  assert.strictEqual(I18N.t('toast.nothing_left_wait', { wait: I18N.minutes(5 * 60 * 1000) }), 'Gerade nichts mehr übrig. Versuch es in 5 Minuten wieder.');
+  assert.strictEqual(I18N.t('toast.none_left_wait', { wait: I18N.minutes(5 * 60 * 1000) }), 'Du hast alle aufgebraucht. Mehr in 5 Minuten.');
 });
 
 console.log(failures ? `\n${failures} failing` : '\nall passing');
@@ -286,6 +282,14 @@ check('plurals follow each language: Russian, Polish, Czech, Arabic, Japanese', 
   assert.strictEqual(t('ar', 'time.minutes', 2), 'دقيقتين');
   assert.strictEqual(t('ar', 'time.minutes', 4), '4 دقائق');
   assert.strictEqual(t('ja', 'search.results', 1), '1 件のトラックが見つかりました。');
+});
+
+check("a browser without the language's plural rules gets English's, not an error", () => {
+  const strings = JSON.parse(read('i18n/ru.json'));
+  // Intl without PluralRules, as before Chrome 63 and Safari 13.
+  const { t } = runtimeFor('ru', strings, { intl: {} });
+  assert.strictEqual(t('time.minutes', { count: 1 }), '1 минуту');
+  assert.strictEqual(t('time.minutes', { count: 5 }), '5 минуты');
 });
 
 console.log('\nchosen language');

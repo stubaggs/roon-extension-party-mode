@@ -28,6 +28,10 @@
   "track.add": "Aan wachtrij toevoegen",
   "track.next": "Hierna afspelen",
   "queue.up_next": "Hierna",
+  "queue.count": {
+    "one": "{count} nummer",
+    "other": "{count} nummers"
+  },
   "queue.empty": "Er staat nog niets klaar.",
   "queue.empty_add": "Er staat nog niets klaar. Voeg een nummer toe.",
   "queue.empty_add_radio": "Er staat nog niets klaar. Voeg een nummer toe, of laat het aan Roon Radio over.",
@@ -37,7 +41,7 @@
   "played.skipped_by": "Overgeslagen door {name}",
   "played.skipped_by_host": "Overgeslagen door de host",
   "allowance.closed": "Verzoekjes zijn nu gesloten.",
-  "allowance.paused": "Verzoeken staan even op pauze.",
+  "allowance.paused": "Verzoekjes staan even op pauze.",
   "button.left": {
     "one": "nog {count}",
     "other": "nog {count}"
@@ -53,15 +57,11 @@
   "toast.queued_next": "Wordt hierna afgespeeld",
   "toast.queued": "Aan de wachtrij toegevoegd",
   "toast.already_queued": "Dat nummer staat al in de wachtrij.",
-  "toast.nothing_left": "Even niets meer over.",
-  "toast.nothing_left_wait": "Even niets meer over. Probeer het over {wait} opnieuw.",
+  "toast.none_left": "Je hebt ze allemaal gebruikt.",
+  "toast.none_left_wait": "Je hebt ze allemaal gebruikt. Meer over {wait}.",
   "toast.disabled": "De host heeft dit uitgezet.",
-  "toast.roon_refused": "Roon nam dat nummer niet aan.",
   "toast.skipped": "Overgeslagen",
-  "toast.no_skips": "Je kunt niet meer overslaan.",
-  "toast.no_skips_wait": "Je kunt niet meer overslaan. Probeer het over {wait} opnieuw.",
-  "toast.failed": "Dat lukte niet.",
-  "toast.name_not_saved": "Je naam kon niet worden opgeslagen.",
+  "toast.failed": "Sorry, dat lukte niet.",
   "toast.too_many_requests": "Te veel verzoeken. Wacht een minuut en probeer het opnieuw.",
   "skip.button": "Overslaan",
   "name.adding_as": "Je voegt toe als {name}",
@@ -79,6 +79,8 @@
   "lang.title": "Taal",
   "lang.automatic": "Automatisch",
   "lang.change": "Taal: {language}. Wijzigen",
+  "invite.open": "Toon de QR-code voor {name}, zodat anderen mee kunnen doen",
+  "invite.close": "Sluiten",
   "locked.title": "Scan de code opnieuw",
   "locked.text": "Deze link werkt pas nadat je de code op de Party Hub hebt gescand. Vraag de host om hem te laten zien.",
   "screen.scan": "Scan om een nummer toe te voegen",
@@ -88,5 +90,5 @@
   "screen.playlist_qr_alt": "QR-code voor de playlist",
   "screen.closed_title": "Verzoekjes zijn gesloten",
   "screen.closed_text": "Bedankt voor alle nummers.",
-  "join.expired": "Deze code is verlopen. Scan de code op de Party Hub opnieuw."
+  "screen.menu": "Menu"
 }

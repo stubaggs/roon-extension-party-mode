@@ -27,6 +27,9 @@
   "track.add": "เพิ่มในคิว",
   "track.next": "เล่นถัดไป",
   "queue.up_next": "ถัดไป",
+  "queue.count": {
+    "other": "{count} แทร็ก"
+  },
   "queue.empty": "คิวว่างอยู่",
   "queue.empty_add": "คิวว่างอยู่ เพิ่มแทร็กได้เลย",
   "queue.empty_add_radio": "คิวว่างอยู่ เพิ่มแทร็กได้เลย หรือปล่อยให้ Roon Radio เลือก",
@@ -50,15 +53,11 @@
   "toast.queued_next": "จะเล่นถัดไป",
   "toast.queued": "เพิ่มในคิวแล้ว",
   "toast.already_queued": "แทร็กนี้อยู่ในคิวแล้ว",
-  "toast.nothing_left": "ตอนนี้สิทธิ์หมดแล้ว",
-  "toast.nothing_left_wait": "ตอนนี้สิทธิ์หมดแล้ว ลองใหม่อีก {wait}",
+  "toast.none_left": "คุณใช้สิทธิ์หมดแล้ว",
+  "toast.none_left_wait": "คุณใช้สิทธิ์หมดแล้ว ได้อีกใน {wait}",
   "toast.disabled": "เจ้าภาพปิดตัวเลือกนี้ไว้",
-  "toast.roon_refused": "Roon ไม่รับแทร็กนี้",
   "toast.skipped": "ข้ามแล้ว",
-  "toast.no_skips": "สิทธิ์ข้ามหมดแล้ว",
-  "toast.no_skips_wait": "สิทธิ์ข้ามหมดแล้ว ลองใหม่อีก {wait}",
-  "toast.failed": "ไม่สำเร็จ",
-  "toast.name_not_saved": "บันทึกชื่อของคุณไม่ได้",
+  "toast.failed": "ขออภัย ไม่สำเร็จ",
   "toast.too_many_requests": "คำขอมากเกินไป รอสักนาทีแล้วลองอีกครั้ง",
   "skip.button": "ข้าม",
   "name.adding_as": "กำลังเพิ่มในชื่อ {name}",
@@ -76,6 +75,8 @@
   "lang.title": "ภาษา",
   "lang.automatic": "อัตโนมัติ",
   "lang.change": "ภาษา: {language} เปลี่ยน",
+  "invite.open": "แสดงคิวอาร์โค้ดของ {name} เพื่อให้คนอื่นเข้าร่วมได้",
+  "invite.close": "ปิด",
   "locked.title": "สแกนโค้ดอีกครั้ง",
   "locked.text": "ลิงก์นี้ใช้ได้หลังจากสแกนโค้ดบน Party Hub เท่านั้น ขอให้เจ้าภาพเปิดให้ดู",
   "screen.scan": "สแกนเพื่อเพิ่มแทร็ก",
@@ -85,5 +86,5 @@
   "screen.playlist_qr_alt": "คิวอาร์โค้ดสำหรับเพลย์ลิสต์",
   "screen.closed_title": "ปิดรับคำขอแล้ว",
   "screen.closed_text": "ขอบคุณสำหรับทุกแทร็ก",
-  "join.expired": "โค้ดนี้หมดอายุแล้ว สแกนโค้ดบน Party Hub อีกครั้ง"
+  "screen.menu": "เมนู"
 }

@@ -28,6 +28,10 @@
   "track.add": "Ajouter à la file",
   "track.next": "Lire ensuite",
   "queue.up_next": "À suivre",
+  "queue.count": {
+    "one": "{count} morceau",
+    "other": "{count} morceaux"
+  },
   "queue.empty": "Rien de prévu.",
   "queue.empty_add": "Rien de prévu. Ajoutez un morceau.",
   "queue.empty_add_radio": "Rien de prévu. Ajoutez un morceau, ou laissez faire Roon Radio.",
@@ -53,15 +57,11 @@
   "toast.queued_next": "Sera lu ensuite",
   "toast.queued": "Ajouté à la file d'attente",
   "toast.already_queued": "Ce morceau est déjà dans la file d'attente.",
-  "toast.nothing_left": "Plus rien pour l'instant.",
-  "toast.nothing_left_wait": "Plus rien pour l'instant. Réessayez dans {wait}.",
+  "toast.none_left": "Vous les avez tous utilisés.",
+  "toast.none_left_wait": "Vous les avez tous utilisés. D'autres dans {wait}.",
   "toast.disabled": "L'hôte a désactivé cette option.",
-  "toast.roon_refused": "Roon n'a pas accepté ce morceau.",
   "toast.skipped": "Morceau passé",
-  "toast.no_skips": "Vous ne pouvez plus passer de morceau.",
-  "toast.no_skips_wait": "Vous ne pouvez plus passer de morceau. Réessayez dans {wait}.",
-  "toast.failed": "Ça n'a pas marché.",
-  "toast.name_not_saved": "Impossible d'enregistrer votre nom.",
+  "toast.failed": "Désolé, ça n'a pas marché.",
   "toast.too_many_requests": "Trop de requêtes. Patientez une minute, puis réessayez.",
   "skip.button": "Passer",
   "name.adding_as": "Vous ajoutez en tant que {name}",
@@ -79,6 +79,8 @@
   "lang.title": "Langue",
   "lang.automatic": "Automatique",
   "lang.change": "Langue : {language}. Modifier",
+  "invite.open": "Afficher le code QR de {name} pour que d'autres puissent participer",
+  "invite.close": "Fermer",
   "locked.title": "Scannez à nouveau le code",
   "locked.text": "Ce lien ne fonctionne qu'après avoir scanné le code affiché sur le Party Hub. Demandez à l'hôte de l'afficher.",
   "screen.scan": "Scannez pour ajouter un morceau",
@@ -88,5 +90,5 @@
   "screen.playlist_qr_alt": "Code QR de la playlist",
   "screen.closed_title": "Les demandes sont fermées",
   "screen.closed_text": "Merci pour tous les morceaux.",
-  "join.expired": "Ce code a expiré. Scannez à nouveau le code affiché sur le Party Hub."
+  "screen.menu": "Menu"
 }

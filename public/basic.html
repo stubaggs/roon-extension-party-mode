@@ -1,0 +1,71 @@
+<!doctype html>
+<!--
+  Copyright (c) 2026 Stubaggs
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Party Hub</title>
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/basic.css" />
+  </head>
+  <!-- The basic Party Hub, for TV browsers years behind (/PartyHub/Basic, the
+       Basic view, or where /PartyHub sends a browser that can't show its own):
+       a fixed 16:9 stage, 120 by 67.5 rem, scaled to the window by basic.js,
+       plain ES5 and CSS. No menu: a TV's remote can't open one. -->
+  <body class="basic">
+    <main id="stage" class="stage">
+      <section class="join">
+        <h1 id="party-name" class="party-name" data-i18n="party.default_name">Party</h1>
+        <div id="join-open">
+          <img class="qr" src="/embed/join-qr.svg" alt="QR code for the guest page" data-i18n-alt="screen.qr_alt" />
+          <p id="join-copy" class="join-copy" data-i18n="screen.scan">Scan to add a track</p>
+        </div>
+        <!-- With Party off: the playlist's code, or where to find it. -->
+        <div id="playlist-qr-offer" hidden>
+          <img id="playlist-qr" class="qr" alt="QR code for the playlist" data-i18n-alt="screen.playlist_qr_alt" />
+          <p class="join-copy" data-i18n="screen.scan_playlist">Scan to download the playlist</p>
+        </div>
+      </section>
+
+      <section id="current" class="current">
+        <img id="current-art" class="art current-art" alt="" />
+        <div class="current-text">
+          <p id="current-label" class="label" data-i18n="playing.now">Playing now</p>
+          <h2 id="current-title" class="current-title line" data-i18n="playing.nothing">Nothing playing</h2>
+          <p id="current-artist" class="current-artist line muted"></p>
+          <p id="current-album" class="current-album line muted"></p>
+          <p id="current-who" class="who line" hidden></p>
+          <p id="current-note" class="note line muted" data-i18n="queue.waiting_for_host" hidden>Waiting for the host to start the queue.</p>
+        </div>
+      </section>
+
+      <section id="upnext" class="upnext">
+        <h2 class="label upnext-title"><span data-i18n="queue.up_next">Up next</span><span id="upnext-count" class="upnext-count" hidden></span></h2>
+        <ol id="list" class="list"></ol>
+      </section>
+
+      <!-- With Party off, in place of what's playing and Up next. -->
+      <section id="closed" class="closed" hidden>
+        <h2 class="closed-title" data-i18n="screen.closed_title">Requests are closed</h2>
+        <p class="closed-text muted" data-i18n="screen.closed_text">Thanks for all the tracks.</p>
+      </section>
+    </main>
+    <script src="/i18n.js?for=hub"></script>
+    <script src="/basic.js"></script>
+  </body>
+</html>

@@ -1,4 +1,4 @@
-// Copyright 2026 Stubaggs
+// Copyright (c) 2026 Stubaggs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -107,14 +107,14 @@ function fakeRoon(profiles, menuTitle = 'Profile', current = 'Guest') {
   console.log('\nprofile setting');
   const layout = (self, values) =>
     RoonService.prototype._layout.call(Object.assign({ _resolveZone: () => null }, self), values);
-  const dropdown = (result) => result.layout.find((item) => item.setting === 'guest_profile');
+  const dropdown = (result) => result.layout.find((item) => item.title === 'Party setup').items.find((item) => item.setting === 'guest_profile');
 
   await check("offers Roon's default, by name when known, plus the Core's profiles", async () => {
     const item = dropdown(layout({ profiles: ['Stu', 'Guests'], defaultProfile: 'Guest' }, {}));
     assert.deepStrictEqual(item.values.map((v) => v.title), ["Roon's default (Guest)", 'Stu', 'Guests']);
     assert.strictEqual(item.values[0].value, '');
     assert.strictEqual(dropdown(layout({ profiles: ['Stu'] }, {})).values[0].title, "Roon's default profile", 'not read');
-    assert.strictEqual(item.title, 'Party profile');
+    assert.strictEqual(item.title, 'Roon profile');
     assert.match(item.subtitle, /Roon profile guests' tracks play under/);
   });
 
@@ -170,6 +170,23 @@ function fakeRoon(profiles, menuTitle = 'Profile', current = 'Guest') {
     assert.deepStrictEqual(core.events.filter((e) => e.includes(':profile ')), ['guest-1:profile Party', 'guest-2:profile Party']);
   });
 
+  await check('Roon losing a guest\'s session: their next step selects the profile again', async () => {
+    const core = fakeBrowseCore({ categories: { Tracks: tracks } });
+    const roon = serviceFor(core, { guest_profile: 'Party' });
+    await roon.search('guest-1', 'abba');
+    core.drop('guest-1');
+    await assert.rejects(roon.search('guest-1', 'queen'), /SessionNotFound/);
+    await roon.search('guest-1', 'queen');
+    assert.strictEqual(core.profileOf('guest-1'), 'Party', 'not Roon\'s default');
+    assert.deepStrictEqual(core.events.filter((e) => e.includes(':profile ')), ['guest-1:profile Party', 'guest-1:profile Party']);
+    // The same after a request that failed.
+    const found = await roon.search('guest-1', 'abba');
+    core.drop('guest-1');
+    await assert.rejects(roon.performAction('guest-1', found[0].item_key, 'add'), /SessionNotFound/);
+    await roon.search('guest-1', 'abba');
+    assert.strictEqual(core.profileOf('guest-1'), 'Party');
+  });
+
   await check('changing the setting reselects in sessions already set up', async () => {
     const core = fakeBrowseCore({ categories: { Tracks: tracks }, profiles: ['Stu', 'Party', 'Kids'] });
     const roon = serviceFor(core, { guest_profile: 'Party' });
@@ -217,6 +234,38 @@ function fakeRoon(profiles, menuTitle = 'Profile', current = 'Guest') {
     assert.deepStrictEqual([...roon.profileSessions.keys()], [two.id]);
     guests.clear();
     assert.strictEqual(roon.profileSessions.size, 0);
+  });
+
+  await check('a Core that just started and does not answer about profiles is asked once more, quietly', async () => {
+    const realTimeout = global.setTimeout;
+    const realWarn = console.warn;
+    const warned = [];
+    const pending = [];
+    try {
+      global.setTimeout = (fn) => (pending.push(fn), { unref() {} });
+      console.warn = (m) => warned.push(m);
+      const core = {};
+      for (const secondAnswers of [true, false]) {
+        const calls = [];
+        const roon = Object.setPrototypeOf({ core, profileProblem: '' }, RoonService.prototype);
+        // What _applyProfile does when Roon doesn't answer: note it, and say so unless quiet.
+        roon._applyProfile = async ({ quiet = false } = {}) => {
+          calls.push(quiet);
+          const answered = calls.length > 1 && secondAnswers;
+          roon.profileProblem = answered ? '' : 'Could not read profiles: Roon did not answer';
+          if (!answered && !quiet) console.warn(roon.profileProblem);
+        };
+        await roon._applyProfileOnConnect(core);
+        assert.deepStrictEqual(calls, [true], 'the first try is quiet');
+        pending.shift()();
+        await new Promise((resolve) => realTimeout(resolve, 0));
+        assert.deepStrictEqual(calls, [true, false], 'then once more');
+      }
+      assert.deepStrictEqual(warned, ['Could not read profiles: Roon did not answer'], 'logged only when the second try fails too');
+    } finally {
+      global.setTimeout = realTimeout;
+      console.warn = realWarn;
+    }
   });
 
   console.log(failures ? `\n${failures} failing` : '\nall passing');

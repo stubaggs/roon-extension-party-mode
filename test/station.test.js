@@ -1,4 +1,4 @@
-// Copyright 2026 Stubaggs
+// Copyright (c) 2026 Stubaggs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,13 +35,13 @@ async function check(name, fn) {
 
 const station = {
   zone_id: 'z1',
-  display_name: 'D90',
+  display_name: 'Lounge',
   state: 'playing',
   is_seek_allowed: false,
   is_next_allowed: false,
   now_playing: { two_line: { line1: 'ABC Triple J Shift', line2: '' } }
 };
-const track = { zone_id: 'z1', display_name: 'D90', state: 'paused', is_seek_allowed: true, is_next_allowed: true, now_playing: { length: 210 } };
+const track = { zone_id: 'z1', display_name: 'Lounge', state: 'paused', is_seek_allowed: true, is_next_allowed: true, now_playing: { length: 210 } };
 
 /** A RoonService with a transport that records what it was asked. */
 function service(zone, queue) {

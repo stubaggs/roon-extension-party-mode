@@ -27,6 +27,9 @@
   "track.add": "Thêm vào hàng chờ",
   "track.next": "Phát tiếp theo",
   "queue.up_next": "Tiếp theo",
+  "queue.count": {
+    "other": "{count} bài"
+  },
   "queue.empty": "Hàng chờ đang trống.",
   "queue.empty_add": "Hàng chờ đang trống. Hãy thêm một bài.",
   "queue.empty_add_radio": "Hàng chờ đang trống. Hãy thêm một bài, hoặc để Roon Radio lo.",
@@ -50,15 +53,11 @@
   "toast.queued_next": "Sẽ phát tiếp theo",
   "toast.queued": "Đã thêm vào hàng chờ",
   "toast.already_queued": "Bài này đã có trong hàng chờ.",
-  "toast.nothing_left": "Tạm thời bạn đã hết lượt.",
-  "toast.nothing_left_wait": "Tạm thời bạn đã hết lượt. Thử lại sau {wait}.",
+  "toast.none_left": "Bạn đã dùng hết lượt.",
+  "toast.none_left_wait": "Bạn đã dùng hết lượt. Thêm lượt sau {wait}.",
   "toast.disabled": "Chủ tiệc đã tắt tính năng này.",
-  "toast.roon_refused": "Roon không nhận bài này.",
   "toast.skipped": "Đã bỏ qua",
-  "toast.no_skips": "Bạn đã hết lượt bỏ qua.",
-  "toast.no_skips_wait": "Bạn đã hết lượt bỏ qua. Thử lại sau {wait}.",
-  "toast.failed": "Không thành công.",
-  "toast.name_not_saved": "Không lưu được tên của bạn.",
+  "toast.failed": "Xin lỗi, không thành công.",
   "toast.too_many_requests": "Quá nhiều yêu cầu. Hãy đợi một phút rồi thử lại.",
   "skip.button": "Bỏ qua",
   "name.adding_as": "Đang thêm với tên {name}",
@@ -76,6 +75,8 @@
   "lang.title": "Ngôn ngữ",
   "lang.automatic": "Tự động",
   "lang.change": "Ngôn ngữ: {language}. Đổi",
+  "invite.open": "Hiện mã QR của {name} để người khác cùng tham gia",
+  "invite.close": "Đóng",
   "locked.title": "Hãy quét lại mã",
   "locked.text": "Liên kết này chỉ hoạt động sau khi quét mã trên Party Hub. Hãy nhờ chủ tiệc cho xem.",
   "screen.scan": "Quét để thêm bài",
@@ -85,5 +86,5 @@
   "screen.playlist_qr_alt": "Mã QR cho danh sách phát",
   "screen.closed_title": "Đã ngừng nhận yêu cầu",
   "screen.closed_text": "Cảm ơn vì tất cả các bài.",
-  "join.expired": "Mã này đã hết hạn. Hãy quét lại mã trên Party Hub."
+  "screen.menu": "Menu"
 }

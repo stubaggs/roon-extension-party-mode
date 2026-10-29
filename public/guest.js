@@ -1,4 +1,4 @@
-// Copyright 2026 Stubaggs
+// Copyright (c) 2026 Stubaggs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -43,11 +43,16 @@
   }
 
   async function api(path, options) {
-    const res = await fetch(path, Object.assign({ headers: { 'Content-Type': 'application/json' } }, options));
+    // With the session cookie: older browsers' fetch leaves cookies out unless
+    // asked (the default changed in Chrome 72, Firefox 61 and Safari 12.1).
+    const res = await fetch(path, Object.assign({ credentials: 'same-origin', headers: { 'Content-Type': 'application/json' } }, options));
     const body = await res.json().catch(() => ({}));
     if (res.status === 401 || res.status === 403) {
-      // Party mode Off answers "closed": requests are over, not the guest's link.
-      showLocked(body.error === 'closed' ? 'closed' : 'locked');
+      // Party Off answers "closed": requests are over, not the guest's link.
+      // No session (a new party, or it ran out): opening /GuestHub again lets
+      // the guest back in, once; if that didn't help (cookies blocked), say so.
+      if (body.error !== 'closed' && rejoin()) throw new Error('no_session');
+      showLocked(body.error === 'closed' ? 'closed' : 'locked', body.playlist === true);
       throw new Error('no_session');
     }
     // Past the per-minute limit (lib/server.js): one note here, so callers stay
@@ -57,15 +62,35 @@
     return body;
   }
 
+  /** Opens /GuestHub again for a new session, unless it was tried a moment ago. */
+  function rejoin() {
+    const KEY = 'partyMode.rejoined';
+    // A named catch, not catch {}: browsers before Chrome 66 and Safari 11.1
+    // can't read the shorter form, and would refuse the whole page.
+    try {
+      if (Date.now() - Number(sessionStorage.getItem(KEY) || 0) < 30000) return false;
+      sessionStorage.setItem(KEY, String(Date.now()));
+    } catch (err) {
+      return false; // No storage: no way to tell a loop, so "Scan the code again".
+    }
+    window.location.replace('/GuestHub');
+    return true;
+  }
+
   /** Errors already explained: the page is closed, or the limit note is up. */
   const explained = (err) => err.message === 'no_session' || err.message === 'too_many_requests';
 
-  /** In place of the page: 'locked' (scan again) or 'closed' (requests are over). */
-  function showLocked(which) {
+  /**
+   * In place of the page: 'locked' (scan again) or 'closed' (requests are
+   * over), with a link to the playlist while the host offers it.
+   */
+  function showLocked(which, playlist) {
     app.hidden = true;
     el('nickname').hidden = true;
+    closeInvite();
     locked.hidden = which !== 'locked';
     el('closed').hidden = which !== 'closed';
+    el('closed-playlist').hidden = !(which === 'closed' && playlist);
   }
 
   const { t } = window.I18N;
@@ -114,8 +139,7 @@
   function spentMessage(bucket) {
     if (party.party_mode === 'paused') return t('allowance.paused');
     const wait = party.allowances[bucket].nextIn;
-    if (bucket === 'skip') return wait ? t('toast.no_skips_wait', { wait: minutes(wait) }) : t('toast.no_skips');
-    return wait ? t('toast.nothing_left_wait', { wait: minutes(wait) }) : t('toast.nothing_left');
+    return wait ? t('toast.none_left_wait', { wait: minutes(wait) }) : t('toast.none_left');
   }
 
   let refillTimer = null;
@@ -148,13 +172,24 @@
     }
   }
 
+  /** The party and queue as they are now, when the page has fallen behind. */
+  async function catchUp() {
+    await refreshParty();
+    showSkip();
+    const snapshot = await api('/api/queue').catch(() => null);
+    if (snapshot) renderQueue(snapshot);
+  }
+
   function artUrl(key, size) {
     return key ? `/api/image/${encodeURIComponent(key)}?size=${size}` : '';
   }
 
   function setArt(img, key, size) {
     if (key) {
-      img.src = artUrl(key, size);
+      // Firefox starts the same picture over when it's set again, as the queue
+      // and live updates both do on joining, so it's set only when it changes.
+      const url = artUrl(key, size);
+      if (img.getAttribute('src') !== url) img.src = url;
       img.hidden = false;
     } else {
       img.removeAttribute('src');
@@ -192,6 +227,8 @@
       img.alt = '';
       img.width = 48;
       img.height = 48;
+      // Only the rows in view load their art: a search shows up to 40.
+      img.loading = 'lazy';
       setArt(img, track.image_key, 96);
 
       const text = document.createElement('div');
@@ -240,7 +277,8 @@
         }
         if (party.capabilities.next) {
           const next = document.createElement('button');
-          next.className = 'pill pill-ghost';
+          // The main button when it's the only one.
+          next.className = party.capabilities.add ? 'pill pill-ghost' : 'pill pill-primary';
           Object.assign(next.dataset, { bucket: 'next', label: 'track.next' });
           labelButton(next);
           next.addEventListener('click', () => request(track, 'next', next));
@@ -335,9 +373,9 @@
       else if (err.message === 'paused') toast(t('allowance.paused'));
       else if (err.message === 'rate_limited') {
         refreshParty(); // the counts were out of date; grey the button out
-        toast(detail.next_in ? t('toast.nothing_left_wait', { wait: minutes(detail.next_in) }) : t('toast.nothing_left'));
+        toast(detail.next_in ? t('toast.none_left_wait', { wait: minutes(detail.next_in) }) : t('toast.none_left'));
       } else if (err.message === 'disabled') toast(t('toast.disabled'));
-      else if (!explained(err)) toast(t('toast.roon_refused'));
+      else if (!explained(err)) toast(t('toast.failed'));
     }
   }
 
@@ -362,8 +400,13 @@
       if (err.message === 'paused') toast(t('allowance.paused'));
       else if (err.message === 'rate_limited') {
         refreshParty();
-        toast(detail.next_in ? t('toast.no_skips_wait', { wait: minutes(detail.next_in) }) : t('toast.no_skips'));
-      } else if (!explained(err)) toast(t('toast.failed'));
+        toast(detail.next_in ? t('toast.none_left_wait', { wait: minutes(detail.next_in) }) : t('toast.none_left'));
+      } else if (!explained(err)) {
+        // The host turned skips off, or Roon won't skip now, since the page
+        // last heard: catch up, so Skip hides.
+        if (err.message === 'disabled' || err.message === 'cant_skip') catchUp();
+        toast(t('toast.failed'));
+      }
     }
   });
 
@@ -419,6 +462,7 @@
       position.setAttribute('aria-hidden', 'true');
       return [position, ...trackCells(item)];
     });
+    showCount('upnext-count', snapshot.upcoming.length, snapshot.queue_full);
 
     renderList(playedList, snapshot.played || [], t('played.empty'), (item) => {
       const cells = trackCells(item);
@@ -430,10 +474,23 @@
       }
       return cells;
     });
+    showCount('played-count', (snapshot.played || []).length, snapshot.played_full);
   }
 
   function creditText(track) {
     return window.I18N.requestedBy(track);
+  }
+
+  /**
+   * "12 tracks" across from Up next or Played, as on the Party Hub; at the most
+   * Roon sends or Played keeps, "500+ tracks", as there may be more. None while
+   * it's empty.
+   */
+  function showCount(id, count, full) {
+    const label = el(id);
+    label.hidden = !count;
+    const text = count ? t('queue.count', { count }) : '';
+    label.textContent = full ? text.replace(String(count), `${count}+`) : text;
   }
 
   function renderList(list, items, emptyText, cells) {
@@ -460,6 +517,7 @@
     img.alt = '';
     img.width = 40;
     img.height = 40;
+    img.loading = 'lazy';
     setArt(img, item.image_key, 80);
 
     const text = document.createElement('div');
@@ -479,6 +537,37 @@
     }
 
     return [img, text];
+  }
+
+  // ----------------------------------------------------------------- dialogs
+
+  /**
+   * Escape closes an open dialog, and Tab and Shift+Tab stay inside it. Listened
+   * for on the whole page: in Chrome and Safari, Tab past a dialog's last button
+   * moves focus out to the page behind it, where the dialog's own listener
+   * would no longer hear Escape.
+   */
+  function dialogKeys(dialog, close) {
+    document.addEventListener('keydown', (event) => {
+      if (dialog.hidden) return;
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        close();
+        return;
+      }
+      if (event.key !== 'Tab') return;
+      const stops = [...dialog.querySelectorAll('button, input, a[href]')].filter(
+        (stop) => !stop.disabled && stop.getClientRects().length
+      );
+      if (!stops.length) return;
+      const first = stops[0];
+      const last = stops[stops.length - 1];
+      const inside = dialog.contains(document.activeElement);
+      if (event.shiftKey ? !inside || document.activeElement === first : !inside || document.activeElement === last) {
+        event.preventDefault();
+        (event.shiftKey ? last : first).focus();
+      }
+    });
   }
 
   // --------------------------------------------------------------- nickname
@@ -583,7 +672,7 @@
         nicknameInput.focus();
         return;
       }
-      if (!explained(err)) toast(t('toast.name_not_saved'));
+      if (!explained(err)) toast(t('toast.failed'));
     }
     // Skipping stores an empty name, so "Skip" isn't asked again on this phone.
     remembered.set(name);
@@ -604,18 +693,17 @@
       return;
     }
     nicknameInput.value = '';
-    el('nickname-form').requestSubmit();
+    // requestSubmit runs the form's submit handler; before Chrome 76, Firefox
+    // 75 and Safari 16 (an iOS 15 iPad) there's none, so send the event itself.
+    const form = el('nickname-form');
+    if (form.requestSubmit) form.requestSubmit();
+    else form.dispatchEvent(new Event('submit', { cancelable: true }));
   }
 
   el('nickname-skip').addEventListener('click', skipName);
 
   // Escape does what the second button says: Cancel, or Skip on a first visit.
-  nickname.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape') {
-      event.preventDefault();
-      skipName();
-    }
-  });
+  dialogKeys(nickname, skipName);
 
   el('name-chip').addEventListener('click', () => askName(true));
 
@@ -681,12 +769,52 @@
 
   el('lang-chip').addEventListener('click', openLanguages);
   el('language-cancel').addEventListener('click', closeLanguages);
-  languageDialog.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape') {
-      event.preventDefault();
-      closeLanguages();
-    }
+  dialogKeys(languageDialog, closeLanguages);
+
+  // ------------------------------------------------------------------ invite
+
+  // The party's name, top left. With Party invites on, it shows the join code, so
+  // a guest can pass the party on from their phone; off, it's just the name.
+  const invite = el('invite');
+  let inviteOpener = null;
+
+  function renderPartyChip() {
+    const name = party.party_name || t('party.default_name');
+    const chip = el('party-chip');
+    chip.hidden = !party.invite;
+    el('party-label').hidden = party.invite;
+    el('party-chip-name').textContent = name;
+    el('party-label-name').textContent = name;
+    chip.title = t('invite.open', { name });
+    chip.setAttribute('aria-label', chip.title);
+    el('invite-title').textContent = name;
+    if (!party.invite) closeInvite();
+  }
+
+  function openInvite() {
+    // Asked for each time: a new party has a new code.
+    el('invite-qr').src = `/embed/join-qr.svg?t=${Date.now()}`;
+    inviteOpener = document.activeElement;
+    app.inert = true;
+    invite.hidden = false;
+    el('invite-close').focus();
+  }
+
+  function closeInvite() {
+    if (invite.hidden) return;
+    invite.hidden = true;
+    app.inert = false;
+    if (inviteOpener && inviteOpener !== document.body) inviteOpener.focus();
+    inviteOpener = null;
+  }
+
+  el('party-chip').addEventListener('click', openInvite);
+  el('invite-close').addEventListener('click', closeInvite);
+  // A tap beside the card closes it too.
+  invite.addEventListener('click', (event) => {
+    if (event.target === invite) closeInvite();
   });
+  dialogKeys(invite, closeInvite);
 
   /** First visit asks; a remembered name (or a remembered skip) is applied quietly. */
   async function settleName() {
@@ -709,13 +837,14 @@
     el('closed').hidden = true;
     document.title = party.party_name || t('page.title');
     const skip = el('skip');
-    // Runs again when Party mode changes, with the station still playing.
+    // Runs again when Party changes, with the station still playing.
     showSkip();
     if (party.capabilities.skip) Object.assign(skip.dataset, { bucket: 'skip', label: 'skip.button', quiet: '' });
     else delete skip.dataset.bucket;
     renderAllowances();
     renderNameChip();
     renderLanguageChip();
+    renderPartyChip();
 
     // boot() runs again when the party settings change; set up the rest once.
     if (started) return;

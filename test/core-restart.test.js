@@ -1,4 +1,4 @@
-// Copyright 2026 Stubaggs
+// Copyright (c) 2026 Stubaggs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@
 const assert = require('assert');
 const { EventEmitter } = require('events');
 const { RoonService } = require('../lib/roon-service');
+const { KnownKeys } = require('../lib/art-cache');
 
 let failures = 0;
 function check(name, fn) {
@@ -35,13 +36,19 @@ function check(name, fn) {
 const entry = (id, title) => ({ queue_item_id: id, length: 200, two_line: { line1: title, line2: 'Artist' } });
 const zone = { zone_id: 'z1', display_name: 'Lounge', state: 'playing', outputs: [{ output_id: 'o1' }], settings: {} };
 
-/** A fake Core: the zones it knows, and every queue subscription made to it. */
+/**
+ * A fake Core: the zones it knows, every queue subscription made to it, and
+ * which of those were ended (by index).
+ */
 function fakeCore(zones) {
-  const core = { zones, queueSubs: [], zonesCb: null };
+  const core = { zones, queueSubs: [], unsubscribed: [], zonesCb: null };
   core.services = {
     RoonApiTransport: {
       subscribe_zones: (cb) => (core.zonesCb = cb),
-      subscribe_queue: (output, count, cb) => core.queueSubs.push(cb),
+      subscribe_queue: (output, count, cb) => {
+        const index = core.queueSubs.push(cb) - 1;
+        return { unsubscribe: () => core.unsubscribed.push(index) };
+      },
       zone_by_output_id: (id) => core.zones.find((z) => z.outputs.some((o) => o.output_id === id)) || null
     }
   };
@@ -57,7 +64,13 @@ function service() {
   roon.queueState = 'none';
   roon.queueRetry = null;
   roon.radioPicks = new Set();
+  roon.artKeys = new KnownKeys();
   roon.profileSessions = new Map();
+  roon.zoneOutput = null;
+  roon.zoneLost = false;
+  roon.zoneHold = false;
+  roon.zoneHoldTimer = null;
+  roon.announcedMode = 'on';
   roon._updateStatus = () => {};
   roon._applyProfile = () => {};
   return roon;
@@ -134,6 +147,390 @@ check('a working queue is not asked for again on every zone update', () => {
   core.zonesCb('Changed', {});
   assert.strictEqual(core.queueSubs.length, 1);
   assert.strictEqual(roon.queue.length, 1);
+});
+
+check("album art keys are noted from now playing and the queue, as they arrive", () => {
+  const roon = service();
+  const playing = Object.assign({}, zone, { now_playing: { image_key: 'playing', two_line: { line1: 'Waterloo' } } });
+  const core = fakeCore([playing]);
+  roon._onCorePaired(core);
+  core.zonesCb('Subscribed', {});
+  core.queueSubs[0]('Subscribed', { items: [Object.assign(entry(1, 'SOS'), { image_key: 'queued' })] });
+  core.queueSubs[0]('Changed', { changes: [{ operation: 'insert', index: 1, items: [Object.assign(entry(2, 'Fernando'), { image_key: 'added' })] }] });
+  for (const key of ['playing', 'queued', 'added']) assert.ok(roon.artKeys.use(key), key);
+  assert.ok(!roon.artKeys.use('made-up'));
+});
+
+console.log('zone and Core log lines');
+
+/** What fn logs, as "log: …" and "warn: …" lines. */
+function logged(fn) {
+  const lines = [];
+  const real = { log: console.log, warn: console.warn };
+  console.log = (m) => lines.push(`log: ${m}`);
+  console.warn = (m) => lines.push(`warn: ${m}`);
+  try {
+    fn();
+  } finally {
+    Object.assign(console, real);
+  }
+  return lines;
+}
+
+check('the party zone going away and coming back is logged, once each way', () => {
+  const roon = service();
+  const core = fakeCore([zone]);
+  core.display_name = 'Studio';
+  const lines = logged(() => {
+    roon._onCorePaired(core);
+    core.zonesCb('Subscribed', {});
+    core.zones = [];
+    core.zonesCb('Changed', {});
+    core.zonesCb('Changed', {});
+    core.zones = [zone];
+    core.zonesCb('Changed', {});
+    core.zonesCb('Changed', {});
+  });
+  assert.deepStrictEqual(lines, [
+    'log: [Roon] Connected to the Roon Core "Studio"',
+    'warn: [Roon] Party zone "Lounge" is no longer available in Roon',
+    'log: [Roon] Party zone "Lounge" is available again'
+  ]);
+});
+
+check('a zone not there yet, or the host choosing another, is not a loss', () => {
+  const roon = service();
+  const core = fakeCore([]);
+  const lines = logged(() => {
+    roon._onCorePaired(core);
+    core.zonesCb('Subscribed', {}); // zones arrive empty after connecting
+    core.zones = [zone];
+    core.zonesCb('Changed', {});
+    roon.settings = { zone: { output_id: 'o2' } }; // another zone, not known
+    roon._refreshZone();
+  });
+  assert.deepStrictEqual(lines, ['log: [Roon] Connected to the Roon Core']);
+});
+
+check('losing the Core is logged as that, not as the zone, and so is getting it back', () => {
+  const roon = service();
+  const first = fakeCore([zone]);
+  const lines = logged(() => {
+    roon._onCorePaired(first);
+    first.zonesCb('Subscribed', {});
+    roon._onCoreUnpaired();
+    roon._onCoreUnpaired(); // already gone: nothing more
+    const second = fakeCore([]);
+    roon._onCorePaired(second);
+    second.zonesCb('Subscribed', {});
+    second.zones = [zone];
+    second.zonesCb('Changed', {});
+  });
+  assert.deepStrictEqual(lines, [
+    'log: [Roon] Connected to the Roon Core',
+    "warn: [Roon] Lost the connection to the Roon Core: guests can't search or request until it's back",
+    'log: [Roon] Connected to the Roon Core'
+  ]);
+});
+
+console.log('the party pauses itself while its zone is gone');
+
+/** A paired service with the zone there, and the Party changes it announces. */
+function partyWithZone(enabled = true) {
+  const roon = service();
+  roon.settings = { zone: { output_id: 'o1', name: 'Lounge' }, enabled };
+  roon.announcedMode = { true: 'on', paused: 'paused', false: 'off' }[enabled];
+  const core = fakeCore([zone]);
+  const changes = [];
+  roon.on('party_mode_changed', (now, previous) => changes.push(`${previous} -> ${now}`));
+  roon._onCorePaired(core);
+  core.zonesCb('Subscribed', {});
+  return { roon, core, changes };
+}
+
+check('gone for the grace period: paused, then back on when the zone returns', () => {
+  withTimers((pending) => {
+    let roon, core, changes;
+    const lines = logged(() => {
+      ({ roon, core, changes } = partyWithZone());
+      core.zones = [];
+      core.zonesCb('Changed', {});
+      assert.strictEqual(roon.currentMode, 'on', 'not before the grace period');
+      pending.forEach((fire) => fire());
+      assert.strictEqual(roon.currentMode, 'paused');
+      core.zones = [zone];
+      core.zonesCb('Changed', {});
+    });
+    assert.strictEqual(roon.currentMode, 'on');
+    assert.deepStrictEqual(changes, ['on -> paused', 'paused -> on']);
+    assert.strictEqual(roon.settings.enabled, true, 'the saved setting is untouched');
+    assert.deepStrictEqual(lines.slice(1), [
+      'warn: [Roon] Party zone "Lounge" is no longer available in Roon',
+      'warn: [Roon] Requests are paused until party zone "Lounge" is back',
+      'log: [Roon] Party zone "Lounge" is available again',
+      'log: [Roon] Requests are back on'
+    ]);
+  });
+});
+
+check('a zone Roon is slow to bring back after a Core restart: its absence and return are logged', () => {
+  withTimers((pending) => {
+    let roon;
+    const lines = logged(() => {
+      ({ roon } = partyWithZone());
+      roon._onCoreUnpaired();
+      const second = fakeCore([]);
+      roon._onCorePaired(second);
+      second.zonesCb('Subscribed', {}); // zones arrive empty after connecting
+      pending.forEach((fire) => fire()); // and stay that way past the grace period
+      second.zones = [zone];
+      second.zonesCb('Changed', {});
+    });
+    assert.strictEqual(roon.currentMode, 'on');
+    assert.deepStrictEqual(lines.slice(2), [
+      'log: [Roon] Connected to the Roon Core',
+      'warn: [Roon] Party zone "Lounge" is not available in Roon',
+      'warn: [Roon] Requests are paused until party zone "Lounge" is back',
+      'log: [Roon] Party zone "Lounge" is available again',
+      'log: [Roon] Requests are back on'
+    ]);
+  });
+});
+
+check('back within the grace period: nothing changes for guests', () => {
+  withTimers((pending) => {
+    let roon, core, changes;
+    logged(() => {
+      ({ roon, core, changes } = partyWithZone());
+      core.zones = [];
+      core.zonesCb('Changed', {});
+      core.zones = [zone];
+      core.zonesCb('Changed', {});
+      pending.forEach((fire) => fire()); // the wait ends after the zone is back
+    });
+    assert.strictEqual(roon.currentMode, 'on');
+    assert.deepStrictEqual(changes, []);
+  });
+});
+
+check("the host's own Paused or Off is left as it is", () => {
+  for (const enabled of ['paused', false]) {
+    withTimers((pending) => {
+      let roon, core, changes;
+      const lines = logged(() => {
+        ({ roon, core, changes } = partyWithZone(enabled));
+        core.zones = [];
+        core.zonesCb('Changed', {});
+        pending.forEach((fire) => fire());
+        core.zones = [zone];
+        core.zonesCb('Changed', {});
+      });
+      assert.strictEqual(roon.currentMode, enabled === false ? 'off' : 'paused', String(enabled));
+      assert.deepStrictEqual(changes, [], String(enabled));
+      assert.ok(!lines.some((l) => l.includes('Requests are')), String(enabled));
+    });
+  }
+});
+
+check('the host unpausing while the zone is gone stays paused until it returns', () => {
+  withTimers((pending) => {
+    let roon, core, changes;
+    logged(() => {
+      ({ roon, core, changes } = partyWithZone('paused'));
+      core.zones = [];
+      core.zonesCb('Changed', {});
+      pending.forEach((fire) => fire());
+      roon.settings.enabled = true; // Unpause in Roon
+      roon._announceMode();
+      assert.strictEqual(roon.currentMode, 'paused');
+      core.zones = [zone];
+      core.zonesCb('Changed', {});
+    });
+    assert.strictEqual(roon.currentMode, 'on');
+    assert.deepStrictEqual(changes, ['paused -> on']);
+  });
+});
+
+check('a zone missing just after connecting does not pause', () => {
+  withTimers((pending) => {
+    const roon = service();
+    roon.settings = { zone: { output_id: 'o1', name: 'Lounge' }, enabled: true };
+    const core = fakeCore([]);
+    logged(() => {
+      roon._onCorePaired(core);
+      core.zonesCb('Subscribed', {}); // zones arrive empty at first
+      core.zones = [zone];
+      core.zonesCb('Changed', {});
+      pending.forEach((fire) => fire());
+    });
+    assert.strictEqual(roon.currentMode, 'on');
+  });
+});
+
+check('the Core gone for the wait: paused, then back on when it returns with the zone', () => {
+  withTimers((pending) => {
+    let roon, core, changes;
+    const lines = logged(() => {
+      ({ roon, core, changes } = partyWithZone());
+      roon._onCoreUnpaired();
+      assert.strictEqual(roon.currentMode, 'on', 'not before the wait');
+      pending.forEach((fire) => fire());
+      assert.strictEqual(roon.currentMode, 'paused');
+      roon._onCorePaired(core);
+      core.zonesCb('Subscribed', {});
+    });
+    assert.strictEqual(roon.currentMode, 'on');
+    assert.deepStrictEqual(changes, ['on -> paused', 'paused -> on']);
+    assert.deepStrictEqual(lines.filter((l) => !l.includes('Connected')), [
+      "warn: [Roon] Lost the connection to the Roon Core: guests can't search or request until it's back",
+      'warn: [Roon] Requests are paused until the Roon Core is back',
+      'log: [Roon] Requests are back on'
+    ]);
+  });
+});
+
+check('the Core back within the wait: nothing changes for guests', () => {
+  withTimers((pending) => {
+    let roon, core, changes;
+    logged(() => {
+      ({ roon, core, changes } = partyWithZone());
+      roon._onCoreUnpaired();
+      roon._onCorePaired(core);
+      core.zonesCb('Subscribed', {});
+      pending.forEach((fire) => fire()); // the Core's wait ends after it's back
+    });
+    assert.strictEqual(roon.currentMode, 'on');
+    assert.deepStrictEqual(changes, []);
+  });
+});
+
+check('the Core back without the zone: still paused, now until the zone is back', () => {
+  withTimers((pending) => {
+    let roon, core, changes;
+    const lines = logged(() => {
+      ({ roon, core, changes } = partyWithZone());
+      roon._onCoreUnpaired();
+      pending.forEach((fire) => fire());
+      core.zones = [];
+      roon._onCorePaired(core);
+      core.zonesCb('Subscribed', {});
+      pending.forEach((fire) => fire());
+      assert.strictEqual(roon.currentMode, 'paused');
+      core.zones = [zone];
+      core.zonesCb('Changed', {});
+    });
+    assert.strictEqual(roon.currentMode, 'on');
+    assert.deepStrictEqual(changes, ['on -> paused', 'paused -> on']);
+    assert.deepStrictEqual(lines.filter((l) => !l.includes('Connected') && !l.includes('Lost')), [
+      'warn: [Roon] Requests are paused until the Roon Core is back',
+      'warn: [Roon] Party zone "Lounge" is not available in Roon',
+      'warn: [Roon] Requests are paused until party zone "Lounge" is back',
+      'log: [Roon] Party zone "Lounge" is available again',
+      'log: [Roon] Requests are back on'
+    ]);
+  });
+});
+
+check('back within the wait but without the zone: the zone\'s own wait still pauses', () => {
+  withTimers((pending) => {
+    let roon, core;
+    logged(() => {
+      ({ roon, core } = partyWithZone());
+      roon._onCoreUnpaired();
+      core.zones = [];
+      roon._onCorePaired(core);
+      core.zonesCb('Subscribed', {});
+      pending.forEach((fire) => fire());
+    });
+    assert.strictEqual(roon.currentMode, 'paused');
+  });
+});
+
+check("the host's own Paused or Off is left alone when the Core goes", () => {
+  for (const enabled of ['paused', false]) {
+    withTimers((pending) => {
+      let roon, changes;
+      const lines = logged(() => {
+        ({ roon, changes } = partyWithZone(enabled));
+        roon._onCoreUnpaired();
+        pending.forEach((fire) => fire());
+      });
+      assert.strictEqual(roon.currentMode, enabled === false ? 'off' : 'paused', String(enabled));
+      assert.deepStrictEqual(changes, [], String(enabled));
+      assert.ok(!lines.some((l) => l.includes('Requests are')), String(enabled));
+    });
+  }
+});
+
+check('a track that ends while the Core is away is not judged left early; one still playing is, from then on', () => {
+  const roon = service();
+  const playing = (title, seek) => Object.assign({}, zone, { now_playing: { length: 234, seek_position: seek, two_line: { line1: title, line2: 'Stevie Wonder' } } });
+  const core = fakeCore([playing('Sir Duke', 214)]);
+  roon._onCorePaired(core);
+  core.zonesCb('Subscribed', {});
+  const ended = [];
+  roon.on('now_playing_changed', (e) => e && ended.push(e));
+  // The connection drops at 214 of 234 s; the next track is playing when it's back.
+  roon._onCoreUnpaired();
+  const back = fakeCore([playing('Isn\'t She Lovely', 5)]);
+  roon._onCorePaired(back);
+  back.zonesCb('Subscribed', {});
+  assert.deepStrictEqual(ended.map((e) => [e.title, e.seek]), [['Sir Duke', null]], 'ended, position unknown');
+  // The same track still playing after a drop is judged from what comes next.
+  roon._onCoreUnpaired();
+  const again = fakeCore([playing('Isn\'t She Lovely', 60)]);
+  roon._onCorePaired(again);
+  again.zonesCb('Subscribed', {});
+  again.zones = [playing('As', 0)];
+  roon._refreshZone();
+  assert.deepStrictEqual(ended.slice(1).map((e) => [e.title, e.seek]), [['Isn\'t She Lovely', 60]]);
+});
+
+check('Roon starting or stopping to allow a skip tells the pages, so Skip shows or hides', () => {
+  const roon = service();
+  const core = fakeCore([Object.assign({}, zone, { is_next_allowed: true })]);
+  roon._onCorePaired(core);
+  core.zonesCb('Subscribed', {});
+  let told = 0;
+  roon.on('now_playing_changed', () => (told += 1));
+  core.zones = [Object.assign({}, zone, { is_next_allowed: false })]; // a radio station started, say
+  roon._refreshZone();
+  assert.strictEqual(told, 1);
+  roon._refreshZone();
+  assert.strictEqual(told, 1, 'no change, nothing said');
+});
+
+check("asking for the queue again ends the old subscription; a refused one or a lost connection's is left", () => {
+  withTimers(() => {
+    const roon = service();
+    const first = fakeCore([zone]);
+    roon._onCorePaired(first);
+    first.zonesCb('Subscribed', {});
+    first.queueSubs[0]('Subscribed', { items: [entry(1, 'Waterloo')] });
+
+    // The host picks the zone again (or another): the old subscription ends,
+    // and anything still on its way from it is ignored.
+    roon._subscribeQueue();
+    assert.deepStrictEqual(first.unsubscribed, [0]);
+    first.queueSubs[0]('Changed', { changes: [{ operation: 'insert', index: 1, items: [entry(9, 'Late')] }] });
+    assert.strictEqual(roon.queue.length, 0, 'the old one is ignored');
+    first.queueSubs[1]('Subscribed', { items: [entry(1, 'Waterloo')] });
+
+    // A refused subscription has nothing to end.
+    roon._subscribeQueue();
+    first.queueSubs[2]('InvalidRequest', { error: 'zone not found' });
+    roon._subscribeQueue();
+    assert.deepStrictEqual(first.unsubscribed, [0, 1], 'only the working one');
+
+    // The connection drops: its subscriptions ended with it, so nothing is
+    // sent on it, and the new connection starts clean.
+    roon._onCoreUnpaired();
+    const second = fakeCore([zone]);
+    roon._onCorePaired(second);
+    assert.deepStrictEqual(first.unsubscribed, [0, 1], 'nothing sent to the old connection');
+    assert.deepStrictEqual(second.unsubscribed, []);
+    assert.strictEqual(second.queueSubs.length, 1);
+  });
 });
 
 console.log(failures ? `\n${failures} failing` : '\nall passing');

@@ -1,4 +1,4 @@
-// Copyright 2026 Stubaggs
+// Copyright (c) 2026 Stubaggs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 const assert = require('assert');
 const { sameRecording, trackHash, identityKey, artistSet } = require('../lib/track-id');
-const { GuestStore } = require('../lib/guests');
+const { GuestStore, MAX_ATTRIBUTIONS, ATTRIBUTION_TTL_MS } = require('../lib/guests');
 
 let failures = 0;
 function check(name, fn) {
@@ -155,6 +155,82 @@ check('two guests, same song, different versions stay separate', () => {
 check('unrelated track gets no credit', () => {
   const found = store.lookup(t('Smells Like Teen Spirit', 'Nirvana', 301));
   assert.strictEqual(found, null);
+});
+
+check('a credit is kept while its track is queued, and a day after it last was', () => {
+  const realNow = Date.now;
+  let clock = realNow();
+  Date.now = () => clock;
+  try {
+    const store4 = new GuestStore();
+    const g = store4.create();
+    g.name = 'Alice';
+    const queued = new Set(['qw', 'qg']);
+    store4.queuedIds = () => queued;
+    const waiting = store4.attribute(g, { title: 'Dancing Queen', artist: 'ABBA' }, 'add');
+    store4.bind(waiting, { id: 'qw', title: 'Dancing Queen', artist: 'ABBA', length: 230 });
+    const gone = store4.attribute(g, { title: 'Waterloo', artist: 'ABBA' }, 'add');
+    store4.bind(gone, { id: 'qg', title: 'Waterloo', artist: 'ABBA', length: 168 });
+    queued.delete('qg');
+
+    clock += ATTRIBUTION_TTL_MS + 60 * 60 * 1000;
+    store4._sweep();
+    assert.strictEqual(store4.lookup({ id: 'qw', title: 'Dancing Queen', artist: 'ABBA', length: 230 }).name, 'Alice');
+    assert.strictEqual(store4.lookup(t('Waterloo', 'ABBA', 168)), null);
+
+    // Played and gone from the queue: kept a while longer, then dropped.
+    queued.delete('qw');
+    clock += ATTRIBUTION_TTL_MS - 60 * 60 * 1000;
+    store4._sweep();
+    assert.strictEqual(store4.lookup(t('Dancing Queen', 'ABBA', 230)).name, 'Alice');
+    clock += 2 * 60 * 60 * 1000;
+    store4._sweep();
+    assert.strictEqual(store4.lookup(t('Dancing Queen', 'ABBA', 230)), null);
+  } finally {
+    Date.now = realNow;
+  }
+});
+
+check('a remembered credit changes with the credits', () => {
+  const store6 = new GuestStore();
+  const a = store6.create();
+  a.name = 'Alice';
+  const b = store6.create();
+  b.name = 'Bob';
+  const track = t('Hey Jude', 'Wilson Pickett', 245);
+  assert.strictEqual(store6.lookup(track), null);
+  // Two guests asked for other takes of the song: too many to guess between.
+  store6.attribute(a, { title: 'Hey Jude', artist: 'The Beatles' }, 'add');
+  store6.attribute(b, { title: 'Hey Jude - Live', artist: 'Elvis Presley' }, 'add');
+  assert.strictEqual(store6.lookup(track), null);
+  // Bob takes Alice's name: one requester left, so the last step credits her.
+  b.name = 'Alice';
+  store6.rename(b);
+  assert.strictEqual(store6.lookup(track).name, 'Alice');
+  store6.clear();
+  assert.strictEqual(store6.lookup(track), null);
+});
+
+check('artistSet gives a set of its own each time', () => {
+  artistSet('ABBA').add('someone else');
+  assert.deepStrictEqual([...artistSet('ABBA')], ['abba']);
+});
+
+check('the cap on credits never drops one still queued', () => {
+  const store5 = new GuestStore();
+  const g = store5.create();
+  g.name = 'Alice';
+  store5.queuedIds = () => new Set(['q0']);
+  const first = store5.attribute(g, { title: 'Track 0', artist: 'ABBA' }, 'add');
+  store5.bind(first, { id: 'q0', title: 'Track 0', artist: 'ABBA', length: 200 });
+  const second = store5.attribute(g, { title: 'Track 1', artist: 'ABBA' }, 'add');
+  store5.bind(second, { id: 'q1', title: 'Track 1', artist: 'ABBA', length: 201 });
+  for (let i = 2; i <= MAX_ATTRIBUTIONS + 1; i += 1) store5.attribute(g, { title: `Track ${i}`, artist: 'ABBA' }, 'add');
+  assert.strictEqual(store5.attributions.length, MAX_ATTRIBUTIONS + 1);
+  assert.ok(store5.attributions.includes(first));
+  assert.ok(!store5.attributions.includes(second));
+  // Dropped from the index too: nothing finds it any more.
+  assert.strictEqual(store5.lookup({ id: 'q1', title: 'Track 1', artist: 'ABBA', length: 201 }), null);
 });
 
 console.log('\nduplicates: covers are not the queued original');

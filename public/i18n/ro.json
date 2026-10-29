@@ -29,6 +29,11 @@
   "track.add": "Adaugă în coadă",
   "track.next": "Redă în continuare",
   "queue.up_next": "Urmează",
+  "queue.count": {
+    "one": "{count} piesă",
+    "few": "{count} piese",
+    "other": "{count} de piese"
+  },
   "queue.empty": "Nimic în coadă.",
   "queue.empty_add": "Nimic în coadă. Adaugă o piesă.",
   "queue.empty_add_radio": "Nimic în coadă. Adaugă o piesă sau lasă totul pe seama Roon Radio.",
@@ -56,15 +61,11 @@
   "toast.queued_next": "Se redă în continuare",
   "toast.queued": "Adăugată în coadă",
   "toast.already_queued": "Piesa este deja în coadă.",
-  "toast.nothing_left": "Deocamdată nu mai ai.",
-  "toast.nothing_left_wait": "Deocamdată nu mai ai. Încearcă din nou în {wait}.",
+  "toast.none_left": "Le-ai folosit pe toate.",
+  "toast.none_left_wait": "Le-ai folosit pe toate. Altele în {wait}.",
   "toast.disabled": "Gazda a dezactivat această opțiune.",
-  "toast.roon_refused": "Roon nu a acceptat această piesă.",
   "toast.skipped": "Sărită",
-  "toast.no_skips": "Nu mai poți sări piese.",
-  "toast.no_skips_wait": "Nu mai poți sări piese. Încearcă din nou în {wait}.",
-  "toast.failed": "Nu a funcționat.",
-  "toast.name_not_saved": "Numele tău nu a putut fi salvat.",
+  "toast.failed": "Ne pare rău, nu a funcționat.",
   "toast.too_many_requests": "Prea multe cereri. Așteaptă un minut și încearcă din nou.",
   "skip.button": "Sari peste",
   "name.adding_as": "Adaugi ca {name}",
@@ -82,6 +83,8 @@
   "lang.title": "Limbă",
   "lang.automatic": "Automat",
   "lang.change": "Limbă: {language}. Schimbă",
+  "invite.open": "Arată codul QR pentru {name}, ca să se poată alătura și alții",
+  "invite.close": "Închide",
   "locked.title": "Scanează din nou codul",
   "locked.text": "Acest link funcționează doar după ce scanezi codul de pe Party Hub. Roagă gazda să ți-l arate.",
   "screen.scan": "Scanează ca să adaugi o piesă",
@@ -91,5 +94,5 @@
   "screen.playlist_qr_alt": "Cod QR pentru playlist",
   "screen.closed_title": "Cererile s-au închis",
   "screen.closed_text": "Mulțumim pentru toate piesele.",
-  "join.expired": "Codul a expirat. Scanează din nou codul de pe Party Hub."
+  "screen.menu": "Meniu"
 }

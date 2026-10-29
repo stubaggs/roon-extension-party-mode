@@ -1,4 +1,4 @@
-// Copyright 2026 Stubaggs
+// Copyright (c) 2026 Stubaggs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -43,6 +43,20 @@ check('a skipped track says who skipped it once it has played', () => {
   assert.strictEqual(played.skipped_by, 'Stu');
 });
 
+check('a played track keeps its album, which Roon gives only while it plays', () => {
+  const history = new PlayHistory();
+  history.update('z1', Object.assign(playing('Waterloo'), { album: 'Waterloo' }), null);
+  history.update('z1', playing('SOS'), null);
+  assert.strictEqual(history.list()[0].album, 'Waterloo');
+  history.update('z1', playing('Fernando'), null);
+  assert.strictEqual(history.list()[0].album, '', 'none given');
+  // When it was queued, too, if known.
+  history.update('z1', Object.assign(playing('Chiquitita'), { queued_at: 1234 }), null);
+  history.update('z1', playing('Mamma Mia'), null);
+  assert.strictEqual(history.list()[0].queued_at, 1234);
+  assert.strictEqual(history.list()[1].queued_at, null);
+});
+
 check('a guest with no name is kept as null, for "a guest"', () => {
   const history = new PlayHistory();
   history.update('z1', playing('Waterloo'), null);
@@ -76,6 +90,20 @@ check('tracks that played to the end are not marked', () => {
   assert.ok(!history.list()[0].skipped);
 });
 
+check('a guest\'s credit that came after the track started replaces the host\'s, never the other way', () => {
+  const history = new PlayHistory();
+  history.update('z1', playing('Waterloo'), { requested_by: null, kind: 'host' });
+  assert.strictEqual(history.credit(playing('SOS'), { requested_by: 'Sam', kind: 'add' }), false, 'only the playing track');
+  assert.strictEqual(history.credit(playing('Waterloo'), { requested_by: 'Sam', kind: 'add', guest: 'g1' }), true);
+  assert.strictEqual(history.credit(playing('Waterloo'), { requested_by: null, kind: 'host' }), false);
+  assert.strictEqual(history.credit(playing('Waterloo'), { requested_by: 'Jo', kind: 'next' }), false);
+  history.update('z1', playing('SOS'), null);
+  // The guest's ref came too: a name they give later reaches it.
+  history.rename('g1', 'Samantha');
+  const [played] = history.list();
+  assert.deepStrictEqual([played.requested_by, played.kind], ['Samantha', 'add']);
+});
+
 console.log('\nPlayHistory: skipped in Roon');
 
 const ended = (title, seek, length = 200) => ({ title, artist: 'ABBA', length, seek });
@@ -88,6 +116,26 @@ check('a track left well before its end was skipped in Roon', () => {
   assert.strictEqual(played.skipped, true);
   assert.strictEqual(played.skipped_by_host, true);
   assert.strictEqual(played.skipped_by, null);
+});
+
+check('a track that ended early is logged, with how far it got; one that played out is not', () => {
+  const lines = [];
+  const log = console.log;
+  console.log = (m) => lines.push(m);
+  try {
+    const history = new PlayHistory();
+    history.update('z1', playing('Waterloo'), null);
+    history.update('z1', playing('SOS'), null, ended('Waterloo', 42));
+    history.update('z1', playing('Fernando'), null, ended('SOS', 195));
+    history.update('z1', playing('Chiquitita'), null);
+    history.markSkipped(playing('Chiquitita'), 'Sam');
+    history.update('z1', playing('Mamma Mia'), null, ended('Chiquitita', 30));
+  } finally {
+    console.log = log;
+  }
+  assert.deepStrictEqual(lines, [
+    '[Roon] Ended early: "Waterloo" / "ABBA" at 42 of 200 s (skipped in Roon, or Roon couldn\'t play it)'
+  ]);
 });
 
 check('a track that reached its last seconds played out', () => {

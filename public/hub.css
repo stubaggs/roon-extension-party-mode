@@ -1,33 +1,96 @@
+/*
+ * Copyright (c) 2026 Stubaggs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/* Laid out for a 1920 × 1080 screen, and the same on every shape of screen as
+   on a 4:3 one of the same height: a wider screen (16:9, 21:9) only adds space,
+   shared out evenly (.stage), and nothing grows with the extra width. --w is
+   1% of the width, but never more than 1% of that 4:3 width; the sizes below
+   use it, not vw. On a bigger screen (a 4K or 8K TV) everything grows with it,
+   so it looks the same, only larger: every size below is in rem, or capped in
+   rem. Never smaller than the browser's own text size, so phones and small
+   screens are as they were. Only the Hub loads this file, so this is the Hub's
+   page alone. */
+html {
+  /* 1% of the height the page really has: hub.js measures it, as an iPad's
+     Safari counts its tab and address bars in vh. */
+  --vh: 1vh;
+  --w: min(1vw, 4 * var(--vh) / 3);
+  font-size: max(100%, min(100 * var(--vh) / 67.5, 100vw / 90));
+}
+
 .hub {
   overflow: hidden;
-  height: 100vh;
+  height: calc(100 * var(--vh));
+  font-size: 1.0625rem;
 }
 
 .stage {
   display: grid;
-  grid-template-columns: minmax(280px, 34%) 1fr;
-  /* The join code and what's playing on top; the whole queue underneath,
-     taking the rest of the screen and scrolling when it is longer. */
+  /* What's playing and the queue have the width they have on a 4:3 screen,
+     plus 5/12 of any width beyond that up to 16:9, and 3/4 of any beyond 16:9
+     (up to 1.6 times the screen's height); the join code's column is no wider
+     than the code (60% of the height). The space left over is shared evenly:
+     either side of the two columns and between them. */
+  grid-template-columns:
+    minmax(17.5rem, calc(60 * var(--vh)))
+    min(
+      77 * var(--vh)
+        + min(max(0px, 100vw - 400 * var(--vh) / 3), 400 * var(--vh) / 9) * 5 / 12
+        + max(0px, 100vw - 1600 * var(--vh) / 9) * 3 / 4,
+      160 * var(--vh),
+      64%,
+      calc(100% - 17.5rem - clamp(1.5rem, calc(4 * var(--w)), 4rem))
+    );
+  justify-content: space-evenly;
+  /* The join code down the left, the whole height; what's playing at the top
+     right, and the queue under it, taking the rest of the height: as many
+     whole tracks as fit, never part of one or a scroll bar (hub.js). */
   grid-template-rows: auto minmax(0, 1fr);
-  gap: clamp(1rem, 3vh, 2.5rem) clamp(1.5rem, 4vw, 4rem);
-  height: 100vh;
-  padding: clamp(1.5rem, 4vh, 3.5rem);
+  gap: clamp(1rem, 3 * var(--vh), 2.5rem) clamp(1.5rem, calc(4 * var(--w)), 4rem);
+  height: calc(100 * var(--vh));
+  /* A margin above and below, as a TV may cut the edges off (overscan). */
+  padding: clamp(1.5rem, 5 * var(--vh), 4.5rem) clamp(1.5rem, 4 * var(--vh), 3.5rem);
   align-items: center;
 }
 
 .join {
+  grid-row: 1 / -1;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   text-align: center;
 }
 
 .join h1 {
   margin: 0 0 1.2rem;
-  font-size: clamp(1.6rem, 3vw, 2.6rem);
+  /* Room beside the name for the corner menu, on both sides so the name
+     stays centred: the menu then never takes a line of its own. */
+  padding-inline-start: 1.5rem;
+  padding-inline-end: 1.5rem;
+  font-size: clamp(1.6rem, calc(3 * var(--w)), 2.6rem);
   font-weight: 800;
   letter-spacing: -0.03em;
 }
 
+/* As big as its column allows, up to 60% of the screen's height, to scan from
+   across the room, with room above for a long party name: the queue is beside
+   it, so this costs it nothing. */
 .qr {
-  width: min(100%, 22rem, 32vh);
+  width: min(100%, 60 * var(--vh));
   aspect-ratio: 1;
   background: #fff;
   border-radius: 18px;
@@ -36,7 +99,7 @@
 
 .join-copy {
   margin: 1rem 0 0.2rem;
-  font-size: clamp(1rem, 1.6vw, 1.4rem);
+  font-size: clamp(1rem, calc(1.6 * var(--w)), 1.4rem);
   color: var(--amber);
 }
 
@@ -55,15 +118,20 @@
   padding: 0;
 }
 
-/* "Requests are closed", where the playing track was, at the same size. */
+/* "Requests are closed" in place of what's playing and Up next, centred. */
+.stage.over .stack {
+  text-align: center;
+}
+
 .closed-message[hidden],
-.current[hidden] {
+.current[hidden],
+.upnext[hidden] {
   display: none;
 }
 
 .closed-title {
   margin: 0;
-  font-size: clamp(1.6rem, 4vw, 3.4rem);
+  font-size: clamp(1.6rem, calc(4 * var(--w)), 3.4rem);
   font-weight: 800;
   letter-spacing: -0.03em;
   line-height: 1.05;
@@ -72,13 +140,13 @@
 
 .closed-text {
   margin: 0.6rem 0 0;
-  font-size: clamp(1rem, 1.8vw, 1.6rem);
+  font-size: clamp(1rem, calc(1.8 * var(--w)), 1.6rem);
 }
 
 .download {
   display: inline-block;
   text-decoration: none;
-  font-size: clamp(1rem, 1.4vw, 1.25rem);
+  font-size: clamp(1rem, calc(1.4 * var(--w)), 1.25rem);
   padding: 0.8rem 1.6rem;
 }
 
@@ -88,7 +156,7 @@
 
 .closed-text {
   margin: 0.4rem 0 1.2rem;
-  font-size: clamp(1rem, 1.6vw, 1.4rem);
+  font-size: clamp(1rem, calc(1.6 * var(--w)), 1.4rem);
 }
 
 /* The scan line is the guest link, in the line's own colour. */
@@ -105,32 +173,35 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: clamp(1rem, 3vh, 2.5rem);
+  gap: clamp(1rem, 3 * var(--vh), 2.5rem);
 }
 
 .current {
   display: flex;
-  gap: clamp(1rem, 2vw, 2rem);
-  align-items: center;
+  /* hub.js then lines the cover up with the text (see alignArt). */
+  align-items: flex-start;
   min-width: 0;
 }
 
 .current-art {
-  width: clamp(96px, 13vw, 200px);
-  height: clamp(96px, 13vw, 200px);
+  width: clamp(6rem, calc(13 * var(--w)), 12.5rem);
+  height: clamp(6rem, calc(13 * var(--w)), 12.5rem);
+  /* A margin, not the row's gap: older TV browsers (webOS 6) have no gap in
+     a flex row. */
+  margin-inline-end: clamp(1rem, calc(2 * var(--w)), 2rem);
   border-radius: 10px;
-  box-shadow: 0 0 90px -20px var(--amber);
+  box-shadow: 0 0 5.6rem -1.25rem var(--amber);
 }
 
 .current-label {
-  margin: 0 0 0.3rem;
+  margin: 0 0 0.5rem;
   color: var(--amber);
-  font-size: clamp(0.8rem, 1.1vw, 1rem);
+  font-size: clamp(0.9rem, calc(1.4 * var(--w)), 1.3rem);
 }
 
 .current-title {
   margin: 0;
-  font-size: clamp(1.6rem, 4vw, 3.4rem);
+  font-size: clamp(1.25rem, calc(1.95 * var(--w)), 1.75rem);
   font-weight: 800;
   letter-spacing: -0.03em;
   line-height: 1.05;
@@ -139,21 +210,42 @@
   white-space: nowrap;
 }
 
+/* "Playing now" on the top line with the credit right after it; title, artist
+   and album under them, across the whole width. */
 .current-text {
+  flex: 1 1 auto;
   min-width: 0;
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  column-gap: 1rem;
+}
+
+.current-text > * {
+  grid-column: 1 / -1;
+}
+
+.current-text > .current-label {
+  grid-column: 1;
+}
+
+.current-text > .current-who {
+  grid-area: 1 / 2;
+  justify-self: start;
+  align-self: center;
+  margin: 0 0 0.5rem;
 }
 
 .current-artist {
-  margin: 0.35rem 0 0;
-  font-size: clamp(1rem, 1.8vw, 1.6rem);
+  margin: 0.6rem 0 0;
+  font-size: clamp(1rem, calc(1.8 * var(--w)), 1.6rem);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .current-album {
-  margin: 0.2rem 0 0;
-  font-size: clamp(0.9rem, 1.5vw, 1.3rem);
+  margin: 0.4rem 0 0;
+  font-size: clamp(0.9rem, calc(1.5 * var(--w)), 1.3rem);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -161,16 +253,17 @@
 
 .current-note {
   margin: 0.6rem 0 0;
-  font-size: clamp(0.9rem, 1.4vw, 1.2rem);
+  font-size: clamp(0.9rem, calc(1.4 * var(--w)), 1.2rem);
   max-width: 40ch;
 }
 
+/* A size up from the credits in Up next. */
 .current-who {
   display: inline-block;
   margin: 0.8rem 0 0;
-  padding: 0.2rem 0.8rem;
+  padding: 0.15rem 0.75rem;
   border-radius: 999px;
-  font-size: clamp(0.85rem, 1.3vw, 1.15rem);
+  font-size: clamp(0.8rem, calc(1.2 * var(--w)), 1.15rem);
   background: rgba(201, 182, 255, 0.18);
   color: var(--lavender);
 }
@@ -180,7 +273,7 @@
 }
 
 .upnext {
-  grid-column: 1 / -1;
+  grid-column: 2;
   align-self: stretch;
   min-height: 0;
   display: flex;
@@ -188,19 +281,41 @@
 }
 
 .upnext-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
   margin: 0 0 0.6rem;
   color: var(--amber);
-  font-size: clamp(0.8rem, 1.1vw, 1rem);
+  font-size: clamp(0.9rem, calc(1.4 * var(--w)), 1.3rem);
   font-weight: 600;
 }
 
-.upnext .list {
-  min-height: 0;
-  overflow-y: auto;
+/* How many tracks are queued, when more than fit: across from the heading,
+   quieter. A margin, not gap (older TV browsers). */
+.upnext-count {
+  margin-inline-start: 1rem;
+  color: var(--muted);
+  font-weight: 400;
+  white-space: nowrap;
 }
 
+.upnext .list {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* An empty queue says so in the middle of its space, at the size of the
+   playing track's artist: filling the gap without outshouting the track. */
 .list .empty {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  height: 100%;
+  border-bottom: 0;
+  text-align: center;
+  font-size: clamp(1rem, calc(1.8 * var(--w)), 1.6rem);
 }
 
 .list {
@@ -211,26 +326,27 @@
   min-width: 0;
 }
 
+/* No numbers: the Hub shows a few tracks, top to bottom, and the room goes to
+   the titles; the heading says how many are queued. */
 .list li {
   display: grid;
-  grid-template-columns: 2.2rem auto 1fr;
+  grid-template-columns: auto 1fr;
   gap: 1rem;
   align-items: center;
-  padding: clamp(0.4rem, 1.1vh, 0.9rem) 0;
+  padding: clamp(0.4rem, 1.1 * var(--vh), 0.9rem) 0;
   border-bottom: 1px solid rgba(58, 42, 99, 0.5);
-  font-size: clamp(1rem, 1.6vw, 1.5rem);
+  font-size: clamp(1rem, calc(1.6 * var(--w)), 1.5rem);
   min-width: 0;
+}
+
+/* Tracks that don't fit whole (hub.js): display: grid above would show them. */
+.list li[hidden] {
+  display: none;
 }
 
 .list .cover {
   width: 2.4em;
   height: 2.4em;
-}
-
-.list .n {
-  color: var(--muted);
-  font-variant-numeric: tabular-nums;
-  font-size: 0.75em;
 }
 
 .list .t {
@@ -286,22 +402,38 @@
 }
 
 
-/* With room to spare, one line per song so more of the queue fits. */
+/* With room to spare, the credit beside the title, and the artist under both. */
 @media (min-width: 721px) {
   .upnext .list > li > div {
-    display: flex;
-    align-items: baseline;
-    gap: 0.9em;
+    display: grid;
+    /* Title over artist, and the credit at the row's far end, level with
+       both: it keeps its width and a long title gives way. */
+    grid-template-columns: minmax(0, 1fr) max-content;
+    align-items: center;
+    column-gap: 1.5em;
   }
   .upnext .list .t {
-    flex: 0 1 auto;
+    grid-area: 1 / 1;
   }
   .upnext .list .a {
-    flex: 0 1 auto;
+    grid-area: 2 / 1;
   }
   .upnext .list .who {
-    flex: none;
+    grid-area: 1 / 2 / span 2;
+    justify-self: end;
     margin-top: 0;
+  }
+  /* When Up next has more tracks than fit, the room left under the last
+     whole one is shared above and below (hub.js), so the right-hand side sits
+     in the middle. Not under the code with Roon Display, nor with Party Off. */
+  .stage:not(.framed):not(.over) .stack,
+  .stage:not(.framed):not(.over) .upnext {
+    transform: translateY(var(--shift, 0px));
+  }
+  /* Party Off: "Requests are closed" in the middle of the right-hand side. */
+  .stage.over .stack {
+    grid-row: 1 / -1;
+    align-self: center;
   }
 }
 
@@ -317,6 +449,13 @@
     height: auto;
     align-content: start;
   }
+  .join {
+    grid-row: auto;
+    display: block;
+  }
+  .upnext {
+    grid-column: auto;
+  }
   .upnext .list {
     overflow: visible;
   }
@@ -325,25 +464,27 @@
   .current {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr);
-    /* The label, then the cover beside title, artist, album and credit. No row
-       gap: the inherited flex gap would push those apart. */
+    /* The label with the credit at its far edge, then the cover beside title,
+       artist and album. No row gap: it would push those apart. */
     gap: 0 1rem;
     align-items: center;
   }
   .current-text {
     display: contents;
   }
-  .current-label {
-    grid-column: 1 / -1;
+  .current-text > .current-label {
+    grid-area: 1 / 1 / auto / -1;
     margin: 0 0 0.6rem;
     font-weight: 600;
   }
   .current-art {
+    margin-inline-end: 0;
     grid-column: 1;
-    grid-row: 2 / span 4;
+    grid-row: 2 / span 3;
   }
-  .current-title {
+  .current-text > .current-title {
     grid-area: 2 / 2;
+    font-size: 1.6rem;
   }
   .current-artist {
     grid-area: 3 / 2;
@@ -351,13 +492,145 @@
   .current-album {
     grid-area: 4 / 2;
   }
-  .current-who {
-    grid-area: 5 / 2;
-  }
-  .current-who {
-    justify-self: start;
+  .current-text > .current-who {
+    grid-area: 1 / 2;
+    justify-self: end;
+    align-self: start;
   }
   .qr {
     width: min(60%, 16rem);
   }
+}
+
+/* Roon Display (Party Hub now playing): Roon's display page in place of what's
+   playing, on the whole right-hand side; the code gets smaller and Up next
+   moves under it. hub.js marks the stage while the frame shows. Phones never
+   show it (hub.js). */
+.stage.framed {
+  grid-template-columns: minmax(17.5rem, 1fr) auto;
+  align-items: start;
+}
+
+.stage.framed .join {
+  grid-row: 1;
+  align-self: start;
+}
+
+.stage.framed .qr {
+  width: min(100%, 30 * var(--vh));
+}
+
+.stage.framed .stack {
+  grid-column: 2;
+  grid-row: 1 / -1;
+  align-self: center;
+}
+
+.stage.framed .upnext {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.frame-slot[hidden] {
+  display: none;
+}
+
+/* 16:15, so Roon's picture is sharp (it picks a 4:3 artist image for that
+   shape): as tall as the screen leaves, less the margins and the line above
+   it, or as wide as leaves the code a usable column. The height is worked out
+   from the width, not with aspect-ratio, which older TV browsers (webOS 6)
+   don't know. */
+.frame {
+  --frame-w: min(62vw, 100vw - 27rem, (100 * var(--vh) - 2 * clamp(1.5rem, 5 * var(--vh), 4.5rem) - 2.8rem) * 16 / 15);
+  display: block;
+  width: var(--frame-w);
+  height: calc(var(--frame-w) * 15 / 16);
+  border: 1px solid var(--edge);
+  border-radius: 0.75rem;
+  background: var(--raised);
+}
+
+/* Above the frame: "Playing now", and at the far end who asked for the
+   track, which Roon's page can't know. */
+.frame-credit {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0 0 0.6rem;
+}
+
+.frame-credit .current-label,
+.frame-credit .current-who {
+  margin: 0;
+}
+
+.frame-credit .current-who {
+  margin-inline-start: 1rem;
+}
+
+/* The corner menu: small and faint, so it doesn't compete with the party.
+   At the start of the line: top left, or top right in Arabic and Hebrew. */
+.hub-menu {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  z-index: 10;
+}
+
+[dir="rtl"] .hub-menu {
+  left: auto;
+  right: 0.5rem;
+}
+
+.menu-button {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 8px;
+  color: var(--muted);
+  opacity: 0.6;
+}
+
+.menu-button:hover,
+.menu-button:focus-visible,
+.menu-button[aria-expanded="true"] {
+  opacity: 1;
+  background: var(--raised);
+}
+
+.menu-button svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.menu {
+  margin: 0.25rem 0 0;
+  padding: 0.3rem;
+  min-width: 9rem;
+  list-style: none;
+  background: var(--raised);
+  border: 1px solid var(--edge);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.35);
+}
+
+.menu[hidden] {
+  display: none;
+}
+
+.menu a {
+  display: block;
+  padding: 0.45rem 0.75rem;
+  border-radius: 6px;
+  color: var(--text);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.menu a:hover,
+.menu a:focus-visible {
+  background: var(--edge);
 }

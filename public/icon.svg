@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Party Mode's icon: black and white like Roon's, a black jukebox with
+       white arches, title strips and speaker, on Roon's white. The PNGs and
+       favicon.ico are drawn from this file (see DEVELOPER.md, Icon). -->
+  <rect width="64" height="64" rx="14" fill="#ffffff"/>
+  <!-- Scaled to 120% about the centre, raised 0.5, then the original 3.4:
+       halfway between centring its outline and its weight, which the wide base
+       pulls down, so it looks centred -->
+  <g transform="translate(32 31.5) scale(1.2) translate(-32 -32) translate(0 -3.4)">
+    <!-- Cabinet with an arched top and two bands round the arch -->
+    <path d="M13 58V30a19 19 0 0 1 38 0v28z" fill="#000000"/>
+    <path d="M17 44V30a15 15 0 0 1 30 0v14" fill="none" stroke="#ffffff" stroke-width="4"/>
+    <path d="M22.5 44V30a9.5 9.5 0 0 1 19 0v14" fill="none" stroke="#ffffff" stroke-width="3.5"/>
+    <!-- Title strips in the window: the tracks to choose from -->
+    <rect x="25.9" y="29" width="5.4" height="2" rx="1" fill="#ffffff"/>
+    <rect x="32.7" y="29" width="5.4" height="2" rx="1" fill="#ffffff"/>
+    <rect x="25.9" y="32.8" width="5.4" height="2" rx="1" fill="#ffffff"/>
+    <rect x="32.7" y="32.8" width="5.4" height="2" rx="1" fill="#ffffff"/>
+    <rect x="25.9" y="36.6" width="5.4" height="2" rx="1" fill="#ffffff"/>
+    <rect x="32.7" y="36.6" width="5.4" height="2" rx="1" fill="#ffffff"/>
+    <rect x="25.9" y="40.4" width="5.4" height="2" rx="1" fill="#ffffff"/>
+    <rect x="32.7" y="40.4" width="5.4" height="2" rx="1" fill="#ffffff"/>
+    <!-- Speaker with a black grille -->
+    <rect x="17" y="47" width="30" height="8" rx="2" fill="#ffffff"/>
+    <path d="M20.5 49.6h23M20.5 52.4h23" stroke="#000000" stroke-width="1.5" stroke-linecap="round"/>
+  </g>
+</svg>
