@@ -50,7 +50,15 @@ function logLinks() {
   console.log(`[PartyMode] Party Hub:  ${server.hubUrl()}`);
 }
 
-roon.on('core_paired', publishLinks);
+// The website link goes to Roon only with the registration, sent before the
+// Core pairs. Started before the network was up (after a reboot), the address
+// in it was 127.0.0.1: if the link has changed since, register again so Roon
+// shows the new one. The next pairing finds it unchanged.
+roon.on('core_paired', () => {
+  const registered = roon.api.extension_reginfo.website;
+  publishLinks();
+  if (roon.api.extension_reginfo.website !== registered) roon.reconnect();
+});
 
 // The port last asked for in the settings. Compared with this rather than the
 // port in use, so saving other settings while on a fallback port doesn't retry.
