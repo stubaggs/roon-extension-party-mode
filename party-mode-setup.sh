@@ -26,7 +26,7 @@ trap 'printf "\nThe setup program stopped unexpectedly (line %s).\n" "$LINENO" >
 
 # This program's own version, separate from Party Mode's: raise it with every
 # change, so a copy kept on a computer can tell a newer one is out.
-SETUP_VERSION=1.3
+SETUP_VERSION=1.4
 IMAGE=stubaggs/roon-extension-party-mode
 SOURCE=https://github.com/stubaggs/roon-extension-party-mode
 DESCRIPTION="Roon Extension for parties: guests request music from their phone, no app needed"
@@ -36,7 +36,7 @@ REM=/home/node/.rem
 ENTRY_FILE="roon-extension-party-mode.json"
 REPOSITORY_URL=${PARTY_MODE_SETUP_REPOSITORY_URL:-https://raw.githubusercontent.com/TheAppgineer/roon-extension-repository/v1.x/repository.json}
 TAGS_URL="https://hub.docker.com/v2/repositories/$IMAGE/tags?page_size=100"
-SETUP_URL=https://raw.githubusercontent.com/stubaggs/roon-extension-party-mode/beta/party-mode-setup.sh
+SETUP_URL=https://raw.githubusercontent.com/stubaggs/roon-extension-party-mode/main/party-mode-setup.sh
 TITLE="Party Mode setup $SETUP_VERSION"
 # The Manager can't finish installing or updating its copy while other
 # containers' names contain its container's name (it looks its copy up by part

@@ -57,10 +57,10 @@ you run it, install the one you'd like to use:
 Download it and run it in one go:
 
 ```bash
-curl -fsSLO https://raw.githubusercontent.com/stubaggs/roon-extension-party-mode/beta/party-mode-setup.sh && bash party-mode-setup.sh
+curl -fsSLO https://raw.githubusercontent.com/stubaggs/roon-extension-party-mode/main/party-mode-setup.sh && bash party-mode-setup.sh
 ```
 
-Or save [`party-mode-setup.sh`](https://raw.githubusercontent.com/stubaggs/roon-extension-party-mode/beta/party-mode-setup.sh) to the computer, then run it from that
+Or save [`party-mode-setup.sh`](https://raw.githubusercontent.com/stubaggs/roon-extension-party-mode/main/party-mode-setup.sh) to the computer, then run it from that
 folder:
 
 ```bash
@@ -89,7 +89,7 @@ then run Party Mode as a project. Its settings are kept through updates, with no
 set up:
 
 1. Download Party Mode's
-   [`docker-compose.yml`](https://raw.githubusercontent.com/stubaggs/roon-extension-party-mode/beta/docker-compose.yml).
+   [`docker-compose.yml`](https://raw.githubusercontent.com/stubaggs/roon-extension-party-mode/main/docker-compose.yml).
 2. In Container Manager, choose **Project → Create**. Give it a name such as
    `party-mode`, and for **Path** create a folder for it, for example
    `docker/party-mode`.
@@ -104,7 +104,7 @@ with **Start the project once it is created** ticked. Build downloads the new ve
 keeps your settings. (Don't use **Clean**: it deletes them.)
 
 On other NAS Docker apps and older DSM, search the app's registry for
-`stubaggs/roon-extension-party-mode`, download the **beta** tag, and create a container
+`stubaggs/roon-extension-party-mode`, download the **latest** tag, and create a container
 from it. Set the network to **host** (with **bridge**, Roon can't find Party Mode) and
 tick **Enable auto-restart**. Party Mode then keeps its settings inside the container, so
 recreating it, for example to update, means enabling it in Roon and choosing its
@@ -122,12 +122,12 @@ choose **Docker** and **Docker Compose** in `dietpi-software`; elsewhere see
 [Install Docker Engine](https://docs.docker.com/engine/install/)).
 
 Then make a folder for Party Mode, download
-[`docker-compose.yml`](https://raw.githubusercontent.com/stubaggs/roon-extension-party-mode/beta/docker-compose.yml)
+[`docker-compose.yml`](https://raw.githubusercontent.com/stubaggs/roon-extension-party-mode/main/docker-compose.yml)
 into it, and start it:
 
 ```bash
-mkdir roon-extension-party-mode-beta && cd roon-extension-party-mode-beta
-curl -O https://raw.githubusercontent.com/stubaggs/roon-extension-party-mode/beta/docker-compose.yml
+mkdir roon-extension-party-mode && cd roon-extension-party-mode
+curl -O https://raw.githubusercontent.com/stubaggs/roon-extension-party-mode/main/docker-compose.yml
 docker compose up -d
 ```
 
@@ -159,11 +159,11 @@ Your settings and Roon's pairing are in a Docker volume, so updating keeps them.
 This does the same as `docker-compose.yml`, and needs only Docker, not the Compose plugin:
 
 ```bash
-docker run -d --name roon-extension-party-mode-beta --network host --restart unless-stopped \
+docker run -d --name roon-extension-party-mode --network host --restart unless-stopped \
   --log-driver json-file --log-opt max-size=10m --log-opt max-file=3 \
   --read-only --memory 512m --cap-drop ALL --security-opt no-new-privileges \
-  -v roon-extension-party-mode-beta-data:/data \
-  stubaggs/roon-extension-party-mode:beta
+  -v roon-extension-party-mode-data:/data \
+  stubaggs/roon-extension-party-mode:latest
 ```
 
 Then see [Starting a party](#starting-a-party).
@@ -171,20 +171,20 @@ Then see [Starting a party](#starting-a-party).
 To update to the latest version, run these, then the command above again:
 
 ```bash
-docker pull stubaggs/roon-extension-party-mode:beta
-docker rm -f roon-extension-party-mode-beta
+docker pull stubaggs/roon-extension-party-mode:latest
+docker rm -f roon-extension-party-mode
 ```
 
 To stop it:
 
 ```bash
-docker stop roon-extension-party-mode-beta
+docker stop roon-extension-party-mode
 ```
 
 To start it again:
 
 ```bash
-docker start roon-extension-party-mode-beta
+docker start roon-extension-party-mode
 ```
 
 Once stopped, it stays stopped, even after a restart of the computer, until you start it
@@ -397,7 +397,7 @@ restart the Roon Core, it can take up to a minute to appear again.
 
 **Roon says settings can't be saved.** The extension has nowhere to keep them. Check that
 `docker-compose.yml` still has its `party-mode-data:/data` volume line, or that your
-`docker run` command has `-v roon-extension-party-mode-beta-data:/data`. If you mount a
+`docker run` command has `-v roon-extension-party-mode-data:/data`. If you mount a
 `config.json` file instead, it must be writable:
 
 ```bash
@@ -445,7 +445,7 @@ once:
 
 ```bash
 docker compose restart                              # Docker Compose, in its folder
-docker restart roon-extension-party-mode-beta       # docker run
+docker restart roon-extension-party-mode       # docker run
 ```
 
 In Synology's Container Manager, stop Party Mode's project and start it again.
@@ -499,7 +499,7 @@ then inspect the log:
 
 ```bash
 docker compose logs -t                              # Docker Compose, in its folder
-docker logs -t roon-extension-party-mode-beta       # docker run
+docker logs -t roon-extension-party-mode       # docker run
 ```
 
 With the Extension Manager, use its **Collect Logs**. Turn the detailed log off again
@@ -587,7 +587,7 @@ docker run -d --name roon-extension-party-mode-garden --network host --restart u
   --read-only --memory 512m --cap-drop ALL --security-opt no-new-privileges \
   -e ROON_EXTENSION_PARTY_MODE_INSTANCE=Garden \
   -v roon-extension-party-mode-garden-data:/data \
-  stubaggs/roon-extension-party-mode:beta
+  stubaggs/roon-extension-party-mode:latest
 ```
 
 It shows in Roon as **Party Mode (Garden)**, a separate extension. Enable it and choose
@@ -631,14 +631,14 @@ docker compose down -v --rmi all
 ```
 
 Then delete the folder. `-v` removes the settings volume
-(`roon-extension-party-mode-beta-data`), and with it your settings and Roon's pairing.
+(`roon-extension-party-mode-data`), and with it your settings and Roon's pairing.
 
 **With `docker run`:** remove the container, its settings volume and the image:
 
 ```bash
-docker rm -f roon-extension-party-mode-beta
-docker volume rm roon-extension-party-mode-beta-data
-docker rmi stubaggs/roon-extension-party-mode:beta
+docker rm -f roon-extension-party-mode
+docker volume rm roon-extension-party-mode-data
+docker rmi stubaggs/roon-extension-party-mode:latest
 ```
 
 A **Roon profile** you created for the party stays in Roon until you delete it. For a

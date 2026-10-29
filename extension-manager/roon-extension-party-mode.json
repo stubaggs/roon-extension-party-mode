@@ -9,9 +9,9 @@
                 "image": {
                     "repo": "stubaggs/roon-extension-party-mode",
                     "tags": {
-                        "amd64": "beta",
-                        "arm": "beta",
-                        "arm64": "beta"
+                        "amd64": "latest",
+                        "arm": "latest",
+                        "arm64": "latest"
                     },
                     "binds": [
                         "/usr/src/app/config.json"

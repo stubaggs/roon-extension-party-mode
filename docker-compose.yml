@@ -14,12 +14,12 @@
 
 # Host networking is required: Roon discovery uses UDP broadcast on port 9003.
 # Settings, including Roon's pairing token, are kept in the volume
-# roon-extension-party-mode-beta-data (the same one the README's docker run
+# roon-extension-party-mode-data (the same one the README's docker run
 # uses), which Docker creates on the first `docker compose up -d`.
 services:
   party-mode:
-    image: stubaggs/roon-extension-party-mode:beta
-    container_name: roon-extension-party-mode-beta
+    image: stubaggs/roon-extension-party-mode:latest
+    container_name: roon-extension-party-mode
     network_mode: host
     restart: unless-stopped
     # Nothing in the image can change (settings save to the volume), no Linux
@@ -52,4 +52,4 @@ volumes:
   party-mode-data:
     # Its own name, rather than one Compose makes from the folder's name. A
     # second copy needs a name of its own here too (see the README).
-    name: roon-extension-party-mode-beta-data
+    name: roon-extension-party-mode-data
