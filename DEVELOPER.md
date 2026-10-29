@@ -46,6 +46,7 @@ Roon Core  ──(node-roon-api over the local network)──  app.js
 | `party-mode-setup.sh` | The setup program for Linux (see [Setup program](#setup-program)) |
 | `public/` | The guest page (`index.html`, `guest.js`), the Party Hub (`hub.html`, `hub.js`, `hub.css`, `hub-check.js`) and the basic Party Hub (`basic.html`, `basic.js`, `basic.css`); no build step |
 | `test/` | `npm test` |
+| `images/` | The title image (1280×640 for GitHub's social preview, 1600×840) and screenshots of the Party Hub and guest page; not in the Docker image |
 
 ## Running it with Node.js
 
@@ -342,15 +343,19 @@ every change, since a copy kept on a computer says so when the one at `SETUP_URL
   `/home/node/.rem`, Compose's has `com.docker.compose.*` labels, the rest are `docker run`.
 - **Docker** uses the README's `docker run` options and a volume on `/data`, named
   `roon-extension-party-mode[-<suffix word>][-<name>]` (`-data` for the volume); images
-  without `/data` (before 1.4.0) run without `--read-only`. A copy that would be the same
+  without `/data` (before 1.4.0) run without `--read-only`, and `--memory` is left out
+  where Docker reports no memory limit support (Raspberry Pi kernels). A copy that would be the same
   extension to Roon as one installed is offered a name (`ROON_EXTENSION_PARTY_MODE_INSTANCE`).
   Updating recreates the container with its name, settings mount and the variables given
   to it; Compose copies are updated and removed with Compose.
 - **Extension Manager** (container `roon-extension-manager`): only the latest release. Until
   Party Mode is in the Manager's own list (read from where the Manager reads it;
   `PARTY_MODE_SETUP_REPOSITORY_URL` replaces it for tests, `file://` works), the script
-  writes a local entry in the Manager's `repos/`, and removes it once listed. The Manager's
-  uninstall leaves `binds/roon-extension-party-mode/` (the settings).
+  writes a local entry in the Manager's `repos/`, and removes it on uninstall, on request
+  (while Party Mode isn't installed) or once listed, restarting the Manager so it reads
+  the change. It never changes the Manager's copy: install and uninstall point to the
+  Manager's settings in Roon and check for the copy after; updates are the Manager's. The
+  Manager's uninstall leaves `binds/roon-extension-party-mode/` (the settings).
 - **One way per computer** (see [Known limitations](#known-limitations)): installing one way
   is refused while Party Mode is installed the other, and the main menu's Fix keeps one if
   both are found.

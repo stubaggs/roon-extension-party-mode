@@ -26,14 +26,12 @@ trap 'printf "\nThe setup program stopped unexpectedly (line %s).\n" "$LINENO" >
 
 # This program's own version, separate from Party Mode's: raise it with every
 # change, so a copy kept on a computer can tell a newer one is out.
-SETUP_VERSION=1.2
+SETUP_VERSION=1.3
 IMAGE=stubaggs/roon-extension-party-mode
 SOURCE=https://github.com/stubaggs/roon-extension-party-mode
 DESCRIPTION="Roon Extension for parties: guests request music from their phone, no app needed"
 BASE="roon-extension-party-mode"
 MANAGER="roon-extension-manager"
-# The Manager names the container after the image, and keeps its bind under binds/.
-MANAGER_COPY="roon-extension-party-mode"
 REM=/home/node/.rem
 ENTRY_FILE="roon-extension-party-mode.json"
 REPOSITORY_URL=${PARTY_MODE_SETUP_REPOSITORY_URL:-https://raw.githubusercontent.com/TheAppgineer/roon-extension-repository/v1.x/repository.json}
@@ -43,6 +41,8 @@ TITLE="Party Mode setup $SETUP_VERSION"
 # The Manager can't finish installing or updating its copy while other
 # containers' names contain its container's name (it looks its copy up by part
 # of the name), so a computer runs Party Mode one way.
+MANAGE="The Extension Manager updates Party Mode each night. Manage it in Roon:
+Settings > Extensions, then the Extension Manager's Settings."
 ONE_WAY="On one computer, run Party Mode with Docker or with the Extension
 Manager, not both."
 
@@ -106,6 +106,7 @@ msg() {
 
 (Tab, then Enter, to close.)" "$SCREEN_H" "$BOX_W" >/dev/tty || true
     fi
+    between
   else
     printf '%s\n\n' "$text" | fold -s -w 78 >&2
   fi
@@ -118,13 +119,15 @@ die() {
 
 # ask "question" [yes label] [no label]
 ask() {
-  local text n
+  local text n rc=0
   text=$(paragraphs "$1")
   if (( WHIPTAIL )); then
     box_size
     n=$(fold -s -w $(( BOX_W - 4 )) <<<"$text" | wc -l)
     whiptail --title "$TITLE" --yes-button "${2:-Yes}" --no-button "${3:-No}" \
-      --yesno "$text" $(( n + 7 < SCREEN_H ? n + 7 : SCREEN_H )) "$BOX_W" >/dev/tty
+      --yesno "$text" $(( n + 7 < SCREEN_H ? n + 7 : SCREEN_H )) "$BOX_W" >/dev/tty || rc=$?
+    between
+    return "$rc"
   elif [[ -t 0 ]]; then
     local answer
     printf '%s\n' "$text" | fold -s -w 78 >&2
@@ -138,8 +141,12 @@ ask() {
 # answer "question" [default]: prints what was typed; fails on Cancel.
 answer() {
   if (( WHIPTAIL )); then
+    local reply rc=0
     box_size
-    whiptail --title "$TITLE" --inputbox "$(paragraphs "$1")" 12 "$BOX_W" "${2:-}" 3>&1 1>&2 2>&3
+    reply=$(whiptail --title "$TITLE" --inputbox "$(paragraphs "$1")" 12 "$BOX_W" "${2:-}" 3>&1 1>&2 2>&3) || rc=$?
+    between
+    printf '%s\n' "$reply"
+    return "$rc"
   else
     local reply
     printf '%s\n' "$(paragraphs "$1")" | fold -s -w 78 >&2
@@ -154,13 +161,16 @@ answer() {
 menu() {
   local text=$1; shift
   if (( WHIPTAIL )); then
-    local lines n
+    local lines n choice rc=0
     box_size
     lines=$(printf '%s\n' "$text" | wc -l)
     n=$(( $# / 2 ))
-    whiptail --title "$TITLE" --notags --cancel-button "${BACK:-Back}" \
+    choice=$(whiptail --title "$TITLE" --notags --cancel-button "${BACK:-Back}" \
       --menu "$text" $(( lines + n + 8 < BOX_H ? lines + n + 8 : BOX_H )) "$BOX_W" \
-      $(( n < BOX_H - lines - 8 ? n : BOX_H - lines - 8 )) "$@" 3>&1 1>&2 2>&3
+      $(( n < BOX_H - lines - 8 ? n : BOX_H - lines - 8 )) "$@" 3>&1 1>&2 2>&3) || rc=$?
+    between
+    printf '%s\n' "$choice"
+    return "$rc"
   else
     local keys=() n=0 choice
     printf '\n%s\n\n' "$text" >&2
@@ -176,9 +186,19 @@ menu() {
   fi
 }
 
+# Between screens, the terminal shows only what's happening now: never what
+# an earlier step printed.
+between() {
+  clear >/dev/tty
+  printf '%s\n\nOne moment...\n' "$TITLE" >/dev/tty
+}
+
 # Long-running Docker output goes to the terminal, between screens.
 progress() {
-  if (( WHIPTAIL )); then clear >/dev/tty; fi
+  if (( WHIPTAIL )); then
+    clear >/dev/tty
+    printf '%s\n\n' "$TITLE" >/dev/tty
+  fi
   printf '%s\n' "$1" >&2
 }
 
@@ -417,21 +437,10 @@ listed() {
   [[ $(manager_category) != Local ]]
 }
 
-# The settings the Manager kept for Party Mode, removed.
-remove_manager_settings() {
-  if ! in_manager_data "rm -rf 'binds/$MANAGER_COPY'" 2>/dev/null; then
-    msg "Couldn't remove Party Mode's settings from the Extension Manager's data
-(binds/$MANAGER_COPY): it refused. Remove them yourself."
-  fi
-}
-
-manager_leftovers() {
-  in_manager_data "test -d binds/$MANAGER_COPY" 2>/dev/null
-}
-
+# restart_manager "why": the Manager reads its entries only when it starts.
 restart_manager() {
   if [[ $(manager_state) == running ]]; then
-    progress "Restarting the Extension Manager..."
+    progress "Restarting the Extension Manager, $1..."
     docker restart "$MANAGER" >/dev/null
   fi
 }
@@ -467,16 +476,20 @@ EOF
 # The Extension Manager and its copy, under a heading.
 # Its own state goes on the heading, so the lines under it are Party Mode's.
 manager_text() {
-  local name
+  local name where
   printf 'Extension Manager (%s)\n' "$(manager_words)"
   if [[ $(manager_state) == none ]]; then return 0; fi
   for name in $(copies_by manager); do copy_lines "$name"; done
   if [[ -n $(copies_by manager) ]]; then return 0; fi
-  if manager_leftovers; then
-    printf '  Party Mode\n    %s: settings only\n' "$MANAGER_COPY"
-  else
-    printf '  Party Mode isn'"'"'t installed with it.\n'
-  fi
+  printf '  Party Mode isn'"'"'t installed with the Extension Manager.\n'
+  # Where the Manager offers it: its own list, a local entry, or both.
+  where=()
+  if listed; then where+=("under $(manager_category)"); fi
+  if [[ -n $(local_entries || true) ]]; then where+=("under Local"); fi
+  case ${#where[@]} in
+    1) printf '  The Extension Manager offers it to install, %s.\n' "${where[0]}" ;;
+    2) printf '  The Extension Manager offers it to install, %s and %s.\n' "${where[@]}" ;;
+  esac
 }
 
 # --- Versions ---
@@ -559,7 +572,8 @@ status_text() {
 
 # --- Choosing a copy ---
 
-# pick_copy "question" manager|docker: prints a container's name; fails if none.
+# pick_copy "question" manager|docker: prints a container's name; fails on Back
+# (or if none).
 pick_copy() {
   local text=$1 name items=()
   for name in $(copies_by "$2"); do
@@ -573,16 +587,18 @@ pick_copy() {
 
 restart() {
   local name
-  if ! name=$(pick_copy "Restart which copy?" "$1"); then msg "Party Mode isn't installed this way."; return 0; fi
+  if [[ -z $(copies_by "$1") ]]; then msg "Party Mode isn't installed this way."; return 0; fi
+  name=$(pick_copy "Restart which copy?" "$1") || return 0
   progress "Restarting $name..."
   docker restart "$name" >/dev/null
   wait_ready "$name"
 }
 
-# wait_ready name [new]: waits up to 90 s for the web server to start, or the
-# container to stop. A new copy also gets the step in Roon.
+# wait_ready name [new [more]]: waits up to 90 s for the web server to start,
+# or the container to stop. A new copy also gets the step in Roon, then more.
 wait_ready() {
   local name=$1 i roon=''
+  progress "Waiting for $name to start..."
   for (( i = 0; i < 45; i++ )); do
     if [[ $(docker inspect -f '{{.State.Status}}' "$name") != running ]]; then break; fi
     if listening "$name"; then break; fi
@@ -598,9 +614,11 @@ $(docker logs --tail 12 "$name" 2>&1 | sed 's/^/ /')"
   if [[ ${2:-} == new ]]; then
     roon="
 
-In Roon, open Settings > Extensions to enable and configure it."
+In Roon, open Settings > Extensions to enable and configure it.${3:+
+
+$3}"
   fi
-  msg "$(roon_name "$C_CHANNEL" "$C_INSTANCE") $(copy_version) is running.$roon"
+  msg "$(roon_name "$C_CHANNEL" "$C_INSTANCE") $(copy_version) has started.$roon"
 }
 
 # --- With Docker ---
@@ -690,7 +708,7 @@ in Roon. From 1.4.0 they're kept." "Install" "Cancel" || return 0
   # So the Manager doesn't offer Party Mode to install beside it.
   if [[ $(manager_state) == running ]] && ! listed && [[ -n $(local_entries || true) ]]; then
     for c in $(local_entries || true); do remove_entry_file "$c" || true; done
-    restart_manager
+    restart_manager "so it no longer offers Party Mode"
   fi
   wait_ready "$name" new
 }
@@ -698,12 +716,15 @@ in Roon. From 1.4.0 they're kept." "Install" "Cancel" || return 0
 # run_container name image [docker run options…]: the README's options;
 # read-only where the image keeps its settings in /data. The log driver is
 # named: DietPi's Docker defaults to journald, which refuses the size options.
+# The memory limit only where Docker can apply it: Raspberry Pi kernels start
+# without it, and Docker would warn that it's discarded.
 run_container() {
-  local name=$1 ref=$2 ro=(); shift 2
+  local name=$1 ref=$2 ro=() mem=(); shift 2
   if image_has_data "$ref"; then ro=(--read-only); fi
+  if [[ $(docker info --format '{{.MemoryLimit}}' 2>/dev/null) == true ]]; then mem=(--memory 512m); fi
   docker run -d --name "$name" --network host --restart unless-stopped \
     --log-driver json-file --log-opt max-size=10m --log-opt max-file=3 \
-    "${ro[@]+"${ro[@]}"}" --memory 512m --cap-drop ALL --security-opt no-new-privileges \
+    "${ro[@]+"${ro[@]}"}" "${mem[@]+"${mem[@]}"}" --cap-drop ALL --security-opt no-new-privileges \
     "$@" "$ref" >/dev/null
 }
 
@@ -723,7 +744,8 @@ compose() {
 
 update_docker() {
   local name tag ref new old_id mount=() env=() e
-  if ! name=$(pick_copy "Update which copy?" docker); then msg "Party Mode isn't installed with Docker."; return 0; fi
+  if [[ -z $(copies_by docker) ]]; then msg "Party Mode isn't installed with Docker."; return 0; fi
+  name=$(pick_copy "Update which copy?" docker) || return 0
   read_copy "$name"
   if [[ $C_METHOD == compose ]]; then
     progress "Updating $name with Docker Compose..."
@@ -760,6 +782,7 @@ over: after updating, you choose them again in Roon." "Update" "Cancel" || retur
   docker stop "$name" >/dev/null
   docker rename "$name" "$name-old"
   if ! run_container "$name" "$ref" "${mount[@]}" "${env[@]+"${env[@]}"}"; then
+    docker rm -f "$name" >/dev/null 2>&1 || true
     docker rename "$name-old" "$name"
     docker start "$name" >/dev/null
     msg "Couldn't start the new version, so the old one is running again."
@@ -843,23 +866,25 @@ mixed() {
 }
 
 fix_mixed() {
-  local keep how name mcopy image notes=''
+  local keep how name mcopy entries notes=''
   keep=$(menu "Party Mode is installed with Docker and with the Extension Manager
 here. $ONE_WAY Which to keep?" \
     docker "Docker: remove the Extension Manager's copy" \
     manager "The Extension Manager: remove the copies run with Docker") || return 0
   mcopy=$(copies_by manager)
   if [[ $keep == docker ]]; then
-    how=$(how_much "the Extension Manager's copy") || return 0
-    read_copy "$mcopy"
-    image=$C_IMAGE
-    docker rm -f "$mcopy" >/dev/null
-    docker image rm "$image" >/dev/null 2>&1 || true
-    if [[ $how == all ]]; then remove_manager_settings; fi
+    # The Manager's copy is the Manager's to remove.
+    while [[ -n $(copies_by manager) ]]; do
+      ask "Uninstall Party Mode with the Extension Manager, so it runs only with
+Docker.
+
+$(in_roon Uninstall)" "Done: check" "Cancel" || return 0
+    done
     # Without its entry, Party Mode isn't offered in the Manager to install again.
-    for name in $(local_entries || true); do remove_entry_file "$name" || true; done
-    restart_manager
-    msg "Removed. Party Mode runs with Docker here."
+    entries=$(local_entries || true)
+    for name in $entries; do remove_entry_file "$name" || true; done
+    if [[ -n $entries ]]; then restart_manager "so it no longer offers Party Mode"; fi
+    msg "Party Mode runs with Docker here."
     return 0
   fi
   how=$(how_much "the copies run with Docker") || return 0
@@ -868,12 +893,12 @@ here. $ONE_WAY Which to keep?" \
   done
   read_copy "$mcopy"
   if [[ $C_STATE == created ]]; then
-    # Its install stalled: start again from Roon.
-    docker rm -f "$mcopy" >/dev/null
-    restart_manager
     msg "Removed the copies run with Docker. The Extension Manager's install had
-stalled: in Roon, open Settings > Extensions and install Party Mode with the
-Extension Manager again, under the $(manager_category) category."
+stalled: uninstall Party Mode with it, then install it again.
+
+$(in_roon Uninstall)
+
+Then set Action to Install, and Save again."
   else
     msg "Removed the copies run with Docker. Party Mode runs with the Extension
 Manager here."
@@ -894,7 +919,7 @@ docker_menu() {
       text=$(docker_text)
     fi
     if (( n > 0 )); then items+=(update "Update" restart "Restart"); fi
-    items+=(uninstall "Uninstall")
+    if (( n > 0 )) || [[ -n $(unused_volumes) ]]; then items+=(uninstall "Uninstall"); fi
     choice=$(menu "$text" "${items[@]}") || return 0
     case $choice in
       install) install_docker ;;
@@ -918,8 +943,10 @@ tidy_entries() {
   if ! listed; then return 0; fi
   entries=$(local_entries || true)
   if [[ -z $entries ]]; then return 0; fi
+  msg "The Extension Manager now offers Party Mode under $(manager_category), from
+its own list, so it no longer needs to offer it under Local."
   for name in $entries; do remove_entry_file "$name" || true; done
-  restart_manager
+  restart_manager "so it no longer offers Party Mode under Local"
   for c in $(copies_by manager); do
     read_copy "$c"
     if [[ -n $C_CHANNEL ]]; then beta=1; fi
@@ -931,6 +958,16 @@ Party Mode (beta) in Roon, then install Party Mode there again."
   fi
 }
 
+# in_roon Install|Uninstall: where to do it. The Manager installs,
+# updates and uninstalls its copy itself; the program only points there.
+in_roon() {
+  printf '%s\n' "In Roon, open Settings > Extensions, then the Extension Manager's
+Settings. Under the $(manager_category) category, choose Party Mode. Below
+its description, set Action to $1, then Save."
+}
+
+# Each action fails only on Cancel, so the menu shows again; once it's done,
+# the main menu does.
 install_manager() {
   local name
   if [[ -n $(copies_by manager) ]]; then
@@ -943,13 +980,29 @@ copy: for more, install them with Docker."
 there first, or keep using Docker."
     return 0
   fi
-  if ! listed; then
+  # The Manager reads its entries only when it starts: restart it only when
+  # the entry changes.
+  if ! listed && ! has_entry; then
     for name in $(local_entries || true); do remove_entry_file "$name" || return 0; done
     entry_json latest | in_manager_data -i "mkdir -p repos && cat > 'repos/$ENTRY_FILE'"
-    restart_manager
+    restart_manager "so it offers Party Mode"
   fi
-  msg "In Roon, open Settings > Extensions and install Party Mode with the
-Extension Manager, under the $(manager_category) category."
+  while [[ -z $(copies_by manager) ]]; do
+    ask "Party Mode is ready to install with the Extension Manager.
+
+$(in_roon Install)
+
+Downloading it can take a few minutes, with no change in Roon's status
+until it's done. Choose Done: check once Roon shows Party Mode installed." \
+      "Done: check" "Cancel" || return 1
+  done
+  wait_ready "$(copies_by manager)" new "$MANAGE"
+}
+
+# Whether this program's entry, as it would write it now, is the only one.
+has_entry() {
+  [[ $(local_entries || true) == "$ENTRY_FILE" ]] &&
+    [[ $(in_manager_data "cat 'repos/$ENTRY_FILE'") == "$(entry_json latest)" ]]
 }
 
 remove_entry_file() {
@@ -961,32 +1014,30 @@ too, so it's left as it is. Remove Party Mode from it yourself."
   in_manager_data "rm -f 'repos/$1'"
 }
 
-update_manager() {
-  msg "The Extension Manager keeps Party Mode up to date: it checks each night."
+uninstall_manager() {
+  local entries name offered=''
+  while [[ -n $(copies_by manager) ]]; do
+    ask "Uninstall Party Mode with the Extension Manager.
+
+$(in_roon Uninstall)" "Done: check" "Cancel" || return 1
+  done
+  # Without its entry, the Manager no longer lists Party Mode in Roon.
+  entries=$(local_entries || true)
+  for name in $entries; do remove_entry_file "$name" || true; done
+  if [[ -n $entries ]]; then
+    restart_manager "so it no longer offers Party Mode"
+    if ! listed; then offered=", and it's no longer offered there"; fi
+  fi
+  msg "Party Mode has been uninstalled from the Extension Manager$offered."
 }
 
-uninstall_manager() {
-  local entries name how
-  while [[ -n $(copies_by manager) ]]; do
-    ask "First uninstall Party Mode in Roon: open Settings > Extensions and
-uninstall it with the Extension Manager, under the $(manager_category)
-category." \
-      "Done: check" "Cancel" || return 0
-  done
-  entries=$(local_entries || true)
-  if [[ -z $entries ]] && ! manager_leftovers; then
-    msg "Nothing of Party Mode is left in the Extension Manager."
-    return 0
-  fi
-  how=$(how_much "Party Mode from the Extension Manager") || return 0
-  if [[ $how == keep ]]; then
-    msg "Its settings are kept, for a reinstall."
-    return 0
-  fi
-  remove_manager_settings
-  for name in $entries; do remove_entry_file "$name" || true; done
-  if [[ -n $entries ]]; then restart_manager; fi
-  msg "Removed."
+# Removes the local entry while Party Mode isn't installed (after an uninstall
+# in Roon, or an install not finished).
+unoffer_manager() {
+  local name
+  for name in $(local_entries || true); do remove_entry_file "$name" || return 0; done
+  restart_manager "so it no longer offers Party Mode under Local"
+  msg "The Extension Manager no longer offers Party Mode under Local."
 }
 
 manager_menu() {
@@ -1009,17 +1060,20 @@ Or install Party Mode with Docker."
     items=()
     if [[ -z $(copies_by manager) ]]; then
       items+=(install "Install Party Mode")
+      if ! listed && [[ -n $(local_entries || true) ]]; then
+        items+=(unoffer "Stop offering Party Mode under Local in the Extension Manager")
+      fi
     else
-      items+=(update "Update" restart "Restart")
+      text+=$'\n\n'"$MANAGE"
+      items+=(uninstall "Uninstall")
     fi
-    items+=(uninstall "Uninstall")
     choice=$(menu "$text" "${items[@]}") || return 0
     case $choice in
-      install) install_manager ;;
-      update) update_manager ;;
-      restart) restart manager ;;
-      uninstall) uninstall_manager ;;
+      install) install_manager || continue ;;
+      unoffer) unoffer_manager ;;
+      uninstall) uninstall_manager || continue ;;
     esac
+    return 0
   done
 }
 
