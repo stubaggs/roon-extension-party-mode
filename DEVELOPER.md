@@ -82,8 +82,9 @@ the image (see [Running the image](#running-the-image)).
   `/api/events`. jsdom has no layout, so the tests set sizes where a script measures.
   Skipped without jsdom, as in the Docker build.
 - `test/setup.test.js`: `party-mode-setup.sh`'s functions in bash against a stand-in for
-  `docker` (`test/fake-docker.js`) and `curl`, with nothing else on the `PATH`. Needs
-  bash 4, so the Docker build (Alpine, no bash) skips it. Also check the script with
+  `docker` (`test/fake-docker.js`), `curl` and `whiptail`, with nothing else on the
+  `PATH`. Questions are answered on stdin (the tests redefine `can_ask`), and whiptail
+  draws to a file (`TTY`). Needs bash 4, so the Docker build (Alpine, no bash) skips it. Also check the script with
   `docker run --rm -v "$PWD:/mnt:ro" koalaman/shellcheck:stable /mnt/party-mode-setup.sh`.
 
 `test/browsers.js` isn't in `npm test`: it opens the pages in Chromium, WebKit and Firefox

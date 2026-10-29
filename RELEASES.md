@@ -11,6 +11,8 @@ Not released yet.
 
 - Roon's website link for Party Mode no longer points at 127.0.0.1 when Party Mode starts
   before the network is up, such as after a reboot.
+- Once the party is over, the guest page keeps the party's name as its title when it's
+  opened again, rather than "Add a track".
 
 ## 1.4.0
 

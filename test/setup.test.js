@@ -91,6 +91,22 @@ process.stdout.write(pages[url]);
 `
   );
   write('curl', `exec "${process.execPath}" "${curl}" "$@"`);
+  // whiptail: each screen's arguments logged, and the next scripted answer
+  // given ({ rc, out }: out on stderr, as whiptail gives a choice). Every
+  // screen is answered Enter (0) once the script runs out.
+  const whiptail = path.join(dir, 'whiptail.js');
+  fs.writeFileSync(
+    whiptail,
+    `const fs = require('fs');
+fs.appendFileSync(process.env.FAKE_WHIPTAIL_LOG, JSON.stringify(process.argv.slice(2)) + '\\n');
+const answers = JSON.parse(fs.readFileSync(process.env.FAKE_WHIPTAIL_ANSWERS, 'utf8'));
+const answer = answers.shift() || {};
+fs.writeFileSync(process.env.FAKE_WHIPTAIL_ANSWERS, JSON.stringify(answers));
+if (answer.out) process.stderr.write(answer.out);
+process.exit(answer.rc || 0);
+`
+  );
+  write('whiptail', `exec "${process.execPath}" "${whiptail}" "$@"`);
   write('sleep', ':');
   write('clear', ':');
   return dir;
@@ -190,17 +206,28 @@ function managerCopy(state, ref = `${IMAGE}:latest`, status = 'running') {
 
 /**
  * Runs `snippet` in bash with the program's functions loaded, or the whole
- * program with `args` (snippet null). Returns its output, exit status, the
- * docker and curl calls, and Docker's state after.
+ * program with `args` (snippet null). With `answers`, questions are answered
+ * on stdin, as at a terminal; with `screens`, whiptail draws them, answered
+ * in turn (see the stand-in above), and the terminal is a file. Returns the
+ * output, exit status, the docker, curl and whiptail calls, what was drawn
+ * on the terminal, and Docker's state after.
  */
-function setup(snippet, { state = freshState(), input = '', args = [], listed = false, pages = {}, docker = true } = {}) {
+function setup(snippet, { state = freshState(), input = '', args = [], listed = false, pages = {}, docker = true, answers = false, screens = null } = {}) {
   const dir = fs.mkdtempSync(path.join(TMP, 'run-'));
   const files = {
     state: path.join(dir, 'state.json'),
     log: path.join(dir, 'docker.log'),
     curl: path.join(dir, 'curl.log'),
-    urls: path.join(dir, 'urls.json')
+    urls: path.join(dir, 'urls.json'),
+    screens: path.join(dir, 'whiptail.log'),
+    script: path.join(dir, 'whiptail-answers.json'),
+    tty: path.join(dir, 'tty')
   };
+  fs.writeFileSync(files.screens, '');
+  fs.writeFileSync(files.script, JSON.stringify(screens || []));
+  fs.writeFileSync(files.tty, '');
+  if (answers) snippet = `can_ask() { true; }; ${snippet}`;
+  if (screens) snippet = `WHIPTAIL=1; TTY='${files.tty}'; ${snippet}`;
   fs.writeFileSync(files.state, JSON.stringify(state));
   fs.writeFileSync(files.log, '');
   fs.writeFileSync(files.curl, '');
@@ -220,7 +247,9 @@ function setup(snippet, { state = freshState(), input = '', args = [], listed = 
       FAKE_DOCKER_STATE: files.state,
       FAKE_DOCKER_LOG: files.log,
       FAKE_CURL_LOG: files.curl,
-      FAKE_URLS: files.urls
+      FAKE_URLS: files.urls,
+      FAKE_WHIPTAIL_LOG: files.screens,
+      FAKE_WHIPTAIL_ANSWERS: files.script
     }
   });
   const calls = fs
@@ -234,6 +263,8 @@ function setup(snippet, { state = freshState(), input = '', args = [], listed = 
     status: r.status,
     calls,
     fetched: fs.readFileSync(files.curl, 'utf8').split('\n').filter(Boolean),
+    screens: fs.readFileSync(files.screens, 'utf8').split('\n').filter(Boolean).map((line) => JSON.parse(line)),
+    tty: fs.readFileSync(files.tty, 'utf8'),
     state: JSON.parse(fs.readFileSync(files.state, 'utf8'))
   };
 }
@@ -912,6 +943,232 @@ check('the Manager menu: not installed, or not running, says what to do', () => 
   withManager(state, 'exited');
   r = setup('manager_menu', { state });
   assert.match(r.err, /The Extension Manager isn't running\. Start it, then choose this again\./);
+});
+
+// --- Questions answered, as at a terminal ---
+
+const tagsPage = (...names) => ({ [`https://hub.docker.com/v2/repositories/${IMAGE}/tags?page_size=100`]: JSON.stringify({ results: names.map((name) => ({ name })) }) });
+
+check('ask at a terminal: the question, then y is Yes and anything else No', () => {
+  let r = setup(status("ask 'Remove it?'"), { answers: true, input: 'y\n' });
+  assert.strictEqual(r.out, 'rc=0\n');
+  assert.match(r.err, /^Remove it\?$/m);
+  for (const input of ['n\n', '\n', 'no\n', '']) {
+    r = setup(status("ask 'Remove it?'"), { answers: true, input });
+    assert.strictEqual(r.out, 'rc=1\n', JSON.stringify(input));
+  }
+  assert.strictEqual(setup(status("ask 'Remove it?'"), { answers: true, input: 'Y\n' }).out, 'rc=0\n');
+});
+
+check('install over the same extension, then Name it: a named copy beside it', () => {
+  const state = freshState();
+  state.images[`${IMAGE}:latest`] = state.registry[`${IMAGE}:latest`];
+  state.containers.party = dockerCopy(state.images, `${IMAGE}:latest`);
+  const r = setup('install_docker', { state, answers: true, input: '1\ny\nGarden\n' });
+  assert.match(said(r.err), /Party Mode is already installed \(party, with Docker\)\. Another copy of it would clash in Roon\./);
+  const c = r.state.containers['roon-extension-party-mode-garden'];
+  assert.ok(c, Object.keys(r.state.containers).join());
+  assert.ok(c.env.includes('ROON_EXTENSION_PARTY_MODE_INSTANCE=Garden'));
+  assert.ok(r.state.containers.party, 'the first stays');
+});
+
+check('install a version before 1.4.0: says its settings stay inside it; Install runs it without --read-only', () => {
+  const pages = tagsPage('1.3.2');
+  let r = setup('install_docker', { answers: true, input: '3\n1\ny\n', pages });
+  assert.match(said(r.err), /Party Mode 1\.3\.2 keeps its settings inside its container, so they don't carry over to the next version/);
+  const c = r.state.containers['roon-extension-party-mode'];
+  assert.ok(c, Object.keys(r.state.containers).join());
+  assert.strictEqual(c.image, `${IMAGE}:1.3.2`);
+  assert.ok(!c.options.includes('--read-only'));
+  r = setup('install_docker', { answers: true, input: '3\n1\nn\n', pages });
+  assert.deepStrictEqual(r.state.containers, {}, 'Cancel installs nothing');
+});
+
+check('update a copy on a particular version: Yes, then the version chosen; its settings kept', () => {
+  const state = freshState();
+  state.images[`${IMAGE}:1.3.2`] = state.registry[`${IMAGE}:1.3.2`];
+  state.containers.party = dockerCopy(state.images, `${IMAGE}:1.3.2`);
+  const r = setup('update_docker', { state, answers: true, input: 'y\n1\n' });
+  assert.match(r.err, /party stays on version 1\.3\.2\. Choose another version\?/);
+  const c = r.state.containers.party;
+  assert.strictEqual(c.image, `${IMAGE}:latest`);
+  assert.deepStrictEqual(c.mounts, [{ type: 'volume', name: 'roon-extension-party-mode-data', dest: '/data' }]);
+});
+
+check('update a copy that keeps its settings inside: Update gives it a volume; Cancel leaves it', () => {
+  const state = freshState();
+  state.images[`${IMAGE}:latest`] = img('1.3.9');
+  state.containers.party = dockerCopy(state.images, `${IMAGE}:latest`, { mounts: [] });
+  let r = setup('update_docker', { state, answers: true, input: 'y\n' });
+  assert.match(said(r.err), /party keeps its settings inside its container, so they don't carry over/);
+  assert.deepStrictEqual(r.state.containers.party.mounts, [{ type: 'volume', name: 'party-data', dest: '/data' }]);
+  r = setup('update_docker', { state, answers: true, input: 'n\n' });
+  assert.deepStrictEqual(ran(r, 'pull'), []);
+});
+
+check('uninstall settings kept from before: Yes removes the volume', () => {
+  const state = freshState();
+  state.volumes['roon-extension-party-mode-data'] = TMP;
+  let r = setup('uninstall_docker', { state, answers: true, input: '1\nn\n' });
+  assert.ok(r.state.volumes['roon-extension-party-mode-data'], 'No keeps it');
+  r = setup('uninstall_docker', { state, answers: true, input: '1\ny\n' });
+  assert.match(said(r.err), /Remove the volume roon-extension-party-mode-data, with the settings and Roon's pairing in it\?/);
+  assert.ok(!r.state.volumes['roon-extension-party-mode-data']);
+  assert.match(r.err, /^Removed\.$/m);
+});
+
+check('fix both ways, keeping Docker: asks until Roon has removed the Manager\'s copy; Cancel stops', () => {
+  const state = freshState();
+  withManager(state);
+  managerCopy(state);
+  state.images[`${IMAGE}:beta`] = state.registry[`${IMAGE}:beta`];
+  state.containers['roon-extension-party-mode-beta'] = dockerCopy(state.images, `${IMAGE}:beta`);
+  const r = setup('fix_mixed', { state, answers: true, input: '1\ny\nn\n' });
+  assert.strictEqual(said(r.err).split('Uninstall Party Mode with the Extension Manager, so it runs only with Docker').length - 1, 2);
+  assert.match(said(r.err), /set Action to Uninstall, then Save\./);
+  assert.ok(r.state.containers['roon-extension-party-mode'] && r.state.containers['roon-extension-party-mode-beta'], 'nothing removed from here');
+});
+
+check('install with the Manager: asks until Roon has installed it; Cancel goes back', () => {
+  const state = freshState();
+  withManager(state);
+  const r = setup(status('install_manager'), { state, answers: true, input: 'y\nn\n' });
+  assert.strictEqual(said(r.err).split('Party Mode is ready to install with the Extension Manager.').length - 1, 2);
+  assert.match(said(r.err), /Choose Done: check once Roon shows Party Mode installed\./);
+  assert.strictEqual(r.out, 'rc=1\n');
+});
+
+check('uninstall from the Manager: asks until Roon has removed it, and leaves the entry until then', () => {
+  const state = freshState();
+  const data = withManager(state);
+  managerCopy(state);
+  fs.writeFileSync(path.join(data, 'repos', 'roon-extension-party-mode.json'), `{"repo": "${IMAGE}"}`);
+  const r = setup(status('uninstall_manager'), { state, answers: true, input: 'y\nn\n' });
+  assert.strictEqual(said(r.err).split('Uninstall Party Mode with the Extension Manager.').length - 1, 2);
+  assert.strictEqual(r.out, 'rc=1\n');
+  assert.deepStrictEqual(fs.readdirSync(path.join(data, 'repos')), ['roon-extension-party-mode.json']);
+});
+
+// --- Menus ---
+
+check('the main menu: Status, then Finish; the Manager marked not installed', () => {
+  const r = setup('main_menu', { input: '1\n0\n' });
+  assert.strictEqual(r.status, 0, r.err);
+  assert.match(r.err, new RegExp(`^Party Mode setup ${source.match(/^SETUP_VERSION=(.*)$/m)[1].replace('.', '\\.')}$`, 'm'));
+  assert.match(r.err, /^ +1\) Status: what's installed$/m);
+  assert.match(r.err, /^ +3\) With the Extension Manager \(not installed\)$/m);
+  assert.match(r.err, /^ +0\) Finish$/m);
+  assert.match(r.err, /Party Mode isn't installed with Docker\./, 'the status');
+});
+
+check('the main menu: Fix first when installed both ways; a later setup program online is mentioned', () => {
+  const state = freshState();
+  withManager(state);
+  managerCopy(state);
+  state.images[`${IMAGE}:beta`] = state.registry[`${IMAGE}:beta`];
+  state.containers['roon-extension-party-mode-beta'] = dockerCopy(state.images, `${IMAGE}:beta`);
+  const url = source.match(SETUP_URL_PATTERN)[1];
+  const r = setup('main_menu', { state, input: '0\n', pages: { [url]: 'SETUP_VERSION=99.0\n' } });
+  assert.match(r.err, /^ +1\) Fix: Party Mode is installed both ways here$/m);
+  assert.match(r.err, /^ +4\) With the Extension Manager$/m);
+  assert.match(said(r.err), /Setup program 99\.0 is available \(this is \d+(\.\d+)+\): download it again \(see the README\)\./);
+});
+
+check("the Docker menu: only what can be done; a long list of copies is left to Status", () => {
+  let r = setup('docker_menu', { input: '0\n' });
+  assert.match(r.err, /^ +2\) Install another copy, with its own name \(such as Garden\)$/m);
+  assert.doesNotMatch(r.err, /Update|Restart|Uninstall/);
+  const kept = freshState();
+  kept.volumes['roon-extension-party-mode-data'] = TMP;
+  r = setup('docker_menu', { state: kept, input: '0\n' });
+  assert.match(r.err, /^ +3\) Uninstall$/m, 'kept settings can be removed');
+  assert.doesNotMatch(r.err, /Update|Restart/);
+  const many = freshState();
+  many.images[`${IMAGE}:latest`] = many.registry[`${IMAGE}:latest`];
+  for (const name of ['a', 'b', 'c', 'd']) many.containers[name] = dockerCopy(many.images, `${IMAGE}:latest`, { mounts: [{ type: 'volume', name: `${name}-data`, dest: '/data' }] });
+  r = setup('docker_menu', { state: many, input: '0\n' });
+  assert.match(r.err, /^ {2}4 copies are installed \(see Status\)\.$/m);
+  assert.match(r.err, /3\) Update[\s\S]*4\) Restart[\s\S]*5\) Uninstall/);
+});
+
+check('restart from the Docker menu: the copy restarts and is waited for', () => {
+  const state = freshState();
+  state.images[`${IMAGE}:latest`] = state.registry[`${IMAGE}:latest`];
+  state.containers.party = dockerCopy(state.images, `${IMAGE}:latest`);
+  const r = setup('docker_menu', { state, input: '4\n0\n' });
+  assert.deepStrictEqual(ran(r, 'restart'), [['restart', 'party']]);
+  assert.match(r.err, /Party Mode 1\.4\.0 has started\./);
+  assert.match(setup('restart docker').err, /Party Mode isn't installed this way\./);
+});
+
+check('the Manager menu: install, or stop offering the local entry; once installed, Uninstall', () => {
+  const state = freshState();
+  const data = withManager(state);
+  fs.writeFileSync(path.join(data, 'repos', 'roon-extension-party-mode.json'), `{"repo": "${IMAGE}"}`);
+  let r = setup('manager_menu', { state, input: '2\n' });
+  assert.match(r.err, /^ +1\) Install Party Mode$/m);
+  assert.match(r.err, /^ +2\) Stop offering Party Mode under Local in the Extension Manager$/m);
+  assert.deepStrictEqual(fs.readdirSync(path.join(data, 'repos')), []);
+  assert.strictEqual(ran(r, 'restart', 'roon-extension-manager').length, 1);
+  assert.match(r.err, /The Extension Manager no longer offers Party Mode under Local\./);
+  managerCopy(state);
+  r = setup('manager_menu', { state, input: '0\n' });
+  assert.match(r.err, /^ +1\) Uninstall$/m);
+  assert.match(said(r.err), /The Extension Manager updates Party Mode each night\./);
+  assert.doesNotMatch(r.err, /Install Party Mode/);
+});
+
+// --- whiptail ---
+
+check('whiptail: a message that fits closes with Enter; a long one scrolls; between screens, "One moment"', () => {
+  let r = setup("msg 'Short message.'", { screens: [] });
+  assert.strictEqual(r.screens.length, 1);
+  const [box] = r.screens;
+  assert.deepStrictEqual(box.slice(0, 4), ['--title', `Party Mode setup ${source.match(/^SETUP_VERSION=(.*)$/m)[1]}`, '--msgbox', 'Short message.']);
+  assert.strictEqual(box[4], '8', 'one line, and the box around it');
+  assert.match(r.tty, /One moment\.\.\./);
+  assert.strictEqual(r.err, '', 'nothing printed beside the box');
+  const long = Array.from({ length: 40 }, (_, i) => `  line ${i}`).join('\\n');
+  r = setup(`msg $'${long}'`, { screens: [] });
+  assert.ok(r.screens[0].includes('--scrolltext'), r.screens[0].join(' '));
+  assert.match(r.screens[0][r.screens[0].indexOf('--msgbox') + 1], /\(Tab, then Enter, to close\.\)$/);
+});
+
+check('whiptail: a menu gives the key chosen; Cancel (named Back, or BACK) is Back', () => {
+  const menu = "menu 'Pick one' red 'Red label' green 'Green label'";
+  let r = setup(status(menu), { screens: [{ out: 'green' }] });
+  assert.strictEqual(r.out, 'green\nrc=0\n');
+  const args = r.screens[0];
+  assert.ok(args.includes('--notags'));
+  assert.strictEqual(args[args.indexOf('--cancel-button') + 1], 'Back');
+  assert.deepStrictEqual(args.slice(-4), ['red', 'Red label', 'green', 'Green label']);
+  r = setup(status(menu), { screens: [{ rc: 1 }] });
+  assert.strictEqual(r.out, '\nrc=1\n');
+  r = setup(status(`BACK=Finish ${menu}`), { screens: [{ rc: 1 }] });
+  assert.strictEqual(r.screens[0][r.screens[0].indexOf('--cancel-button') + 1], 'Finish');
+});
+
+check('whiptail: a yes/no question with its own button names; a text box', () => {
+  let r = setup(status("ask 'Do that?' 'Name it' 'Cancel'"), { screens: [{ rc: 0 }] });
+  assert.strictEqual(r.out, 'rc=0\n');
+  const args = r.screens[0];
+  assert.strictEqual(args[args.indexOf('--yes-button') + 1], 'Name it');
+  assert.strictEqual(args[args.indexOf('--no-button') + 1], 'Cancel');
+  assert.strictEqual(args[args.indexOf('--yesno') + 1], 'Do that?');
+  assert.strictEqual(setup(status("ask 'Do that?'"), { screens: [{ rc: 1 }] }).out, 'rc=1\n');
+  r = setup(status("answer 'A name?' Garden"), { screens: [{ out: 'Kitchen' }] });
+  assert.strictEqual(r.out, 'Kitchen\nrc=0\n');
+  assert.deepStrictEqual(r.screens[0].slice(2, 4), ['--inputbox', 'A name?']);
+  assert.strictEqual(r.screens[0][r.screens[0].length - 1], 'Garden', 'the suggestion');
+  assert.strictEqual(setup(status("answer 'A name?'"), { screens: [{ rc: 1 }] }).out, '\nrc=1\n');
+});
+
+check('whiptail: installing, start to finish', () => {
+  const r = setup('install_docker', { screens: [{ out: 'latest' }] });
+  assert.ok(r.state.containers['roon-extension-party-mode']);
+  assert.deepStrictEqual(r.screens.map((args) => args[2]), ['--notags', '--msgbox']);
+  assert.match(r.screens[1][3], /Party Mode 1\.4\.0 has started\./);
+  assert.match(r.tty, /Party Mode setup/);
 });
 
 if (failures) {

@@ -42,10 +42,14 @@ function partyRoon() {
     async search() {
       return searchResults;
     },
+    // Set, Roon refuses requests and skips.
+    failing: false,
     async performAction(session, key, mode) {
+      if (this.failing) throw new Error('roon_refused');
       this.actions.push({ key, mode });
     },
     async skip() {
+      if (this.failing) throw new Error('roon_refused');
       this.skips += 1;
     }
   });
@@ -77,6 +81,7 @@ function partyRoon() {
     Object.assign(roon.settings, DEFAULT_SETTINGS, { port: 0, enabled: true, allow_add: true, allow_next: true, allow_skip: true, add_limit: 0, next_limit: 0, skip_limit: 0 });
     roon.actions = [];
     roon.skips = 0;
+    roon.failing = false;
     delete roon.currentMode;
     zoneCount += 1;
     play(null);

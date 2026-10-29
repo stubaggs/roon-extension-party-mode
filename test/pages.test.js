@@ -78,7 +78,9 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const { roon, searchResults, track, play, set, reset } = partyRoon();
 
 const guests = new GuestStore();
-const server = createServer(roon, guests, { limits: { all: 0, search: 0 } });
+// Requests a minute per device: none here, until a test sets one (read on each request).
+const limits = { all: 0, search: 0 };
+const server = createServer(roon, guests, { limits });
 let base;
 
 // --- A browser, as far as the pages need one ---
@@ -197,6 +199,8 @@ async function open(pathname, options = {}) {
     document: window.document,
     $: (id) => window.document.getElementById(id),
     errors,
+    /** The page's cookies, the guest session among them, for asking the server as this guest. */
+    cookie: () => cookieJar.getCookieStringSync(base),
     navigations,
     streams,
     /** Waits until the live updates are connected: the server sends the queue first. */
@@ -494,6 +498,35 @@ const display = http.createServer((req, res) => res.end('<!doctype html><title>R
     }
   });
 
+  await check('a long party name leaves less room: the QR code gives way, down to 10rem', async () => {
+    const page = await open('/PartyHub');
+    try {
+      await until(() => page.$('party-name').textContent === 'Garden Party');
+      const { window } = page;
+      const join = page.document.querySelector('.join');
+      const code = page.$('qr');
+      // The name and the code take 500 px of the 300 the side has; the code is 400 px wide.
+      Object.defineProperty(join, 'clientHeight', { configurable: true, value: 300 });
+      page.$('party-name').getBoundingClientRect = () => ({ top: 0, bottom: 150 });
+      page.$('join-open').getBoundingClientRect = () => ({ top: 150, bottom: 500 });
+      Object.defineProperty(code, 'offsetParent', { configurable: true, value: join });
+      Object.defineProperty(code, 'offsetWidth', { configurable: true, value: 400 });
+      window.getComputedStyle = ((original) => (el) => (el === page.document.documentElement ? { fontSize: '16px' } : original(el)))(window.getComputedStyle);
+      window.dispatchEvent(new window.Event('resize'));
+      assert.strictEqual(code.style.width, '200px');
+      // Far too little room: never smaller than 10rem.
+      Object.defineProperty(join, 'clientHeight', { configurable: true, value: 100 });
+      window.dispatchEvent(new window.Event('resize'));
+      assert.strictEqual(code.style.width, '160px');
+      // Room enough again: its own size.
+      Object.defineProperty(join, 'clientHeight', { configurable: true, value: 600 });
+      window.dispatchEvent(new window.Event('resize'));
+      assert.strictEqual(code.style.width, '');
+    } finally {
+      page.close();
+    }
+  });
+
   console.log('\npages: the basic Party Hub (basic.js)');
 
   await check('shows the party, what is playing and at most six of Up next, with the count', async () => {
@@ -749,6 +782,147 @@ const display = http.createServer((req, res) => res.end('<!doctype html><title>R
     }
   });
 
+  /** Searches on the page and opens result `index`: its main button. */
+  async function openResult(page, index = 0) {
+    page.$('search').value = 'abba';
+    page.$('search').dispatchEvent(new page.window.Event('input'));
+    await until(() => page.document.querySelectorAll('#results .row').length >= 2, 'the results');
+    page.document.querySelectorAll('#results .row')[index].click();
+    return page.document.querySelector('#results .actions .pill-primary');
+  }
+  /** Presses `button` and waits for the toast to say `text`. */
+  async function pressFor(page, button, text) {
+    page.$('toast').textContent = '';
+    button.click();
+    await until(() => page.$('toast').textContent === text, `"${text}"`);
+  }
+  /** As this page's guest, from elsewhere (another tab): the server, directly. */
+  const asGuest = (page, pathname, body) =>
+    fetch(base + pathname, body === undefined ? { headers: { Cookie: page.cookie() } } : { method: 'POST', headers: { Cookie: page.cookie(), 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+
+  await check('a refused request says why, and its button can be pressed again', async () => {
+    Object.assign(roon.settings, { prevent_duplicates: true });
+    const page = await guestPage(named);
+    try {
+      await until(() => visible(page.$('app')));
+      const add = await openResult(page);
+      // Each refusal comes after the page last heard, as when the host or Roon changes something.
+      roon.currentMode = 'paused';
+      await pressFor(page, add, page.t('allowance.paused'));
+      assert.strictEqual(add.disabled, false);
+      delete roon.currentMode;
+      roon.settings.allow_add = false;
+      await pressFor(page, add, page.t('toast.disabled'));
+      roon.settings.allow_add = true;
+      roon.failing = true;
+      await pressFor(page, add, page.t('toast.failed'));
+      roon.failing = false;
+      play(waterloo);
+      await pressFor(page, add, page.t('toast.already_queued'));
+      assert.strictEqual(add.disabled, false);
+      assert.deepStrictEqual(roon.actions, [], 'nothing reached Roon');
+      play(null);
+      await pressFor(page, add, page.t('toast.queued'));
+      assert.deepStrictEqual(roon.actions, [{ key: '10:0', mode: 'add' }]);
+      assert.deepStrictEqual(page.errors, []);
+    } finally {
+      page.close();
+    }
+  });
+
+  await check('a request after the allowance was used elsewhere: says when more come, and greys the button', async () => {
+    Object.assign(roon.settings, { add_limit: 1, add_period: 60 });
+    const page = await guestPage(named);
+    try {
+      await until(() => visible(page.$('app')));
+      const add = await openResult(page);
+      assert.strictEqual(add.getAttribute('aria-disabled'), 'false');
+      // Used from another tab: this page still says "1 left".
+      assert.strictEqual((await asGuest(page, '/api/request', { key: '10:1', mode: 'add' })).status, 200);
+      add.click();
+      await until(() => /^You've used them all\. More in /.test(page.$('toast').textContent), 'the wait');
+      assert.match(page.$('toast').textContent, new RegExp(`^${page.t('toast.none_left_wait', { wait: '(an? |\\d+ )minutes?' }).replace('.', '\\.')}$`));
+      // The counts fetched again, so the button shows it's used up.
+      await until(() => page.document.querySelector('#results .actions .pill-primary').getAttribute('aria-disabled') === 'true', 'the button greyed');
+    } finally {
+      page.close();
+    }
+  });
+
+  await check('too many requests a minute: one note, not a second about the search', async () => {
+    const page = await guestPage(named);
+    try {
+      await until(() => visible(page.$('app')));
+      limits.search = 1;
+      await openResult(page);
+      page.$('toast').textContent = '';
+      page.$('search').value = 'sos';
+      page.$('search').dispatchEvent(new page.window.Event('input'));
+      await until(() => page.$('toast').textContent === page.t('toast.too_many_requests'), 'the note');
+      await sleep(100);
+      assert.strictEqual(page.$('toast').textContent, page.t('toast.too_many_requests'));
+    } finally {
+      limits.search = 0;
+      page.close();
+    }
+  });
+
+  await check('a refused skip says why; one Roon will no longer do hides Skip', async () => {
+    play(waterloo, [sos]);
+    const page = await guestPage(named);
+    try {
+      await until(() => visible(page.$('skip')), 'Skip');
+      const skip = page.$('skip');
+      roon.currentMode = 'paused';
+      await pressFor(page, skip, page.t('allowance.paused'));
+      delete roon.currentMode;
+      roon.failing = true;
+      await pressFor(page, skip, page.t('toast.failed'));
+      roon.failing = false;
+      assert.strictEqual(roon.skips, 0);
+      // Roon won't skip now (the last track, Roon Radio off), and the page hadn't heard.
+      roon.zone = Object.assign({}, roon.zone, { is_next_allowed: false });
+      await pressFor(page, skip, page.t('toast.failed'));
+      await until(() => !visible(skip), 'Skip hidden, caught up');
+    } finally {
+      page.close();
+    }
+  });
+
+  await check('a skip after the allowance was used elsewhere: says when more come', async () => {
+    Object.assign(roon.settings, { skip_limit: 1, skip_period: 60 });
+    play(waterloo, [sos, fernando]);
+    const page = await guestPage(named);
+    try {
+      await until(() => visible(page.$('skip')), 'Skip');
+      assert.strictEqual((await asGuest(page, '/api/skip', {})).status, 200);
+      page.$('skip').click();
+      await until(() => /^You've used them all\. More in /.test(page.$('toast').textContent), 'the wait');
+      assert.strictEqual(roon.skips, 1, 'only the other tab skipped');
+    } finally {
+      page.close();
+    }
+  });
+
+  await check('every 30 seconds the page catches up: a name set in another tab shows', async () => {
+    const timers = [];
+    const page = await guestPage(Object.assign({}, named, {
+      before(window) {
+        const setInterval = window.setInterval.bind(window);
+        window.setInterval = (fn, ms) => (timers.push({ fn, ms }), setInterval(fn, ms));
+      }
+    }));
+    try {
+      await until(() => timers.some((timer) => timer.ms === 30000), 'the 30-second refresh');
+      await (await asGuest(page, '/api/name', { name: 'Elsewhere', confirm: true })).json();
+      assert.strictEqual(page.$('name-chip').textContent, 'Add your name');
+      timers.find((timer) => timer.ms === 30000).fn();
+      await until(() => page.$('name-chip').textContent === 'Elsewhere', 'the new name');
+    } finally {
+      page.close();
+    }
+  });
+
   await check('Skip: only when the host allows it and Roon will skip; skips', async () => {
     play(waterloo, [sos]);
     const page = await guestPage(named);
@@ -779,6 +953,39 @@ const display = http.createServer((req, res) => res.end('<!doctype html><title>R
     } finally {
       page.close();
       reset();
+    }
+  });
+
+  await check("Party Off keeps the party's name as the title, also when the page is opened again", async () => {
+    const page = await guestPage(named);
+    try {
+      await until(() => visible(page.$('app')));
+      assert.strictEqual(page.document.title, 'Garden Party');
+      await page.live();
+      set({ enabled: false, playlist_download: 'link' });
+      roon.emit('party_mode_changed', 'off', 'on');
+      await until(() => visible(page.$('closed')), 'closed');
+      assert.strictEqual(page.document.title, 'Garden Party');
+    } finally {
+      page.close();
+    }
+    const again = await guestPage(named);
+    try {
+      await until(() => visible(again.$('closed')), 'closed');
+      assert.strictEqual(again.document.title, 'Garden Party');
+      assert.ok(visible(again.$('closed-playlist')));
+    } finally {
+      again.close();
+    }
+    // A party with no name: the guest page's own title, as during the party.
+    roon.pageName = '';
+    const unnamed = await guestPage(named);
+    try {
+      await until(() => visible(unnamed.$('closed')), 'closed');
+      assert.strictEqual(unnamed.document.title, unnamed.t('page.title'));
+    } finally {
+      unnamed.close();
+      roon.pageName = 'Garden Party';
     }
   });
 
@@ -820,6 +1027,7 @@ const display = http.createServer((req, res) => res.end('<!doctype html><title>R
     try {
       await until(() => visible(again.$('locked')), 'Scan the code again');
       assert.deepStrictEqual(again.navigations, []);
+      assert.strictEqual(again.document.title, again.t('locked.title'));
       assert.ok(!visible(again.$('app')));
     } finally {
       again.close();
@@ -866,6 +1074,59 @@ const display = http.createServer((req, res) => res.end('<!doctype html><title>R
       french.click();
       assert.match(page.document.cookie, /party_lang=fr/);
       assert.strictEqual(page.navigations.length, 1);
+    } finally {
+      page.close();
+    }
+  });
+
+  await check('the language dialog: Cancel, Escape or the current language close it, back on the globe', async () => {
+    const page = await guestPage(named);
+    try {
+      await until(() => visible(page.$('app')));
+      const chip = page.$('lang-chip');
+      chip.focus();
+      chip.click();
+      page.$('language-cancel').click();
+      assert.ok(!visible(page.$('language')));
+      assert.strictEqual(page.document.activeElement, chip);
+      chip.click();
+      page.document.dispatchEvent(new page.window.KeyboardEvent('keydown', { key: 'Escape' }));
+      assert.ok(!visible(page.$('language')));
+      chip.click();
+      page.document.querySelector('#language-list [aria-current]').click();
+      assert.ok(!visible(page.$('language')));
+      assert.deepStrictEqual(page.navigations, [], 'no reload for the language already in use');
+    } finally {
+      page.close();
+    }
+  });
+
+  await check('Tab and Shift+Tab stay inside an open dialog', async () => {
+    const page = await guestPage({
+      // jsdom lays nothing out: every element shown counts as on screen.
+      before(window) {
+        window.Element.prototype.getClientRects = function () {
+          return this.closest('[hidden]') ? [] : [{}];
+        };
+      }
+    });
+    try {
+      await until(() => visible(page.$('nickname')), 'the name dialog');
+      const { document, window } = page;
+      const tab = (shiftKey = false) => document.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Tab', shiftKey, cancelable: true }));
+      const first = page.$('nickname-input');
+      const last = page.$('nickname-skip');
+      last.focus();
+      tab();
+      assert.strictEqual(document.activeElement, first, 'from the last, Tab goes to the first');
+      tab(true);
+      assert.strictEqual(document.activeElement, last, 'from the first, Shift+Tab goes to the last');
+      page.$('search').focus();
+      tab();
+      assert.strictEqual(document.activeElement, first, 'from outside, back in');
+      page.$('nickname-go').focus();
+      tab();
+      assert.strictEqual(document.activeElement, page.$('nickname-go'), 'in between, the browser moves on as usual');
     } finally {
       page.close();
     }

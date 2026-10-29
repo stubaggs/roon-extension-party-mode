@@ -309,7 +309,7 @@ const set = (values) => Object.assign(roon.settings, values);
     set({ enabled: false, playlist_download: 'qr' });
     const res = await get('/api/party', { Cookie: cookie });
     assert.strictEqual(res.status, 403);
-    assert.deepStrictEqual(await res.json(), { error: 'closed', playlist: true });
+    assert.deepStrictEqual(await res.json(), { error: 'closed', playlist: true, party_name: 'Test Party' });
     set({ playlist_download: 'link' });
     assert.strictEqual((await (await get('/api/party', { Cookie: cookie })).json()).playlist, true);
     set({ playlist_download: 'off' });
