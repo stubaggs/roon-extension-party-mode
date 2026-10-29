@@ -5,6 +5,9 @@ running in its Extensions list.
 
 ## 1.4.0
 
+Docker image: `stubaggs/roon-extension-party-mode:1.4.0@sha256:30e1d3c3432d27c74466ccf852151f2c792a3d94f7f2b9bc5327cd09a347c740`<br>
+Code fingerprint: `d2a63034c5ec`
+
 ### New
 
 - **Pass it on:** guests tap the party's name to show the QR code to a friend. Turn it off
