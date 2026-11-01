@@ -47,7 +47,7 @@ Two addresses outside `/embed/` are for links people tap on your screen:
 | `party` | `on`, `paused`, `off` | The party's state |
 | `party_name` | text | The party's name; empty if unset |
 | `host_name` | text, or null | The host's name; null unless set |
-| `ready` | true, false | Connected to Roon |
+| `ready` | true, false | Connected to Roon, and the party zone is there |
 | `playlist` | `qr`, `link`, `off`, or null | How the playlist is offered once the party's over; null while it's on |
 | `language` | a language code, or null | The Hub's language, if the host chose one |
 | `roon_radio` | true, false | Roon Radio is on in the party zone |

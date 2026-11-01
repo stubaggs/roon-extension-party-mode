@@ -317,7 +317,7 @@ check('no permission to use Docker: run it with sudo, or join the docker group',
   const r = setup(null, { args: ['--status'], state: freshState({ daemon: 'permission denied' }) });
   assert.strictEqual(r.status, 1);
   assert.match(r.err, /You don't have permission to use Docker/);
-  assert.match(r.err, /sudo bash .*party-mode-setup\.sh/);
+  assert.match(r.err, /sudo bash\s+.*party-mode-setup\.sh/);
   assert.match(said(r.err), /\(sudo usermod -aG docker pi\), then log out and back in\./);
 });
 

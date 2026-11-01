@@ -9,6 +9,7 @@ Not released yet.
 
 ### Fixed
 
+- A search with no matches no longer lists "No Results" as a track guests could pick.
 - Roon's website link for Party Mode no longer points at 127.0.0.1 when Party Mode starts
   before the network is up, such as after a reboot.
 - Once the party is over, the guest page keeps the party's name as its title when it's
