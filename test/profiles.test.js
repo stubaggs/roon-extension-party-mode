@@ -344,6 +344,53 @@ function fakeRoon(profiles, menuTitle = 'Profile', current = 'Guest') {
     assert.deepStrictEqual(lines, [`[Roon] ${NO_ANSWER}`, '[Roon] Roon answered about profiles after all']);
   });
 
+  await check('steps in the browse session take turns: a new one waits for one still going', async () => {
+    const roon = serviceFor(fakeBrowseCore({}));
+    const order = [];
+    let finish;
+    const going = new Promise((resolve) => (finish = resolve));
+    const first = roon._inProfileSession(async () => {
+      order.push('first starts');
+      await going;
+      order.push('first ends');
+    });
+    const second = roon._inProfileSession(async () => order.push('second starts'));
+    await settled();
+    assert.deepStrictEqual(order, ['first starts'], 'the second waits');
+    finish();
+    await Promise.all([first, second]);
+    assert.deepStrictEqual(order, ['first starts', 'first ends', 'second starts']);
+  });
+
+  await check('a step that failed does not stop the next', async () => {
+    const roon = serviceFor(fakeBrowseCore({}));
+    await assert.rejects(roon._inProfileSession(async () => { throw new Error('no'); }), /no/);
+    assert.strictEqual(await roon._inProfileSession(async () => 'next'), 'next');
+  });
+
+  await check('reads through the real menus take turns when one outlives its wait', async () => {
+    const { core, release } = slowCore({ profiles: ['Stu', 'Party'] });
+    const roon = serviceFor(core);
+    roon.profileWaitMs = 5;
+    await logged(async () => {
+      await roon._refreshProfiles();
+      const again = roon._refreshProfiles();
+      await settled();
+      release();
+      await again;
+      await settled();
+    });
+    assert.deepStrictEqual(roon.profiles, ['Stu', 'Party']);
+    assert.strictEqual(roon.profileProblem, '');
+  });
+
+  await check('a step that never ends is left behind when the Core goes', async () => {
+    const roon = serviceFor(fakeBrowseCore({}));
+    roon._inProfileSession(() => new Promise(() => {}));
+    roon.profileSteps = null; // what losing the Core does
+    assert.strictEqual(await roon._inProfileSession(async () => 'next'), 'next');
+  });
+
   await check('a late answer about profiles is left when the Core has gone, or a newer read has run', async () => {
     for (const change of [(roon) => (roon.core = null), (roon) => (roon.profileTurn += 1)]) {
       const { core, release } = slowCore({ profiles: ['Stu', 'Party'] });
