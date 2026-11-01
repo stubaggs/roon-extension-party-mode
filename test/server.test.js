@@ -1399,6 +1399,14 @@ const set = (values) => Object.assign(roon.settings, values);
       roon.emit('queue_changed');
       assert.ok(await until(/event: up-next\n.*Waterloo/s), text);
       assert.ok(!text.includes('event: status'), 'status unchanged, not sent');
+      // The zone going and coming, straight away.
+      const ready = roon.ready;
+      for (const [event, now] of [['zone_left', !ready], ['zone_arrived', ready]]) {
+        text = '';
+        roon.ready = now;
+        roon.emit(event);
+        assert.ok(await until(new RegExp(`event: status\\n.*"ready":${now}`, 's')), text);
+      }
       const about = await (await get('/About')).text();
       assert.match(about, /<th scope="row">Custom Party Hub pages<\/th><td>1 open<\/td>/);
     } finally {
@@ -1536,17 +1544,28 @@ const set = (values) => Object.assign(roon.settings, values);
     const page = http.createServer((req, res) => res.end('ok'));
     await new Promise((resolve) => page.listen(0, '127.0.0.1', resolve));
     const frameOk = async () => (await (await get('/api/hub?view=roon')).json()).frame_ok;
+    let screen;
     try {
       set({ hub_playing: 'simple' });
       roon.coreAddress = { host: '127.0.0.1', port: page.address().port };
       roon.emit('core_paired');
+      assert.notStrictEqual(await frameOk(), true, 'no screen shows it yet');
+      screen = new AbortController();
+      await fetch(base + '/api/events?view=roon', { signal: screen.signal });
       let ok = await frameOk();
       for (let i = 0; i < 50 && ok !== true; i += 1) {
         await new Promise((r) => setTimeout(r, 20));
         ok = await frameOk();
       }
       assert.strictEqual(ok, true);
+      screen.abort();
+      for (let i = 0; i < 50 && ok === true; i += 1) {
+        await new Promise((r) => setTimeout(r, 20));
+        ok = await frameOk();
+      }
+      assert.notStrictEqual(ok, true, 'the screen went: no longer checked');
     } finally {
+      if (screen) screen.abort();
       await new Promise((resolve) => page.close(resolve));
       delete roon.coreAddress;
       set({ hub_playing: 'simple' });

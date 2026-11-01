@@ -110,7 +110,7 @@ docker run --rm --init -v "$PWD:/app:ro" -w /app mcr.microsoft.com/playwright:v1
 | `/` | "Scan the code again" |
 | `/api/party`, `/api/queue`, `/api/search`, `POST /api/request`, `POST /api/skip`, `POST /api/name` | The guest page's API; need a guest session |
 | `/api/hub` | The Party Hub's data; no session |
-| `/api/events` | Live updates for both pages (server-sent events) |
+| `/api/events` | Live updates for both pages (server-sent events); `?view=roon` from a Party Hub showing Roon's display page by its address |
 | `/api/image/<key>` | Album art, only for image keys Party Mode has sent |
 | `/i18n.js` | The page text in the browser's language |
 | `/embed/…` | Read-only views, art, QR codes and live updates for other people's screens (see [EMBED.md](EMBED.md)) |

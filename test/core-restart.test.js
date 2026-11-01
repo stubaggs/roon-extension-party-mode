@@ -508,6 +508,23 @@ check('the party zone arriving is told once, not on every zone update; again whe
   });
 });
 
+check('the party zone leaving is told once', () => {
+  withTimers(() => {
+    const roon = service();
+    const core = fakeCore([zone]);
+    let told = 0;
+    roon.on('zone_left', () => (told += 1));
+    roon._onCorePaired(core);
+    core.zonesCb('Subscribed', {});
+    assert.strictEqual(told, 0);
+    core.zones = [];
+    roon._refreshZone();
+    assert.strictEqual(told, 1);
+    roon._refreshZone();
+    assert.strictEqual(told, 1, 'an update, not a departure');
+  });
+});
+
 check('a Core restart: the zone arriving asks about profiles again, once, only after no answer', () => {
   withTimers(() => {
     const roon = service();

@@ -128,19 +128,18 @@
   if ('ResizeObserver' in window) new ResizeObserver(fitRows).observe(list);
   else window.addEventListener('resize', fitRows);
 
-  // And once the page has loaded: an iPad's Safari can report its height
-  // before its bars settle, leaving the right-hand side too high.
+  // And once the page has loaded, and when the visible area changes: an iPad's
+  // Safari can report its height before its bars settle, leaving the right-hand
+  // side too high.
   function relayout() {
     measureHeight();
     alignArt();
     fitRows();
     fitQr();
   }
-  window.addEventListener('load', () => {
-    relayout();
-    setTimeout(relayout, 500);
-  });
+  window.addEventListener('load', relayout);
   window.addEventListener('pageshow', relayout);
+  if (window.visualViewport) window.visualViewport.addEventListener('resize', relayout);
 
   // Turning a tablet, or resizing a window, past a phone's width.
   wide.addEventListener('change', () => arrange());
@@ -318,7 +317,8 @@
 
   refresh();
 
-  const events = new EventSource('/api/events');
+  // With the view, so Party Mode knows a screen shows Roon's display page.
+  const events = new EventSource(view ? `/api/events?view=${encodeURIComponent(view)}` : '/api/events');
   events.addEventListener('queue', refresh);
   // The join code is the same for every party (/GuestHub), so it stays as loaded.
   events.addEventListener('party', refresh);
