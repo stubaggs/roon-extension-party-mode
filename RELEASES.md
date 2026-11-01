@@ -13,7 +13,8 @@ Not released yet.
 - Titles and artists in Japanese, Chinese, Korean, Cyrillic, Greek, Hebrew, Arabic and
   Thai are told apart, so different tracks no longer count as duplicates or share a credit.
 - Roon's website link for Party Mode no longer points at 127.0.0.1 when Party Mode starts
-  before the network is up, such as after a reboot.
+  before the network is up, such as after a reboot, even on the same computer as the Roon
+  Core.
 - Once the party is over, the guest page keeps the party's name as its title when it's
   opened again, rather than "Add a track".
 

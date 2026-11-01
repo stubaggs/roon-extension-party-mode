@@ -160,6 +160,32 @@ const settle = () => new Promise((resolve) => setImmediate(resolve));
     assert.strictEqual(roon.reconnects, 1);
   });
 
+  await check('a Core on this computer pairs before the network is up: registers again when the party zone arrives', async () => {
+    const roon = fakeRoon();
+    const server = fakeServer({ address: '127.0.0.1' });
+    await quiet(() => start(roon, server));
+    roon.emit('core_paired');
+    assert.strictEqual(roon.reconnects, 0, 'still no address at pairing');
+    server.address = '192.0.2.10';
+    roon.emit('zone_arrived');
+    assert.strictEqual(roon.reconnects, 1);
+    assert.deepStrictEqual(roon.registered, ['http://127.0.0.1:8338/About', 'http://192.0.2.10:8338/About']);
+    assert.strictEqual(roon.status.line, 'Hub: http://192.0.2.10:8338/PartyHub');
+    // The reconnect pairs again and the zone arrives again: the link is the same now.
+    roon.emit('core_paired');
+    roon.emit('zone_arrived');
+    assert.strictEqual(roon.reconnects, 1);
+  });
+
+  await check('the party zone arriving with the link unchanged does not reconnect', async () => {
+    const roon = fakeRoon();
+    const server = fakeServer();
+    await quiet(() => start(roon, server));
+    roon.emit('core_paired');
+    roon.emit('zone_arrived');
+    assert.strictEqual(roon.reconnects, 0);
+  });
+
   await check('8338 taken and no port chosen: the next free port, kept in the settings', async () => {
     const roon = fakeRoon(8338, false);
     const server = fakeServer({ busy: [8338, 8339] });

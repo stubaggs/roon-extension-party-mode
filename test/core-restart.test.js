@@ -486,6 +486,28 @@ check('a track that ends while the Core is away is not judged left early; one st
   assert.deepStrictEqual(ended.slice(1).map((e) => [e.title, e.seek]), [['Isn\'t She Lovely', 60]]);
 });
 
+check('the party zone arriving is told once, not on every zone update; again when it returns', () => {
+  withTimers(() => {
+    const roon = service();
+    const core = fakeCore([]);
+    let told = 0;
+    roon.on('zone_arrived', () => (told += 1));
+    roon._onCorePaired(core);
+    core.zonesCb('Subscribed', {});
+    assert.strictEqual(told, 0, 'not there yet');
+    core.zones = [zone];
+    roon._refreshZone();
+    assert.strictEqual(told, 1);
+    roon._refreshZone();
+    assert.strictEqual(told, 1, 'an update, not an arrival');
+    core.zones = [];
+    roon._refreshZone();
+    core.zones = [zone];
+    roon._refreshZone();
+    assert.strictEqual(told, 2);
+  });
+});
+
 check('Roon starting or stopping to allow a skip tells the pages, so Skip shows or hides', () => {
   const roon = service();
   const core = fakeCore([Object.assign({}, zone, { is_next_allowed: true })]);
