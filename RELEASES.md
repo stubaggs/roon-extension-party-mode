@@ -17,6 +17,8 @@ Not released yet.
   Core.
 - Once the party is over, the guest page keeps the party's name as its title when it's
   opened again, rather than "Add a track".
+- The About page no longer reports a problem with the Roon profile after a Roon Core
+  restart.
 
 ## 1.4.0
 

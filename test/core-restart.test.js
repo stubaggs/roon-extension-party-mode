@@ -508,6 +508,24 @@ check('the party zone arriving is told once, not on every zone update; again whe
   });
 });
 
+check('a Core restart: the zone arriving asks about profiles again, once, only after no answer', () => {
+  withTimers(() => {
+    const roon = service();
+    const asked = [];
+    roon._applyProfile = async (o) => asked.push(o);
+    const core = fakeCore([]);
+    roon._onCorePaired(core);
+    roon.profileProblem = 'Could not read profiles: Roon did not answer';
+    core.zonesCb('Subscribed', {});
+    asked.length = 0;
+    core.zones = [zone];
+    roon._refreshZone();
+    assert.strictEqual(asked.length, 1);
+    roon._refreshZone();
+    assert.strictEqual(asked.length, 1, 'an update, not an arrival');
+  });
+});
+
 check('Roon starting or stopping to allow a skip tells the pages, so Skip shows or hides', () => {
   const roon = service();
   const core = fakeCore([Object.assign({}, zone, { is_next_allowed: true })]);
