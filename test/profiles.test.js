@@ -293,6 +293,85 @@ function fakeRoon(profiles, menuTitle = 'Profile', current = 'Guest') {
     assert.strictEqual(roon.profileProblem, '');
   });
 
+  // Roon's settings menu, on a Core that answers only when told to, as a busy one does.
+  const slowCore = ({ profiles }) => {
+    const levels = {};
+    let release;
+    const answered = new Promise((resolve) => (release = resolve));
+    const core = {
+      browse: async (o) => {
+        await answered;
+        if (o.pop_all) levels[o.multi_session_key] = 'menu';
+        else if (o.item_key === 'prof') levels[o.multi_session_key] = 'profiles';
+        return { action: 'list' };
+      },
+      load: async (o) => ({
+        items: levels[o.multi_session_key] === 'profiles'
+          ? profiles.map((title, i) => ({ title, item_key: `p${i}`, hint: 'action' }))
+          : [{ title: 'Profile', item_key: 'prof', hint: 'list', subtitle: 'Guest' }]
+      })
+    };
+    return { core, release };
+  };
+  const settled = () => new Promise((resolve) => setTimeout(resolve, 20));
+  const logged = async (fn) => {
+    const realLog = console.log;
+    const realWarn = console.warn;
+    const lines = [];
+    console.log = (m) => lines.push(m);
+    console.warn = (m) => lines.push(m);
+    try {
+      await fn();
+    } finally {
+      console.log = realLog;
+      console.warn = realWarn;
+    }
+    return lines;
+  };
+
+  await check('a Core that answers about profiles after the wait: the answer still counts', async () => {
+    const { core, release } = slowCore({ profiles: ['Stu', 'Party'] });
+    const roon = serviceFor(core);
+    roon.profileWaitMs = 5;
+    const lines = await logged(async () => {
+      await roon._refreshProfiles();
+      assert.match(roon.profileProblem, /^Could not read profiles/);
+      release();
+      await settled();
+    });
+    assert.strictEqual(roon.profileProblem, '');
+    assert.deepStrictEqual(roon.profiles, ['Stu', 'Party']);
+    assert.deepStrictEqual(lines, [`[Roon] ${NO_ANSWER}`, '[Roon] Roon answered about profiles after all']);
+  });
+
+  await check('a late answer about profiles is left when the Core has gone, or a newer read has run', async () => {
+    for (const change of [(roon) => (roon.core = null), (roon) => (roon.profileTurn += 1)]) {
+      const { core, release } = slowCore({ profiles: ['Stu', 'Party'] });
+      const roon = serviceFor(core);
+      roon.profileWaitMs = 5;
+      await logged(async () => {
+        await roon._refreshProfiles();
+        change(roon);
+        release();
+        await settled();
+      });
+      assert.match(roon.profileProblem, /^Could not read profiles/);
+    }
+  });
+
+  await check('a Core that selects the guest profile after the wait: the answer still counts', async () => {
+    const { core, release } = slowCore({ profiles: ['Stu', 'Party'] });
+    const roon = serviceFor(core, { guest_profile: 'Party' });
+    roon.profileWaitMs = 5;
+    const lines = await logged(async () => {
+      await roon._applyProfile();
+      release();
+      await settled();
+    });
+    assert.strictEqual(roon.profileProblem, '');
+    assert.ok(lines.includes('[PartyMode] Guest requests use the Roon profile "Party"'), lines.join('\n'));
+  });
+
   await check('a profile problem that is not a missing answer is not asked about again', async () => {
     const core = {};
     const roon = unanswered(core, () => true, { display_name: 'Lounge' });
