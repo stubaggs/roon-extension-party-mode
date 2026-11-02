@@ -1077,6 +1077,34 @@ const set = (values) => Object.assign(roon.settings, values);
     assert.strictEqual((await post('/api/name', sam, { name: 'Sam', confirm: true })).status, 200);
   });
 
+  await check('saving the same name again sends the pages nothing; a new one sends the queue', async () => {
+    const cookie = await newGuest();
+    await post('/api/name', cookie, { name: 'Steady' });
+    const controller = new AbortController();
+    const res = await fetch(`${base}/api/events`, { signal: controller.signal });
+    const reader = res.body.getReader();
+    let text = '';
+    const until = async (pattern) => {
+      while (!pattern.test(text)) text += new TextDecoder().decode((await reader.read()).value);
+    };
+    try {
+      await until(/event: queue/); // the snapshot sent on connecting
+      text = '';
+      const same = await post('/api/name', cookie, { name: 'Steady' });
+      assert.deepStrictEqual(await same.json(), { guest_name: 'Steady' });
+      // A marker: anything the rename sent would arrive before it.
+      roon.emit('party_mode_changed', 'on', 'on');
+      await until(/event: party/);
+      assert.ok(!/event: queue[\s\S]*event: party/.test(text), text.slice(0, 200));
+      await until(/event: queue/); // the marker's own queue
+      text = '';
+      await post('/api/name', cookie, { name: 'Moved' });
+      await until(/event: queue/);
+    } finally {
+      controller.abort();
+    }
+  });
+
   await check('a guest action sent from another site is refused, before anything happens', async () => {
     const cookie = await newGuest();
     const send = (origin) =>
