@@ -299,6 +299,9 @@ check("a language the guest chose wins over the browser's", () => {
   assert.strictEqual(i18n.pick(req('ja', 'fr-FR')), 'ja');
   assert.strictEqual(i18n.pick(req('pt-BR', 'en')), 'pt-BR');
   assert.strictEqual(i18n.pick(req('xx', 'fr-FR')), 'fr', 'an unknown choice is ignored');
+  for (const name of ['toString', '__proto__', 'constructor']) {
+    assert.strictEqual(i18n.pick(req(name, 'fr-FR')), 'fr', `${name} is not a language`);
+  }
   assert.strictEqual(i18n.pick(req(null, 'fr-FR')), 'fr');
 });
 
