@@ -14,9 +14,10 @@
 
 'use strict';
 
-const { countWarnings } = require('./lib/log');
+const { countWarnings, logUnhandledRejections } = require('./lib/log');
 
 countWarnings();
+logUnhandledRejections();
 
 const { RoonService } = require('./lib/roon-service');
 const { GuestStore } = require('./lib/guests');

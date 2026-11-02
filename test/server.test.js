@@ -996,6 +996,22 @@ const set = (values) => Object.assign(roon.settings, values);
     }
   });
 
+  await check('a web server error once listening is logged, not lost', async () => {
+    const other = createServer(roon, new GuestStore(), { limits: { all: 0, search: 0 } });
+    const listening = await other.listen(0);
+    const { error } = console;
+    const written = [];
+    console.error = (m) => written.push(m);
+    try {
+      assert.strictEqual(listening.listenerCount('error'), 1, 'only the logger, not the startup check');
+      listening.emit('error', new Error('EMFILE: too many open files'));
+      assert.deepStrictEqual(written, ['[PartyMode] Web server error: EMFILE: too many open files']);
+    } finally {
+      console.error = error;
+      listening.close();
+    }
+  });
+
   await check('an unknown address gets a plain 404 that keeps the security headers', async () => {
     for (const path of ['/nope', '/robots.txt', '/api/nope']) {
       const res = await get(path);
