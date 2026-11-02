@@ -344,6 +344,48 @@ function fakeRoon(profiles, menuTitle = 'Profile', current = 'Guest') {
     assert.deepStrictEqual(lines, [`[Roon] ${NO_ANSWER}`, '[Roon] Roon answered about profiles after all']);
   });
 
+  // As Roon was seen to do just after a restart: pop_all says level 0, and the
+  // next load is still the Profile list, at level 1.
+  const stuckCore = (profiles, popLevelsWorks = true) => {
+    let level = 1;
+    const seen = [];
+    return {
+      seen,
+      browse: async (o) => {
+        seen.push(Object.keys(o).filter((k) => !['hierarchy', 'multi_session_key'].includes(k)).join());
+        if (o.pop_levels && popLevelsWorks) level = 0;
+        else if (o.item_key === 'prof') level = 1;
+        return { action: 'list', list: { level: 0, title: 'Settings' } };
+      },
+      load: async () => (level
+        ? { items: profiles.map((title, i) => ({ title, item_key: `p${i}`, hint: 'action' })), list: { level: 1, title: 'Profile' } }
+        : { items: [{ title: 'Profile', item_key: 'prof', hint: 'list', subtitle: 'Guest' }], list: { level: 0, title: 'Settings' } })
+    };
+  };
+
+  await check('a session left a level down after a Core restart: goes by what is loaded, not what pop_all said', async () => {
+    const core = stuckCore(['Guest', 'Cait']);
+    const roon = serviceFor(core);
+    roon._readDefaultProfile = async () => null;
+    const lines = await logged(() => roon._refreshProfiles());
+    assert.deepStrictEqual(roon.profiles, ['Guest', 'Cait']);
+    assert.strictEqual(roon.profileProblem, '');
+    assert.deepStrictEqual(lines, []);
+    assert.deepStrictEqual(core.seen.slice(0, 2), ['pop_all', 'pop_levels']);
+  });
+
+  await check('a session at the top goes straight on, with no extra step', async () => {
+    const core = stuckCore(['Guest']);
+    core.seen.length = 0;
+    core.browse({ pop_levels: 1 });
+    core.seen.length = 0;
+    const roon = serviceFor(core);
+    roon._readDefaultProfile = async () => null;
+    await roon._refreshProfiles();
+    assert.ok(!core.seen.includes('pop_levels'));
+    assert.deepStrictEqual(roon.profiles, ['Guest']);
+  });
+
   await check('steps in the browse session take turns: a new one waits for one still going', async () => {
     const roon = serviceFor(fakeBrowseCore({}));
     const order = [];
