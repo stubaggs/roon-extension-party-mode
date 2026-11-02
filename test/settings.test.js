@@ -217,6 +217,36 @@ check(`a pairing made while config.json can't be saved is saved once it can${isR
   }
 });
 
+check('the detailed log never shows the pairing token', () => {
+  const dir = path.join(tmp, 'token-log');
+  fs.mkdirSync(dir, { recursive: true });
+  const cwd = process.cwd();
+  const { log, warn } = console;
+  const lines = [];
+  console.log = (...args) => lines.push(args.join(' '));
+  console.warn = () => {};
+  try {
+    process.chdir(dir);
+    const roon = new RoonService();
+    roon._setDetailedLog(true, false);
+    // node-roon-api's own message layer, registering with a saved pairing.
+    const Moo = require('node-roon-api/moo');
+    const moo = new Moo({ logger: roon.api.logger, send() {} });
+    moo.send_request('com.roonlabs.registry:1/register', { extension_id: 'x', token: 'secret-1' });
+    roon.api.logger.log('<-', 'COMPLETE', 1, 'Registered', JSON.stringify({ core_id: 'c', token: 'secret-2' }));
+    roon._setDetailedLog(false, false);
+    const text = lines.join('\n');
+    assert.ok(text.includes('register'), text);
+    assert.ok(text.includes('"token":"[redacted]"'), text);
+    assert.ok(!text.includes('secret-'), text);
+  } finally {
+    process.chdir(cwd);
+    console.log = log;
+    console.warn = warn;
+    setDebug(false);
+  }
+});
+
 check("the host's Party changes are logged, naming both", () => {
   const dir = path.join(tmp, 'modes');
   fs.mkdirSync(dir, { recursive: true });
