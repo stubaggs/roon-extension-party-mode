@@ -535,6 +535,50 @@ const set = (values) => Object.assign(roon.settings, values);
     assert.strictEqual((await post('/api/skip', other, {})).status, 200);
   });
 
+  await check('guests skipping the same song together skip it once, and all hear it skipped', async () => {
+    const play = (title) => {
+      roon.zone = { zone_id: 'z1', state: 'playing', is_next_allowed: true, now_playing: { length: 200, two_line: { line1: title, line2: 'Spandau Ballet' } } };
+      roon.emit('now_playing_changed', null);
+    };
+    const log = console.log;
+    console.log = () => {};
+    try {
+      play('Gold');
+      const [alex, sam, jo] = [await newGuest(), await newGuest(), await newGuest()];
+      roon.skips = 0;
+      const answers = await Promise.all([alex, sam].map((cookie) => post('/api/skip', cookie, {})));
+      assert.deepStrictEqual(answers.map((res) => res.status), [200, 200]);
+      assert.strictEqual(roon.skips, 1, 'one skip sent to Roon');
+      const left = async (cookie) => (await (await get('/api/party', { Cookie: cookie })).json()).allowances.skip.remaining;
+      assert.deepStrictEqual([await left(alex), await left(sam)].sort(), [0, 1], 'only the skip sent is used');
+      // Roon skipped but hasn't said what plays next yet: still the same song.
+      assert.strictEqual((await post('/api/skip', jo, {})).status, 200);
+      assert.strictEqual(roon.skips, 1);
+      assert.strictEqual(await left(jo), 1);
+      // The next song is a new one to skip, even the same song again later.
+      play('True');
+      assert.strictEqual((await post('/api/skip', jo, {})).status, 200);
+      assert.strictEqual(roon.skips, 2);
+      play('Gold');
+      const [kim, lee] = [await newGuest(), await newGuest()];
+      roon.skips = 0;
+      roon.failing = true;
+      const failed = await Promise.all([kim, lee].map((cookie) => post('/api/skip', cookie, {})));
+      roon.failing = false;
+      assert.deepStrictEqual(failed.map((res) => res.status), [502, 502], 'a failed skip fails for both');
+      assert.deepStrictEqual([await left(kim), await left(lee)], [1, 1], 'nothing used');
+      assert.strictEqual((await post('/api/skip', lee, {})).status, 200, 'and is sent afresh');
+      assert.strictEqual(roon.skips, 1);
+    } finally {
+      roon.failing = false;
+      // Another zone, so the songs here don't stay the playing one.
+      roon.zone = { zone_id: 'z-after-skips', state: 'stopped' };
+      roon.emit('now_playing_changed', null);
+      roon.zone = null;
+      console.log = log;
+    }
+  });
+
   await check('a guest\'s skip is logged with their name and the track, and a failed one with why', async () => {
     const cookie = await newGuest();
     await post('/api/name', cookie, { name: 'Skipper' });

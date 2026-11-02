@@ -924,6 +924,9 @@ const display = http.createServer((req, res) => res.end('<!doctype html><title>R
     try {
       await until(() => visible(page.$('skip')), 'Skip');
       assert.strictEqual((await asGuest(page, '/api/skip', {})).status, 200);
+      // Roon moves on: Skip now is for the next song.
+      play(sos, [fernando]);
+      await until(() => page.$('playing-title').textContent === 'SOS', 'the next song');
       page.$('skip').click();
       await until(() => /^You've used them all\. More in /.test(page.$('toast').textContent), 'the wait');
       assert.strictEqual(roon.skips, 1, 'only the other tab skipped');
