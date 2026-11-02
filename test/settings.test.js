@@ -235,13 +235,70 @@ check("the host's Party changes are logged, naming both", () => {
       send_complete() {}
     });
     save({ enabled: 'paused' });
-    save({ enabled: 'paused', party_name: 'Garden' }); // no change of mode: nothing
+    save({ enabled: 'paused', party_name: 'Garden' }); // no change of mode: only the name
+    save({ enabled: 'paused', party_name: 'Garden' }); // nothing changed: nothing
     save({ enabled: false });
     save({ enabled: true });
-    assert.deepStrictEqual(lines.filter((l) => String(l).startsWith('[PartyMode] Party')), [
-      '[PartyMode] Party: Paused (was On)',
-      '[PartyMode] Party: Off (was Paused)',
-      '[PartyMode] Party: On (was Off)'
+    assert.deepStrictEqual(lines.filter((l) => String(l).startsWith('[PartyMode] Setting changed')), [
+      '[PartyMode] Setting changed: Party: Paused (was On)',
+      '[PartyMode] Setting changed: Name: "Garden" (was blank)',
+      '[PartyMode] Setting changed: Party: Off (was Paused)',
+      '[PartyMode] Setting changed: Party: On (was Off)'
+    ]);
+  } finally {
+    process.chdir(cwd);
+    console.log = log;
+    console.warn = warn;
+  }
+});
+
+check('every setting a save changes is logged as "Title: new (was old)"; a refused save says why', () => {
+  const dir = path.join(tmp, 'changes');
+  fs.mkdirSync(dir, { recursive: true });
+  const cwd = process.cwd();
+  const { log, warn } = console;
+  const lines = [];
+  console.log = (m) => lines.push(m);
+  console.warn = (m) => lines.push(`warn ${m}`);
+  try {
+    process.chdir(dir);
+    const roon = new RoonService();
+    const save = (changes) => roon.api._service_request_handlers['com.roonlabs.settings:1']({
+      msg: { name: 'save_settings' },
+      body: { is_dry_run: false, settings: { values: Object.assign({}, roon.settings, changes) } },
+      send_complete() {}
+    });
+    save({ zone: { output_id: 'o1', name: 'Test Zone' }, host_name: 'Disco Stu', add_limit: 5, add_refill: 1 });
+    lines.length = 0;
+    save({
+      zone: { output_id: 'o2', name: 'Bedroom' },
+      host_name: '',
+      party_name: 'Line\nbreak',
+      prevent_duplicates: false,
+      playlist_download: 'off',
+      add_limit: 10,
+      add_refill: 5,
+      skip_refill: 2,
+      title_tracks: 'Titel'
+    });
+    assert.deepStrictEqual(lines, [
+      '[PartyMode] Setting changed: Zone: "Bedroom" (was "Test Zone")',
+      '[PartyMode] Setting changed: Name: "Line\\nbreak" (was blank)',
+      '[PartyMode] Setting changed: Host name: blank (was "Disco Stu")',
+      '[PartyMode] Setting changed: Playlist: Off (was QR code)',
+      '[PartyMode] Setting changed: Block tracks already in the queue: No (was Yes)',
+      '[PartyMode] Setting changed: Add to queue, per guest: 10 (was 5)',
+      '[PartyMode] Setting changed: Add to queue, one more every (minutes): 5 (was 1)',
+      '[PartyMode] Setting changed: Skip tracks, one more every (minutes): 2 (was 60)',
+      '[PartyMode] Setting changed: Track category: "Titel" (was "Tracks")'
+    ]);
+
+    // Saving again with nothing changed logs nothing; a refused save says why.
+    lines.length = 0;
+    save({});
+    save({ port: 0 });
+    assert.deepStrictEqual(lines.filter((l) => !l.startsWith('warn [PartyMode] config.json')), [
+      'warn [PartyMode] Settings not saved: Web port: Enter a whole number from 1 to 65535'
     ]);
   } finally {
     process.chdir(cwd);

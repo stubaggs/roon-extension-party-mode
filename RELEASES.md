@@ -21,6 +21,8 @@ Not released yet.
   restart.
 - The guest page shows "Searching…" while a search is under way, so a slow answer from
   Roon no longer looks like the page has frozen.
+- The log records each setting the host changes, with its old value, and why Roon
+  refused a save.
 
 ## 1.4.0
 

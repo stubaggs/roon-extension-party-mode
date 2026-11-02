@@ -553,8 +553,8 @@ const set = (values) => Object.assign(roon.settings, values);
       roon.zone = null;
     }
     assert.deepStrictEqual(lines.filter((m) => /^\[\w+\] Skip /.test(m)), [
-      '[Roon] Skip from Skipper failed: roon_refused',
-      '[Guest] Skip from Skipper: "Gold" / "Spandau Ballet"'
+      '[Roon] Skip from "Skipper" failed: roon_refused',
+      '[Guest] Skip from "Skipper": "Gold" / "Spandau Ballet"'
     ]);
   });
 
@@ -587,10 +587,10 @@ const set = (values) => Object.assign(roon.settings, values);
       `[Guest] ${id}: name "Logger" (was Anon)`,
       `[Guest] ${id}: name Anon (was "Logger")`,
       `[Guest] ${id}: name "Logger" (was Anon)`,
-      '[Roon] Request (add) from Logger failed: "Waterloo" / "ABBA": roon_refused',
+      '[Roon] Request (add) from "Logger" failed: "Waterloo" / "ABBA": roon_refused',
       lines.find((m) => m.startsWith('[PartyMode] Playlist downloaded')),
-      '[Guest] Search from Logger: "abba" (2 results)',
-      '[Guest] Request (next) from Logger refused: unknown_track'
+      '[Guest] Search from "Logger": "abba" (2 results)',
+      '[Guest] Request (next) from "Logger" refused: unknown_track'
     ]);
     assert.match(lines[4], /^\[PartyMode\] Playlist downloaded \(\d+ tracks, from its own address\)$/);
   });
@@ -658,9 +658,9 @@ const set = (values) => Object.assign(roon.settings, values);
       roon.queue = [];
     }
     assert.deepStrictEqual(lines.filter((m) => /"Mamma Mia"/.test(m)).map((m) => m.replace(/ \[.*?\]/, '').replace(/ \d+s/, '')), [
-      '[PartyMode] Queued: "Mamma Mia" / "ABBA" -> Early',
-      '[PartyMode] Playing: "Mamma Mia" / "ABBA" -> Early',
-      '[Guest] Request (add) from Early: "Mamma Mia" / "ABBA"'
+      '[PartyMode] Queued: "Mamma Mia" / "ABBA" for "Early"',
+      '[PartyMode] Playing: "Mamma Mia" / "ABBA" for "Early"',
+      '[Guest] Request (add) from "Early": "Mamma Mia" / "ABBA"'
     ]);
   });
 
@@ -712,8 +712,8 @@ const set = (values) => Object.assign(roon.settings, values);
       roon.queue = [];
     }
     assert.deepStrictEqual(lines.filter((m) => /^\[PartyMode\] (Playing|Credited): "Dancing Queen"/.test(m)).map((m) => m.replace(/ \[.*\]/, '')), [
-      '[PartyMode] Playing: "Dancing Queen" / "ABBA" -> Host',
-      '[PartyMode] Credited: "Dancing Queen" / "ABBA" -> Starter'
+      '[PartyMode] Playing: "Dancing Queen" / "ABBA" for Host',
+      '[PartyMode] Credited: "Dancing Queen" / "ABBA" to "Starter"'
     ]);
   });
 

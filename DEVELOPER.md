@@ -434,6 +434,11 @@ Every line starts with a tag saying what it's about, so `grep` finds one kind:
 - **`[PartyMode]`**: Party Mode itself and the host's settings: startup, the tracks it
   follows and credits, playlist downloads.
 
+Names (tracks, artists, zones, profiles, guests, the host) and text the host typed are
+in quotes, with line breaks and control characters escaped (`quote()` in
+`lib/log.js`); labels (`Anon`, `Host`, `Roon Radio`, `nobody`), choices and numbers
+aren't. A change reads `new (was old)`.
+
 Info and Detailed lines go to standard output, Warning and Error to standard error; the
 About page counts warnings and errors. Detailed lines appear only while the **Detailed
 log** setting (or `ROON_EXTENSION_PARTY_MODE_DEBUG`) is on: they include what guests
@@ -460,6 +465,7 @@ tag. Lines carry no time; use `docker logs -t`.
 | A guest's session couldn't get the profile | `[Roon] Could not select profile "Party" for a guest: …` |
 | A request's action not found in Roon | `[Roon] No "Add to queue" action and not the usual four actions; …` |
 | Roon refused to start or pause playback | `[Roon] Could not start playback for a request: …` |
+| The host's save refused, with why | `[PartyMode] Settings not saved: Web port: Enter a whole number from 1 to 65535` |
 
 ### Info
 
@@ -473,18 +479,17 @@ tag. Lines carry no time; use `docker logs -t`.
 | Guest requests' profile | `[PartyMode] Guest requests use the Roon profile "Party"` |
 | Party zone back | `[Roon] Party zone "Lounge" is available again` |
 | Requests back on | `[Roon] Requests are back on` |
-| The host changes Party | `[PartyMode] Party: Paused (was On)` |
-| Detailed log turned on or off | `[PartyMode] Detailed log on` |
+| The host saves a changed setting, one line each (names and typed text in quotes, line breaks escaped) | `[PartyMode] Setting changed: Party: Paused (was On)`, `[PartyMode] Setting changed: Name: "Garden" (was blank)`, `[PartyMode] Setting changed: Add to queue, per guest: 10 (was 5)` |
 | A guest names themselves | `[Guest] RA8lxj…: name "Sam" (was Anon)` |
 | A guest's session gets the profile, at their first search | `[Guest] RA8lxj…: profile "Party"` |
-| Request | `[Guest] Request (add) from Sam: "Gold" / "Spandau Ballet"` |
-| Request Roon failed | `[Roon] Request (next) from Sam failed: "Gold" / …: <error>` |
+| Request | `[Guest] Request (add) from "Sam": "Gold" / "Spandau Ballet"` |
+| Request Roon failed | `[Roon] Request (next) from "Sam" failed: "Gold" / …: <error>` |
 | Playback started for a request | `[PartyMode] Started playback in "Lounge" for a request` |
-| Queued for a guest | `[PartyMode] Queued: "Gold" / "Spandau Ballet" 290s [c47dd885da0f] -> Sam` |
-| Started playing, with its credit | `[PartyMode] Playing: "Gold" / "Spandau Ballet" [c47dd885da0f] -> Sam` |
-| Credited after it started | `[PartyMode] Credited: "Gold" / "Spandau Ballet" -> Sam` |
-| Skip | `[Guest] Skip from Sam: "Gold" / "Spandau Ballet"` |
-| Skip Roon failed | `[Roon] Skip from Sam failed: <error>` |
+| Queued for a guest | `[PartyMode] Queued: "Gold" / "Spandau Ballet" 290s [c47dd885da0f] for "Sam"` |
+| Started playing, with its credit | `[PartyMode] Playing: "Gold" / "Spandau Ballet" [c47dd885da0f] for "Sam"` |
+| Credited after it started | `[PartyMode] Credited: "Gold" / "Spandau Ballet" to "Sam"` |
+| Skip | `[Guest] Skip from "Sam": "Gold" / "Spandau Ballet"` |
+| Skip Roon failed | `[Roon] Skip from "Sam" failed: <error>` |
 | Ended early with no guest skip: skipped in Roon, or Roon couldn't play it (Roon doesn't say which) | `[Roon] Ended early: "Gold" / … at 38 of 290 s (…)` |
 | Paused with the party | `[PartyMode] Paused "Lounge": party paused or off` |
 | Playlist downloaded | `[PartyMode] Playlist downloaded (152 tracks, from its own address)` |
@@ -495,9 +500,9 @@ tag. Lines carry no time; use `docker logs -t`.
 | --- | --- |
 | The profiles on offer | `[Roon] Profiles on offer: Party, Guest, …` |
 | The profile before and after a guest's switch | `[Roon] Guest RA8lxj…: Roon answered list; profile before "Guest", after "Party"` |
-| Search | `[Guest] Search from Sam: "abba" (12 results)`; a refused one (`[Guest] … refused: not_ready`) or failed one (`[Roon] … failed: …`) |
+| Search | `[Guest] Search from "Sam": "abba" (12 results)`; a refused one (`[Guest] … refused: not_ready`) or failed one (`[Roon] … failed: …`) |
 | The first search's result categories | `[Roon] Search (Library → Search) result categories: …` |
-| Request or skip refused, with the reason | `[Guest] Request (add) from Sam refused: rate_limited: "Gold" / …` |
+| Request or skip refused, with the reason | `[Guest] Request (add) from "Sam" refused: rate_limited: "Gold" / …` |
 | Roon stopped sending the queue (e.g. after a Core restart); asked again within 5 s | `[Roon] Queue subscription ended: …` |
 | node-roon-api's log of every message to and from the Core | `-> REQUEST 74 com.roonlabs.transport:2/control {…}` |
 
