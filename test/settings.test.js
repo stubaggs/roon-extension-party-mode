@@ -993,6 +993,26 @@ check('a limit changed mid-party counts what each guest has already used', () =>
   assert.strictEqual(left(5), 4);
 });
 
+check('an allowance handed back after the host changed the limit counts against the new one', () => {
+  const guests = new GuestStore();
+  const at = (limit) => layout({ allow_add: true, add_limit: limit, add_refill: 10 }).values;
+  // Taken with no limit, the host sets one, then Roon refuses the request.
+  const free = guests.create();
+  guests.consume(free, 'add', at(0));
+  guests.refund(free, 'add', at(1));
+  assert.strictEqual(guests.check(free, 'add', at(1)).remaining, 1, 'a full allowance, not stuck at none');
+  // One of five taken, the host lowers it to three, then Roon refuses it.
+  const lowered = guests.create();
+  guests.consume(lowered, 'add', at(5));
+  guests.refund(lowered, 'add', at(3));
+  assert.strictEqual(guests.check(lowered, 'add', at(3)).remaining, 3);
+  // One of five taken, the host raises it to ten, then Roon refuses it.
+  const raised = guests.create();
+  guests.consume(raised, 'add', at(5));
+  guests.refund(raised, 'add', at(10));
+  assert.strictEqual(guests.check(raised, 'add', at(10)).remaining, 10);
+});
+
 check('switched off wins over any limit', () => {
   const guests = new GuestStore();
   const settings = layout({ allow_skip: false, skip_limit: 0 }).values;
