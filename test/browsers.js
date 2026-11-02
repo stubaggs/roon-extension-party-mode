@@ -55,6 +55,15 @@ async function check(name, fn) {
   }
 }
 
+// Whether an image loaded, once it has finished either way: a code shown
+// just now may still be on its way.
+const loaded = (locator) => locator.evaluate((img) => (img.complete && img.src
+  ? img.naturalWidth > 0
+  : new Promise((done) => {
+    img.addEventListener('load', () => done(img.naturalWidth > 0), { once: true });
+    img.addEventListener('error', () => done(false), { once: true });
+  })));
+
 /**
  * A new page, with what goes wrong on it collected: console errors (a script
  * or a security policy refusing something), uncaught errors and failed
@@ -106,7 +115,7 @@ const phone = (name) => (name === 'firefox' ? { viewport: { width: 390, height: 
           await page.locator('#current-title', { hasText: 'Waterloo' }).waitFor();
           assert.strictEqual(new URL(page.url()).pathname, '/PartyHub');
           assert.strictEqual(await page.textContent('#party-name'), 'Garden Party');
-          assert.ok(await page.locator('#qr').evaluate((img) => img.complete && img.naturalWidth > 0), 'the join code loaded');
+          assert.ok(await loaded(page.locator('#qr')), 'the join code loaded');
           play(sos, []);
           await page.locator('#current-title', { hasText: 'SOS' }).waitFor();
           assert.deepStrictEqual(problems, []);
@@ -177,7 +186,7 @@ const phone = (name) => (name === 'firefox' ? { viewport: { width: 390, height: 
           set({ enabled: false, playlist_download: 'qr' });
           roon.emit('party_mode_changed', 'off', 'on');
           await page.locator('#closed:not([hidden])').waitFor();
-          assert.ok(await page.locator('#playlist-qr').evaluate((img) => img.complete && img.naturalWidth > 0), 'the playlist code loaded');
+          assert.ok(await loaded(page.locator('#playlist-qr')), 'the playlist code loaded');
           assert.deepStrictEqual(problems, []);
         } finally {
           await close();
@@ -204,7 +213,7 @@ const phone = (name) => (name === 'firefox' ? { viewport: { width: 390, height: 
           // The join code, to pass the party on.
           await page.click('#party-chip');
           await page.locator('#invite:not([hidden])').waitFor();
-          assert.ok(await page.locator('#invite-qr').evaluate((img) => img.complete && img.naturalWidth > 0), 'the join code loaded');
+          assert.ok(await loaded(page.locator('#invite-qr')), 'the join code loaded');
           assert.deepStrictEqual(problems, []);
         } finally {
           await close();
