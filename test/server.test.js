@@ -579,6 +579,25 @@ const set = (values) => Object.assign(roon.settings, values);
     }
   });
 
+  await check('a track title with a line break stays on its own log line', async () => {
+    const lines = [];
+    const log = console.log;
+    console.log = (m) => lines.push(m);
+    try {
+      roon.zone = { zone_id: 'z-forged', state: 'playing', is_next_allowed: true, now_playing: { length: 200, two_line: { line1: 'Gold\n[Guest] Skip from "Sam": "Gold"', line2: 'Spandau Ballet' } } };
+      roon.emit('now_playing_changed', null);
+    } finally {
+      roon.zone = { zone_id: 'z-after-forged', state: 'stopped' };
+      roon.emit('now_playing_changed', null);
+      roon.zone = null;
+      console.log = log;
+    }
+    const playing = lines.filter((m) => m.startsWith('[PartyMode] Playing:'));
+    assert.strictEqual(playing.length, 1, lines.join(' | '));
+    assert.ok(!playing[0].includes('\n'), playing[0]);
+    assert.ok(playing[0].startsWith('[PartyMode] Playing: "Gold\\n[Guest] Skip from "Sam": "Gold"" / "Spandau Ballet"'), playing[0]);
+  });
+
   await check('a guest\'s skip is logged with their name and the track, and a failed one with why', async () => {
     const cookie = await newGuest();
     await post('/api/name', cookie, { name: 'Skipper' });
