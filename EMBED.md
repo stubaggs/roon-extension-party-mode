@@ -31,6 +31,8 @@ on `http`. Firefox moves the images of a page opened from disk to `https` (other
 | `/embed/join-qr.svg` | The join QR code, the Party Hub's own: it leads to `/GuestHub` |
 | `/embed/playlist-qr.svg` | The playlist QR code, leading to `/Playlist`, only while the Hub offers it as a QR code; 404 otherwise |
 
+Both codes carry the address your page reached Party Mode on.
+
 Two addresses outside `/embed/` are for links people tap on your screen:
 
 | Address | What it does |

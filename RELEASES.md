@@ -23,6 +23,8 @@ Not released yet.
   Roon no longer looks like the page has frozen.
 - The log records each setting the host changes, with its old value, and why Roon
   refused a save.
+- QR codes carry the address the Party Hub or guest page was opened on, so they work on a
+  second network such as guest Wi-Fi.
 
 ## 1.4.0
 

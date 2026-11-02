@@ -119,6 +119,12 @@ docker run --rm --init -v "$PWD:/app:ro" -w /app mcr.microsoft.com/playwright:v1
 addresses and fields may be added, nothing renamed or removed (tests check each view's
 exact fields); a breaking change would go under `/embed/v2/`.
 
+The QR codes (join, playlist and the guest page's Invite) carry the address on this
+computer that their request reached (`req.socket.localAddress`, never the Host header), so
+a page opened on a second network, such as guest Wi-Fi, gets a code that works there.
+Loopback, `0.0.0.0` and IPv6 fall back to the first non-internal IPv4 address, which
+Roon's status line, the log and About always use.
+
 Guest API errors are JSON `{ "error": … }`: 401 `no_session`; 403 `closed` (Party Off,
 with `playlist: true` while `/Playlist` answers) or `cross_origin`; 409 `paused`,
 `already_queued`, `cant_skip` or `name_taken` (sent again with `confirm: true` to accept);

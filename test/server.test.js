@@ -21,7 +21,7 @@ const assert = require('assert');
 const EventEmitter = require('events');
 const qr = require('../lib/qr');
 const http = require('http');
-const { createServer, lanAddress, CONNECTION_LIMITS } = require('../lib/server');
+const { createServer, lanAddress, qrAddress, CONNECTION_LIMITS } = require('../lib/server');
 const { GuestStore, cleanName, MAX_SESSIONS, OFFERED_SEARCHES } = require('../lib/guests');
 const { DEFAULT_SETTINGS, RoonService } = require('../lib/roon-service');
 const { ArtCache, KnownKeys } = require('../lib/art-cache');
@@ -1194,6 +1194,33 @@ const set = (values) => Object.assign(roon.settings, values);
       assert.doesNotMatch(res.headers.get('content-security-policy'), /frame-ancestors/, path);
       assert.strictEqual(res.headers.get('x-frame-options'), null, path);
     }
+    set({ enabled: true });
+  });
+
+  await check('a QR code carries the address its request reached, else the LAN address', async () => {
+    // Example addresses from TEST-NET-1; the rule, as a function (tests bind only 127.0.0.1).
+    assert.strictEqual(qrAddress('192.0.2.30'), '192.0.2.30');
+    assert.strictEqual(qrAddress('::ffff:192.0.2.30'), '192.0.2.30', 'IPv4 on a dual-stack socket');
+    assert.strictEqual(qrAddress('::FFFF:192.0.2.67'), '192.0.2.67');
+    for (const local of ['127.0.0.1', '::ffff:127.0.0.1', '127.1.2.3', '0.0.0.0', '::1', 'fe80::1', '2001:db8::1', '', undefined]) {
+      assert.strictEqual(qrAddress(local), lanAddress(), String(local));
+    }
+  });
+
+  await check('the QR codes ignore the Host header', async () => {
+    set({ enabled: false, playlist_download: 'qr' });
+    // fetch won't send a Host of our choosing, so plain http.
+    const raw = (path) => new Promise((resolve, reject) => {
+      http.get({ host: '127.0.0.1', port: server.port, path, headers: { Host: '192.0.2.99:80' } }, (res) => {
+        let body = '';
+        res.on('data', (chunk) => { body += chunk; });
+        res.on('end', () => resolve(body));
+      }).on('error', reject);
+    });
+    // Reached over loopback, so both carry the LAN address, as for a screen on this computer.
+    const origin = `http://${lanAddress()}:${server.port}`;
+    assert.strictEqual(await raw('/embed/join-qr.svg'), qr.svg(`${origin}/GuestHub`));
+    assert.strictEqual(await raw('/embed/playlist-qr.svg'), qr.svg(`${origin}/Playlist`));
     set({ enabled: true });
   });
 
