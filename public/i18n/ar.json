@@ -17,6 +17,7 @@
   "credit.host": "المضيفون",
   "search.placeholder": "ابحث عن مقطع أو فنان",
   "search.clear": "مسح البحث",
+  "search.searching": "جارٍ البحث…",
   "search.no_results": "لم يُعثر على أي مقطع. جرّب اسم الفنان.",
   "search.results": {
     "zero": "لم يُعثر على أي مقطع.",

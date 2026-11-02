@@ -17,6 +17,7 @@
   "credit.host": "Hostitelé",
   "search.placeholder": "Hledat skladbu nebo interpreta",
   "search.clear": "Vymazat hledání",
+  "search.searching": "Hledání…",
   "search.no_results": "Žádné skladby nenalezeny. Zkuste jméno interpreta.",
   "search.results": {
     "one": "Nalezena {count} skladba.",

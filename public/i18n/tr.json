@@ -17,6 +17,7 @@
   "credit.host": "Ev sahibi",
   "search.placeholder": "Parça veya sanatçı ara",
   "search.clear": "Aramayı temizle",
+  "search.searching": "Aranıyor…",
   "search.no_results": "Parça bulunamadı. Sanatçının adını dene.",
   "search.results": {
     "one": "{count} parça bulundu.",

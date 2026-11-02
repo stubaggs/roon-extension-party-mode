@@ -754,6 +754,34 @@ const display = http.createServer((req, res) => res.end('<!doctype html><title>R
     }
   });
 
+  await check('search: "Searching…" in place of the old results until Roon answers', async () => {
+    const search = roon.search;
+    let answer;
+    const page = await guestPage(named);
+    try {
+      await until(() => visible(page.$('app')));
+      const input = page.$('search');
+      input.value = 'ab';
+      input.dispatchEvent(new page.window.Event('input'));
+      await until(() => page.document.querySelectorAll('#results .row').length === 2, 'the results');
+      // Roon is slow with the next one.
+      roon.search = () => new Promise((resolve) => { answer = resolve; });
+      input.value = 'abba';
+      input.dispatchEvent(new page.window.Event('input'));
+      await until(() => answer, 'the search to reach Roon');
+      assert.strictEqual(page.document.querySelectorAll('#results .row').length, 0, 'the old results go');
+      assert.strictEqual(page.document.querySelector('#results .empty').textContent, page.t('search.searching'));
+      answer(searchResults.slice(0, 1));
+      await until(() => page.document.querySelectorAll('#results .row').length === 1, 'the answer');
+      assert.strictEqual(page.document.querySelector('#results .empty'), null);
+      assert.deepStrictEqual(page.errors, []);
+    } finally {
+      roon.search = search;
+      page.close();
+      reset();
+    }
+  });
+
   await check('allowances on the buttons: "1 left", then used up: greyed, and pressing it explains', async () => {
     Object.assign(roon.settings, { add_limit: 1, allow_next: false });
     const page = await guestPage(named);

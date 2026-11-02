@@ -17,6 +17,7 @@
   "credit.host": "Anfitriões",
   "search.placeholder": "Buscar uma faixa ou artista",
   "search.clear": "Limpar a busca",
+  "search.searching": "Buscando…",
   "search.no_results": "Nenhuma faixa encontrada. Tente o nome do artista.",
   "search.results": {
     "one": "{count} faixa encontrada.",

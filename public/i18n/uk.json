@@ -17,6 +17,7 @@
   "credit.host": "Господарі",
   "search.placeholder": "Знайти трек або виконавця",
   "search.clear": "Очистити пошук",
+  "search.searching": "Пошук…",
   "search.no_results": "Треків не знайдено. Спробуйте ім'я виконавця.",
   "search.results": {
     "one": "Знайдено {count} трек.",

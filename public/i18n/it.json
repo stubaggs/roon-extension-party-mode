@@ -17,6 +17,7 @@
   "credit.host": "Host",
   "search.placeholder": "Cerca un brano o un artista",
   "search.clear": "Cancella la ricerca",
+  "search.searching": "Ricerca in corso…",
   "search.no_results": "Nessun brano trovato. Prova con il nome dell'artista.",
   "search.results": {
     "one": "{count} brano trovato.",

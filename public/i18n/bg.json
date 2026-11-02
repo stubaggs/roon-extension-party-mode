@@ -17,6 +17,7 @@
   "credit.host": "Домакини",
   "search.placeholder": "Търси запис или изпълнител",
   "search.clear": "Изчисти търсенето",
+  "search.searching": "Търсене…",
   "search.no_results": "Няма намерени записи. Опитай с името на изпълнителя.",
   "search.results": {
     "one": "Намерен е {count} запис.",

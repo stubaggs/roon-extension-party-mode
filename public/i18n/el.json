@@ -17,6 +17,7 @@
   "credit.host": "Οικοδεσπότες",
   "search.placeholder": "Αναζήτηση κομματιού ή καλλιτέχνη",
   "search.clear": "Καθαρισμός αναζήτησης",
+  "search.searching": "Αναζήτηση…",
   "search.no_results": "Δεν βρέθηκαν κομμάτια. Δοκιμάστε το όνομα του καλλιτέχνη.",
   "search.results": {
     "one": "Βρέθηκε {count} κομμάτι.",

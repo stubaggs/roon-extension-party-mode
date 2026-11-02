@@ -17,6 +17,7 @@
   "credit.host": "Gospodarze",
   "search.placeholder": "Szukaj utworu lub wykonawcy",
   "search.clear": "Wyczyść wyszukiwanie",
+  "search.searching": "Wyszukiwanie…",
   "search.no_results": "Nie znaleziono utworów. Spróbuj nazwy wykonawcy.",
   "search.results": {
     "one": "Znaleziono {count} utwór.",

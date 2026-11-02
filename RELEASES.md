@@ -19,6 +19,8 @@ Not released yet.
   opened again, rather than "Add a track".
 - The About page no longer reports a problem with the Roon profile after a Roon Core
   restart.
+- The guest page shows "Searching…" while a search is under way, so a slow answer from
+  Roon no longer looks like the page has frozen.
 
 ## 1.4.0
 

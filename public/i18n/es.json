@@ -17,6 +17,7 @@
   "credit.host": "Anfitriones",
   "search.placeholder": "Busca una pista o un artista",
   "search.clear": "Borrar búsqueda",
+  "search.searching": "Buscando…",
   "search.no_results": "No hay pistas que coincidan. Prueba con el nombre del artista.",
   "search.results": {
     "one": "{count} pista encontrada.",

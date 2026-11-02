@@ -17,6 +17,7 @@
   "credit.host": "Vert",
   "search.placeholder": "Søk etter et spor eller en artist",
   "search.clear": "Tøm søket",
+  "search.searching": "Søker…",
   "search.no_results": "Fant ingen spor. Prøv artistens navn.",
   "search.results": {
     "one": "{count} spor funnet.",

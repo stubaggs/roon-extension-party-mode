@@ -17,6 +17,7 @@
   "credit.host": "Gazda",
   "search.placeholder": "Caută o piesă sau un artist",
   "search.clear": "Șterge căutarea",
+  "search.searching": "Se caută…",
   "search.no_results": "Nu s-a găsit nicio piesă. Încearcă numele artistului.",
   "search.results": {
     "one": "{count} piesă găsită.",

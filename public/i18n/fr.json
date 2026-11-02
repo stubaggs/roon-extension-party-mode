@@ -17,6 +17,7 @@
   "credit.host": "Hôte",
   "search.placeholder": "Rechercher un morceau ou un artiste",
   "search.clear": "Effacer la recherche",
+  "search.searching": "Recherche en cours…",
   "search.no_results": "Aucun morceau trouvé. Essayez avec le nom de l'artiste.",
   "search.results": {
     "one": "{count} morceau trouvé.",

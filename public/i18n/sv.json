@@ -17,6 +17,7 @@
   "credit.host": "Värd",
   "search.placeholder": "Sök efter ett spår eller en artist",
   "search.clear": "Rensa sökningen",
+  "search.searching": "Söker…",
   "search.no_results": "Inga spår hittades. Prova artistens namn.",
   "search.results": {
     "one": "{count} spår hittades.",

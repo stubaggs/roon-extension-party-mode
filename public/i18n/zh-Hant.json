@@ -17,6 +17,7 @@
   "credit.host": "主人",
   "search.placeholder": "搜尋曲目或藝人",
   "search.clear": "清除搜尋",
+  "search.searching": "搜尋中…",
   "search.no_results": "找不到曲目。試試藝人名稱。",
   "search.results": {
     "other": "找到 {count} 首曲目。"

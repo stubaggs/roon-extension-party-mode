@@ -17,6 +17,7 @@
   "credit.host": "Хозяева",
   "search.placeholder": "Найти трек или исполнителя",
   "search.clear": "Очистить поиск",
+  "search.searching": "Поиск…",
   "search.no_results": "Треки не найдены. Попробуйте имя исполнителя.",
   "search.results": {
     "one": "Найден {count} трек.",

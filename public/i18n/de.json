@@ -17,6 +17,7 @@
   "credit.host": "Gastgebende",
   "search.placeholder": "Titel oder Künstler suchen",
   "search.clear": "Suche löschen",
+  "search.searching": "Suche läuft…",
   "search.no_results": "Keine passenden Titel. Versuch es mit dem Namen des Künstlers.",
   "search.results": {
     "one": "{count} Titel gefunden.",

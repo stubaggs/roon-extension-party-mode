@@ -17,6 +17,7 @@
   "credit.host": "Host",
   "search.placeholder": "Zoek een nummer of artiest",
   "search.clear": "Zoekopdracht wissen",
+  "search.searching": "Zoeken…",
   "search.no_results": "Geen nummers gevonden. Probeer de naam van de artiest.",
   "search.results": {
     "one": "{count} nummer gevonden.",

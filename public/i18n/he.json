@@ -17,6 +17,7 @@
   "credit.host": "המארחים",
   "search.placeholder": "חיפוש רצועה או אמן",
   "search.clear": "ניקוי החיפוש",
+  "search.searching": "מתבצע חיפוש…",
   "search.no_results": "לא נמצאו רצועות. נסו את שם האמן.",
   "search.results": {
     "one": "נמצאה רצועה אחת.",

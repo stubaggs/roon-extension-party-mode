@@ -314,6 +314,9 @@
       announceResults(query);
       return;
     }
+    // Roon can take a while to answer: say so, in place of results that no
+    // longer match what was typed.
+    showSearching();
     try {
       const body = await api(`/api/search?q=${encodeURIComponent(query)}`);
       if (mine !== searchSeq || body.superseded) return;
@@ -322,8 +325,18 @@
       renderResults();
       announceResults(query);
     } catch (err) {
-      if (mine === searchSeq && !explained(err)) toast(t('search.unavailable'));
+      if (mine !== searchSeq) return;
+      renderResults();
+      if (!explained(err)) toast(t('search.unavailable'));
     }
+  }
+
+  function showSearching() {
+    results.innerHTML = '';
+    const p = document.createElement('p');
+    p.className = 'empty';
+    p.textContent = t('search.searching');
+    results.appendChild(p);
   }
 
   const searchClear = el('search-clear');

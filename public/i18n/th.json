@@ -17,6 +17,7 @@
   "credit.host": "เจ้าภาพ",
   "search.placeholder": "ค้นหาแทร็กหรือศิลปิน",
   "search.clear": "ล้างการค้นหา",
+  "search.searching": "กำลังค้นหา…",
   "search.no_results": "ไม่พบแทร็ก ลองค้นด้วยชื่อศิลปิน",
   "search.results": {
     "other": "พบ {count} แทร็ก"
