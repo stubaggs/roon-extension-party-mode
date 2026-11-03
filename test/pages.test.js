@@ -771,9 +771,12 @@ const display = http.createServer((req, res) => res.end('<!doctype html><title>R
       await until(() => answer, 'the search to reach Roon');
       assert.strictEqual(page.document.querySelectorAll('#results .row').length, 0, 'the old results go');
       assert.strictEqual(page.document.querySelector('#results .empty').textContent, page.t('search.searching'));
+      // Screen readers hear it too (the polite live region), then the answer replaces it.
+      assert.strictEqual(page.$('results-status').textContent, page.t('search.searching'));
       answer(searchResults.slice(0, 1));
       await until(() => page.document.querySelectorAll('#results .row').length === 1, 'the answer');
       assert.strictEqual(page.document.querySelector('#results .empty'), null);
+      assert.strictEqual(page.$('results-status').textContent, page.t('search.results', { count: 1 }));
       assert.deepStrictEqual(page.errors, []);
     } finally {
       roon.search = search;

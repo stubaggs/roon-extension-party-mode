@@ -327,6 +327,7 @@
     } catch (err) {
       if (mine !== searchSeq) return;
       renderResults();
+      resultsStatus.textContent = '';
       if (!explained(err)) toast(t('search.unavailable'));
     }
   }
@@ -337,6 +338,8 @@
     p.className = 'empty';
     p.textContent = t('search.searching');
     results.appendChild(p);
+    // Screen readers hear it too; announceResults replaces it with the answer.
+    resultsStatus.textContent = t('search.searching');
   }
 
   const searchClear = el('search-clear');
