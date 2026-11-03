@@ -44,7 +44,7 @@
   "button.left": {
     "other": "剩餘 {count}"
   },
-  "button.wait": "{wait}後",
+  "button.wait": "{wait} 後",
   "button.used": "已用完",
   "button.paused": "已暫停",
   "time.minutes": {
@@ -55,7 +55,7 @@
   "toast.queued": "已加入佇列",
   "toast.already_queued": "這首曲目已在佇列中。",
   "toast.none_left": "你已全部用完。",
-  "toast.none_left_wait": "你已全部用完。{wait}後可再用。",
+  "toast.none_left_wait": "你已全部用完。{wait} 後可再用。",
   "toast.disabled": "主人已關閉此功能。",
   "toast.skipped": "已跳過",
   "toast.failed": "抱歉，操作未成功。",

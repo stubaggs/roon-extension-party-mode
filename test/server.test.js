@@ -275,7 +275,7 @@ const set = (values) => Object.assign(roon.settings, values);
     }
     const html = await (await get('/', { 'Accept-Language': 'fr' })).text();
     assert.match(html, /<html lang="fr"/);
-    assert.match(html, /<h1>Scannez à nouveau le code<\/h1>/);
+    assert.match(html, /<h1>Scanne à nouveau le code<\/h1>/);
     assert.doesNotMatch(html, /id="app"/, 'not the guest page');
   });
 

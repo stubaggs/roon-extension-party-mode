@@ -28,7 +28,7 @@
   "track.added": "Adăugată",
   "track.in_queue": "În coadă",
   "track.add": "Adaugă în coadă",
-  "track.next": "Redă în continuare",
+  "track.next": "Redă următoarea",
   "queue.up_next": "Urmează",
   "queue.count": {
     "one": "{count} piesă",
@@ -50,7 +50,7 @@
     "few": "au rămas {count}",
     "other": "au rămas {count}"
   },
-  "button.wait": "în {wait}",
+  "button.wait": "peste {wait}",
   "button.used": "nu mai ai",
   "button.paused": "în pauză",
   "time.minutes": {
@@ -59,11 +59,11 @@
     "other": "{count} de minute"
   },
   "time.short": "{count} min",
-  "toast.queued_next": "Se redă în continuare",
+  "toast.queued_next": "Urmează imediat",
   "toast.queued": "Adăugată în coadă",
   "toast.already_queued": "Piesa este deja în coadă.",
   "toast.none_left": "Le-ai folosit pe toate.",
-  "toast.none_left_wait": "Le-ai folosit pe toate. Altele în {wait}.",
+  "toast.none_left_wait": "Le-ai folosit pe toate. Altele peste {wait}.",
   "toast.disabled": "Gazda a dezactivat această opțiune.",
   "toast.skipped": "Sărită",
   "toast.failed": "Ne pare rău, nu a funcționat.",

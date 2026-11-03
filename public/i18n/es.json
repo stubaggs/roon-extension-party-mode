@@ -1,6 +1,6 @@
 {
   "_language": "Español",
-  "_reserved_host_words": "Anfitrión, Anfitriona",
+  "_reserved_host_words": "Anfitrión, Anfitriona, Anfitriones",
   "_reserved_radio_words": "Radio",
   "page.title": "Añadir una pista",
   "page.hub_title": "{name} Hub",
@@ -37,7 +37,7 @@
   "queue.empty_add": "No hay nada en cola. Añade una pista.",
   "queue.empty_add_radio": "No hay nada en cola. Añade una pista o déjaselo a Roon Radio.",
   "queue.empty_radio": "Roon Radio elige lo siguiente.",
-  "played.title": "Ya sonaron",
+  "played.title": "Ya han sonado",
   "played.empty": "Todavía no ha sonado nada.",
   "played.skipped_by": "Saltada por {name}",
   "played.skipped_by_host": "Saltada por los anfitriones",

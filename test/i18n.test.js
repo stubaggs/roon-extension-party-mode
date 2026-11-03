@@ -184,8 +184,8 @@ check('French text, plurals and clock', () => {
   const I18N = runtimeFor('fr', fr);
   assert.strictEqual(I18N.t('queue.up_next'), 'À suivre');
   assert.strictEqual(I18N.t('credit.requested_by', { name: 'Sam' }), 'Demandé par Sam');
-  assert.strictEqual(I18N.t('button.left', { count: 1 }), '1 restant');
-  assert.strictEqual(I18N.t('button.left', { count: 3 }), '3 restants');
+  assert.strictEqual(I18N.t('button.left', { count: 1 }), 'encore 1');
+  assert.strictEqual(I18N.t('button.left', { count: 3 }), 'encore 3');
   assert.strictEqual(I18N.minutes(30 * 1000), 'une minute');
   assert.strictEqual(I18N.credit({ kind: 'add', requested_by: null }), 'Anonyme');
 });
@@ -281,7 +281,7 @@ check('plurals follow each language: Russian, Polish, Czech, Arabic, Japanese', 
   assert.strictEqual(t('cs', 'button.left', 3), 'zbývají 3');
   assert.strictEqual(t('ar', 'time.minutes', 2), 'دقيقتين');
   assert.strictEqual(t('ar', 'time.minutes', 4), '4 دقائق');
-  assert.strictEqual(t('ja', 'search.results', 1), '1 件のトラックが見つかりました。');
+  assert.strictEqual(t('ja', 'search.results', 1), '1件のトラックが見つかりました。');
 });
 
 check("a browser without the language's plural rules gets English's, not an error", () => {

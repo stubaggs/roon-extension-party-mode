@@ -1,6 +1,6 @@
 {
   "_language": "Italiano",
-  "_reserved_host_words": "Host",
+  "_reserved_host_words": "Host, Padrone di casa, Padrona di casa, Organizzatore, Organizzatrice",
   "_reserved_radio_words": "Radio",
   "page.title": "Aggiungi un brano",
   "page.hub_title": "{name} Hub",
@@ -27,7 +27,7 @@
   "track.added": "Aggiunto",
   "track.in_queue": "In coda",
   "track.add": "Aggiungi alla coda",
-  "track.next": "Riproduci dopo",
+  "track.next": "Riproduci subito dopo",
   "queue.up_next": "A seguire",
   "queue.count": {
     "one": "{count} brano",
@@ -48,18 +48,18 @@
     "other": "ne restano {count}"
   },
   "button.wait": "tra {wait}",
-  "button.used": "esauriti",
+  "button.used": "esaurite",
   "button.paused": "in pausa",
   "time.minutes": {
     "one": "un minuto",
     "other": "{count} minuti"
   },
   "time.short": "{count} min",
-  "toast.queued_next": "Sarà riprodotto dopo",
+  "toast.queued_next": "Sarà riprodotto subito dopo",
   "toast.queued": "Aggiunto alla coda",
   "toast.already_queued": "Questo brano è già in coda.",
-  "toast.none_left": "Li hai usati tutti.",
-  "toast.none_left_wait": "Li hai usati tutti. Altri tra {wait}.",
+  "toast.none_left": "Le hai usate tutte.",
+  "toast.none_left_wait": "Le hai usate tutte. Altre tra {wait}.",
   "toast.disabled": "L'host ha disattivato questa opzione.",
   "toast.skipped": "Saltato",
   "toast.failed": "Spiacenti, non ha funzionato.",

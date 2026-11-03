@@ -27,7 +27,7 @@
   "track.added": "Eklendi",
   "track.in_queue": "Sırada",
   "track.add": "Sıraya ekle",
-  "track.next": "Sonra çal",
+  "track.next": "Hemen sonra çal",
   "queue.up_next": "Sıradaki",
   "queue.count": {
     "one": "{count} parça",
@@ -55,7 +55,7 @@
     "other": "{count} dakika"
   },
   "time.short": "{count} dk",
-  "toast.queued_next": "Sonra çalacak",
+  "toast.queued_next": "Hemen sonra çalacak",
   "toast.queued": "Sıraya eklendi",
   "toast.already_queued": "Bu parça zaten sırada.",
   "toast.none_left": "Hepsini kullandın.",

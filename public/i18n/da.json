@@ -49,7 +49,7 @@
   },
   "button.wait": "om {wait}",
   "button.used": "ingen tilbage",
-  "button.paused": "pause",
+  "button.paused": "på pause",
   "time.minutes": {
     "one": "et minut",
     "other": "{count} minutter"

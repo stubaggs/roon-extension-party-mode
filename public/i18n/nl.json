@@ -1,6 +1,6 @@
 {
   "_language": "Nederlands",
-  "_reserved_host_words": "Host",
+  "_reserved_host_words": "Host, Gastheer, Gastvrouw",
   "_reserved_radio_words": "Radio",
   "page.title": "Nummer toevoegen",
   "page.hub_title": "{name} Hub",
@@ -48,7 +48,7 @@
     "other": "nog {count}"
   },
   "button.wait": "over {wait}",
-  "button.used": "op",
+  "button.used": "geen meer",
   "button.paused": "gepauzeerd",
   "time.minutes": {
     "one": "een minuut",
