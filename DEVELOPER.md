@@ -277,8 +277,9 @@ placeholders. Say "tracks", not songs, with a neutral word as Roon does.
 The language comes from a `party_lang` cookie (the guest's 🌐 choice), else
 Accept-Language (`no`/`nn` → `nb`, `iw` → `he`), else English. Chinese gets a file only
 when the tag names one: Simplified for `zh`, China, Singapore or the Hans script, Traditional
-(Taiwan's) for Taiwan, Hong Kong, Macau or `zh-Hant` alone; any other Chinese tag (other
-regions, Cantonese) gets English, and a later bare `zh` doesn't stand in for it. The
+(Taiwan's) for Taiwan, Hong Kong, Macau or the Hant script (any region); any other Chinese
+tag (a region with no script, Cantonese) gets English, and a later bare `zh` doesn't stand
+in for it. The
 Party Hub language setting overrides both on the Hub. Hebrew and Arabic pages are
 right to left; names dropped into sentences are wrapped in first-strong isolates.
 

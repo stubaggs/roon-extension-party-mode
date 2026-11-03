@@ -240,12 +240,14 @@ const languageCases = [
   ['zh-CN', 'zh-Hans'], ['zh-SG', 'zh-Hans'], ['zh', 'zh-Hans'], ['zh-Hans-CN', 'zh-Hans'],
   ['zh-Hans', 'zh-Hans'], ['zh-Hans-SG', 'zh-Hans'], ['zh-Hans-HK', 'zh-Hans'],
   ['zh-Hans-MO', 'zh-Hans'], ['zh-Hans-MY', 'zh-Hans'],
-  // Traditional: Taiwan, Hong Kong, Macau, or the script with no region.
+  // Traditional: Taiwan, Hong Kong, Macau, or the script in any region (iOS sends
+  // "zh-Hant-US" for Traditional Chinese in the United States).
   ['zh-TW', 'zh-Hant'], ['zh-HK', 'zh-Hant'], ['zh-MO', 'zh-Hant'], ['zh-Hant', 'zh-Hant'],
   ['zh-Hant-TW', 'zh-Hant'], ['zh-Hant-HK', 'zh-Hant'], ['zh-Hant-MO', 'zh-Hant'],
-  // Anything else in Chinese gets English: other regions, Traditional outside those three,
-  // Cantonese and the other Chinese languages.
-  ['zh-MY', 'en'], ['zh-ID', 'en'], ['zh-US', 'en'], ['zh-Hant-CN', 'en'], ['zh-Hant-SG', 'en'],
+  ['zh-Hant-US', 'zh-Hant'], ['zh-Hant-CN', 'zh-Hant'], ['zh-Hant-SG', 'zh-Hant'], ['zh-Hant-MY', 'zh-Hant'],
+  // Anything else in Chinese gets English: a region with no script, Cantonese and the
+  // other Chinese languages.
+  ['zh-MY', 'en'], ['zh-ID', 'en'], ['zh-US', 'en'],
   ['yue', 'en'], ['yue-HK', 'en'], ['yue-Hant-HK', 'en'], ['zh-yue-HK', 'en'],
   ['cmn', 'en'], ['cmn-Hans-CN', 'en'], ['wuu', 'en'], ['hak', 'en'], ['nan', 'en'],
   // A declined Chinese tag keeps the later Chinese ones out ("zh-MY,zh;q=0.9": the bare
