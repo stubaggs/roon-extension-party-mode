@@ -25,6 +25,12 @@ Not released yet.
   refused a save.
 - QR codes carry the address the Party Hub or guest page was opened on, so they work on a
   second network such as guest Wi-Fi.
+- The translations were reviewed again: a friendlier, informal "you" in Czech, Greek,
+  French, Portuguese (Portugal), Russian and Ukrainian, and many smaller corrections in
+  other languages.
+- Browsers set to Chinese for a region other than China, Singapore, Taiwan, Hong Kong or
+  Macau, such as Malaysia, now get English rather than Simplified Chinese. Guests can still
+  pick any language with the 🌐 button.
 
 ## 1.4.0
 

@@ -234,9 +234,28 @@ const languageCases = [
   ['pt-BR', 'pt-BR'], ['pt-PT', 'pt'], ['pt', 'pt'], ['pt-AO', 'pt'],
   // Arabic: Egypt has its own file.
   ['ar-EG', 'ar-EG'], ['ar-SA', 'ar'], ['ar', 'ar'],
-  // Chinese by script: Traditional for Taiwan, Hong Kong and Macau.
+  // Chinese has two files, Simplified and Traditional (Taiwan's, which also serves Hong
+  // Kong and Macau), and a tag gets one only when it names it.
+  // Simplified: China, Singapore, "zh" alone, the script in any region.
   ['zh-CN', 'zh-Hans'], ['zh-SG', 'zh-Hans'], ['zh', 'zh-Hans'], ['zh-Hans-CN', 'zh-Hans'],
+  ['zh-Hans', 'zh-Hans'], ['zh-Hans-SG', 'zh-Hans'], ['zh-Hans-HK', 'zh-Hans'],
+  ['zh-Hans-MO', 'zh-Hans'], ['zh-Hans-MY', 'zh-Hans'],
+  // Traditional: Taiwan, Hong Kong, Macau, or the script with no region.
   ['zh-TW', 'zh-Hant'], ['zh-HK', 'zh-Hant'], ['zh-MO', 'zh-Hant'], ['zh-Hant', 'zh-Hant'],
+  ['zh-Hant-TW', 'zh-Hant'], ['zh-Hant-HK', 'zh-Hant'], ['zh-Hant-MO', 'zh-Hant'],
+  // Anything else in Chinese gets English: other regions, Traditional outside those three,
+  // Cantonese and the other Chinese languages.
+  ['zh-MY', 'en'], ['zh-ID', 'en'], ['zh-US', 'en'], ['zh-Hant-CN', 'en'], ['zh-Hant-SG', 'en'],
+  ['yue', 'en'], ['yue-HK', 'en'], ['yue-Hant-HK', 'en'], ['zh-yue-HK', 'en'],
+  ['cmn', 'en'], ['cmn-Hans-CN', 'en'], ['wuu', 'en'], ['hak', 'en'], ['nan', 'en'],
+  // A declined Chinese tag keeps the later Chinese ones out ("zh-MY,zh;q=0.9": the bare
+  // "zh" is Simplified), but another language after it still counts.
+  ['zh-MY,zh;q=0.9,en;q=0.8', 'en'], ['zh-MY,zh;q=0.9', 'en'], ['zh-ID,zh;q=0.9,ja;q=0.8', 'ja'],
+  ['yue-HK,zh;q=0.9,en;q=0.8', 'en'],
+  // The order still decides when the first Chinese tag has a file (Chrome in Hong Kong
+  // sends "zh-HK,zh;q=0.9,en;q=0.8").
+  ['zh-HK,zh;q=0.9,en;q=0.8', 'zh-Hant'], ['zh-TW,zh;q=0.9', 'zh-Hant'],
+  ['zh-CN,zh;q=0.9,en;q=0.8', 'zh-Hans'], ['zh,zh-HK;q=0.9', 'zh-Hans'],
   // Preference order and weights.
   ['sw,ja;q=0.8,en;q=0.9', 'en'], ['en;q=0.5,ko', 'ko'], ['*', 'en'], ['ja;q=0', 'en']
 ];
