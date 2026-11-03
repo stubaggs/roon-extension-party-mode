@@ -16,7 +16,6 @@
 
 const assert = require('assert');
 const { isTrackList, pickAction, findProfileEntry } = require('../lib/titles');
-const { RoonService } = require('../lib/roon-service');
 
 let failures = 0;
 async function check(name, fn) {

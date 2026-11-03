@@ -109,7 +109,7 @@
     var name = data.party_name || t('party.default_name');
     setText('party-name', name);
     fitName();
-    document.title = t('page.hub_title', { name: name }).replace(/[⁨⁩]/g, '');
+    document.title = t('page.hub_title', { name: name }).replace(/[\u2068\u2069]/g, '');
 
     // Party Off: the playlist's code (if the host offers it as one) in place of
     // the code to join, and "Requests are closed" in place of the rest.

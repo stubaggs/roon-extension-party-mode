@@ -41,7 +41,6 @@ const { spawnSync } = require('child_process');
 const STATE = process.env.FAKE_DOCKER_STATE;
 const REM = '/home/node/.rem';
 const VERSION_LABEL = 'org.opencontainers.image.version';
-const SOURCE_LABEL = 'org.opencontainers.image.source';
 
 const state = JSON.parse(fs.readFileSync(STATE, 'utf8'));
 const args = process.argv.slice(2);
