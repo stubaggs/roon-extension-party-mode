@@ -5,6 +5,9 @@ running in its Extensions list.
 
 ## 1.4.1
 
+Docker image: `stubaggs/roon-extension-party-mode:1.4.1@sha256:906acde736d4e89bafee85623e9f8055610043c3db3f79e55cd937cde2a66caf`<br>
+Code fingerprint: `ea6fe928ab3e`
+
 ### Fixed
 
 - **Searching, on the guest page**
