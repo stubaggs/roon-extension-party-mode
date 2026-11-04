@@ -341,6 +341,10 @@ Logging, playlist privacy, network and Roon menu names.
   `http://192.0.2.10:8338/GuestHub`, so if the router gives the computer a new address,
   the code changes. With the address reserved, you can print the code, and guests'
   bookmarks and home-screen icons open straight in at the next party.
+- **If you've made Party Mode reachable from another network, such as guest Wi-Fi,**
+  open the Party Hub at an address guests can reach from that network. The QR
+  codes carry the address the page was opened on, so those guests get a code that works
+  for them. Roon's status line still shows the main address.
 - **Guests can't rearrange the queue.** They can add a track to the end, or play one next
   when they add it, but Roon doesn't yet let anyone move a queued track.
 - **A radio station waits for you.** While a live radio station plays on the party zone,
@@ -439,8 +443,7 @@ iOS 10.3 or later, or Chrome 55 or later on Android. On Android, updating Chrome
 Play Store usually fixes it.
 
 **Guests can't join, and Roon shows Party Mode's address as `127.0.0.1`.** The QR code
-and links point at the computer itself, which phones can't reach. It happens after the
-computer restarts, when Party Mode starts before the network is up. Restart Party Mode
+and links point at the computer itself, which phones can't reach. Restart Party Mode
 once:
 
 ```bash

@@ -13,24 +13,22 @@ Not released yet.
 - Titles and artists in Japanese, Chinese, Korean, Cyrillic, Greek, Hebrew, Arabic and
   Thai are told apart, so different tracks no longer count as duplicates or share a credit.
 - Roon's website link for Party Mode no longer points at 127.0.0.1 when Party Mode starts
-  before the network is up, such as after a reboot, even on the same computer as the Roon
-  Core.
+  before the network is up.
 - Once the party is over, the guest page keeps the party's name as its title when it's
   opened again, rather than "Add a track".
 - The About page no longer reports a problem with the Roon profile after a Roon Core
   restart.
 - The guest page shows "Searching…" while a search is under way, so a slow answer from
   Roon no longer looks like the page has frozen.
-- The log records each setting the host changes, with its old value, and why Roon
-  refused a save.
 - QR codes carry the address the Party Hub or guest page was opened on, so they work on a
   second network such as guest Wi-Fi.
-- The translations were reviewed again: a friendlier, informal "you" in Czech, Greek,
-  French, Portuguese (Portugal), Russian and Ukrainian, and many smaller corrections in
-  other languages.
-- Browsers set to Chinese for a region other than China, Singapore, Taiwan, Hong Kong or
-  Macau, such as Malaysia, now get English rather than Simplified Chinese. Guests can still
-  pick any language with the 🌐 button.
+- Updated translations.
+- Choosing another party zone no longer drops that zone's first track from **Played**.
+- Two guests skipping the same track at the same moment now skip it once, not twice.
+
+### Security
+
+- Various security enhancements.
 
 ## 1.4.0
 
@@ -198,7 +196,7 @@ Docker image: `stubaggs/roon-extension-party-mode:1.3.0@sha256:b2a1339e64544fca2
 - Changing how many tracks, plays next or skips each guest gets now applies straight away
   to guests already at the party, counting what they've used. Before, raising a limit
   didn't give them any more.
-  
+
 ### Security
 - Various security enhancements.
 - The container is now called `roon-extension-party-mode` (it was `party-mode`). When
