@@ -3,9 +3,7 @@
 What's new in each version of Party Mode, newest first. Roon shows the version you're
 running in its Extensions list.
 
-## 1.4.1 (in progress)
-
-Not released yet.
+## 1.4.1
 
 ### Fixed
 
