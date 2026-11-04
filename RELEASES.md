@@ -9,22 +9,25 @@ Not released yet.
 
 ### Fixed
 
-- A search with no matches no longer lists "No Results" as a track guests could pick.
-- Titles and artists in Japanese, Chinese, Korean, Cyrillic, Greek, Hebrew, Arabic and
-  Thai are told apart, so different tracks no longer count as duplicates or share a credit.
+- **Searching, on the guest page**
+  - A search with no matches no longer lists "No Results" as a track guests could pick.
+  - The guest page shows "Searching…" while a search is under way, so a slow answer from
+    Roon no longer looks like the page has frozen.
+  - Titles and artists in Japanese, Chinese, Korean, Cyrillic, Greek, Hebrew, Arabic and
+    Thai are told apart, so different tracks no longer count as duplicates or share a credit.
+- **Skips and Played**
+  - Two guests skipping the same track at the same moment now skip it once, not twice.
+  - Choosing another party zone no longer drops that zone's first track from **Played**.
+- **Joining and QR codes**
+  - QR codes carry the address the Party Hub or guest page was opened on, so they work on a
+    second network such as guest Wi-Fi.
+  - Once the party is over, the guest page keeps the party's name as its title when it's
+    opened again, rather than "Add a track".
 - Roon's website link for Party Mode no longer points at 127.0.0.1 when Party Mode starts
   before the network is up.
-- Once the party is over, the guest page keeps the party's name as its title when it's
-  opened again, rather than "Add a track".
 - The About page no longer reports a problem with the Roon profile after a Roon Core
   restart.
-- The guest page shows "Searching…" while a search is under way, so a slow answer from
-  Roon no longer looks like the page has frozen.
-- QR codes carry the address the Party Hub or guest page was opened on, so they work on a
-  second network such as guest Wi-Fi.
 - Updated translations.
-- Choosing another party zone no longer drops that zone's first track from **Played**.
-- Two guests skipping the same track at the same moment now skip it once, not twice.
 
 ### Security
 
