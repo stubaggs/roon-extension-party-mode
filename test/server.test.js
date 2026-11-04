@@ -21,7 +21,7 @@ const assert = require('assert');
 const EventEmitter = require('events');
 const qr = require('../lib/qr');
 const http = require('http');
-const { createServer, lanAddress, CONNECTION_LIMITS } = require('../lib/server');
+const { createServer, lanAddress, qrAddress, CONNECTION_LIMITS } = require('../lib/server');
 const { GuestStore, cleanName, MAX_SESSIONS, OFFERED_SEARCHES } = require('../lib/guests');
 const { DEFAULT_SETTINGS, RoonService } = require('../lib/roon-service');
 const { ArtCache, KnownKeys } = require('../lib/art-cache');
@@ -275,7 +275,7 @@ const set = (values) => Object.assign(roon.settings, values);
     }
     const html = await (await get('/', { 'Accept-Language': 'fr' })).text();
     assert.match(html, /<html lang="fr"/);
-    assert.match(html, /<h1>Scannez à nouveau le code<\/h1>/);
+    assert.match(html, /<h1>Scanne à nouveau le code<\/h1>/);
     assert.doesNotMatch(html, /id="app"/, 'not the guest page');
   });
 
@@ -309,7 +309,7 @@ const set = (values) => Object.assign(roon.settings, values);
     set({ enabled: false, playlist_download: 'qr' });
     const res = await get('/api/party', { Cookie: cookie });
     assert.strictEqual(res.status, 403);
-    assert.deepStrictEqual(await res.json(), { error: 'closed', playlist: true });
+    assert.deepStrictEqual(await res.json(), { error: 'closed', playlist: true, party_name: 'Test Party' });
     set({ playlist_download: 'link' });
     assert.strictEqual((await (await get('/api/party', { Cookie: cookie })).json()).playlist, true);
     set({ playlist_download: 'off' });
@@ -535,6 +535,69 @@ const set = (values) => Object.assign(roon.settings, values);
     assert.strictEqual((await post('/api/skip', other, {})).status, 200);
   });
 
+  await check('guests skipping the same song together skip it once, and all hear it skipped', async () => {
+    const play = (title) => {
+      roon.zone = { zone_id: 'z1', state: 'playing', is_next_allowed: true, now_playing: { length: 200, two_line: { line1: title, line2: 'Spandau Ballet' } } };
+      roon.emit('now_playing_changed', null);
+    };
+    const log = console.log;
+    console.log = () => {};
+    try {
+      play('Gold');
+      const [alex, sam, jo] = [await newGuest(), await newGuest(), await newGuest()];
+      roon.skips = 0;
+      const answers = await Promise.all([alex, sam].map((cookie) => post('/api/skip', cookie, {})));
+      assert.deepStrictEqual(answers.map((res) => res.status), [200, 200]);
+      assert.strictEqual(roon.skips, 1, 'one skip sent to Roon');
+      const left = async (cookie) => (await (await get('/api/party', { Cookie: cookie })).json()).allowances.skip.remaining;
+      assert.deepStrictEqual([await left(alex), await left(sam)].sort(), [0, 1], 'only the skip sent is used');
+      // Roon skipped but hasn't said what plays next yet: still the same song.
+      assert.strictEqual((await post('/api/skip', jo, {})).status, 200);
+      assert.strictEqual(roon.skips, 1);
+      assert.strictEqual(await left(jo), 1);
+      // The next song is a new one to skip, even the same song again later.
+      play('True');
+      assert.strictEqual((await post('/api/skip', jo, {})).status, 200);
+      assert.strictEqual(roon.skips, 2);
+      play('Gold');
+      const [kim, lee] = [await newGuest(), await newGuest()];
+      roon.skips = 0;
+      roon.failing = true;
+      const failed = await Promise.all([kim, lee].map((cookie) => post('/api/skip', cookie, {})));
+      roon.failing = false;
+      assert.deepStrictEqual(failed.map((res) => res.status), [502, 502], 'a failed skip fails for both');
+      assert.deepStrictEqual([await left(kim), await left(lee)], [1, 1], 'nothing used');
+      assert.strictEqual((await post('/api/skip', lee, {})).status, 200, 'and is sent afresh');
+      assert.strictEqual(roon.skips, 1);
+    } finally {
+      roon.failing = false;
+      // Another zone, so the songs here don't stay the playing one.
+      roon.zone = { zone_id: 'z-after-skips', state: 'stopped' };
+      roon.emit('now_playing_changed', null);
+      roon.zone = null;
+      console.log = log;
+    }
+  });
+
+  await check('a track title with a line break stays on its own log line', async () => {
+    const lines = [];
+    const log = console.log;
+    console.log = (m) => lines.push(m);
+    try {
+      roon.zone = { zone_id: 'z-forged', state: 'playing', is_next_allowed: true, now_playing: { length: 200, two_line: { line1: 'Gold\n[Guest] Skip from "Sam": "Gold"', line2: 'Spandau Ballet' } } };
+      roon.emit('now_playing_changed', null);
+    } finally {
+      roon.zone = { zone_id: 'z-after-forged', state: 'stopped' };
+      roon.emit('now_playing_changed', null);
+      roon.zone = null;
+      console.log = log;
+    }
+    const playing = lines.filter((m) => m.startsWith('[PartyMode] Playing:'));
+    assert.strictEqual(playing.length, 1, lines.join(' | '));
+    assert.ok(!playing[0].includes('\n'), playing[0]);
+    assert.ok(playing[0].startsWith('[PartyMode] Playing: "Gold\\n[Guest] Skip from "Sam": "Gold"" / "Spandau Ballet"'), playing[0]);
+  });
+
   await check('a guest\'s skip is logged with their name and the track, and a failed one with why', async () => {
     const cookie = await newGuest();
     await post('/api/name', cookie, { name: 'Skipper' });
@@ -553,8 +616,8 @@ const set = (values) => Object.assign(roon.settings, values);
       roon.zone = null;
     }
     assert.deepStrictEqual(lines.filter((m) => /^\[\w+\] Skip /.test(m)), [
-      '[Roon] Skip from Skipper failed: roon_refused',
-      '[Guest] Skip from Skipper: "Gold" / "Spandau Ballet"'
+      '[Roon] Skip from "Skipper" failed: roon_refused',
+      '[Guest] Skip from "Skipper": "Gold" / "Spandau Ballet"'
     ]);
   });
 
@@ -587,10 +650,10 @@ const set = (values) => Object.assign(roon.settings, values);
       `[Guest] ${id}: name "Logger" (was Anon)`,
       `[Guest] ${id}: name Anon (was "Logger")`,
       `[Guest] ${id}: name "Logger" (was Anon)`,
-      '[Roon] Request (add) from Logger failed: "Waterloo" / "ABBA": roon_refused',
+      '[Roon] Request (add) from "Logger" failed: "Waterloo" / "ABBA": roon_refused',
       lines.find((m) => m.startsWith('[PartyMode] Playlist downloaded')),
-      '[Guest] Search from Logger: "abba" (2 results)',
-      '[Guest] Request (next) from Logger refused: unknown_track'
+      '[Guest] Search from "Logger": "abba" (2 results)',
+      '[Guest] Request (next) from "Logger" refused: unknown_track'
     ]);
     assert.match(lines[4], /^\[PartyMode\] Playlist downloaded \(\d+ tracks, from its own address\)$/);
   });
@@ -658,9 +721,9 @@ const set = (values) => Object.assign(roon.settings, values);
       roon.queue = [];
     }
     assert.deepStrictEqual(lines.filter((m) => /"Mamma Mia"/.test(m)).map((m) => m.replace(/ \[.*?\]/, '').replace(/ \d+s/, '')), [
-      '[PartyMode] Queued: "Mamma Mia" / "ABBA" -> Early',
-      '[PartyMode] Playing: "Mamma Mia" / "ABBA" -> Early',
-      '[Guest] Request (add) from Early: "Mamma Mia" / "ABBA"'
+      '[PartyMode] Queued: "Mamma Mia" / "ABBA" for "Early"',
+      '[PartyMode] Playing: "Mamma Mia" / "ABBA" for "Early"',
+      '[Guest] Request (add) from "Early": "Mamma Mia" / "ABBA"'
     ]);
   });
 
@@ -712,8 +775,8 @@ const set = (values) => Object.assign(roon.settings, values);
       roon.queue = [];
     }
     assert.deepStrictEqual(lines.filter((m) => /^\[PartyMode\] (Playing|Credited): "Dancing Queen"/.test(m)).map((m) => m.replace(/ \[.*\]/, '')), [
-      '[PartyMode] Playing: "Dancing Queen" / "ABBA" -> Host',
-      '[PartyMode] Credited: "Dancing Queen" / "ABBA" -> Starter'
+      '[PartyMode] Playing: "Dancing Queen" / "ABBA" for Host',
+      '[PartyMode] Credited: "Dancing Queen" / "ABBA" to "Starter"'
     ]);
   });
 
@@ -996,6 +1059,22 @@ const set = (values) => Object.assign(roon.settings, values);
     }
   });
 
+  await check('a web server error once listening is logged, not lost', async () => {
+    const other = createServer(roon, new GuestStore(), { limits: { all: 0, search: 0 } });
+    const listening = await other.listen(0);
+    const { error } = console;
+    const written = [];
+    console.error = (m) => written.push(m);
+    try {
+      assert.strictEqual(listening.listenerCount('error'), 1, 'only the logger, not the startup check');
+      listening.emit('error', new Error('EMFILE: too many open files'));
+      assert.deepStrictEqual(written, ['[PartyMode] Web server error: EMFILE: too many open files']);
+    } finally {
+      console.error = error;
+      listening.close();
+    }
+  });
+
   await check('an unknown address gets a plain 404 that keeps the security headers', async () => {
     for (const path of ['/nope', '/robots.txt', '/api/nope']) {
       const res = await get(path);
@@ -1075,6 +1154,34 @@ const set = (values) => Object.assign(roon.settings, values);
     assert.strictEqual((await post('/api/name', sam, { name: 'Sam' })).status, 409, 'two Sams now: the first is asked too');
     assert.strictEqual((await post('/api/name', sam, { name: '' })).status, 200);
     assert.strictEqual((await post('/api/name', sam, { name: 'Sam', confirm: true })).status, 200);
+  });
+
+  await check('saving the same name again sends the pages nothing; a new one sends the queue', async () => {
+    const cookie = await newGuest();
+    await post('/api/name', cookie, { name: 'Steady' });
+    const controller = new AbortController();
+    const res = await fetch(`${base}/api/events`, { signal: controller.signal });
+    const reader = res.body.getReader();
+    let text = '';
+    const until = async (pattern) => {
+      while (!pattern.test(text)) text += new TextDecoder().decode((await reader.read()).value);
+    };
+    try {
+      await until(/event: queue/); // the snapshot sent on connecting
+      text = '';
+      const same = await post('/api/name', cookie, { name: 'Steady' });
+      assert.deepStrictEqual(await same.json(), { guest_name: 'Steady' });
+      // A marker: anything the rename sent would arrive before it.
+      roon.emit('party_mode_changed', 'on', 'on');
+      await until(/event: party/);
+      assert.ok(!/event: queue[\s\S]*event: party/.test(text), text.slice(0, 200));
+      await until(/event: queue/); // the marker's own queue
+      text = '';
+      await post('/api/name', cookie, { name: 'Moved' });
+      await until(/event: queue/);
+    } finally {
+      controller.abort();
+    }
   });
 
   await check('a guest action sent from another site is refused, before anything happens', async () => {
@@ -1194,6 +1301,33 @@ const set = (values) => Object.assign(roon.settings, values);
       assert.doesNotMatch(res.headers.get('content-security-policy'), /frame-ancestors/, path);
       assert.strictEqual(res.headers.get('x-frame-options'), null, path);
     }
+    set({ enabled: true });
+  });
+
+  await check('a QR code carries the address its request reached, else the LAN address', async () => {
+    // Example addresses from TEST-NET-1; the rule, as a function (tests bind only 127.0.0.1).
+    assert.strictEqual(qrAddress('192.0.2.30'), '192.0.2.30');
+    assert.strictEqual(qrAddress('::ffff:192.0.2.30'), '192.0.2.30', 'IPv4 on a dual-stack socket');
+    assert.strictEqual(qrAddress('::FFFF:192.0.2.67'), '192.0.2.67');
+    for (const local of ['127.0.0.1', '::ffff:127.0.0.1', '127.1.2.3', '0.0.0.0', '::1', 'fe80::1', '2001:db8::1', '', undefined]) {
+      assert.strictEqual(qrAddress(local), lanAddress(), String(local));
+    }
+  });
+
+  await check('the QR codes ignore the Host header', async () => {
+    set({ enabled: false, playlist_download: 'qr' });
+    // fetch won't send a Host of our choosing, so plain http.
+    const raw = (path) => new Promise((resolve, reject) => {
+      http.get({ host: '127.0.0.1', port: server.port, path, headers: { Host: '192.0.2.99:80' } }, (res) => {
+        let body = '';
+        res.on('data', (chunk) => { body += chunk; });
+        res.on('end', () => resolve(body));
+      }).on('error', reject);
+    });
+    // Reached over loopback, so both carry the LAN address, as for a screen on this computer.
+    const origin = `http://${lanAddress()}:${server.port}`;
+    assert.strictEqual(await raw('/embed/join-qr.svg'), qr.svg(`${origin}/GuestHub`));
+    assert.strictEqual(await raw('/embed/playlist-qr.svg'), qr.svg(`${origin}/Playlist`));
     set({ enabled: true });
   });
 
@@ -1399,6 +1533,14 @@ const set = (values) => Object.assign(roon.settings, values);
       roon.emit('queue_changed');
       assert.ok(await until(/event: up-next\n.*Waterloo/s), text);
       assert.ok(!text.includes('event: status'), 'status unchanged, not sent');
+      // The zone going and coming, straight away.
+      const ready = roon.ready;
+      for (const [event, now] of [['zone_left', !ready], ['zone_arrived', ready]]) {
+        text = '';
+        roon.ready = now;
+        roon.emit(event);
+        assert.ok(await until(new RegExp(`event: status\\n.*"ready":${now}`, 's')), text);
+      }
       const about = await (await get('/About')).text();
       assert.match(about, /<th scope="row">Custom Party Hub pages<\/th><td>1 open<\/td>/);
     } finally {
@@ -1536,17 +1678,28 @@ const set = (values) => Object.assign(roon.settings, values);
     const page = http.createServer((req, res) => res.end('ok'));
     await new Promise((resolve) => page.listen(0, '127.0.0.1', resolve));
     const frameOk = async () => (await (await get('/api/hub?view=roon')).json()).frame_ok;
+    let screen;
     try {
       set({ hub_playing: 'simple' });
       roon.coreAddress = { host: '127.0.0.1', port: page.address().port };
       roon.emit('core_paired');
+      assert.notStrictEqual(await frameOk(), true, 'no screen shows it yet');
+      screen = new AbortController();
+      await fetch(base + '/api/events?view=roon', { signal: screen.signal });
       let ok = await frameOk();
       for (let i = 0; i < 50 && ok !== true; i += 1) {
         await new Promise((r) => setTimeout(r, 20));
         ok = await frameOk();
       }
       assert.strictEqual(ok, true);
+      screen.abort();
+      for (let i = 0; i < 50 && ok === true; i += 1) {
+        await new Promise((r) => setTimeout(r, 20));
+        ok = await frameOk();
+      }
+      assert.notStrictEqual(ok, true, 'the screen went: no longer checked');
     } finally {
+      if (screen) screen.abort();
       await new Promise((resolve) => page.close(resolve));
       delete roon.coreAddress;
       set({ hub_playing: 'simple' });
@@ -1785,18 +1938,43 @@ const set = (values) => Object.assign(roon.settings, values);
     assert.ok(html.includes('href="/About/license/party-mode"'));
     // Thanked though not included: the Extension Manager, which installs Party Mode,
     // then the security tools. Licences link to their repositories; not with the libraries.
-    const thanks = html.slice(html.indexOf('<h3>Installed and tested with</h3>'), html.indexOf('<h3>Open-source licences</h3>'));
+    // The licences come first; the tools it was installed and tested with are the last list.
+    const licences = html.slice(html.indexOf('<h3>Libraries and base image</h3>'), html.indexOf('<h3>Installed and tested with</h3>'));
+    assert.ok(licences.length > 0, 'the licences come before the tools');
+    const thanks = html.slice(html.indexOf('<h3>Installed and tested with</h3>'), html.indexOf('</section>', html.indexOf('<h3>Installed and tested with</h3>')));
     assert.ok(thanks.includes('<span class="lib"><a href="https://github.com/TheAppgineer/roon-extension-manager" target="_blank" rel="noopener">roon-extension-manager</a> <span class="ver"></span></span>' +
       '<span class="lic"><a href="https://github.com/TheAppgineer/roon-extension-manager" target="_blank" rel="noopener">Apache-2.0</a></span>' +
       '<span class="who">By TheAppgineer</span>'));
     assert.ok(thanks.indexOf('roon-extension-manager') < thanks.indexOf('>Docker Engine<'));
     assert.ok(thanks.indexOf('>Docker Engine<') < thanks.indexOf('>autocannon<'));
     for (const tool of ['ZAP', 'Trivy', 'Nuclei', 'Schemathesis']) assert.ok(thanks.includes(`>${tool}</a>`), tool);
-    assert.ok(!html.slice(html.indexOf('<h3>Open-source licences</h3>')).includes('roon-extension-manager'));
+    assert.ok(!licences.includes('roon-extension-manager'));
     assert.ok(html.includes('<h2>Installation</h2>'));
     assert.ok(html.includes('<button type="button" class="copy-button" id="copy-details" aria-label="Copy details" hidden>'));
     assert.ok(html.includes('<script src="/about.js"></script>'));
     assert.strictEqual((await get('/about.js')).status, 200);
+  });
+
+  await check('the About page lists the libraries Party Mode depends on directly; the rest still have their licence text', async () => {
+    const html = await (await get('/About')).text();
+    const section = html.slice(html.indexOf('<h3>Libraries and base image</h3>'), html.indexOf('<h3>Libraries they depend on</h3>'));
+    const below = html.slice(html.indexOf('<h3>Libraries they depend on</h3>'), html.indexOf('<h3>Installed and tested with</h3>'));
+    const listed = [...section.matchAll(/<span class="lib">(?:<a [^>]+>)?([^<]+?)(?:<\/a>)? <span class="ver">/g)].map((m) => m[1]);
+    // The direct dependencies, then what the image is based on, each with a licence to read.
+    const basedOn = ['node:22-alpine', 'Node.js', 'Alpine Linux'];
+    assert.deepStrictEqual([...listed].sort(), [...Object.keys(require('../package.json').dependencies), ...basedOn].sort());
+    assert.deepStrictEqual(listed.slice(-3), basedOn);
+    assert.ok(section.includes('href="https://hub.docker.com/_/node"'));
+    assert.ok(section.includes('href="https://github.com/nodejs/node/blob/main/LICENSE"'));
+    assert.ok(section.includes('href="https://pkgs.alpinelinux.org/packages"'));
+    assert.ok(section.includes('are licensed separately'));
+    // What they depend on (Express's own parts, say) follows in its own list, licence text served.
+    const { readPackages } = require('../lib/about');
+    const inner = readPackages().find((p) => p.name === 'accepts');
+    assert.ok(inner && !listed.includes('accepts'));
+    assert.ok(below.includes('>accepts</a>') && !below.includes('>express</a>'));
+    assert.ok(below.includes('Installed with the libraries above'));
+    assert.match(await (await get(`/About/license/${encodeURIComponent(inner.id)}`)).text(), /Permission is hereby granted/);
   });
 
   await check("the About page says the Core is connected, never its name", async () => {
@@ -2104,7 +2282,7 @@ const set = (values) => Object.assign(roon.settings, values);
     assert.strictEqual(duration(3 * 86400 + 4 * 3600 + 5 * 60), '3 days, 4 hours');
   });
 
-  await check("libraries: a Readme's licence when there's no file; notes on those only a tool installs", async () => {
+  await check("libraries: a Readme's licence when there's no file; notes on those only a tool installs; none only for development", async () => {
     const { readPackages, readmeLicense, sourceLicense } = require('../lib/about');
     const fs = require('fs');
     const os = require('os');
@@ -2118,7 +2296,8 @@ const set = (values) => Object.assign(roon.settings, values);
     assert.strictEqual(sourceLicense('// Just code.\nvar x;'), '');
 
     // app needs lib, a package with a command-line tool needing cli-lib,
-    // which needs cli-dep; lib's licence is in its Readme.
+    // which needs cli-dep; lib's licence is in its Readme. For development
+    // only, test-kit, which needs kit-dep and lib.
     const root = fs.mkdtempSync(path.join(os.tmpdir(), 'libs-'));
     const pkg = (dir, json, files = {}) => {
       const full = path.join(root, dir);
@@ -2130,7 +2309,9 @@ const set = (values) => Object.assign(roon.settings, values);
       }
     };
     try {
-      pkg('.', { name: 'app', dependencies: { tool: '1' } });
+      pkg('.', { name: 'app', dependencies: { tool: '1' }, devDependencies: { 'test-kit': '1' } });
+      pkg('node_modules/test-kit', { name: 'test-kit', version: '1.0.0', dependencies: { 'kit-dep': '1', lib: '1' } }, { LICENSE: 'MIT' });
+      pkg('node_modules/kit-dep', { name: 'kit-dep', version: '1.0.0' }, { LICENSE: 'MIT' });
       pkg('node_modules/tool', { name: 'tool', version: '1.0.0', bin: { tool: './bin/tool' }, dependencies: { lib: '1', 'cli-lib': '1' } },
         { 'index.js': "require('lib/x')", 'bin/tool': "require('cli-lib')", LICENSE: 'MIT\nCopyright (c) 2020 Tool' });
       pkg('node_modules/lib', { name: 'lib', version: '1.0.0', license: 'MIT' }, { 'README.md': '# lib\n\n## License\n\nCopyright (c) 2021 Lib\n' });

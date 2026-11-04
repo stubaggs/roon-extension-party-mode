@@ -236,36 +236,178 @@ function fakeRoon(profiles, menuTitle = 'Profile', current = 'Guest') {
     assert.strictEqual(roon.profileSessions.size, 0);
   });
 
-  await check('a Core that just started and does not answer about profiles is asked once more, quietly', async () => {
-    const realTimeout = global.setTimeout;
+  // What _applyProfile does when Roon doesn't answer: note it, and say so unless quiet.
+  const unanswered = (core, answers, zone = null) => {
+    const roon = Object.setPrototypeOf({ core, zone, profileProblem: '', calls: [] }, RoonService.prototype);
+    roon._applyProfile = async ({ quiet = false } = {}) => {
+      roon.calls.push(quiet);
+      const answered = answers(roon.calls.length);
+      roon.profileProblem = answered ? '' : 'Could not read profiles: Roon did not answer';
+      if (!answered && !quiet) console.warn(roon.profileProblem);
+    };
+    return roon;
+  };
+  const warnings = async (fn) => {
     const realWarn = console.warn;
     const warned = [];
-    const pending = [];
+    console.warn = (m) => warned.push(m);
     try {
-      global.setTimeout = (fn) => (pending.push(fn), { unref() {} });
-      console.warn = (m) => warned.push(m);
-      const core = {};
-      for (const secondAnswers of [true, false]) {
-        const calls = [];
-        const roon = Object.setPrototypeOf({ core, profileProblem: '' }, RoonService.prototype);
-        // What _applyProfile does when Roon doesn't answer: note it, and say so unless quiet.
-        roon._applyProfile = async ({ quiet = false } = {}) => {
-          calls.push(quiet);
-          const answered = calls.length > 1 && secondAnswers;
-          roon.profileProblem = answered ? '' : 'Could not read profiles: Roon did not answer';
-          if (!answered && !quiet) console.warn(roon.profileProblem);
-        };
-        await roon._applyProfileOnConnect(core);
-        assert.deepStrictEqual(calls, [true], 'the first try is quiet');
-        pending.shift()();
-        await new Promise((resolve) => realTimeout(resolve, 0));
-        assert.deepStrictEqual(calls, [true, false], 'then once more');
-      }
-      assert.deepStrictEqual(warned, ['Could not read profiles: Roon did not answer'], 'logged only when the second try fails too');
+      await fn();
     } finally {
-      global.setTimeout = realTimeout;
       console.warn = realWarn;
     }
+    return warned;
+  };
+  const NO_ANSWER = 'Could not read profiles: Roon did not answer';
+
+  await check('a Core that just started and does not answer about profiles is asked again when the zone arrives', async () => {
+    const core = {};
+    const roon = unanswered(core, (call) => call > 1);
+    const warned = await warnings(async () => {
+      await roon._applyProfileOnConnect(core);
+      assert.deepStrictEqual(roon.calls, [true], 'the first try is quiet, and nothing is on a timer');
+      roon._retryProfile(); // the zone arrived
+      await Promise.resolve();
+    });
+    assert.deepStrictEqual(roon.calls, [true, false]);
+    assert.strictEqual(roon.profileProblem, '');
+    assert.deepStrictEqual(warned, []);
+  });
+
+  await check('still no answer when the zone arrives: logged as a problem', async () => {
+    const core = {};
+    const roon = unanswered(core, () => false);
+    const warned = await warnings(async () => {
+      await roon._applyProfileOnConnect(core);
+      roon._retryProfile();
+      await Promise.resolve();
+    });
+    assert.deepStrictEqual(warned, [NO_ANSWER]);
+  });
+
+  await check('the zone arrived while the first try waited: asked again straight after it', async () => {
+    const core = {};
+    const roon = unanswered(core, (call) => call > 1, { display_name: 'Lounge' });
+    await roon._applyProfileOnConnect(core);
+    assert.deepStrictEqual(roon.calls, [true, false]);
+    assert.strictEqual(roon.profileProblem, '');
+  });
+
+  // Roon's settings menu, on a Core that answers only when told to, as a busy one does.
+  const slowCore = ({ profiles }) => {
+    const levels = {};
+    let release;
+    const answered = new Promise((resolve) => (release = resolve));
+    const core = {
+      browse: async (o) => {
+        await answered;
+        if (o.pop_all) levels[o.multi_session_key] = 'menu';
+        else if (o.item_key === 'prof') levels[o.multi_session_key] = 'profiles';
+        return { action: 'list' };
+      },
+      load: async (o) => ({
+        items: levels[o.multi_session_key] === 'profiles'
+          ? profiles.map((title, i) => ({ title, item_key: `p${i}`, hint: 'action' }))
+          : [{ title: 'Profile', item_key: 'prof', hint: 'list', subtitle: 'Guest' }]
+      })
+    };
+    return { core, release };
+  };
+  const settled = () => new Promise((resolve) => setTimeout(resolve, 20));
+  const logged = async (fn) => {
+    const realLog = console.log;
+    const realWarn = console.warn;
+    const lines = [];
+    console.log = (m) => lines.push(m);
+    console.warn = (m) => lines.push(m);
+    try {
+      await fn();
+    } finally {
+      console.log = realLog;
+      console.warn = realWarn;
+    }
+    return lines;
+  };
+
+  await check('a Core that answers about profiles after the wait: the answer still counts', async () => {
+    const { core, release } = slowCore({ profiles: ['Stu', 'Party'] });
+    const roon = serviceFor(core);
+    roon.profileWaitMs = 5;
+    const lines = await logged(async () => {
+      await roon._refreshProfiles();
+      assert.match(roon.profileProblem, /^Could not read profiles/);
+      release();
+      await settled();
+    });
+    assert.strictEqual(roon.profileProblem, '');
+    assert.deepStrictEqual(roon.profiles, ['Stu', 'Party']);
+    assert.deepStrictEqual(lines, [`[Roon] ${NO_ANSWER}`, '[Roon] Roon answered about profiles after all']);
+  });
+
+  await check('each read has a browse session of its own: Roon shares one by its key, between copies', async () => {
+    const { core, release } = slowCore({ profiles: ['Stu', 'Party'] });
+    const keys = [];
+    const browse = core.browse;
+    core.browse = (o) => {
+      if (o.pop_all) keys.push(o.multi_session_key);
+      return browse(o);
+    };
+    const roon = serviceFor(core);
+    release();
+    await roon._refreshProfiles();
+    await roon._refreshProfiles();
+    const reads = keys.filter((key) => /^party-profile/.test(key));
+    assert.strictEqual(reads.length, 2);
+    assert.notStrictEqual(reads[0], reads[1]);
+    assert.ok(!reads.includes('party-profile'), 'no fixed name');
+  });
+
+  await check('a late answer about profiles is left when the Core has gone, or a newer read has run', async () => {
+    for (const change of [(roon) => (roon.core = null), (roon) => (roon.profileTurn += 1)]) {
+      const { core, release } = slowCore({ profiles: ['Stu', 'Party'] });
+      const roon = serviceFor(core);
+      roon.profileWaitMs = 5;
+      await logged(async () => {
+        await roon._refreshProfiles();
+        change(roon);
+        release();
+        await settled();
+      });
+      assert.match(roon.profileProblem, /^Could not read profiles/);
+    }
+  });
+
+  await check('a Core that selects the guest profile after the wait: the answer still counts', async () => {
+    const { core, release } = slowCore({ profiles: ['Stu', 'Party'] });
+    const roon = serviceFor(core, { guest_profile: 'Party' });
+    roon.profileWaitMs = 5;
+    const lines = await logged(async () => {
+      await roon._applyProfile();
+      release();
+      await settled();
+    });
+    assert.strictEqual(roon.profileProblem, '');
+    assert.ok(lines.includes('[PartyMode] Guest requests use the Roon profile "Party"'), lines.join('\n'));
+  });
+
+  await check('a profile problem that is not a missing answer is not asked about again', async () => {
+    const core = {};
+    const roon = unanswered(core, () => true, { display_name: 'Lounge' });
+    roon.profileProblem = 'Profile "Party" not found (Roon has: Stu)';
+    roon._retryProfile();
+    assert.deepStrictEqual(roon.calls, []);
+  });
+
+  await check('with the Core gone by then, the first try is not followed up', async () => {
+    const core = {};
+    const roon = unanswered(core, () => false, { display_name: 'Lounge' });
+    const apply = roon._applyProfile;
+    roon._applyProfile = async (o) => {
+      await apply(o);
+      roon.core = null;
+    };
+    await roon._applyProfileOnConnect(core);
+    assert.deepStrictEqual(roon.calls, [true]);
   });
 
   console.log(failures ? `\n${failures} failing` : '\nall passing');

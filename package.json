@@ -1,6 +1,6 @@
 {
   "name": "roon-extension-party-mode",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "Roon Extension for parties: guests request music from their phone, no app needed",
   "main": "app.js",
   "repository": {
@@ -9,7 +9,7 @@
   },
   "scripts": {
     "start": "node app.js",
-    "test": "node test/env.test.js && node test/art-cache.test.js && node test/track-id.test.js && node test/settings.test.js && node test/ports.test.js && node test/profiles.test.js && node test/titles.test.js && node test/i18n.test.js && node test/party-playlist.test.js && node test/history.test.js && node test/server.test.js && node test/station.test.js && node test/roon-radio.test.js && node test/core-restart.test.js && node test/healthcheck.test.js"
+    "test": "node test/env.test.js && node test/art-cache.test.js && node test/track-id.test.js && node test/settings.test.js && node test/ports.test.js && node test/startup.test.js && node test/profiles.test.js && node test/titles.test.js && node test/i18n.test.js && node test/party-playlist.test.js && node test/history.test.js && node test/server.test.js && node test/pages.test.js && node test/station.test.js && node test/roon-radio.test.js && node test/core-restart.test.js && node test/healthcheck.test.js && node test/setup.test.js"
   },
   "author": "Stubaggs",
   "license": "Apache-2.0",
@@ -26,5 +26,8 @@
     "node-roon-api-status": "github:roonlabs/node-roon-api-status",
     "node-roon-api-transport": "github:roonlabs/node-roon-api-transport",
     "qrcode-generator": "^2.0.4"
+  },
+  "devDependencies": {
+    "jsdom": "^30.1.3"
   }
 }

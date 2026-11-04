@@ -16,7 +16,6 @@
 
 const assert = require('assert');
 const { isTrackList, pickAction, findProfileEntry } = require('../lib/titles');
-const { RoonService } = require('../lib/roon-service');
 
 let failures = 0;
 async function check(name, fn) {
@@ -84,6 +83,21 @@ const artists = [{ title: 'ABBA', item_key: 'x2', hint: 'list' }];
     assert.strictEqual(findProfileEntry(menu('Perfil'), 'Profile').item.item_key, 'p');
     assert.strictEqual(findProfileEntry(menu('Profile'), 'Profile').by, 'title');
     assert.strictEqual(findProfileEntry(menu('Bibliothek'), 'Profile'), null);
+  });
+
+  console.log('\nno matches');
+
+  await check("Roon's \"No Results\" item isn't a track, in any language", async () => {
+    for (const title of ['No Results', 'Keine Ergebnisse']) {
+      const fake = fakeBrowseCore({ results: [{ title, subtitle: null, image_key: null, item_key: '11921:0' }] });
+      assert.deepStrictEqual(await service(fake).search('s1', 'zzqxvbnm'), []);
+    }
+  });
+
+  await check('tracks with no category around them still come through', async () => {
+    const fake = fakeBrowseCore({ results: tracks });
+    const found = await service(fake).search('s1', 'abba');
+    assert.deepStrictEqual(found.map((t) => t.title), ['Dancing Queen', 'Waterloo']);
   });
 
   console.log('\na Core in German');

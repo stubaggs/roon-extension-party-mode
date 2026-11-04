@@ -15,7 +15,8 @@
 'use strict';
 const assert = require('assert');
 const { envValue, startPort, DEFAULT_PORT, instanceName } = require('../lib/env');
-const { debugOn, countWarnings, warningCount } = require('../lib/log');
+const { debugOn, countWarnings, logUnhandledRejections, warningCount } = require('../lib/log');
+const EventEmitter = require('events');
 const { portChosen } = require('../lib/env');
 
 let failures = 0;
@@ -78,6 +79,23 @@ check('warnings and errors are counted, and still written', () => {
   target.log('c');
   assert.strictEqual(warningCount() - before, 2);
   assert.deepStrictEqual(written, ['warn a', 'error b']);
+});
+
+check('a rejection nothing caught is logged as an error, not the end of the process', () => {
+  const target = new EventEmitter();
+  logUnhandledRejections(target);
+  const { error } = console;
+  const written = [];
+  console.error = (m) => written.push(m);
+  try {
+    target.emit('unhandledRejection', new Error('lost'));
+    target.emit('unhandledRejection', 'plain');
+  } finally {
+    console.error = error;
+  }
+  assert.strictEqual(written.length, 2);
+  assert.match(written[0], /^\[PartyMode\] Unhandled error, still running: Error: lost\n\s+at /);
+  assert.strictEqual(written[1], '[PartyMode] Unhandled error, still running: plain');
 });
 
 if (failures) {

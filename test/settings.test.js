@@ -217,6 +217,36 @@ check(`a pairing made while config.json can't be saved is saved once it can${isR
   }
 });
 
+check('the detailed log never shows the pairing token', () => {
+  const dir = path.join(tmp, 'token-log');
+  fs.mkdirSync(dir, { recursive: true });
+  const cwd = process.cwd();
+  const { log, warn } = console;
+  const lines = [];
+  console.log = (...args) => lines.push(args.join(' '));
+  console.warn = () => {};
+  try {
+    process.chdir(dir);
+    const roon = new RoonService();
+    roon._setDetailedLog(true, false);
+    // node-roon-api's own message layer, registering with a saved pairing.
+    const Moo = require('node-roon-api/moo');
+    const moo = new Moo({ logger: roon.api.logger, send() {} });
+    moo.send_request('com.roonlabs.registry:1/register', { extension_id: 'x', token: 'secret-1' });
+    roon.api.logger.log('<-', 'COMPLETE', 1, 'Registered', JSON.stringify({ core_id: 'c', token: 'secret-2' }));
+    roon._setDetailedLog(false, false);
+    const text = lines.join('\n');
+    assert.ok(text.includes('register'), text);
+    assert.ok(text.includes('"token":"[redacted]"'), text);
+    assert.ok(!text.includes('secret-'), text);
+  } finally {
+    process.chdir(cwd);
+    console.log = log;
+    console.warn = warn;
+    setDebug(false);
+  }
+});
+
 check("the host's Party changes are logged, naming both", () => {
   const dir = path.join(tmp, 'modes');
   fs.mkdirSync(dir, { recursive: true });
@@ -235,13 +265,70 @@ check("the host's Party changes are logged, naming both", () => {
       send_complete() {}
     });
     save({ enabled: 'paused' });
-    save({ enabled: 'paused', party_name: 'Garden' }); // no change of mode: nothing
+    save({ enabled: 'paused', party_name: 'Garden' }); // no change of mode: only the name
+    save({ enabled: 'paused', party_name: 'Garden' }); // nothing changed: nothing
     save({ enabled: false });
     save({ enabled: true });
-    assert.deepStrictEqual(lines.filter((l) => String(l).startsWith('[PartyMode] Party')), [
-      '[PartyMode] Party: Paused (was On)',
-      '[PartyMode] Party: Off (was Paused)',
-      '[PartyMode] Party: On (was Off)'
+    assert.deepStrictEqual(lines.filter((l) => String(l).startsWith('[PartyMode] Setting changed')), [
+      '[PartyMode] Setting changed: Party: Paused (was On)',
+      '[PartyMode] Setting changed: Name: "Garden" (was blank)',
+      '[PartyMode] Setting changed: Party: Off (was Paused)',
+      '[PartyMode] Setting changed: Party: On (was Off)'
+    ]);
+  } finally {
+    process.chdir(cwd);
+    console.log = log;
+    console.warn = warn;
+  }
+});
+
+check('every setting a save changes is logged as "Title: new (was old)"; a refused save says why', () => {
+  const dir = path.join(tmp, 'changes');
+  fs.mkdirSync(dir, { recursive: true });
+  const cwd = process.cwd();
+  const { log, warn } = console;
+  const lines = [];
+  console.log = (m) => lines.push(m);
+  console.warn = (m) => lines.push(`warn ${m}`);
+  try {
+    process.chdir(dir);
+    const roon = new RoonService();
+    const save = (changes) => roon.api._service_request_handlers['com.roonlabs.settings:1']({
+      msg: { name: 'save_settings' },
+      body: { is_dry_run: false, settings: { values: Object.assign({}, roon.settings, changes) } },
+      send_complete() {}
+    });
+    save({ zone: { output_id: 'o1', name: 'Test Zone' }, host_name: 'Disco Stu', add_limit: 5, add_refill: 1 });
+    lines.length = 0;
+    save({
+      zone: { output_id: 'o2', name: 'Bedroom' },
+      host_name: '',
+      party_name: 'Line\nbreak',
+      prevent_duplicates: false,
+      playlist_download: 'off',
+      add_limit: 10,
+      add_refill: 5,
+      skip_refill: 2,
+      title_tracks: 'Titel'
+    });
+    assert.deepStrictEqual(lines, [
+      '[PartyMode] Setting changed: Zone: "Bedroom" (was "Test Zone")',
+      '[PartyMode] Setting changed: Name: "Line\\nbreak" (was blank)',
+      '[PartyMode] Setting changed: Host name: blank (was "Disco Stu")',
+      '[PartyMode] Setting changed: Playlist: Off (was QR code)',
+      '[PartyMode] Setting changed: Block tracks already in the queue: No (was Yes)',
+      '[PartyMode] Setting changed: Add to queue, per guest: 10 (was 5)',
+      '[PartyMode] Setting changed: Add to queue, one more every (minutes): 5 (was 1)',
+      '[PartyMode] Setting changed: Skip tracks, one more every (minutes): 2 (was 60)',
+      '[PartyMode] Setting changed: Track category: "Titel" (was "Tracks")'
+    ]);
+
+    // Saving again with nothing changed logs nothing; a refused save says why.
+    lines.length = 0;
+    save({});
+    save({ port: 0 });
+    assert.deepStrictEqual(lines.filter((l) => !l.startsWith('warn [PartyMode] config.json')), [
+      'warn [PartyMode] Settings not saved: Web port: Enter a whole number from 1 to 65535'
     ]);
   } finally {
     process.chdir(cwd);
@@ -904,6 +991,26 @@ check('a limit changed mid-party counts what each guest has already used', () =>
   // No limit in between leaves the count where it was.
   assert.strictEqual(guests.check(session, 'add', at(0)).remaining, null);
   assert.strictEqual(left(5), 4);
+});
+
+check('an allowance handed back after the host changed the limit counts against the new one', () => {
+  const guests = new GuestStore();
+  const at = (limit) => layout({ allow_add: true, add_limit: limit, add_refill: 10 }).values;
+  // Taken with no limit, the host sets one, then Roon refuses the request.
+  const free = guests.create();
+  guests.consume(free, 'add', at(0));
+  guests.refund(free, 'add', at(1));
+  assert.strictEqual(guests.check(free, 'add', at(1)).remaining, 1, 'a full allowance, not stuck at none');
+  // One of five taken, the host lowers it to three, then Roon refuses it.
+  const lowered = guests.create();
+  guests.consume(lowered, 'add', at(5));
+  guests.refund(lowered, 'add', at(3));
+  assert.strictEqual(guests.check(lowered, 'add', at(3)).remaining, 3);
+  // One of five taken, the host raises it to ten, then Roon refuses it.
+  const raised = guests.create();
+  guests.consume(raised, 'add', at(5));
+  guests.refund(raised, 'add', at(10));
+  assert.strictEqual(guests.check(raised, 'add', at(10)).remaining, 10);
 });
 
 check('switched off wins over any limit', () => {

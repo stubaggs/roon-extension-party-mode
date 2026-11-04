@@ -26,7 +26,7 @@ trap 'printf "\nThe setup program stopped unexpectedly (line %s).\n" "$LINENO" >
 
 # This program's own version, separate from Party Mode's: raise it with every
 # change, so a copy kept on a computer can tell a newer one is out.
-SETUP_VERSION=1.4
+SETUP_VERSION=1.5
 IMAGE=stubaggs/roon-extension-party-mode
 SOURCE=https://github.com/stubaggs/roon-extension-party-mode
 DESCRIPTION="Roon Extension for parties: guests request music from their phone, no app needed"
@@ -47,6 +47,9 @@ ONE_WAY="On one computer, run Party Mode with Docker or with the Extension
 Manager, not both."
 
 WHIPTAIL=0
+# Where whiptail draws, and the screens between it: the terminal. The tests
+# (test/setup.test.js) draw elsewhere.
+TTY=/dev/tty
 
 have() { command -v "$1" >/dev/null 2>&1; }
 
@@ -100,11 +103,11 @@ msg() {
     box_size
     n=$(fold -s -w $(( BOX_W - 4 )) <<<"$text" | wc -l)
     if (( n + 7 <= SCREEN_H )); then
-      whiptail --title "$TITLE" --msgbox "$text" $(( n + 7 )) "$BOX_W" >/dev/tty || true
+      whiptail --title "$TITLE" --msgbox "$text" $(( n + 7 )) "$BOX_W" >"$TTY" || true
     else
       whiptail --title "$TITLE" --scrolltext --msgbox "$text
 
-(Tab, then Enter, to close.)" "$SCREEN_H" "$BOX_W" >/dev/tty || true
+(Tab, then Enter, to close.)" "$SCREEN_H" "$BOX_W" >"$TTY" || true
     fi
     between
   else
@@ -117,6 +120,12 @@ die() {
   exit 1
 }
 
+# Whether a plain prompt can be answered: someone at a terminal. The tests
+# answer on stdin instead.
+can_ask() {
+  [[ -t 0 ]]
+}
+
 # ask "question" [yes label] [no label]
 ask() {
   local text n rc=0
@@ -125,10 +134,10 @@ ask() {
     box_size
     n=$(fold -s -w $(( BOX_W - 4 )) <<<"$text" | wc -l)
     whiptail --title "$TITLE" --yes-button "${2:-Yes}" --no-button "${3:-No}" \
-      --yesno "$text" $(( n + 7 < SCREEN_H ? n + 7 : SCREEN_H )) "$BOX_W" >/dev/tty || rc=$?
+      --yesno "$text" $(( n + 7 < SCREEN_H ? n + 7 : SCREEN_H )) "$BOX_W" >"$TTY" || rc=$?
     between
     return "$rc"
-  elif [[ -t 0 ]]; then
+  elif can_ask; then
     local answer
     printf '%s\n' "$text" | fold -s -w 78 >&2
     read -r -p "[y/N] " answer
@@ -189,15 +198,15 @@ menu() {
 # Between screens, the terminal shows only what's happening now: never what
 # an earlier step printed.
 between() {
-  clear >/dev/tty
-  printf '%s\n\nOne moment...\n' "$TITLE" >/dev/tty
+  clear >"$TTY"
+  printf '%s\n\nOne moment...\n' "$TITLE" >"$TTY"
 }
 
 # Long-running Docker output goes to the terminal, between screens.
 progress() {
   if (( WHIPTAIL )); then
-    clear >/dev/tty
-    printf '%s\n\n' "$TITLE" >/dev/tty
+    clear >"$TTY"
+    printf '%s\n\n' "$TITLE" >"$TTY"
   fi
   printf '%s\n' "$1" >&2
 }

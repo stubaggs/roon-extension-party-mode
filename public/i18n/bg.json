@@ -1,6 +1,6 @@
 {
   "_language": "Български",
-  "_reserved_host_words": "Домакин, Домакиня",
+  "_reserved_host_words": "Домакин, Домакиня, Домакини",
   "_reserved_radio_words": "Радио",
   "page.title": "Добави запис",
   "page.hub_title": "{name} Hub",
@@ -17,6 +17,7 @@
   "credit.host": "Домакини",
   "search.placeholder": "Търси запис или изпълнител",
   "search.clear": "Изчисти търсенето",
+  "search.searching": "Търсене…",
   "search.no_results": "Няма намерени записи. Опитай с името на изпълнителя.",
   "search.results": {
     "one": "Намерен е {count} запис.",
@@ -26,7 +27,7 @@
   "track.added": "Добавен",
   "track.in_queue": "В опашката",
   "track.add": "Добави в опашката",
-  "track.next": "Пусни следващ",
+  "track.next": "Пусни го следващ",
   "queue.up_next": "Следват",
   "queue.count": {
     "one": "{count} запис",

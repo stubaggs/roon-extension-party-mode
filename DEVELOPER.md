@@ -27,7 +27,7 @@ Roon Core  ──(node-roon-api over the local network)──  app.js
 
 | File | What it does |
 | --- | --- |
-| `app.js` | Wires the Roon service to the web server |
+| `app.js`, `lib/startup.js` | Wires the Roon service to the web server: the web port, then Roon discovery, and Roon's links |
 | `lib/roon-service.js` | Pairing, the settings layout, search, queue actions, the queue subscription, the status line |
 | `lib/server.js` | The web server: pages, API, live updates, security headers |
 | `lib/embed.js` | The `/embed/` views, built field by field |
@@ -64,7 +64,9 @@ prints the guest link and the Party Hub's address. Settings are written to `conf
 in the folder it's started from.
 
 Dependencies: Roon Labs' `node-roon-api*` packages (from `github:roonlabs/…`), `express`,
-`express-rate-limit` and `qrcode-generator`. There are no development dependencies.
+`express-rate-limit` and `qrcode-generator`. The one development dependency, `jsdom`, is
+for the page tests; the image installs without it (`npm ci --omit=dev`), and the About
+page leaves it out of its library list.
 
 ## Tests
 
@@ -73,8 +75,27 @@ Dependencies: Roon Labs' `node-roon-api*` packages (from `github:roonlabs/…`),
 build runs them too, so a failing test stops a build. Before pushing, also build and run
 the image (see [Running the image](#running-the-image)).
 
-`party-mode-setup.sh` isn't in `npm test` (the image has no bash): check it with
-`docker run --rm -v "$PWD:/mnt:ro" koalaman/shellcheck:stable /mnt/party-mode-setup.sh`.
+- `test/startup.test.js`: `lib/startup.js` (the web port, Roon's links) against stand-ins
+  for the Roon service and the web server.
+- `test/pages.test.js`: the page scripts in `jsdom`, each page as the server sends it,
+  with a stand-in for Roon playing a party (`test/party-roon.js`) and live updates from
+  `/api/events`. jsdom has no layout, so the tests set sizes where a script measures.
+  Skipped without jsdom, as in the Docker build.
+- `test/setup.test.js`: `party-mode-setup.sh`'s functions in bash against a stand-in for
+  `docker` (`test/fake-docker.js`), `curl` and `whiptail`, with nothing else on the
+  `PATH`. Questions are answered on stdin (the tests redefine `can_ask`), and whiptail
+  draws to a file (`TTY`). Needs bash 4, so the Docker build (Alpine, no bash) skips it. Also check the script with
+  `docker run --rm -v "$PWD:/mnt:ro" koalaman/shellcheck:stable /mnt/party-mode-setup.sh`.
+
+`test/browsers.js` isn't in `npm test`: it opens the pages in Chromium, WebKit and Firefox
+with the same stand-in, for what jsdom can't show (the security policy enforced, layout,
+Roon's display page in its frame, console errors). Run it in Playwright's image, with the
+image's version of Playwright, after a page change:
+
+```bash
+docker run --rm --init -v "$PWD:/app:ro" -w /app mcr.microsoft.com/playwright:v1.64.1-noble \
+  sh -c 'cd /tmp && npm i -s playwright@1.64.1 && cd /app && NODE_PATH=/tmp/node_modules node test/browsers.js'
+```
 
 ## Endpoints
 
@@ -85,11 +106,11 @@ the image (see [Running the image](#running-the-image)).
 | `/PartyHub/Standard`, `/PartyHub/Roon`, `/PartyHub/Basic` | The Party Hub in that view, whatever the setting (`data-view` on the page, `?view=` to `/api/hub`); Basic is `basic.html`, for TV browsers too old for the Party Hub |
 | `/Playlist` | The party playlist, only while Party is Off and Playlist isn't Off |
 | `/p/<code>` | The party playlist at the host's own address, new for each party (in Roon's status) |
-| `/About`, `/About/license/<id>` | Version, the running copy's state, every library and its licence, and the Party Hub's address; Roon's link for the extension (`website`) |
+| `/About`, `/About/license/<id>` | Version, the running copy's state, every library it runs on (not development ones) and its licence, and the Party Hub's address; Roon's link for the extension (`website`) |
 | `/` | "Scan the code again" |
 | `/api/party`, `/api/queue`, `/api/search`, `POST /api/request`, `POST /api/skip`, `POST /api/name` | The guest page's API; need a guest session |
 | `/api/hub` | The Party Hub's data; no session |
-| `/api/events` | Live updates for both pages (server-sent events) |
+| `/api/events` | Live updates for both pages (server-sent events); `?view=roon` from a Party Hub showing Roon's display page by its address |
 | `/api/image/<key>` | Album art, only for image keys Party Mode has sent |
 | `/i18n.js` | The page text in the browser's language |
 | `/embed/…` | Read-only views, art, QR codes and live updates for other people's screens (see [EMBED.md](EMBED.md)) |
@@ -97,6 +118,17 @@ the image (see [Running the image](#running-the-image)).
 `/api/…` is only for Party Mode's own pages and may change. `/embed/…` is a contract: new
 addresses and fields may be added, nothing renamed or removed (tests check each view's
 exact fields); a breaking change would go under `/embed/v2/`.
+
+The QR codes (join, playlist and the guest page's Invite) carry the address on this
+computer that their request reached (`req.socket.localAddress`, never the Host header), so
+a page opened on a second network, such as guest Wi-Fi, gets a code that works there.
+Loopback, `0.0.0.0` and IPv6 fall back to the first non-internal IPv4 address, which
+Roon's status line, the log and About always use.
+
+Roon's link for the extension (`website`, the About page) reaches Roon only with the
+registration, so `lib/startup.js` registers again if the link changed: when the Core
+pairs and when the party zone arrives. Started before the network was up (after a
+reboot) the link was `127.0.0.1`; a Core on the same computer pairs with no network at all.
 
 Guest API errors are JSON `{ "error": … }`: 401 `no_session`; 403 `closed` (Party Off,
 with `playlist: true` while `/Playlist` answers) or `cross_origin`; 409 `paused`,
@@ -198,8 +230,11 @@ sends `play` unless the zone is playing. Not on a radio station: a station plays
 the queue and never ends, so requests wait for the host.
 
 **Played and skips.** Roon has no play history, so Played (last 200) is recorded as tracks
-start, in memory: a new party, a restart or another zone starts it over. A track left 10
-seconds or more before its end without a guest's skip shows "Skipped by Host".
+start, in memory: a new party, a restart or another zone starts it over (the track already
+playing there is recorded at once). A track left 10 seconds or more before its end without
+a guest's skip shows "Skipped by Host". A skip is kept until Roon moves on, so guests
+skipping the same track at the same moment skip it once: the later ones get the same
+answer and use none of their own skips.
 
 **The playlist** is a CSV download in the form Soundiiz imports (Roon's API can't make
 playlists): every queue entry the party zone gets, once, at most 5000, in memory. Its
@@ -238,17 +273,25 @@ Chrome 53 and Firefox 47.
 
 Page text is in `public/i18n/<code>.json`, 30 languages (the list is in `lib/i18n.js`);
 a missing key falls back to `en.json`. Settings and Roon's status line stay in English.
-The non-English files are AI drafts: corrections from native speakers are welcome.
+The non-English files were generated interactively with AI: corrections from native
+speakers are welcome.
 
 To add a language: copy `en.json`, translate the values, keep `{name}`, `{count}` and
 `{wait}`, give plurals the forms the language uses (`Intl.PluralRules`: Arabic all six;
 Czech, Polish, Russian and Ukrainian `few` and `many`; CJK, Thai and Vietnamese only
-`other`), fill in `_reserved_host_words` and `_reserved_radio_words` (words guests can't
-take as names; not sent to the pages), and restart. `npm test` checks keys and
-placeholders. Say "tracks", not songs, with a neutral word as Roon does.
+`other`), fill in `_reserved_host_words` and `_reserved_radio_words` (the other words
+guests can't take as names: plurals, feminine forms, the plain word for "radio"; every
+language's `credit.host`, `credit.radio`, `credit.guest` and `playing.station` are
+reserved already; none is sent to the pages), and restart. `npm test` checks keys,
+placeholders, the plural forms each language uses and that `…` is never written as three
+dots. Say "tracks", not songs, with a neutral word as Roon does.
 
 The language comes from a `party_lang` cookie (the guest's 🌐 choice), else
-Accept-Language (`no`/`nn` → `nb`, `iw` → `he`, Chinese by script), else English. The
+Accept-Language (`no`/`nn` → `nb`, `iw` → `he`), else English. Chinese gets a file only
+when the tag names one: Simplified for `zh`, China, Singapore or the Hans script, Traditional
+(Taiwan's) for Taiwan, Hong Kong, Macau or the Hant script (any region); any other Chinese
+tag (a region with no script, Cantonese) gets English, and a later bare `zh` doesn't stand
+in for it. The
 Party Hub language setting overrides both on the Hub. Hebrew and Arabic pages are
 right to left; names dropped into sentences are wrapped in first-strong isolates.
 
@@ -413,6 +456,11 @@ Every line starts with a tag saying what it's about, so `grep` finds one kind:
 - **`[PartyMode]`**: Party Mode itself and the host's settings: startup, the tracks it
   follows and credits, playlist downloads.
 
+Names (tracks, artists, zones, profiles, guests, the host) and text the host typed are
+in quotes, with line breaks and control characters escaped (`quote()` in
+`lib/log.js`); labels (`Anon`, `Host`, `Roon Radio`, `nobody`), choices and numbers
+aren't. A change reads `new (was old)`.
+
 Info and Detailed lines go to standard output, Warning and Error to standard error; the
 About page counts warnings and errors. Detailed lines appear only while the **Detailed
 log** setting (or `ROON_EXTENSION_PARTY_MODE_DEBUG`) is on: they include what guests
@@ -439,6 +487,8 @@ tag. Lines carry no time; use `docker logs -t`.
 | A guest's session couldn't get the profile | `[Roon] Could not select profile "Party" for a guest: …` |
 | A request's action not found in Roon | `[Roon] No "Add to queue" action and not the usual four actions; …` |
 | Roon refused to start or pause playback | `[Roon] Could not start playback for a request: …` |
+| The host's save refused, with why | `[PartyMode] Settings not saved: Web port: Enter a whole number from 1 to 65535` |
+| An error nothing caught (a rejected promise, or the web server's); the extension keeps running. An uncaught exception still stops it | `[PartyMode] Unhandled error, still running: <stack>`, `[PartyMode] Web server error: <message>` |
 
 ### Info
 
@@ -452,18 +502,17 @@ tag. Lines carry no time; use `docker logs -t`.
 | Guest requests' profile | `[PartyMode] Guest requests use the Roon profile "Party"` |
 | Party zone back | `[Roon] Party zone "Lounge" is available again` |
 | Requests back on | `[Roon] Requests are back on` |
-| The host changes Party | `[PartyMode] Party: Paused (was On)` |
-| Detailed log turned on or off | `[PartyMode] Detailed log on` |
+| The host saves a changed setting, one line each (names and typed text in quotes, line breaks escaped) | `[PartyMode] Setting changed: Party: Paused (was On)`, `[PartyMode] Setting changed: Name: "Garden" (was blank)`, `[PartyMode] Setting changed: Add to queue, per guest: 10 (was 5)` |
 | A guest names themselves | `[Guest] RA8lxj…: name "Sam" (was Anon)` |
 | A guest's session gets the profile, at their first search | `[Guest] RA8lxj…: profile "Party"` |
-| Request | `[Guest] Request (add) from Sam: "Gold" / "Spandau Ballet"` |
-| Request Roon failed | `[Roon] Request (next) from Sam failed: "Gold" / …: <error>` |
+| Request | `[Guest] Request (add) from "Sam": "Gold" / "Spandau Ballet"` |
+| Request Roon failed | `[Roon] Request (next) from "Sam" failed: "Gold" / …: <error>` |
 | Playback started for a request | `[PartyMode] Started playback in "Lounge" for a request` |
-| Queued for a guest | `[PartyMode] Queued: "Gold" / "Spandau Ballet" 290s [c47dd885da0f] -> Sam` |
-| Started playing, with its credit | `[PartyMode] Playing: "Gold" / "Spandau Ballet" [c47dd885da0f] -> Sam` |
-| Credited after it started | `[PartyMode] Credited: "Gold" / "Spandau Ballet" -> Sam` |
-| Skip | `[Guest] Skip from Sam: "Gold" / "Spandau Ballet"` |
-| Skip Roon failed | `[Roon] Skip from Sam failed: <error>` |
+| Queued for a guest | `[PartyMode] Queued: "Gold" / "Spandau Ballet" 290s [c47dd885da0f] for "Sam"` |
+| Started playing, with its credit | `[PartyMode] Playing: "Gold" / "Spandau Ballet" [c47dd885da0f] for "Sam"` |
+| Credited after it started | `[PartyMode] Credited: "Gold" / "Spandau Ballet" to "Sam"` |
+| Skip | `[Guest] Skip from "Sam": "Gold" / "Spandau Ballet"` |
+| Skip Roon failed | `[Roon] Skip from "Sam" failed: <error>` |
 | Ended early with no guest skip: skipped in Roon, or Roon couldn't play it (Roon doesn't say which) | `[Roon] Ended early: "Gold" / … at 38 of 290 s (…)` |
 | Paused with the party | `[PartyMode] Paused "Lounge": party paused or off` |
 | Playlist downloaded | `[PartyMode] Playlist downloaded (152 tracks, from its own address)` |
@@ -474,9 +523,9 @@ tag. Lines carry no time; use `docker logs -t`.
 | --- | --- |
 | The profiles on offer | `[Roon] Profiles on offer: Party, Guest, …` |
 | The profile before and after a guest's switch | `[Roon] Guest RA8lxj…: Roon answered list; profile before "Guest", after "Party"` |
-| Search | `[Guest] Search from Sam: "abba" (12 results)`; a refused one (`[Guest] … refused: not_ready`) or failed one (`[Roon] … failed: …`) |
+| Search | `[Guest] Search from "Sam": "abba" (12 results)`; a refused one (`[Guest] … refused: not_ready`) or failed one (`[Roon] … failed: …`) |
 | The first search's result categories | `[Roon] Search (Library → Search) result categories: …` |
-| Request or skip refused, with the reason | `[Guest] Request (add) from Sam refused: rate_limited: "Gold" / …` |
+| Request or skip refused, with the reason | `[Guest] Request (add) from "Sam" refused: rate_limited: "Gold" / …` |
 | Roon stopped sending the queue (e.g. after a Core restart); asked again within 5 s | `[Roon] Queue subscription ended: …` |
 | node-roon-api's log of every message to and from the Core | `-> REQUEST 74 com.roonlabs.transport:2/control {…}` |
 
@@ -530,8 +579,10 @@ number, or a digest from RELEASES.md, to stay on one image.
   disabled in Roon, or the Core restarts, it can be missing from Roon's Extensions list
   for up to a minute.
 - **Everything is in memory:** Played, the playlist and credits start over on a restart.
-- **Sessions can take tens of megabytes** if all 2000 are filled, which anyone on the
-  network could do; the longest idle go first, and real guests rejoin by themselves.
+- **A full set of 2000 sessions takes about 50 MB.** A session is under 1 KB until its
+  guest searches, then about 13 KB for each search it keeps (the last two, 40 results
+  each): 26 KB at most. A party of 200 guests takes about 5 MB. Anyone on the network could
+  fill all 2000; the longest idle go first, and real guests rejoin by themselves.
 - **The Extension Manager and Docker don't mix on one computer:** the Manager finds its new
   container by Docker's name filter, which matches part of a name, so containers named
   `roon-extension-party-mode-…` stall its installs and updates at "Installing".

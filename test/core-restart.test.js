@@ -486,6 +486,63 @@ check('a track that ends while the Core is away is not judged left early; one st
   assert.deepStrictEqual(ended.slice(1).map((e) => [e.title, e.seek]), [['Isn\'t She Lovely', 60]]);
 });
 
+check('the party zone arriving is told once, not on every zone update; again when it returns', () => {
+  withTimers(() => {
+    const roon = service();
+    const core = fakeCore([]);
+    let told = 0;
+    roon.on('zone_arrived', () => (told += 1));
+    roon._onCorePaired(core);
+    core.zonesCb('Subscribed', {});
+    assert.strictEqual(told, 0, 'not there yet');
+    core.zones = [zone];
+    roon._refreshZone();
+    assert.strictEqual(told, 1);
+    roon._refreshZone();
+    assert.strictEqual(told, 1, 'an update, not an arrival');
+    core.zones = [];
+    roon._refreshZone();
+    core.zones = [zone];
+    roon._refreshZone();
+    assert.strictEqual(told, 2);
+  });
+});
+
+check('the party zone leaving is told once', () => {
+  withTimers(() => {
+    const roon = service();
+    const core = fakeCore([zone]);
+    let told = 0;
+    roon.on('zone_left', () => (told += 1));
+    roon._onCorePaired(core);
+    core.zonesCb('Subscribed', {});
+    assert.strictEqual(told, 0);
+    core.zones = [];
+    roon._refreshZone();
+    assert.strictEqual(told, 1);
+    roon._refreshZone();
+    assert.strictEqual(told, 1, 'an update, not a departure');
+  });
+});
+
+check('a Core restart: the zone arriving asks about profiles again, once, only after no answer', () => {
+  withTimers(() => {
+    const roon = service();
+    const asked = [];
+    roon._applyProfile = async (o) => asked.push(o);
+    const core = fakeCore([]);
+    roon._onCorePaired(core);
+    roon.profileProblem = 'Could not read profiles: Roon did not answer';
+    core.zonesCb('Subscribed', {});
+    asked.length = 0;
+    core.zones = [zone];
+    roon._refreshZone();
+    assert.strictEqual(asked.length, 1);
+    roon._refreshZone();
+    assert.strictEqual(asked.length, 1, 'an update, not an arrival');
+  });
+});
+
 check('Roon starting or stopping to allow a skip tells the pages, so Skip shows or hides', () => {
   const roon = service();
   const core = fakeCore([Object.assign({}, zone, { is_next_allowed: true })]);

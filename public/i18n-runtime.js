@@ -51,10 +51,10 @@
   // isolates, they keep their place in the sentence. Only when it matters: a
   // right-to-left page, or right-to-left text, so other pages stay plain text.
   var ISOLATE = ['name', 'language'];
-  var RTL_TEXT = /[֐-ࣿיִ-﷿ﹰ-﻿]/;
+  var RTL_TEXT = /[\u0590-\u08ff\ufb1d-\ufdff\ufe70-\ufeff]/;
   function isolate(value) {
     var text = String(value);
-    return data.dir === 'rtl' || RTL_TEXT.test(text) ? '⁨' + text + '⁩' : text;
+    return data.dir === 'rtl' || RTL_TEXT.test(text) ? '\u2068' + text + '\u2069' : text;
   }
 
   function t(key, vars) {

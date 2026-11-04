@@ -17,6 +17,7 @@
   "credit.host": "Chủ tiệc",
   "search.placeholder": "Tìm bài hoặc nghệ sĩ",
   "search.clear": "Xóa tìm kiếm",
+  "search.searching": "Đang tìm…",
   "search.no_results": "Không tìm thấy bài nào. Hãy thử tên nghệ sĩ.",
   "search.results": {
     "other": "Tìm thấy {count} bài."

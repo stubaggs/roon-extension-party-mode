@@ -17,6 +17,7 @@
   "credit.host": "Host",
   "search.placeholder": "Search for a track or artist",
   "search.clear": "Clear search",
+  "search.searching": "Searching…",
   "search.no_results": "No tracks matched. Try the artist name.",
   "search.results": {
     "one": "{count} track found.",

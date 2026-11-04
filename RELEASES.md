@@ -3,6 +3,34 @@
 What's new in each version of Party Mode, newest first. Roon shows the version you're
 running in its Extensions list.
 
+## 1.4.1
+
+### Fixed
+
+- **Searching, on the guest page**
+  - A search with no matches no longer lists "No Results" as a track guests could pick.
+  - The guest page shows "Searching…" while a search is under way, so a slow answer from
+    Roon no longer looks like the page has frozen.
+  - Titles and artists in Japanese, Chinese, Korean, Cyrillic, Greek, Hebrew, Arabic and
+    Thai are told apart, so different tracks no longer count as duplicates or share a credit.
+- **Skips and Played**
+  - Two guests skipping the same track at the same moment now skip it once, not twice.
+  - Choosing another party zone no longer drops that zone's first track from **Played**.
+- **Joining and QR codes**
+  - QR codes carry the address the Party Hub or guest page was opened on, so they work on a
+    second network such as guest Wi-Fi.
+  - Once the party is over, the guest page keeps the party's name as its title when it's
+    opened again, rather than "Add a track".
+- Roon's website link for Party Mode no longer points at 127.0.0.1 when Party Mode starts
+  before the network is up.
+- The About page no longer reports a problem with the Roon profile after a Roon Core
+  restart.
+- Updated translations.
+
+### Security
+
+- Various security enhancements.
+
 ## 1.4.0
 
 Docker image: `stubaggs/roon-extension-party-mode:1.4.0@sha256:30e1d3c3432d27c74466ccf852151f2c792a3d94f7f2b9bc5327cd09a347c740`<br>
@@ -169,7 +197,7 @@ Docker image: `stubaggs/roon-extension-party-mode:1.3.0@sha256:b2a1339e64544fca2
 - Changing how many tracks, plays next or skips each guest gets now applies straight away
   to guests already at the party, counting what they've used. Before, raising a limit
   didn't give them any more.
-  
+
 ### Security
 - Various security enhancements.
 - The container is now called `roon-extension-party-mode` (it was `party-mode`). When

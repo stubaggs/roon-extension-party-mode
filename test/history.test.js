@@ -231,5 +231,18 @@ check('a radio station never goes into Played, but the track before it does', ()
   assert.deepStrictEqual(history.list().map((t) => t.title), ['SOS', 'Waterloo']);
 });
 
+check('another zone starts Played over, and its playing track still goes in', () => {
+  const history = new PlayHistory();
+  history.update('z1', playing('Waterloo'), null);
+  history.update('z1', playing('SOS'), null);
+  assert.strictEqual(history.update('z2', playing('Gold'), null), true, 'Played changed: emptied');
+  assert.deepStrictEqual(history.list(), []);
+  assert.strictEqual(history.playOf(playing('Gold')).title, 'Gold', 'the playing track is recorded');
+  history.update('z2', playing('True'), null);
+  assert.deepStrictEqual(history.list().map((t) => t.title), ['Gold']);
+  // From an empty Played, nothing changed to say.
+  assert.strictEqual(new PlayHistory().update('z3', playing('Gold'), null), false);
+});
+
 console.log(failures ? `\n${failures} failing` : '\nall passing');
 process.exit(failures ? 1 : 0);

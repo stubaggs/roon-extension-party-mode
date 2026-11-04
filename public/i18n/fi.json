@@ -17,6 +17,7 @@
   "credit.host": "Isäntä",
   "search.placeholder": "Hae kappaletta tai artistia",
   "search.clear": "Tyhjennä haku",
+  "search.searching": "Haetaan…",
   "search.no_results": "Kappaleita ei löytynyt. Kokeile artistin nimeä.",
   "search.results": {
     "one": "{count} kappale löytyi.",
@@ -38,7 +39,7 @@
   "queue.empty_radio": "Roon Radio valitsee, mitä seuraavaksi soi.",
   "played.title": "Soitetut",
   "played.empty": "Mitään ei ole vielä soitettu.",
-  "played.skipped_by": "Ohitti: {name}",
+  "played.skipped_by": "{name} ohitti",
   "played.skipped_by_host": "Isäntä ohitti",
   "allowance.closed": "Toiveet on juuri nyt suljettu.",
   "allowance.paused": "Toiveet ovat hetken tauolla.",
@@ -47,7 +48,7 @@
     "other": "{count} jäljellä"
   },
   "button.wait": "{wait} päästä",
-  "button.used": "ei jäljellä",
+  "button.used": "ei enää",
   "button.paused": "tauolla",
   "time.minutes": {
     "one": "minuutin",
@@ -62,7 +63,7 @@
   "toast.disabled": "Isäntä on poistanut tämän käytöstä.",
   "toast.skipped": "Ohitettu",
   "toast.failed": "Valitettavasti se ei onnistunut.",
-  "toast.too_many_requests": "Liikaa pyyntöjä. Odota hetki ja yritä uudelleen.",
+  "toast.too_many_requests": "Liikaa pyyntöjä. Odota minuutti ja yritä uudelleen.",
   "skip.button": "Ohita",
   "name.adding_as": "Lisäät nimellä {name}",
   "name.change": "Vaihda",
@@ -79,7 +80,7 @@
   "lang.title": "Kieli",
   "lang.automatic": "Automaattinen",
   "lang.change": "Kieli: {language}. Vaihda",
-  "invite.open": "Näytä QR-koodi ({name}), jotta muutkin pääsevät mukaan",
+  "invite.open": "Näytä juhlien {name} QR-koodi, jotta muutkin pääsevät mukaan",
   "invite.close": "Sulje",
   "locked.title": "Skannaa koodi uudelleen",
   "locked.text": "Tämä linkki toimii vasta, kun olet skannannut koodin Party Hubista. Pyydä isäntää näyttämään se.",

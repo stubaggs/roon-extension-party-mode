@@ -17,6 +17,7 @@
   "credit.host": "Vært",
   "search.placeholder": "Søg efter et nummer eller en kunstner",
   "search.clear": "Ryd søgningen",
+  "search.searching": "Søger…",
   "search.no_results": "Ingen numre fundet. Prøv kunstnerens navn.",
   "search.results": {
     "one": "{count} nummer fundet.",
@@ -48,7 +49,7 @@
   },
   "button.wait": "om {wait}",
   "button.used": "ingen tilbage",
-  "button.paused": "pause",
+  "button.paused": "på pause",
   "time.minutes": {
     "one": "et minut",
     "other": "{count} minutter"

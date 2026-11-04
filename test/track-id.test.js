@@ -308,5 +308,66 @@ console.log('\nduplicates: one band\'s versions on different albums');
   });
 }
 
+console.log('\ntitles and artists in any script');
+
+{
+  const { sameRecordingAsQueued: isQueued, versionTitle, looseTitle, fold } = require('../lib/track-id');
+  const different = [
+    ['Japanese', '君の名は', '夜に駆ける'],
+    ['Chinese', '月亮代表我的心', '甜蜜蜜'],
+    ['Korean', '봄날', '작은 것들을 위한 시'],
+    ['Cyrillic', 'Группа крови', 'Кукушка'],
+    ['Greek', 'Τα παιδιά του Πειραιά', 'Ζορμπάς'],
+    ['Hebrew', 'הללויה', 'ירושלים של זהב'],
+    ['Arabic', 'أنت عمري', 'الأطلال'],
+    ['Thai', 'คิดถึง', 'รักเธอ']
+  ];
+
+  for (const [script, one, other] of different) {
+    check(`${script}: titles keep their letters, and two different ones differ`, () => {
+      assert.ok(versionTitle(one), 'not empty');
+      assert.ok(looseTitle(one), 'not empty');
+      assert.notStrictEqual(versionTitle(one), versionTitle(other));
+    });
+
+    check(`${script}: two tracks on one album aren't duplicates; the same one is`, () => {
+      const queued = { title: one, artist: 'Artist', image_key: 'album' };
+      assert.strictEqual(isQueued(queued, { title: other, artist: 'Artist', image_key: 'album' }), false);
+      assert.strictEqual(isQueued(queued, { title: one, artist: 'Artist', image_key: 'album' }), true);
+    });
+
+    check(`${script}: tracks of the same length get their own hash`, () => {
+      const hash = (title) => trackHash({ title, artist: 'Artist', length: 200 });
+      assert.notStrictEqual(hash(one), hash(other));
+    });
+  }
+
+  check('artists in any script are names, so different ones disagree', () => {
+    assert.deepStrictEqual([...artistSet('宇多田ヒカル / 椎名林檎')], ['宇多田ヒカル', '椎名林檎'].map(fold));
+    const queued = { title: 'Song', artist: 'Кино' };
+    assert.strictEqual(sameRecording(queued, { title: 'Song', artist: 'Алиса' }), false);
+    assert.strictEqual(sameRecording(queued, { title: 'Song', artist: 'Кино' }), true);
+  });
+
+  check('words that differ only by a mark stay different', () => {
+    assert.notStrictEqual(versionTitle('か'), versionTitle('が'));
+    assert.notStrictEqual(versionTitle('คน'), versionTitle('คน่'));
+  });
+
+  check('letters accents do not make keep theirs: ø, ß, æ', () => {
+    assert.strictEqual(versionTitle('Bjørk'), 'bjørk');
+    assert.strictEqual(versionTitle('Straße'), 'straße');
+    assert.strictEqual(versionTitle('Mærsk'), 'mærsk');
+  });
+
+  check('Latin titles read as before', () => {
+    assert.strictEqual(versionTitle('Dancing Queen (Remastered 2001)'), 'dancing queen remastered 2001');
+    assert.strictEqual(versionTitle('Hoppípolla'), 'hoppipolla');
+    assert.strictEqual(versionTitle("Don't Stop Me Now!"), 'don t stop me now');
+    assert.strictEqual(looseTitle('Dancing Queen - 2014 Remaster'), 'dancing queen');
+    assert.deepStrictEqual([...artistSet('Calvin Harris / Dua Lipa feat. Beyoncé')], ['calvin harris', 'dua lipa', 'beyonce']);
+  });
+}
+
 console.log(failures ? `\n${failures} failing` : '\nall passing');
 process.exit(failures ? 1 : 0);

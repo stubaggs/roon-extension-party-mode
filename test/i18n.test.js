@@ -184,8 +184,8 @@ check('French text, plurals and clock', () => {
   const I18N = runtimeFor('fr', fr);
   assert.strictEqual(I18N.t('queue.up_next'), 'À suivre');
   assert.strictEqual(I18N.t('credit.requested_by', { name: 'Sam' }), 'Demandé par Sam');
-  assert.strictEqual(I18N.t('button.left', { count: 1 }), '1 restant');
-  assert.strictEqual(I18N.t('button.left', { count: 3 }), '3 restants');
+  assert.strictEqual(I18N.t('button.left', { count: 1 }), 'encore 1');
+  assert.strictEqual(I18N.t('button.left', { count: 3 }), 'encore 3');
   assert.strictEqual(I18N.minutes(30 * 1000), 'une minute');
   assert.strictEqual(I18N.credit({ kind: 'add', requested_by: null }), 'Anonyme');
 });
@@ -234,9 +234,30 @@ const languageCases = [
   ['pt-BR', 'pt-BR'], ['pt-PT', 'pt'], ['pt', 'pt'], ['pt-AO', 'pt'],
   // Arabic: Egypt has its own file.
   ['ar-EG', 'ar-EG'], ['ar-SA', 'ar'], ['ar', 'ar'],
-  // Chinese by script: Traditional for Taiwan, Hong Kong and Macau.
+  // Chinese has two files, Simplified and Traditional (Taiwan's, which also serves Hong
+  // Kong and Macau), and a tag gets one only when it names it.
+  // Simplified: China, Singapore, "zh" alone, the script in any region.
   ['zh-CN', 'zh-Hans'], ['zh-SG', 'zh-Hans'], ['zh', 'zh-Hans'], ['zh-Hans-CN', 'zh-Hans'],
+  ['zh-Hans', 'zh-Hans'], ['zh-Hans-SG', 'zh-Hans'], ['zh-Hans-HK', 'zh-Hans'],
+  ['zh-Hans-MO', 'zh-Hans'], ['zh-Hans-MY', 'zh-Hans'],
+  // Traditional: Taiwan, Hong Kong, Macau, or the script in any region (iOS sends
+  // "zh-Hant-US" for Traditional Chinese in the United States).
   ['zh-TW', 'zh-Hant'], ['zh-HK', 'zh-Hant'], ['zh-MO', 'zh-Hant'], ['zh-Hant', 'zh-Hant'],
+  ['zh-Hant-TW', 'zh-Hant'], ['zh-Hant-HK', 'zh-Hant'], ['zh-Hant-MO', 'zh-Hant'],
+  ['zh-Hant-US', 'zh-Hant'], ['zh-Hant-CN', 'zh-Hant'], ['zh-Hant-SG', 'zh-Hant'], ['zh-Hant-MY', 'zh-Hant'],
+  // Anything else in Chinese gets English: a region with no script, Cantonese and the
+  // other Chinese languages.
+  ['zh-MY', 'en'], ['zh-ID', 'en'], ['zh-US', 'en'],
+  ['yue', 'en'], ['yue-HK', 'en'], ['yue-Hant-HK', 'en'], ['zh-yue-HK', 'en'],
+  ['cmn', 'en'], ['cmn-Hans-CN', 'en'], ['wuu', 'en'], ['hak', 'en'], ['nan', 'en'],
+  // A declined Chinese tag keeps the later Chinese ones out ("zh-MY,zh;q=0.9": the bare
+  // "zh" is Simplified), but another language after it still counts.
+  ['zh-MY,zh;q=0.9,en;q=0.8', 'en'], ['zh-MY,zh;q=0.9', 'en'], ['zh-ID,zh;q=0.9,ja;q=0.8', 'ja'],
+  ['yue-HK,zh;q=0.9,en;q=0.8', 'en'],
+  // The order still decides when the first Chinese tag has a file (Chrome in Hong Kong
+  // sends "zh-HK,zh;q=0.9,en;q=0.8").
+  ['zh-HK,zh;q=0.9,en;q=0.8', 'zh-Hant'], ['zh-TW,zh;q=0.9', 'zh-Hant'],
+  ['zh-CN,zh;q=0.9,en;q=0.8', 'zh-Hans'], ['zh,zh-HK;q=0.9', 'zh-Hans'],
   // Preference order and weights.
   ['sw,ja;q=0.8,en;q=0.9', 'en'], ['en;q=0.5,ko', 'ko'], ['*', 'en'], ['ja;q=0', 'en']
 ];
@@ -250,6 +271,36 @@ check('every language file has a name, and every page key', () => {
     assert.ok(strings._language, lang);
     const missing = Object.keys(en).filter((key) => !(key in strings));
     assert.deepStrictEqual(missing, [], lang);
+  }
+});
+
+check('no language writes an ellipsis as three dots', () => {
+  for (const lang of i18n.languages()) {
+    const strings = JSON.parse(read(`i18n/${lang}.json`));
+    for (const [key, value] of Object.entries(strings)) {
+      const text = typeof value === 'object' ? Object.values(value).join(' ') : String(value);
+      assert.ok(!text.includes('...'), `${lang} ${key}: use the single character …`);
+    }
+  }
+});
+
+// The forms each plural phrase needs come from the language's own rules (CLDR, through
+// Intl.PluralRules). Left out on purpose: "many" in Spanish, French, Italian and
+// Portuguese (only exact millions, and the page falls back to "other"), and button.left's
+// "zero" (it is only shown above 0; "none left" says 0).
+check('every plural phrase has the forms its language uses', () => {
+  const needed = (lang) => new Intl.PluralRules(lang).resolvedOptions().pluralCategories;
+  if (!needed('ar').includes('few')) return; // a Node without the language data can't tell
+  const noMany = ['es', 'fr', 'it', 'pt', 'pt-BR'];
+  const phrases = Object.keys(en).filter((key) => typeof en[key] === 'object' && key !== 'button.left');
+  for (const lang of i18n.languages()) {
+    const strings = JSON.parse(read(`i18n/${lang}.json`));
+    for (const key of phrases) {
+      for (const form of needed(lang)) {
+        if (form === 'many' && noMany.includes(lang)) continue;
+        assert.ok(strings[key] && strings[key][form], `${lang} ${key} has no "${form}" form`);
+      }
+    }
   }
 });
 
@@ -281,7 +332,7 @@ check('plurals follow each language: Russian, Polish, Czech, Arabic, Japanese', 
   assert.strictEqual(t('cs', 'button.left', 3), 'zbývají 3');
   assert.strictEqual(t('ar', 'time.minutes', 2), 'دقيقتين');
   assert.strictEqual(t('ar', 'time.minutes', 4), '4 دقائق');
-  assert.strictEqual(t('ja', 'search.results', 1), '1 件のトラックが見つかりました。');
+  assert.strictEqual(t('ja', 'search.results', 1), '1件のトラックが見つかりました。');
 });
 
 check("a browser without the language's plural rules gets English's, not an error", () => {
@@ -299,6 +350,9 @@ check("a language the guest chose wins over the browser's", () => {
   assert.strictEqual(i18n.pick(req('ja', 'fr-FR')), 'ja');
   assert.strictEqual(i18n.pick(req('pt-BR', 'en')), 'pt-BR');
   assert.strictEqual(i18n.pick(req('xx', 'fr-FR')), 'fr', 'an unknown choice is ignored');
+  for (const name of ['toString', '__proto__', 'constructor']) {
+    assert.strictEqual(i18n.pick(req(name, 'fr-FR')), 'fr', `${name} is not a language`);
+  }
   assert.strictEqual(i18n.pick(req(null, 'fr-FR')), 'fr');
 });
 

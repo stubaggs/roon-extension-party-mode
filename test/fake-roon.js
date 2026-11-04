@@ -70,7 +70,9 @@ function fakeBrowseCore(options = {}) {
       ];
     }
     if (level === 'prof') return o.profiles.map((title, i) => ({ title, item_key: `p${i}`, hint: 'action' }));
-    if (level === 'results') return categoryNames().map((title, i) => ({ title, item_key: `c${i}`, hint: 'list' }));
+    if (level === 'results') {
+      return o.results || categoryNames().map((title, i) => ({ title, item_key: `c${i}`, hint: 'list' }));
+    }
     if (level.startsWith('c')) return o.categories[categoryNames()[Number(level.slice(1))]];
     if (level.startsWith('t')) return o.actions.map((title, i) => ({ title, item_key: `a${i}`, hint: 'action' }));
     return [];
