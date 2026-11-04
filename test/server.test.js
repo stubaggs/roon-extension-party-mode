@@ -1938,18 +1938,43 @@ const set = (values) => Object.assign(roon.settings, values);
     assert.ok(html.includes('href="/About/license/party-mode"'));
     // Thanked though not included: the Extension Manager, which installs Party Mode,
     // then the security tools. Licences link to their repositories; not with the libraries.
-    const thanks = html.slice(html.indexOf('<h3>Installed and tested with</h3>'), html.indexOf('<h3>Open-source licences</h3>'));
+    // The licences come first; the tools it was installed and tested with are the last list.
+    const licences = html.slice(html.indexOf('<h3>Libraries and base image</h3>'), html.indexOf('<h3>Installed and tested with</h3>'));
+    assert.ok(licences.length > 0, 'the licences come before the tools');
+    const thanks = html.slice(html.indexOf('<h3>Installed and tested with</h3>'), html.indexOf('</section>', html.indexOf('<h3>Installed and tested with</h3>')));
     assert.ok(thanks.includes('<span class="lib"><a href="https://github.com/TheAppgineer/roon-extension-manager" target="_blank" rel="noopener">roon-extension-manager</a> <span class="ver"></span></span>' +
       '<span class="lic"><a href="https://github.com/TheAppgineer/roon-extension-manager" target="_blank" rel="noopener">Apache-2.0</a></span>' +
       '<span class="who">By TheAppgineer</span>'));
     assert.ok(thanks.indexOf('roon-extension-manager') < thanks.indexOf('>Docker Engine<'));
     assert.ok(thanks.indexOf('>Docker Engine<') < thanks.indexOf('>autocannon<'));
     for (const tool of ['ZAP', 'Trivy', 'Nuclei', 'Schemathesis']) assert.ok(thanks.includes(`>${tool}</a>`), tool);
-    assert.ok(!html.slice(html.indexOf('<h3>Open-source licences</h3>')).includes('roon-extension-manager'));
+    assert.ok(!licences.includes('roon-extension-manager'));
     assert.ok(html.includes('<h2>Installation</h2>'));
     assert.ok(html.includes('<button type="button" class="copy-button" id="copy-details" aria-label="Copy details" hidden>'));
     assert.ok(html.includes('<script src="/about.js"></script>'));
     assert.strictEqual((await get('/about.js')).status, 200);
+  });
+
+  await check('the About page lists the libraries Party Mode depends on directly; the rest still have their licence text', async () => {
+    const html = await (await get('/About')).text();
+    const section = html.slice(html.indexOf('<h3>Libraries and base image</h3>'), html.indexOf('<h3>Libraries they depend on</h3>'));
+    const below = html.slice(html.indexOf('<h3>Libraries they depend on</h3>'), html.indexOf('<h3>Installed and tested with</h3>'));
+    const listed = [...section.matchAll(/<span class="lib">(?:<a [^>]+>)?([^<]+?)(?:<\/a>)? <span class="ver">/g)].map((m) => m[1]);
+    // The direct dependencies, then what the image is based on, each with a licence to read.
+    const basedOn = ['node:22-alpine', 'Node.js', 'Alpine Linux'];
+    assert.deepStrictEqual([...listed].sort(), [...Object.keys(require('../package.json').dependencies), ...basedOn].sort());
+    assert.deepStrictEqual(listed.slice(-3), basedOn);
+    assert.ok(section.includes('href="https://hub.docker.com/_/node"'));
+    assert.ok(section.includes('href="https://github.com/nodejs/node/blob/main/LICENSE"'));
+    assert.ok(section.includes('href="https://pkgs.alpinelinux.org/packages"'));
+    assert.ok(section.includes('are licensed separately'));
+    // What they depend on (Express's own parts, say) follows in its own list, licence text served.
+    const { readPackages } = require('../lib/about');
+    const inner = readPackages().find((p) => p.name === 'accepts');
+    assert.ok(inner && !listed.includes('accepts'));
+    assert.ok(below.includes('>accepts</a>') && !below.includes('>express</a>'));
+    assert.ok(below.includes('Installed with the libraries above'));
+    assert.match(await (await get(`/About/license/${encodeURIComponent(inner.id)}`)).text(), /Permission is hereby granted/);
   });
 
   await check("the About page says the Core is connected, never its name", async () => {

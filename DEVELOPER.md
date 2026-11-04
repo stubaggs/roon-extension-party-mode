@@ -125,6 +125,11 @@ a page opened on a second network, such as guest Wi-Fi, gets a code that works t
 Loopback, `0.0.0.0` and IPv6 fall back to the first non-internal IPv4 address, which
 Roon's status line, the log and About always use.
 
+Roon's link for the extension (`website`, the About page) reaches Roon only with the
+registration, so `lib/startup.js` registers again if the link changed: when the Core
+pairs and when the party zone arrives. Started before the network was up (after a
+reboot) the link was `127.0.0.1`; a Core on the same computer pairs with no network at all.
+
 Guest API errors are JSON `{ "error": … }`: 401 `no_session`; 403 `closed` (Party Off,
 with `playlist: true` while `/Playlist` answers) or `cross_origin`; 409 `paused`,
 `already_queued`, `cant_skip` or `name_taken` (sent again with `confirm: true` to accept);
@@ -225,8 +230,11 @@ sends `play` unless the zone is playing. Not on a radio station: a station plays
 the queue and never ends, so requests wait for the host.
 
 **Played and skips.** Roon has no play history, so Played (last 200) is recorded as tracks
-start, in memory: a new party, a restart or another zone starts it over. A track left 10
-seconds or more before its end without a guest's skip shows "Skipped by Host".
+start, in memory: a new party, a restart or another zone starts it over (the track already
+playing there is recorded at once). A track left 10 seconds or more before its end without
+a guest's skip shows "Skipped by Host". A skip is kept until Roon moves on, so guests
+skipping the same track at the same moment skip it once: the later ones get the same
+answer and use none of their own skips.
 
 **The playlist** is a CSV download in the form Soundiiz imports (Roon's API can't make
 playlists): every queue entry the party zone gets, once, at most 5000, in memory. Its
@@ -265,7 +273,8 @@ Chrome 53 and Firefox 47.
 
 Page text is in `public/i18n/<code>.json`, 30 languages (the list is in `lib/i18n.js`);
 a missing key falls back to `en.json`. Settings and Roon's status line stay in English.
-The non-English files are AI drafts: corrections from native speakers are welcome.
+The non-English files were generated interactively with AI: corrections from native
+speakers are welcome.
 
 To add a language: copy `en.json`, translate the values, keep `{name}`, `{count}` and
 `{wait}`, give plurals the forms the language uses (`Intl.PluralRules`: Arabic all six;
@@ -479,6 +488,7 @@ tag. Lines carry no time; use `docker logs -t`.
 | A request's action not found in Roon | `[Roon] No "Add to queue" action and not the usual four actions; …` |
 | Roon refused to start or pause playback | `[Roon] Could not start playback for a request: …` |
 | The host's save refused, with why | `[PartyMode] Settings not saved: Web port: Enter a whole number from 1 to 65535` |
+| An error nothing caught (a rejected promise, or the web server's); the extension keeps running. An uncaught exception still stops it | `[PartyMode] Unhandled error, still running: <stack>`, `[PartyMode] Web server error: <message>` |
 
 ### Info
 
@@ -569,8 +579,10 @@ number, or a digest from RELEASES.md, to stay on one image.
   disabled in Roon, or the Core restarts, it can be missing from Roon's Extensions list
   for up to a minute.
 - **Everything is in memory:** Played, the playlist and credits start over on a restart.
-- **Sessions can take tens of megabytes** if all 2000 are filled, which anyone on the
-  network could do; the longest idle go first, and real guests rejoin by themselves.
+- **A full set of 2000 sessions takes about 50 MB.** A session is under 1 KB until its
+  guest searches, then about 13 KB for each search it keeps (the last two, 40 results
+  each): 26 KB at most. A party of 200 guests takes about 5 MB. Anyone on the network could
+  fill all 2000; the longest idle go first, and real guests rejoin by themselves.
 - **The Extension Manager and Docker don't mix on one computer:** the Manager finds its new
   container by Docker's name filter, which matches part of a name, so containers named
   `roon-extension-party-mode-…` stall its installs and updates at "Installing".
