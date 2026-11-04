@@ -274,6 +274,36 @@ check('every language file has a name, and every page key', () => {
   }
 });
 
+check('no language writes an ellipsis as three dots', () => {
+  for (const lang of i18n.languages()) {
+    const strings = JSON.parse(read(`i18n/${lang}.json`));
+    for (const [key, value] of Object.entries(strings)) {
+      const text = typeof value === 'object' ? Object.values(value).join(' ') : String(value);
+      assert.ok(!text.includes('...'), `${lang} ${key}: use the single character …`);
+    }
+  }
+});
+
+// The forms each plural phrase needs come from the language's own rules (CLDR, through
+// Intl.PluralRules). Left out on purpose: "many" in Spanish, French, Italian and
+// Portuguese (only exact millions, and the page falls back to "other"), and button.left's
+// "zero" (it is only shown above 0; "none left" says 0).
+check('every plural phrase has the forms its language uses', () => {
+  const needed = (lang) => new Intl.PluralRules(lang).resolvedOptions().pluralCategories;
+  if (!needed('ar').includes('few')) return; // a Node without the language data can't tell
+  const noMany = ['es', 'fr', 'it', 'pt', 'pt-BR'];
+  const phrases = Object.keys(en).filter((key) => typeof en[key] === 'object' && key !== 'button.left');
+  for (const lang of i18n.languages()) {
+    const strings = JSON.parse(read(`i18n/${lang}.json`));
+    for (const key of phrases) {
+      for (const form of needed(lang)) {
+        if (form === 'many' && noMany.includes(lang)) continue;
+        assert.ok(strings[key] && strings[key][form], `${lang} ${key} has no "${form}" form`);
+      }
+    }
+  }
+});
+
 check('reserved host and radio words are read from every language, and never sent to the pages', () => {
   const words = i18n.wordLists('_reserved_host_words');
   for (const word of ['Hostess', 'Gastgeber', 'Gastgeberin', 'Хозяйка', 'ホスト']) assert.ok(words.includes(word), word);

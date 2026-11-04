@@ -270,9 +270,12 @@ The non-English files are AI drafts: corrections from native speakers are welcom
 To add a language: copy `en.json`, translate the values, keep `{name}`, `{count}` and
 `{wait}`, give plurals the forms the language uses (`Intl.PluralRules`: Arabic all six;
 Czech, Polish, Russian and Ukrainian `few` and `many`; CJK, Thai and Vietnamese only
-`other`), fill in `_reserved_host_words` and `_reserved_radio_words` (words guests can't
-take as names; not sent to the pages), and restart. `npm test` checks keys and
-placeholders. Say "tracks", not songs, with a neutral word as Roon does.
+`other`), fill in `_reserved_host_words` and `_reserved_radio_words` (the other words
+guests can't take as names: plurals, feminine forms, the plain word for "radio"; every
+language's `credit.host`, `credit.radio`, `credit.guest` and `playing.station` are
+reserved already; none is sent to the pages), and restart. `npm test` checks keys,
+placeholders, the plural forms each language uses and that `…` is never written as three
+dots. Say "tracks", not songs, with a neutral word as Roon does.
 
 The language comes from a `party_lang` cookie (the guest's 🌐 choice), else
 Accept-Language (`no`/`nn` → `nb`, `iw` → `he`), else English. Chinese gets a file only
