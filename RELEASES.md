@@ -5,7 +5,8 @@ running in its Extensions list.
 
 ## 1.4.1 (5b21c60)
 
-Docker image: `stubaggs/roon-extension-party-mode:1.4.1@sha256:906acde736d4e89bafee85623e9f8055610043c3db3f79e55cd937cde2a66caf`<br>
+Docker image: `stubaggs/roon-extension-party-mode:1.4.1`<br>
+Docker sha256: `906acde736d4e89bafee85623e9f8055610043c3db3f79e55cd937cde2a66caf`<br>
 Code fingerprint: `ea6fe928ab3e`
 
 ### Fixed
@@ -36,7 +37,8 @@ Code fingerprint: `ea6fe928ab3e`
 
 ## 1.4.0 (36cd254)
 
-Docker image: `stubaggs/roon-extension-party-mode:1.4.0@sha256:30e1d3c3432d27c74466ccf852151f2c792a3d94f7f2b9bc5327cd09a347c740`<br>
+Docker image: `stubaggs/roon-extension-party-mode:1.4.0`<br>
+Docker sha256: `30e1d3c3432d27c74466ccf852151f2c792a3d94f7f2b9bc5327cd09a347c740`<br>
 Code fingerprint: `d2a63034c5ec`
 
 ### New
@@ -125,7 +127,8 @@ Code fingerprint: `d2a63034c5ec`
 
 ## 1.3.2
 
-Docker image: `stubaggs/roon-extension-party-mode:1.3.2@sha256:d3a801fba58640ee1b856ebeea9b548dc8bccc964df328c011c0359b5160f07c`
+Docker image: `stubaggs/roon-extension-party-mode:1.3.2`<br>
+Docker sha256: `d3a801fba58640ee1b856ebeea9b548dc8bccc964df328c011c0359b5160f07c`
 
 ### Fixes
 
@@ -140,7 +143,8 @@ Docker image: `stubaggs/roon-extension-party-mode:1.3.2@sha256:d3a801fba58640ee1
 
 ## 1.3.1
 
-Docker image: `stubaggs/roon-extension-party-mode:1.3.1@sha256:4479bb446d6774e3f461510755979c3042320bf9106d39cbd15237da6f87567b`
+Docker image: `stubaggs/roon-extension-party-mode:1.3.1`<br>
+Docker sha256: `4479bb446d6774e3f461510755979c3042320bf9106d39cbd15237da6f87567b`
 
 ### Security
 
@@ -151,7 +155,8 @@ Docker image: `stubaggs/roon-extension-party-mode:1.3.1@sha256:4479bb446d6774e3f
 
 ## 1.3.0
 
-Docker image: `stubaggs/roon-extension-party-mode:1.3.0@sha256:b2a1339e64544fca2265d09190015024eb4a2209a0ddfa39ff7607096c9687bd`
+Docker image: `stubaggs/roon-extension-party-mode:1.3.0`<br>
+Docker sha256: `b2a1339e64544fca2265d09190015024eb4a2209a0ddfa39ff7607096c9687bd`
 
 ### New
 
@@ -213,7 +218,8 @@ Docker image: `stubaggs/roon-extension-party-mode:1.3.0@sha256:b2a1339e64544fca2
 
 ## 1.2.0
 
-Docker image: `stubaggs/roon-extension-party-mode:1.2.0@sha256:082b9c61ad9e05a462c39e05a524b8cf0ab7cdb05614bcc943cc2a1245ab2e4d`
+Docker image: `stubaggs/roon-extension-party-mode:1.2.0`<br>
+Docker sha256: `082b9c61ad9e05a462c39e05a524b8cf0ab7cdb05614bcc943cc2a1245ab2e4d`
 
 ### Party Hub
 
