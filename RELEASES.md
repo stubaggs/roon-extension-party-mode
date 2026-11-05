@@ -3,7 +3,7 @@
 What's new in each version of Party Mode, newest first. Roon shows the version you're
 running in its Extensions list.
 
-## 1.4.1
+## 1.4.1 (5b21c60)
 
 Docker image: `stubaggs/roon-extension-party-mode:1.4.1@sha256:906acde736d4e89bafee85623e9f8055610043c3db3f79e55cd937cde2a66caf`<br>
 Code fingerprint: `ea6fe928ab3e`
@@ -34,7 +34,7 @@ Code fingerprint: `ea6fe928ab3e`
 
 - Various security enhancements.
 
-## 1.4.0
+## 1.4.0 (36cd254)
 
 Docker image: `stubaggs/roon-extension-party-mode:1.4.0@sha256:30e1d3c3432d27c74466ccf852151f2c792a3d94f7f2b9bc5327cd09a347c740`<br>
 Code fingerprint: `d2a63034c5ec`
