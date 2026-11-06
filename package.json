@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "express": "^5.3.0",
-    "express-rate-limit": "^8.7.1",
+    "express-rate-limit": "^8.7.3",
     "node-roon-api": "github:roonlabs/node-roon-api",
     "node-roon-api-browse": "github:roonlabs/node-roon-api-browse",
     "node-roon-api-image": "github:roonlabs/node-roon-api-image",
